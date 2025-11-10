@@ -9,18 +9,18 @@
  * - Server-side validation always enforced
  */
 
-import type { ISubscriptionService } from '../application/ports/ISubscriptionService';
-import type { ISubscriptionRepository } from '../application/ports/ISubscriptionRepository';
-import type { SubscriptionStatus } from '../domain/entities/SubscriptionStatus';
+import type { ISubscriptionService } from '../../application/ports/ISubscriptionService';
+import type { ISubscriptionRepository } from '../../application/ports/ISubscriptionRepository';
+import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
 import {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
-} from '../domain/entities/SubscriptionStatus';
+} from '../../domain/entities/SubscriptionStatus';
 import {
   SubscriptionRepositoryError,
   SubscriptionValidationError,
-} from '../domain/errors/SubscriptionError';
-import type { SubscriptionConfig } from '../domain/value-objects/SubscriptionConfig';
+} from '../../domain/errors/SubscriptionError';
+import type { SubscriptionConfig } from '../../domain/value-objects/SubscriptionConfig';
 
 export class SubscriptionService implements ISubscriptionService {
   private repository: ISubscriptionRepository;
