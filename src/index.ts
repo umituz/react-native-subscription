@@ -64,9 +64,27 @@ export type { UseSubscriptionResult } from './presentation/hooks/useSubscription
 // UTILS
 // =============================================================================
 
+// Date utilities
 export {
   isSubscriptionExpired,
   getDaysUntilExpiration,
   formatExpirationDate,
-} from './utils/subscriptionUtils';
+  calculateExpirationDate,
+} from './utils/dateUtils';
+
+// Price utilities
+export { formatPrice } from './utils/priceUtils';
+
+// Period utilities
+export { getPeriodText } from './utils/periodUtils';
+
+export {
+  SUBSCRIPTION_PLAN_TYPES,
+  MIN_SUBSCRIPTION_DURATIONS_DAYS,
+  SUBSCRIPTION_PERIOD_DAYS,
+  DATE_CONSTANTS,
+  SUBSCRIPTION_PERIOD_UNITS,
+  PRODUCT_ID_KEYWORDS,
+  type SubscriptionPlanType,
+} from './utils/subscriptionConstants';
 
