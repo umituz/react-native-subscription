@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-subscription",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Subscription management system for React Native apps - Database-first approach with secure validation",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
