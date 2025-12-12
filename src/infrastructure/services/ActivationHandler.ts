@@ -26,6 +26,10 @@ export async function activateSubscription(
   expiresAt: string | null
 ): Promise<SubscriptionStatus> {
   try {
+    if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
+      console.log("[Subscription] Activating subscription in handler", { userId, productId, expiresAt });
+    }
+    
     const updatedStatus = await config.repository.updateSubscriptionStatus(
       userId,
       {
@@ -53,6 +57,10 @@ export async function deactivateSubscription(
   userId: string
 ): Promise<SubscriptionStatus> {
   try {
+    if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
+      console.log("[Subscription] Deactivating subscription in handler", { userId });
+    }
+    
     const updatedStatus = await config.repository.updateSubscriptionStatus(
       userId,
       {

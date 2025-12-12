@@ -66,11 +66,18 @@ export type { UseSubscriptionResult } from './presentation/hooks/useSubscription
 
 // Date utilities
 export {
-  isSubscriptionExpired,
-  getDaysUntilExpiration,
   formatExpirationDate,
   calculateExpirationDate,
 } from './utils/dateUtils';
+
+export {
+  isSubscriptionExpired,
+  getDaysUntilExpiration,
+} from './utils/dateValidationUtils';
+
+export {
+  extractPlanFromProductId,
+} from './utils/planDetectionUtils';
 
 // Price utilities
 export { formatPrice } from './utils/priceUtils';

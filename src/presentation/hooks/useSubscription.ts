@@ -3,7 +3,7 @@
  * React hook for subscription management
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { getSubscriptionService } from '../../infrastructure/services/SubscriptionService';
 import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
 
@@ -44,6 +44,11 @@ export function useSubscription(): UseSubscriptionResult {
   const [error, setError] = useState<string | null>(null);
 
   const loadStatus = useCallback(async (userId: string) => {
+    if (!userId) {
+      setError('User ID is required');
+      return;
+    }
+
     const service = getSubscriptionService();
     if (!service) {
       setError('Subscription service is not initialized');
@@ -66,6 +71,11 @@ export function useSubscription(): UseSubscriptionResult {
   }, []);
 
   const refreshStatus = useCallback(async (userId: string) => {
+    if (!userId) {
+      setError('User ID is required');
+      return;
+    }
+
     const service = getSubscriptionService();
     if (!service) {
       setError('Subscription service is not initialized');
@@ -89,6 +99,11 @@ export function useSubscription(): UseSubscriptionResult {
 
   const activateSubscription = useCallback(
     async (userId: string, productId: string, expiresAt: string | null) => {
+      if (!userId || !productId) {
+        setError('User ID and Product ID are required');
+        return;
+      }
+
       const service = getSubscriptionService();
       if (!service) {
         setError('Subscription service is not initialized');
@@ -118,6 +133,11 @@ export function useSubscription(): UseSubscriptionResult {
   );
 
   const deactivateSubscription = useCallback(async (userId: string) => {
+    if (!userId) {
+      setError('User ID is required');
+      return;
+    }
+
     const service = getSubscriptionService();
     if (!service) {
       setError('Subscription service is not initialized');
@@ -140,7 +160,7 @@ export function useSubscription(): UseSubscriptionResult {
     }
   }, []);
 
-  const isPremium = status ? status.isPremium && (status.expiresAt === null || new Date(status.expiresAt) > new Date()) : false;
+  const isPremium = status?.isPremium && (status.expiresAt === null || new Date(status.expiresAt).getTime() > Date.now()) || false;
 
   return {
     status,
