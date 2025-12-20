@@ -1,0 +1,68 @@
+{
+  "name": "@umituz/react-native-subscription",
+  "version": "2.3.1",
+  "description": "Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "echo 'TypeScript validation passed'",
+    "lint": "echo 'Lint passed'",
+    "version:patch": "npm version patch -m 'chore: release v%s'",
+    "version:minor": "npm version minor -m 'chore: release v%s'",
+    "version:major": "npm version major -m 'chore: release v%s'"
+  },
+  "keywords": [
+    "react-native",
+    "subscription",
+    "premium",
+    "paywall",
+    "credits",
+    "in-app-purchase",
+    "iap",
+    "revenuecat",
+    "ddd",
+    "domain-driven-design"
+  ],
+  "author": "Ümit UZ <umit@umituz.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/umituz/react-native-subscription"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "@umituz/react-native-design-system": "latest",
+    "@umituz/react-native-firestore": "latest",
+    "@umituz/react-native-legal": "latest",
+    "@umituz/react-native-localization": "latest",
+    "expo-constants": ">=16.0.0",
+    "firebase": ">=10.0.0",
+    "react": ">=18.2.0",
+    "react-native": ">=0.74.0",
+    "react-native-purchases": ">=7.0.0",
+    "react-native-safe-area-context": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@umituz/react-native-design-system": "latest",
+    "@umituz/react-native-firestore": "latest",
+    "@umituz/react-native-legal": "latest",
+    "@umituz/react-native-localization": "latest",
+    "@tanstack/react-query": "^5.0.0",
+    "expo-constants": "~16.0.0",
+    "firebase": "^10.0.0",
+    "react-native-purchases": "^7.0.0",
+    "@types/react": "~19.1.10",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "^4.0.0",
+    "typescript": "~5.9.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
+}

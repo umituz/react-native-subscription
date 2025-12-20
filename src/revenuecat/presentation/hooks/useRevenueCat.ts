@@ -1,0 +1,101 @@
+/**
+ * useRevenueCat Hook
+ * React hook for RevenueCat subscription management
+ */
+
+import { useState, useCallback } from "react";
+import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
+import { getRevenueCatService } from "../../infrastructure/services/RevenueCatService";
+import type { PurchaseResult, RestoreResult } from "../../application/ports/IRevenueCatService";
+
+export interface UseRevenueCatResult {
+  /** Current offering */
+  offering: PurchasesOffering | null;
+  /** Whether RevenueCat is loading */
+  loading: boolean;
+  /** Initialize RevenueCat SDK */
+  initialize: (userId: string, apiKey?: string) => Promise<void>;
+  /** Load offerings */
+  loadOfferings: () => Promise<void>;
+  /** Purchase a package */
+  purchasePackage: (pkg: PurchasesPackage, userId: string) => Promise<PurchaseResult>;
+  /** Restore purchases */
+  restorePurchases: (userId: string) => Promise<RestoreResult>;
+}
+
+/**
+ * Hook for RevenueCat operations
+ * Only initialize when subscription screen is opened
+ * 
+ * @example
+ * ```typescript
+ * const { offering, loading, initialize, purchasePackage } = useRevenueCat();
+ * ```
+ */
+export function useRevenueCat(): UseRevenueCatResult {
+  const [offering, setOffering] = useState<PurchasesOffering | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const initialize = useCallback(async (userId: string, apiKey?: string) => {
+    setLoading(true);
+    try {
+      const service = getRevenueCatService();
+      if (!service) {
+        return;
+      }
+      const result = await service.initialize(userId, apiKey);
+      if (result.success) {
+        setOffering(result.offering);
+      }
+    } catch {
+      // Error handling is done by service
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadOfferings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const service = getRevenueCatService();
+      if (!service) {
+        return;
+      }
+      const fetchedOffering = await service.fetchOfferings();
+      setOffering(fetchedOffering);
+    } catch {
+      // Error handling is done by service
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const purchasePackage = useCallback(async (pkg: PurchasesPackage, userId: string) => {
+    const service = getRevenueCatService();
+    if (!service) {
+      throw new Error("RevenueCat service is not initialized");
+    }
+    return await service.purchasePackage(pkg, userId);
+  }, []);
+
+  const restorePurchases = useCallback(async (userId: string) => {
+    const service = getRevenueCatService();
+    if (!service) {
+      throw new Error("RevenueCat service is not initialized");
+    }
+    return await service.restorePurchases(userId);
+  }, []);
+
+  // Note: State cleanup is handled by React automatically on unmount
+  // No explicit cleanup needed for these state variables
+
+  return {
+    offering,
+    loading,
+    initialize,
+    loadOfferings,
+    purchasePackage,
+    restorePurchases,
+  };
+}
+
