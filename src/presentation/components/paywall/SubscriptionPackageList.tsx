@@ -27,6 +27,18 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         const hasPackages = packages.length > 0;
         const showLoading = isLoading && !hasPackages;
 
+        // Debug logging in development
+        if (__DEV__) {
+            console.log("[SubscriptionPackageList] State:", {
+                isLoading,
+                hasPackages,
+                showLoading,
+                packagesCount: packages?.length ?? 0,
+                loadingText,
+                emptyText,
+                selectedPkgId: selectedPkg?.identifier ?? null,
+            });
+        }
 
         if (showLoading) {
             return (

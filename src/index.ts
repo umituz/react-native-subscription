@@ -66,15 +66,9 @@ export {
 export {
   SubscriptionModal,
   type SubscriptionModalProps,
-  type SubscriptionModalStyles,
 } from "./presentation/components/paywall/SubscriptionModal";
 
 export { SubscriptionModalHeader } from "./presentation/components/paywall/SubscriptionModalHeader";
-export {
-  SubscriptionModalOverlay,
-  type SubscriptionModalVariant,
-  type ModalLayoutConfig,
-} from "./presentation/components/paywall/SubscriptionModalOverlay";
 
 export { SubscriptionPlanCard } from "./presentation/components/paywall/SubscriptionPlanCard";
 export { PaywallFeaturesList } from "./presentation/components/paywall/PaywallFeaturesList";
@@ -83,7 +77,6 @@ export { PaywallLegalFooter } from "./presentation/components/paywall/PaywallLeg
 export {
   PaywallModal,
   type PaywallModalProps,
-  type PaywallModalStyles,
 } from "./presentation/components/paywall/PaywallModal";
 
 // =============================================================================
@@ -312,9 +305,23 @@ export {
   resetRevenueCatService,
 } from "./revenuecat/infrastructure/services/RevenueCatService";
 
+export {
+  SubscriptionManager,
+  type SubscriptionManagerConfig,
+  type PremiumStatus,
+} from "./revenuecat/infrastructure/managers/SubscriptionManager";
+
 // =============================================================================
 // REVENUECAT - Hooks
 // =============================================================================
 
 export { useRevenueCat } from "./revenuecat/presentation/hooks/useRevenueCat";
 export type { UseRevenueCatResult } from "./revenuecat/presentation/hooks/useRevenueCat";
+
+export {
+  useInitializeSubscription,
+  useSubscriptionPackages,
+  usePurchasePackage,
+  useRestorePurchase,
+  SUBSCRIPTION_QUERY_KEYS,
+} from "./revenuecat/presentation/hooks/useSubscriptionQueries";

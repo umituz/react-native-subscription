@@ -7,6 +7,10 @@ import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 import { getExpirationDate } from "./ExpirationDateCalculator";
+import {
+  trackPackageError,
+  addPackageBreadcrumb,
+} from "@umituz/react-native-sentry";
 
 export async function syncPremiumStatus(
   config: RevenueCatConfig,
@@ -23,6 +27,14 @@ export async function syncPremiumStatus(
     entitlementIdentifier
   );
 
+  const isPremium = !!premiumEntitlement;
+
+  addPackageBreadcrumb("subscription", "Syncing premium status", {
+    userId,
+    isPremium,
+    productId: premiumEntitlement?.productIdentifier,
+  });
+
   try {
     if (premiumEntitlement) {
       const productId = premiumEntitlement.productIdentifier;
@@ -36,7 +48,22 @@ export async function syncPremiumStatus(
     } else {
       await config.onPremiumStatusChanged(userId, false);
     }
+
+    addPackageBreadcrumb("subscription", "Premium status synced successfully", {
+      userId,
+      isPremium,
+    });
   } catch (error) {
+    trackPackageError(
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        packageName: "subscription",
+        operation: "sync_premium_status",
+        userId,
+        isPremium,
+      }
+    );
+
     if (__DEV__) {
       const message =
         error instanceof Error ? error.message : "Premium sync failed";
@@ -55,9 +82,29 @@ export async function notifyPurchaseCompleted(
     return;
   }
 
+  addPackageBreadcrumb("subscription", "Notifying purchase completed", {
+    userId,
+    productId,
+  });
+
   try {
     await config.onPurchaseCompleted(userId, productId, customerInfo);
+
+    addPackageBreadcrumb("subscription", "Purchase callback completed", {
+      userId,
+      productId,
+    });
   } catch (error) {
+    trackPackageError(
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        packageName: "subscription",
+        operation: "purchase_callback",
+        userId,
+        productId,
+      }
+    );
+
     if (__DEV__) {
       const message =
         error instanceof Error ? error.message : "Purchase callback failed";
@@ -76,9 +123,29 @@ export async function notifyRestoreCompleted(
     return;
   }
 
+  addPackageBreadcrumb("subscription", "Notifying restore completed", {
+    userId,
+    isPremium,
+  });
+
   try {
     await config.onRestoreCompleted(userId, isPremium, customerInfo);
+
+    addPackageBreadcrumb("subscription", "Restore callback completed", {
+      userId,
+      isPremium,
+    });
   } catch (error) {
+    trackPackageError(
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        packageName: "subscription",
+        operation: "restore_callback",
+        userId,
+        isPremium,
+      }
+    );
+
     if (__DEV__) {
       const message =
         error instanceof Error ? error.message : "Restore callback failed";

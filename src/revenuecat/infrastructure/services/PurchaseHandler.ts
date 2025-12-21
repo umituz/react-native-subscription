@@ -18,6 +18,10 @@ import {
   syncPremiumStatus,
   notifyPurchaseCompleted,
 } from "../utils/PremiumStatusSyncer";
+import {
+  trackPackageError,
+  addPackageBreadcrumb,
+} from "@umituz/react-native-sentry";
 
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
@@ -42,12 +46,20 @@ export async function handlePurchase(
   pkg: PurchasesPackage,
   userId: string
 ): Promise<PurchaseResult> {
-  if (__DEV__) {
-    console.log("[RevenueCat] handlePurchase() called for:", pkg.product.identifier);
-  }
+  addPackageBreadcrumb("subscription", "Purchase started", {
+    productId: pkg.product.identifier,
+    userId,
+  });
 
   if (!deps.isInitialized()) {
-    throw new RevenueCatInitializationError();
+    const error = new RevenueCatInitializationError();
+    trackPackageError(error, {
+      packageName: "subscription",
+      operation: "purchase",
+      userId,
+      productId: pkg.product.identifier,
+    });
+    throw error;
   }
 
 
@@ -85,15 +97,35 @@ export async function handlePurchase(
       return { success: true, isPremium: true, customerInfo };
     }
 
-    throw new RevenueCatPurchaseError(
+    const entitlementError = new RevenueCatPurchaseError(
       "Purchase completed but premium entitlement not active",
       pkg.product.identifier
     );
+    trackPackageError(entitlementError, {
+      packageName: "subscription",
+      operation: "purchase",
+      userId,
+      productId: pkg.product.identifier,
+      reason: "entitlement_not_active",
+    });
+    throw entitlementError;
   } catch (error) {
     if (isUserCancelledError(error)) {
+      addPackageBreadcrumb("subscription", "Purchase cancelled by user", {
+        productId: pkg.product.identifier,
+        userId,
+      });
       return { success: false, isPremium: false };
     }
     const errorMessage = getErrorMessage(error, "Purchase failed");
-    throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
+    const purchaseError = new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
+    trackPackageError(purchaseError, {
+      packageName: "subscription",
+      operation: "purchase",
+      userId,
+      productId: pkg.product.identifier,
+      originalError: error instanceof Error ? error.message : String(error),
+    });
+    throw purchaseError;
   }
 }

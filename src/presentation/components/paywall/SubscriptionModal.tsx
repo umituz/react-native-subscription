@@ -1,29 +1,18 @@
 /**
  * Subscription Modal Component
- * Orchestrates subscription flow using decomposed components
+ * Fullscreen subscription flow using BaseModal from design system
  */
 
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens, BaseModal, useResponsive } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
 import { SubscriptionModalHeader } from "./SubscriptionModalHeader";
-import {
-  SubscriptionModalOverlay,
-  SubscriptionModalVariant,
-  ModalLayoutConfig,
-} from "./SubscriptionModalOverlay";
 import { PaywallFeaturesList } from "./PaywallFeaturesList";
 import { SubscriptionPackageList } from "./SubscriptionPackageList";
 import { SubscriptionFooter } from "./SubscriptionFooter";
 import { useSubscriptionModal } from "../../hooks/useSubscriptionModal";
-
-export interface SubscriptionModalStyles {
-  headerTopPadding?: number;
-  contentHorizontalPadding?: number;
-  contentBottomPadding?: number;
-}
 
 export interface SubscriptionModalProps {
   visible: boolean;
@@ -45,16 +34,7 @@ export interface SubscriptionModalProps {
   privacyText?: string;
   termsOfServiceText?: string;
   showRestoreButton?: boolean;
-  variant?: SubscriptionModalVariant;
-  layoutConfig?: ModalLayoutConfig;
-  styleConfig?: SubscriptionModalStyles;
 }
-
-const DEFAULT_STYLES: SubscriptionModalStyles = {
-  headerTopPadding: 48,
-  contentHorizontalPadding: 24,
-  contentBottomPadding: 32,
-};
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((props) => {
   const {
@@ -77,13 +57,10 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     privacyText,
     termsOfServiceText,
     showRestoreButton = true,
-    variant = "bottom-sheet",
-    layoutConfig,
-    styleConfig,
   } = props;
 
   const tokens = useAppDesignTokens();
-  const styles_ = { ...DEFAULT_STYLES, ...styleConfig };
+  const { modalLayout } = useResponsive();
 
   const {
     selectedPkg,
@@ -97,35 +74,32 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     onClose,
   });
 
-
-  if (!visible) return null;
-
-  const isFullscreen = variant === "fullscreen";
-  const containerPaddingTop = isFullscreen ? styles_.headerTopPadding : 0;
+  if (__DEV__) {
+    console.log("[SubscriptionModal] State:", {
+      visible,
+      isLoading,
+      packagesCount: packages?.length ?? 0,
+      modalLayout,
+      selectedPkg: selectedPkg?.identifier ?? null,
+      isProcessing,
+    });
+  }
 
   return (
-    <SubscriptionModalOverlay
-      visible={visible}
-      onClose={onClose}
-      variant={variant}
-      layoutConfig={layoutConfig}
-    >
-      <View style={[styles.container, { paddingTop: containerPaddingTop }]}>
+    <BaseModal visible={visible} onClose={onClose}>
+      <View style={styles.container}>
         <SubscriptionModalHeader
           title={title}
           subtitle={subtitle}
           onClose={onClose}
-          variant={variant}
+          variant="fullscreen"
         />
 
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            {
-              paddingHorizontal: styles_.contentHorizontalPadding,
-              paddingBottom: styles_.contentBottomPadding,
-            }
+            { paddingHorizontal: modalLayout.horizontalPadding }
           ]}
           showsVerticalScrollIndicator={false}
           bounces={false}
@@ -140,7 +114,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
           />
 
           {features.length > 0 && (
-            <View style={[styles.featuresSection, { backgroundColor: tokens.colors.surfaceSecondary }]}>
+            <View
+              style={[
+                styles.featuresSection,
+                {
+                  backgroundColor: tokens.colors.surfaceSecondary,
+                  borderColor: tokens.colors.border
+                }
+              ]}
+            >
               <PaywallFeaturesList features={features} gap={12} />
             </View>
           )}
@@ -163,7 +145,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
           onRestore={handleRestore}
         />
       </View>
-    </SubscriptionModalOverlay>
+    </BaseModal>
   );
 });
 
@@ -176,16 +158,15 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    width: "100%",
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 32,
   },
   featuresSection: {
     borderRadius: 24,
     padding: 24,
     marginTop: 12,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.05)",
   },
 });

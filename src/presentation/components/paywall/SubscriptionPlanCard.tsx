@@ -10,6 +10,7 @@ import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
+import { BestValueBadge } from "./BestValueBadge";
 
 interface SubscriptionPlanCardProps {
   package: PurchasesPackage;
@@ -63,18 +64,10 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
           },
         ]}
       >
-        {isBestValue && (
-          <View
-            style={[styles.badge, { backgroundColor: tokens.colors.primary }]}
-          >
-            <AtomicText
-              type="labelSmall"
-              style={{ color: tokens.colors.onPrimary, fontWeight: "600" }}
-            >
-              {t("paywall.bestValue")}
-            </AtomicText>
-          </View>
-        )}
+        <BestValueBadge
+          text={t("paywall.bestValue")}
+          visible={isBestValue}
+        />
 
         <View style={styles.content}>
           <View style={styles.leftSection}>
@@ -137,14 +130,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 18,
     position: "relative",
-  },
-  badge: {
-    position: "absolute",
-    top: -10,
-    right: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 8,
   },
   content: {
     flexDirection: "row",

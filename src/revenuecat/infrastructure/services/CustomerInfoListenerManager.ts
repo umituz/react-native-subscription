@@ -9,6 +9,7 @@ import Purchases, {
 } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { syncPremiumStatus } from "../utils/PremiumStatusSyncer";
+import { addPackageBreadcrumb } from "@umituz/react-native-sentry";
 
 export class CustomerInfoListenerManager {
   private listener: CustomerInfoUpdateListener | null = null;
@@ -30,11 +31,21 @@ export class CustomerInfoListenerManager {
   setupListener(config: RevenueCatConfig): void {
     this.removeListener();
 
+    addPackageBreadcrumb("subscription", "Setting up customer info listener", {
+      userId: this.currentUserId,
+    });
+
     this.listener = (customerInfo: CustomerInfo) => {
       if (!this.currentUserId) return;
 
       const hasPremium =
         !!customerInfo.entitlements.active[this.entitlementIdentifier];
+
+      addPackageBreadcrumb("subscription", "Customer info updated", {
+        userId: this.currentUserId,
+        hasPremium,
+        entitlementIdentifier: this.entitlementIdentifier,
+      });
 
       if (__DEV__) {
         console.log("[RevenueCat] CustomerInfo updated", {
@@ -52,6 +63,7 @@ export class CustomerInfoListenerManager {
 
   removeListener(): void {
     if (this.listener) {
+      addPackageBreadcrumb("subscription", "Removing customer info listener", {});
       Purchases.removeCustomerInfoUpdateListener(this.listener);
       this.listener = null;
     }

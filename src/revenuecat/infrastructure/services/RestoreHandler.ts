@@ -15,6 +15,10 @@ import {
   syncPremiumStatus,
   notifyRestoreCompleted,
 } from "../utils/PremiumStatusSyncer";
+import {
+  trackPackageError,
+  addPackageBreadcrumb,
+} from "@umituz/react-native-sentry";
 
 export interface RestoreHandlerDeps {
   config: RevenueCatConfig;
@@ -29,11 +33,17 @@ export async function handleRestore(
   deps: RestoreHandlerDeps,
   userId: string
 ): Promise<RestoreResult> {
+  addPackageBreadcrumb("subscription", "Restore started", { userId });
+
   if (!deps.isInitialized()) {
-    throw new RevenueCatInitializationError();
+    const error = new RevenueCatInitializationError();
+    trackPackageError(error, {
+      packageName: "subscription",
+      operation: "restore",
+      userId,
+    });
+    throw error;
   }
-
-
 
   try {
     const customerInfo = await Purchases.restorePurchases();
@@ -42,12 +52,28 @@ export async function handleRestore(
 
     if (isPremium) {
       await syncPremiumStatus(deps.config, userId, customerInfo);
+      addPackageBreadcrumb("subscription", "Restore successful - premium active", {
+        userId,
+        entitlementId: entitlementIdentifier,
+      });
+    } else {
+      addPackageBreadcrumb("subscription", "Restore completed - no premium found", {
+        userId,
+      });
     }
+
     await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
 
     return { success: isPremium, isPremium, customerInfo };
   } catch (error) {
     const errorMessage = getErrorMessage(error, "Restore failed");
-    throw new RevenueCatRestoreError(errorMessage);
+    const restoreError = new RevenueCatRestoreError(errorMessage);
+    trackPackageError(restoreError, {
+      packageName: "subscription",
+      operation: "restore",
+      userId,
+      originalError: error instanceof Error ? error.message : String(error),
+    });
+    throw restoreError;
   }
 }

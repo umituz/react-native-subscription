@@ -22,10 +22,6 @@ export const SubscriptionModalHeader: React.FC<SubscriptionModalHeaderProps> = (
 }) => {
     const tokens = useAppDesignTokens();
 
-    if (__DEV__) {
-        console.log("[SubscriptionModalHeader] Rendering", { title, variant, hasSubtitle: !!subtitle });
-    }
-
     return (
         <View style={styles.header}>
             <TouchableOpacity
