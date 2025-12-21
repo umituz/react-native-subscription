@@ -33,9 +33,11 @@ export async function handleRestore(
   deps: RestoreHandlerDeps,
   userId: string
 ): Promise<RestoreResult> {
+  if (__DEV__) console.log("[RevenueCat] Restore started for user:", userId);
   addPackageBreadcrumb("subscription", "Restore started", { userId });
 
   if (!deps.isInitialized()) {
+    if (__DEV__) console.error("[RevenueCat] Restore failed - Not initialized");
     const error = new RevenueCatInitializationError();
     trackPackageError(error, {
       packageName: "subscription",
@@ -51,12 +53,14 @@ export async function handleRestore(
     const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
 
     if (isPremium) {
+      if (__DEV__) console.log("[RevenueCat] Restore successful - Premium active");
       await syncPremiumStatus(deps.config, userId, customerInfo);
       addPackageBreadcrumb("subscription", "Restore successful - premium active", {
         userId,
         entitlementId: entitlementIdentifier,
       });
     } else {
+      if (__DEV__) console.log("[RevenueCat] Restore completed - No premium found");
       addPackageBreadcrumb("subscription", "Restore completed - no premium found", {
         userId,
       });
@@ -66,6 +70,7 @@ export async function handleRestore(
 
     return { success: isPremium, isPremium, customerInfo };
   } catch (error) {
+    if (__DEV__) console.error("[RevenueCat] Restore error:", error);
     const errorMessage = getErrorMessage(error, "Restore failed");
     const restoreError = new RevenueCatRestoreError(errorMessage);
     trackPackageError(restoreError, {
