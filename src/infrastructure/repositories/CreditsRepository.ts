@@ -2,7 +2,7 @@
  * Credits Repository
  *
  * Firestore operations for user credits management.
- * Extends BaseRepository from @umituz/react-native-firestore.
+ * Extends BaseRepository from @umituz/react-native-firebase.
  *
  * Generic and reusable - accepts config from main app.
  */
@@ -15,7 +15,7 @@ import {
   type FieldValue,
   type Firestore,
 } from "firebase/firestore";
-import { BaseRepository, getFirestore } from "@umituz/react-native-firestore";
+import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type {
   CreditType,
   CreditsConfig,

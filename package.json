@@ -32,7 +32,7 @@
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",
     "@umituz/react-native-design-system": "latest",
-    "@umituz/react-native-firestore": "latest",
+    "@umituz/react-native-firebase": "latest",
     "@umituz/react-native-legal": "latest",
     "@umituz/react-native-localization": "latest",
     "@umituz/react-native-sentry": "latest",
@@ -45,7 +45,7 @@
   },
   "devDependencies": {
     "@umituz/react-native-design-system": "latest",
-    "@umituz/react-native-firestore": "latest",
+    "@umituz/react-native-firebase": "latest",
     "@umituz/react-native-legal": "latest",
     "@umituz/react-native-localization": "latest",
     "@umituz/react-native-sentry": "latest",
