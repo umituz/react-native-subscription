@@ -1,10 +1,9 @@
+
 /**
  * Credits Repository
  *
  * Firestore operations for user credits management.
  * Extends BaseRepository from @umituz/react-native-firebase.
- *
- * Generic and reusable - accepts config from main app.
  */
 
 import {
@@ -12,8 +11,8 @@ import {
   getDoc,
   runTransaction,
   serverTimestamp,
-  type FieldValue,
   type Firestore,
+  type Transaction,
 } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type {
@@ -22,20 +21,8 @@ import type {
   CreditsResult,
   DeductCreditsResult,
 } from "../../domain/entities/Credits";
-
-interface FirestoreTimestamp {
-  toDate: () => Date;
-}
-
-// Document structure when READING from Firestore
-interface UserCreditsDocumentRead {
-  textCredits: number;
-  imageCredits: number;
-  purchasedAt?: FirestoreTimestamp;
-  lastUpdatedAt?: FirestoreTimestamp;
-  lastPurchaseAt?: FirestoreTimestamp;
-  processedPurchases?: string[];
-}
+import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
+import { initializeCreditsTransaction } from "../services/CreditsInitializer";
 
 export class CreditsRepository extends BaseRepository {
   private config: CreditsConfig;
@@ -83,8 +70,7 @@ export class CreditsRepository extends BaseRepository {
       return {
         success: false,
         error: {
-          message:
-            error instanceof Error ? error.message : "Failed to get credits",
+          message: error instanceof Error ? error.message : "Failed to get credits",
           code: "FETCH_FAILED",
         },
       };
@@ -105,53 +91,12 @@ export class CreditsRepository extends BaseRepository {
 
     try {
       const creditsRef = this.getCreditsDocRef(db, userId);
-
-      const result = await runTransaction(db, async (transaction) => {
-        const creditsDoc = await transaction.get(creditsRef);
-        const now = serverTimestamp();
-
-        let newTextCredits = this.config.textCreditLimit;
-        let newImageCredits = this.config.imageCreditLimit;
-        let purchasedAt = now;
-        let processedPurchases: string[] = [];
-
-        if (creditsDoc.exists()) {
-          const existing = creditsDoc.data() as UserCreditsDocumentRead;
-          processedPurchases = existing.processedPurchases || [];
-
-          if (purchaseId && processedPurchases.includes(purchaseId)) {
-            return {
-              textCredits: existing.textCredits,
-              imageCredits: existing.imageCredits,
-              alreadyProcessed: true,
-            };
-          }
-
-          newTextCredits =
-            (existing.textCredits || 0) + this.config.textCreditLimit;
-          newImageCredits =
-            (existing.imageCredits || 0) + this.config.imageCreditLimit;
-          // Keep existing purchasedAt if available, otherwise use server timestamp
-          if (existing.purchasedAt) {
-            purchasedAt = existing.purchasedAt as unknown as FieldValue;
-          }
-        }
-
-        if (purchaseId) {
-          processedPurchases = [...processedPurchases, purchaseId].slice(-10);
-        }
-
-        transaction.set(creditsRef, {
-          textCredits: newTextCredits,
-          imageCredits: newImageCredits,
-          purchasedAt,
-          lastUpdatedAt: now,
-          lastPurchaseAt: now,
-          processedPurchases,
-        });
-
-        return { textCredits: newTextCredits, imageCredits: newImageCredits };
-      });
+      const result = await initializeCreditsTransaction(
+        db,
+        creditsRef,
+        this.config,
+        purchaseId
+      );
 
       return {
         success: true,
@@ -166,10 +111,7 @@ export class CreditsRepository extends BaseRepository {
       return {
         success: false,
         error: {
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to initialize credits",
+          message: error instanceof Error ? error.message : "Failed to initialize credits",
           code: "INIT_FAILED",
         },
       };
@@ -192,62 +134,35 @@ export class CreditsRepository extends BaseRepository {
       const creditsRef = this.getCreditsDocRef(db, userId);
       const fieldName = creditType === "text" ? "textCredits" : "imageCredits";
 
-      const newCredits = await runTransaction(db, async (transaction) => {
+      const newCredits = await runTransaction(db, async (transaction: Transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
-
-        if (!creditsDoc.exists()) {
-          throw new Error("NO_CREDITS");
-        }
+        if (!creditsDoc.exists()) throw new Error("NO_CREDITS");
 
         const currentCredits = creditsDoc.data()[fieldName] as number;
-
-        if (currentCredits <= 0) {
-          throw new Error("CREDITS_EXHAUSTED");
-        }
+        if (currentCredits <= 0) throw new Error("CREDITS_EXHAUSTED");
 
         const updatedCredits = currentCredits - 1;
         transaction.update(creditsRef, {
           [fieldName]: updatedCredits,
           lastUpdatedAt: serverTimestamp(),
         });
-
         return updatedCredits;
       });
 
       return { success: true, remainingCredits: newCredits };
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
+      const msg = error instanceof Error ? error.message : "Unknown error";
+      const code = msg === "NO_CREDITS" || msg === "CREDITS_EXHAUSTED" ? msg : "DEDUCT_FAILED";
+      const message = msg === "NO_CREDITS" ? "No credits found" : msg === "CREDITS_EXHAUSTED" ? "Credits exhausted" : msg;
 
-      if (errorMessage === "NO_CREDITS") {
-        return {
-          success: false,
-          error: { message: "No credits found", code: "NO_CREDITS" },
-        };
-      }
-
-      if (errorMessage === "CREDITS_EXHAUSTED") {
-        return {
-          success: false,
-          error: { message: "Credits exhausted", code: "CREDITS_EXHAUSTED" },
-        };
-      }
-
-      return {
-        success: false,
-        error: { message: errorMessage, code: "DEDUCT_FAILED" },
-      };
+      return { success: false, error: { message, code } };
     }
   }
 
   async hasCredits(userId: string, creditType: CreditType): Promise<boolean> {
     const result = await this.getCredits(userId);
-    if (!result.success || !result.data) {
-      return false;
-    }
-
-    const credits =
-      creditType === "text" ? result.data.textCredits : result.data.imageCredits;
+    if (!result.success || !result.data) return false;
+    const credits = creditType === "text" ? result.data.textCredits : result.data.imageCredits;
     return credits > 0;
   }
 }
