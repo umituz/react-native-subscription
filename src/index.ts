@@ -250,6 +250,12 @@ export {
   type CreditChecker,
 } from "./utils/creditChecker";
 
+export {
+  createAICreditHelpers,
+  type AICreditHelpersConfig,
+  type AICreditHelpers,
+} from "./utils/aiCreditHelpers";
+
 // =============================================================================
 // REVENUECAT - Errors
 // =============================================================================
