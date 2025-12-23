@@ -12,17 +12,14 @@ interface PaywallHeaderProps {
   title: string;
   subtitle?: string;
   onClose: () => void;
-  variant?: "bottom-sheet" | "fullscreen" | "dialog";
 }
 
 export const PaywallHeader: React.FC<PaywallHeaderProps> = React.memo(
-  ({ title, subtitle, onClose, variant = "bottom-sheet" }) => {
+  ({ title, subtitle, onClose }) => {
     const tokens = useAppDesignTokens();
 
-    const containerStyle = variant === "fullscreen" ? styles.containerFullscreen : styles.container;
-
     return (
-      <View style={containerStyle}>
+      <View style={styles.container}>
         <View style={styles.titleContainer}>
           <AtomicText
             type="headlineLarge"
@@ -58,14 +55,6 @@ PaywallHeader.displayName = "PaywallHeader";
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 16,
-  },
-  containerFullscreen: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",

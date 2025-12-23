@@ -334,6 +334,9 @@ export {
 export { useRevenueCat } from "./revenuecat/presentation/hooks/useRevenueCat";
 export type { UseRevenueCatResult } from "./revenuecat/presentation/hooks/useRevenueCat";
 
+export { useCustomerInfo } from "./revenuecat/presentation/hooks/useCustomerInfo";
+export type { UseCustomerInfoResult } from "./revenuecat/presentation/hooks/useCustomerInfo";
+
 export {
   useInitializeSubscription,
   useSubscriptionPackages,

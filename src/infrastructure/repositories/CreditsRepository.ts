@@ -40,7 +40,7 @@ export class CreditsRepository extends BaseRepository {
   }
 
   async getCredits(userId: string): Promise<CreditsResult> {
-    const db = this.getDb();
+    const db = getFirestore();
     if (!db) {
       return {
         success: false,

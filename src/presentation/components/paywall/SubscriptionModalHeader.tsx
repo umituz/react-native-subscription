@@ -11,14 +11,12 @@ interface SubscriptionModalHeaderProps {
     title: string;
     subtitle?: string;
     onClose: () => void;
-    variant?: "bottom-sheet" | "fullscreen" | "dialog";
 }
 
 export const SubscriptionModalHeader: React.FC<SubscriptionModalHeaderProps> = ({
     title,
     subtitle,
     onClose,
-    variant = "bottom-sheet",
 }) => {
     const tokens = useAppDesignTokens();
 

@@ -5,7 +5,7 @@
 
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { useAppDesignTokens, BaseModal, useResponsive } from "@umituz/react-native-design-system";
+import { useAppDesignTokens, BaseModal } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
 import { SubscriptionModalHeader } from "./SubscriptionModalHeader";
@@ -66,7 +66,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
   } = props;
 
   const tokens = useAppDesignTokens();
-  const { modalLayout } = useResponsive();
 
   const {
     selectedPkg,
@@ -85,7 +84,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
       visible,
       isLoading,
       packagesCount: packages?.length ?? 0,
-      modalLayout,
       selectedPkg: selectedPkg?.identifier ?? null,
       isProcessing,
     });
@@ -98,15 +96,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
           title={title}
           subtitle={subtitle}
           onClose={onClose}
-          variant="fullscreen"
         />
 
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingHorizontal: modalLayout.horizontalPadding }
-          ]}
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={false}
         >

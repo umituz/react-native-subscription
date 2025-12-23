@@ -10,7 +10,6 @@ import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionM
 import {
   trackPackageError,
   addPackageBreadcrumb,
-  trackPackageEvent,
 } from "@umituz/react-native-sentry";
 
 /**
@@ -112,7 +111,7 @@ export const usePurchasePackage = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-      trackPackageEvent("subscription", "purchase_started", {
+      addPackageBreadcrumb("subscription", "Purchase started", {
         packageId: pkg.identifier,
         userId,
       });
@@ -125,7 +124,7 @@ export const usePurchasePackage = (userId: string | undefined) => {
       const success = await SubscriptionManager.purchasePackage(pkg);
 
       if (success) {
-        trackPackageEvent("subscription", "purchase_success", {
+        addPackageBreadcrumb("subscription", "Purchase success", {
           packageId: pkg.identifier,
           userId,
         });
@@ -135,7 +134,7 @@ export const usePurchasePackage = (userId: string | undefined) => {
           userId,
         });
       } else {
-        trackPackageEvent("subscription", "purchase_cancelled", {
+        addPackageBreadcrumb("subscription", "Purchase cancelled", {
           packageId: pkg.identifier,
           userId,
         });
@@ -178,7 +177,7 @@ export const useRestorePurchase = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-      trackPackageEvent("subscription", "restore_started", {
+      addPackageBreadcrumb("subscription", "Restore started", {
         userId,
       });
 
@@ -189,7 +188,7 @@ export const useRestorePurchase = (userId: string | undefined) => {
       const success = await SubscriptionManager.restore();
 
       if (success) {
-        trackPackageEvent("subscription", "restore_success", {
+        addPackageBreadcrumb("subscription", "Restore success", {
           userId,
         });
 

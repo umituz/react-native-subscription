@@ -5,7 +5,7 @@
 
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { BaseModal, useResponsive } from "@umituz/react-native-design-system";
+import { BaseModal } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePaywall } from "../../hooks/usePaywall";
 import { PaywallHeader } from "./PaywallHeader";
@@ -80,8 +80,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     processingText,
   } = props;
 
-  const { modalLayout } = useResponsive();
-
   const {
     activeTab,
     selectedCreditsPackageId,
@@ -102,12 +100,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
       console.log("[PaywallModal] State:", {
         visible,
         activeTab,
-        modalLayout,
         creditsPackagesCount: creditsPackages?.length ?? 0,
         subscriptionPackagesCount: subscriptionPackages?.length ?? 0,
       });
     }
-  }, [visible, activeTab, modalLayout, creditsPackages?.length, subscriptionPackages?.length]);
+  }, [visible, activeTab, creditsPackages?.length, subscriptionPackages?.length]);
 
   return (
     <BaseModal visible={visible} onClose={onClose}>
@@ -116,7 +113,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
           title={title}
           subtitle={subtitle}
           onClose={onClose}
-          variant="fullscreen"
         />
 
         <PaywallTabBar
