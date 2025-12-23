@@ -55,14 +55,10 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
                             activeOpacity={0.8}
                         >
                             <LinearGradient
-                                colors={
-                                    isDisabled
-                                        ? [tokens.colors.border, tokens.colors.borderLight]
-                                        : [tokens.colors.primary, tokens.colors.secondary]
-                                }
+                                colors={[tokens.colors.primary, tokens.colors.secondary]}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 0 }}
-                                style={[styles.gradientButton, isDisabled && { opacity: 0.6 }]}
+                                style={[styles.gradientButton, isDisabled && { opacity: 0.5 }]}
                             >
                                 <AtomicText
                                     type="titleSmall"

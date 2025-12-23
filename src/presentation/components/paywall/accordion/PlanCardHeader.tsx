@@ -7,7 +7,6 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import {
   AtomicText,
-  AtomicIcon,
   useAppDesignTokens,
   withAlpha,
 } from "@umituz/react-native-design-system";
@@ -99,13 +98,6 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
           >
             {price}
           </AtomicText>
-          <View style={styles.expandIconContainer}>
-            <AtomicIcon
-              name={isExpanded ? "caret-up" : "caret-down"}
-              size={18}
-              color={tokens.colors.textSecondary as any}
-            />
-          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -157,11 +149,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  expandIconContainer: {
-    width: 24,
-    height: 24,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
