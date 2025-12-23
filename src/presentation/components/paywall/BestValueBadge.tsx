@@ -38,12 +38,12 @@ const styles = StyleSheet.create({
   badge: {
     position: "absolute",
     top: -12,
-    left: 0,
-    right: 0,
+    right: 16,
     paddingHorizontal: 16,
-    paddingVertical: 7,
+    paddingVertical: 6,
     borderRadius: 16,
     zIndex: 1,
-    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
