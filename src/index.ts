@@ -85,7 +85,10 @@ export { PaywallLegalFooter } from "./presentation/components/paywall/PaywallLeg
 export {
   PaywallModal,
   type PaywallModalProps,
+  type PaywallTranslations,
+  type PaywallLegalUrls,
 } from "./presentation/components/paywall/PaywallModal";
+export type { PaywallMode } from "./domain/entities/paywall/PaywallMode";
 
 // =============================================================================
 // PRESENTATION LAYER - Premium Details Components

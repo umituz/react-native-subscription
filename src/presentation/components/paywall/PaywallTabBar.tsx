@@ -1,12 +1,11 @@
 /**
  * Paywall Tab Bar Component
- * Single Responsibility: Display and handle tab selection
+ * Segmented control for paywall tabs
  */
 
 import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { AtomicText } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PaywallTabType } from "../../../domain/entities/paywall/PaywallTab";
 
 interface PaywallTabBarProps {
@@ -24,6 +23,18 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
     subscriptionLabel = "Subscription",
   }) => {
     const tokens = useAppDesignTokens();
+    const animatedValue = React.useRef(
+      new Animated.Value(activeTab === "credits" ? 0 : 1)
+    ).current;
+
+    React.useEffect(() => {
+      Animated.spring(animatedValue, {
+        toValue: activeTab === "credits" ? 0 : 1,
+        useNativeDriver: false,
+        tension: 68,
+        friction: 12,
+      }).start();
+    }, [activeTab, animatedValue]);
 
     const renderTab = (tab: PaywallTabType, label: string) => {
       const isActive = activeTab === tab;
@@ -31,25 +42,16 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
       return (
         <TouchableOpacity
           key={tab}
-          style={[
-            styles.tab,
-            {
-              backgroundColor: isActive
-                ? tokens.colors.primary
-                : tokens.colors.surfaceSecondary,
-            },
-          ]}
+          style={styles.tab}
           onPress={() => onTabChange(tab)}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
         >
           <AtomicText
             type="labelLarge"
             style={[
               styles.tabText,
               {
-                color: isActive
-                  ? tokens.colors.onPrimary
-                  : tokens.colors.textSecondary,
+                color: isActive ? tokens.colors.primary : tokens.colors.textSecondary,
               },
             ]}
           >
@@ -59,6 +61,11 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
       );
     };
 
+    const indicatorTranslateX = animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0%", "50%"],
+    });
+
     return (
       <View
         style={[
@@ -66,11 +73,20 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
           { backgroundColor: tokens.colors.surfaceSecondary },
         ]}
       >
+        <Animated.View
+          style={[
+            styles.indicator,
+            {
+              backgroundColor: tokens.colors.surface,
+              left: indicatorTranslateX,
+            },
+          ]}
+        />
         {renderTab("credits", creditsLabel)}
         {renderTab("subscription", subscriptionLabel)}
       </View>
     );
-  },
+  }
 );
 
 PaywallTabBar.displayName = "PaywallTabBar";
@@ -82,13 +98,21 @@ const styles = StyleSheet.create({
     padding: 4,
     marginHorizontal: 24,
     marginBottom: 16,
+    position: "relative",
+    height: 44,
+  },
+  indicator: {
+    position: "absolute",
+    top: 4,
+    bottom: 4,
+    width: "48%",
+    borderRadius: 8,
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 1,
   },
   tabText: {
     fontWeight: "600",

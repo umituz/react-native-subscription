@@ -1,6 +1,6 @@
 /**
  * Accordion Plan Card
- * Expandable subscription plan card with credit display
+ * Expandable subscription plan card
  */
 
 import React, { useCallback, useMemo } from "react";
@@ -41,7 +41,6 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
       : null;
 
     const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
-    const displayPrice = price;
 
     const handleHeaderPress = useCallback(() => {
       onSelect();
@@ -53,11 +52,9 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
     const containerStyle: StyleProp<ViewStyle> = [
       styles.container,
       {
-        borderColor: isSelected
-          ? tokens.colors.primary
-          : tokens.colors.borderLight,
-        borderWidth: isSelected ? 2 : 1,
         backgroundColor: tokens.colors.surface,
+        borderColor: isSelected ? tokens.colors.primary : tokens.colors.border,
+        borderWidth: isSelected ? 2 : 1,
       },
     ];
 
@@ -65,7 +62,7 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
       <View style={containerStyle}>
         <PlanCardHeader
           title={title}
-          price={displayPrice}
+          price={price}
           creditAmount={creditAmount}
           isSelected={isSelected}
           isExpanded={isExpanded}
@@ -96,5 +93,6 @@ const createStyles = (spacingMult: number) =>
     container: {
       borderRadius: 16 * spacingMult,
       marginBottom: 12 * spacingMult,
+      overflow: "hidden",
     },
   });

@@ -1,12 +1,13 @@
 /**
  * Plan Card Header
- * Collapsed state of accordion subscription card
+ * Header for accordion subscription card
  */
 
 import React, { useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import {
   AtomicText,
+  AtomicIcon,
   useAppDesignTokens,
   withAlpha,
   useResponsive,
@@ -47,19 +48,13 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
             style={[
               styles.radio,
               {
-                borderColor: isSelected
-                  ? tokens.colors.primary
-                  : tokens.colors.border,
+                borderColor: isSelected ? tokens.colors.primary : tokens.colors.border,
+                backgroundColor: isSelected ? tokens.colors.primary : "transparent",
               },
             ]}
           >
             {isSelected && (
-              <View
-                style={[
-                  styles.radioInner,
-                  { backgroundColor: tokens.colors.primary },
-                ]}
-              />
+              <AtomicIcon name="checkmark" customSize={14} customColor={tokens.colors.onPrimary} />
             )}
           </View>
 
@@ -80,15 +75,17 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
                   },
                 ]}
               >
+                <AtomicIcon name="flash" customSize={creditFontSize} customColor={tokens.colors.primary} />
                 <AtomicText
                   type="labelSmall"
                   style={{
                     color: tokens.colors.primary,
                     fontWeight: "700",
                     fontSize: creditFontSize,
+                    marginLeft: 4,
                   }}
                 >
-                  {creditAmount} {t("paywall.credits") || "Credits"}
+                  {creditAmount} {t("paywall.credits")}
                 </AtomicText>
               </View>
             )}
@@ -98,10 +95,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
         <View style={styles.rightSection}>
           <AtomicText
             type="titleMedium"
-            style={{
-              color: tokens.colors.textPrimary,
-              fontWeight: "700",
-            }}
+            style={{ color: tokens.colors.textPrimary, fontWeight: "700" }}
           >
             {price}
           </AtomicText>
@@ -113,7 +107,6 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
 
 const createStyles = (spacingMult: number, touchTarget: number) => {
   const radioSize = Math.max(touchTarget * 0.4, 22);
-  const radioInnerSize = radioSize * 0.55;
 
   return StyleSheet.create({
     container: {
@@ -140,17 +133,14 @@ const createStyles = (spacingMult: number, touchTarget: number) => {
       justifyContent: "center",
       marginRight: 12 * spacingMult,
     },
-    radioInner: {
-      width: radioInnerSize,
-      height: radioInnerSize,
-      borderRadius: radioInnerSize / 2,
-    },
     textContainer: {
       flex: 1,
       gap: 6 * spacingMult,
     },
     creditBadge: {
-      paddingHorizontal: 10 * spacingMult,
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 8 * spacingMult,
       paddingVertical: 4 * spacingMult,
       borderRadius: 12 * spacingMult,
       borderWidth: 1,
