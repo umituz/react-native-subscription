@@ -5,8 +5,7 @@
 
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { useAppDesignTokens, BaseModal, useResponsive } from "@umituz/react-native-design-system";
-import { useLocalization } from "@umituz/react-native-localization";
+import { BaseModal, useResponsive } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePaywall } from "../../hooks/usePaywall";
 import { PaywallHeader } from "./PaywallHeader";
@@ -35,8 +34,12 @@ export interface PaywallModalProps {
   onRestore?: () => Promise<void>;
   subscriptionFeatures?: Array<{ icon: string; text: string }>;
   isLoading?: boolean;
-  title?: string;
-  subtitle?: string;
+  title: string;
+  subtitle: string;
+  creditsTabLabel: string;
+  subscriptionTabLabel: string;
+  purchaseButtonText: string;
+  subscribeButtonText: string;
   privacyUrl?: string;
   termsUrl?: string;
   privacyText?: string;
@@ -60,6 +63,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     isLoading = false,
     title,
     subtitle,
+    creditsTabLabel,
+    subscriptionTabLabel,
+    purchaseButtonText,
+    subscribeButtonText,
     privacyUrl,
     termsUrl,
     privacyText,
@@ -67,8 +74,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     restoreButtonText,
   } = props;
 
-  const tokens = useAppDesignTokens();
-  const { t } = useLocalization();
   const { modalLayout } = useResponsive();
 
   const {
@@ -86,9 +91,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     onSubscriptionPurchase,
   });
 
-  const displayTitle = title || t("paywall.title");
-  const displaySubtitle = subtitle || t("paywall.subtitle");
-
   useEffect(() => {
     if (__DEV__) {
       console.log("[PaywallModal] State:", {
@@ -105,8 +107,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     <BaseModal visible={visible} onClose={onClose}>
       <View style={styles.container}>
         <PaywallHeader
-          title={displayTitle}
-          subtitle={displaySubtitle}
+          title={title}
+          subtitle={subtitle}
           onClose={onClose}
           variant="fullscreen"
         />
@@ -114,8 +116,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
         <PaywallTabBar
           activeTab={activeTab}
           onTabChange={handleTabChange}
-          creditsLabel={t("paywall.tabs.credits")}
-          subscriptionLabel={t("paywall.tabs.subscription")}
+          creditsLabel={creditsTabLabel}
+          subscriptionLabel={subscriptionTabLabel}
         />
 
         <View style={styles.tabContent}>
@@ -128,7 +130,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
               currentCredits={currentCredits}
               requiredCredits={requiredCredits}
               isLoading={isLoading}
-              purchaseButtonText={t("paywall.purchase")}
+              purchaseButtonText={purchaseButtonText}
             />
           ) : (
             <SubscriptionTabContent
@@ -138,7 +140,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
               onPurchase={handleSubscriptionPurchase}
               features={subscriptionFeatures}
               isLoading={isLoading}
-              purchaseButtonText={t("paywall.subscribe")}
+              purchaseButtonText={subscribeButtonText}
               onRestore={onRestore}
               privacyUrl={privacyUrl}
               termsUrl={termsUrl}

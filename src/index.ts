@@ -190,21 +190,15 @@ export {
 } from "./infrastructure/repositories/CreditsRepository";
 
 // =============================================================================
-// CREDITS SYSTEM - Context & Provider
+// CREDITS SYSTEM - Configuration (Module-Level Provider)
 // =============================================================================
 
 export {
-  CreditsContext,
-  useCreditsContext,
-  useCreditsConfig,
-  useCreditsRepository,
-  type CreditsContextValue,
-} from "./presentation/context/CreditsContext";
-
-export {
-  CreditsProvider,
-  type CreditsProviderProps,
-} from "./presentation/providers/CreditsProvider";
+  configureCreditsRepository,
+  getCreditsRepository,
+  getCreditsConfig,
+  resetCreditsRepository,
+} from "./infrastructure/repositories/CreditsRepositoryProvider";
 
 // =============================================================================
 // CREDITS SYSTEM - Hooks

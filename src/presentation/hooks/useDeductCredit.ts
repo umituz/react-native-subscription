@@ -2,12 +2,12 @@
  * useDeductCredit Hook
  *
  * TanStack Query mutation hook for deducting credits.
- * Generic and reusable - uses config from CreditsProvider.
+ * Generic and reusable - uses module-level repository.
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreditType, UserCredits } from "../../domain/entities/Credits";
-import { useCreditsRepository } from "../context/CreditsContext";
+import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import { creditsQueryKeys } from "./useCredits";
 
 export interface UseDeductCreditParams {
@@ -24,7 +24,7 @@ export const useDeductCredit = ({
   userId,
   onCreditsExhausted,
 }: UseDeductCreditParams): UseDeductCreditResult => {
-  const repository = useCreditsRepository();
+  const repository = getCreditsRepository();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -113,7 +113,7 @@ export interface UseInitializeCreditsResult {
 export const useInitializeCredits = ({
   userId,
 }: UseInitializeCreditsParams): UseInitializeCreditsResult => {
-  const repository = useCreditsRepository();
+  const repository = getCreditsRepository();
   const queryClient = useQueryClient();
 
   const mutation = useMutation({

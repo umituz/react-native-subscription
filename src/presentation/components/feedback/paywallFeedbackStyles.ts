@@ -28,11 +28,8 @@ export const createPaywallFeedbackStyles = (
             backgroundColor: tokens.colors.surface,
             borderRadius: 24,
             padding: 24,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.25,
-            shadowRadius: 16,
-            elevation: 8,
+            borderWidth: 1,
+            borderColor: tokens.colors.border,
         },
         header: {
             alignItems: "center",

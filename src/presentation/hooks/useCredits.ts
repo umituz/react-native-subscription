@@ -2,15 +2,15 @@
  * useCredits Hook
  *
  * TanStack Query hook for fetching user credits.
- * Generic and reusable - uses config from CreditsProvider.
+ * Generic and reusable - uses config from module-level provider.
  */
 
 import { useQuery } from "@tanstack/react-query";
 import type { UserCredits, CreditType } from "../../domain/entities/Credits";
 import {
-  useCreditsRepository,
-  useCreditsConfig,
-} from "../context/CreditsContext";
+  getCreditsRepository,
+  getCreditsConfig,
+} from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
 const CACHE_CONFIG = {
   staleTime: 30 * 1000,
@@ -42,8 +42,8 @@ export const useCredits = ({
   userId,
   enabled = true,
 }: UseCreditsParams): UseCreditsResult => {
-  const repository = useCreditsRepository();
-  const config = useCreditsConfig();
+  const repository = getCreditsRepository();
+  const config = getCreditsConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),

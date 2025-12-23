@@ -1,12 +1,12 @@
 /**
  * useCreditChecker Hook
  *
- * Provides credit checking utilities using context repository.
+ * Provides credit checking utilities using module-level repository.
  */
 
 import { useMemo } from "react";
 import type { CreditType } from "../../domain/entities/Credits";
-import { useCreditsRepository } from "../context/CreditsContext";
+import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import {
   createCreditChecker,
   type CreditCheckResult,
@@ -30,11 +30,11 @@ export interface UseCreditCheckerResult {
 export const useCreditChecker = ({
   getCreditType,
 }: UseCreditCheckerParams): UseCreditCheckerResult => {
-  const repository = useCreditsRepository();
+  const repository = getCreditsRepository();
 
   const checker = useMemo(
     () => createCreditChecker({ repository, getCreditType }),
-    [repository, getCreditType]
+    [getCreditType]
   );
 
   return checker;

@@ -6,7 +6,6 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
-import { useLocalization } from "@umituz/react-native-localization";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PaywallFeaturesList } from "./PaywallFeaturesList";
 import { SubscriptionPackageList } from "./SubscriptionPackageList";
@@ -20,9 +19,11 @@ interface SubscriptionTabContentProps {
   onRestore?: () => void;
   features?: Array<{ icon: string; text: string }>;
   isLoading?: boolean;
-  purchaseButtonText?: string;
-  processingText?: string;
-  restoreButtonText?: string;
+  purchaseButtonText: string;
+  processingText: string;
+  restoreButtonText: string;
+  loadingText: string;
+  emptyText: string;
   privacyUrl?: string;
   termsUrl?: string;
   privacyText?: string;
@@ -57,20 +58,14 @@ export const SubscriptionTabContent: React.FC<SubscriptionTabContentProps> =
       purchaseButtonText,
       processingText,
       restoreButtonText,
+      loadingText,
+      emptyText,
       privacyUrl,
       termsUrl,
       privacyText,
       termsOfServiceText,
     }) => {
       const tokens = useAppDesignTokens();
-      const { t } = useLocalization();
-
-      const displayPurchaseButtonText =
-        purchaseButtonText || t("paywall.subscribe");
-      const displayProcessingText =
-        processingText || t("paywall.processing");
-      const displayRestoreButtonText =
-        restoreButtonText || t("paywall.restore");
 
       const sortedPackages = useMemo(() => sortPackages(packages), [packages]);
 
@@ -86,8 +81,8 @@ export const SubscriptionTabContent: React.FC<SubscriptionTabContentProps> =
               isLoading={isLoading}
               selectedPkg={selectedPackage}
               onSelect={onSelectPackage}
-              loadingText={t("paywall.loading")}
-              emptyText={t("paywall.empty")}
+              loadingText={loadingText}
+              emptyText={emptyText}
             />
 
             {features.length > 0 && (
@@ -103,13 +98,13 @@ export const SubscriptionTabContent: React.FC<SubscriptionTabContentProps> =
           </ScrollView>
 
           <SubscriptionFooter
-            isProcessing={false} // Tab content usually delegated processing to external state, currently no isProcessing prop passed. Assuming false or controlled by isLoading.
+            isProcessing={false}
             isLoading={isLoading}
-            processingText={displayProcessingText}
-            purchaseButtonText={displayPurchaseButtonText}
+            processingText={processingText}
+            purchaseButtonText={purchaseButtonText}
             hasPackages={packages.length > 0}
             selectedPkg={selectedPackage}
-            restoreButtonText={displayRestoreButtonText}
+            restoreButtonText={restoreButtonText}
             showRestoreButton={!!onRestore}
             onPurchase={onPurchase}
             onRestore={onRestore || (() => { })}

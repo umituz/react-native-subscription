@@ -20,15 +20,15 @@ export interface SubscriptionModalProps {
   packages: PurchasesPackage[];
   onPurchase: (pkg: PurchasesPackage) => Promise<boolean>;
   onRestore: () => Promise<boolean>;
-  title?: string;
+  title: string;
   subtitle?: string;
   features?: Array<{ icon: string; text: string }>;
   isLoading?: boolean;
-  purchaseButtonText?: string;
-  restoreButtonText?: string;
-  loadingText?: string;
-  emptyText?: string;
-  processingText?: string;
+  purchaseButtonText: string;
+  restoreButtonText: string;
+  loadingText: string;
+  emptyText: string;
+  processingText: string;
   privacyUrl?: string;
   termsUrl?: string;
   privacyText?: string;
@@ -43,15 +43,15 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     packages,
     onPurchase,
     onRestore,
-    title = "Go Premium",
+    title,
     subtitle,
     features = [],
     isLoading = false,
-    purchaseButtonText = "Subscribe",
-    restoreButtonText = "Restore Purchases",
-    loadingText = "Loading...",
-    emptyText = "No packages",
-    processingText = "Processing...",
+    purchaseButtonText,
+    restoreButtonText,
+    loadingText,
+    emptyText,
+    processingText,
     privacyUrl,
     termsUrl,
     privacyText,
