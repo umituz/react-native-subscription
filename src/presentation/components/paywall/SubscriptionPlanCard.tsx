@@ -12,6 +12,7 @@ import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
 
+import { getPeriodLabel, isYearlyPackage } from "../../../utils/packagePeriodUtils";
 // @ts-ignore
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -22,26 +23,13 @@ interface SubscriptionPlanCardProps {
   isBestValue?: boolean;
 }
 
-const getPeriodLabel = (period: string | null | undefined): string => {
-  if (!period) return "";
-  if (period.includes("Y") || period.includes("year")) return "yearly";
-  if (period.includes("M") || period.includes("month")) return "monthly";
-  if (period.includes("W") || period.includes("week")) return "weekly";
-  if (period.includes("D") || period.includes("day")) return "daily";
-  return "";
-};
-
-const isYearlyPeriod = (period: string | null | undefined): boolean => {
-  return period?.includes("Y") || period?.includes("year") || false;
-};
-
 export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
   React.memo(({ package: pkg, isSelected, onSelect, isBestValue = false }) => {
     const tokens = useAppDesignTokens();
     const { t } = useLocalization();
 
     const period = pkg.product.subscriptionPeriod;
-    const isYearly = isYearlyPeriod(period);
+    const isYearly = isYearlyPackage(pkg);
     const periodLabel = getPeriodLabel(period);
     const price = formatPrice(pkg.product.price, pkg.product.currencyCode);
     const monthlyEquivalent = isYearly

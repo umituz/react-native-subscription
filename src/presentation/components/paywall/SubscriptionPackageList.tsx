@@ -4,6 +4,7 @@ import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { SubscriptionPlanCard } from "./SubscriptionPlanCard";
+import { isYearlyPackage } from "../../../utils/packagePeriodUtils";
 
 interface SubscriptionPackageListProps {
     isLoading: boolean;
@@ -12,6 +13,8 @@ interface SubscriptionPackageListProps {
     loadingText: string;
     emptyText: string;
     onSelect: (pkg: PurchasesPackage) => void;
+    /** Optional: Manually specify which package should show "Best Value" badge by identifier */
+    bestValueIdentifier?: string;
 }
 
 export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = React.memo(
@@ -22,6 +25,7 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         loadingText,
         emptyText,
         onSelect,
+        bestValueIdentifier,
     }) => {
         const tokens = useAppDesignTokens();
         const hasPackages = packages.length > 0;
@@ -69,15 +73,28 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
 
         return (
             <View style={styles.packagesContainer}>
-                {packages.map((pkg, index) => (
-                    <SubscriptionPlanCard
-                        key={pkg.product.identifier}
-                        package={pkg}
-                        isSelected={selectedPkg?.product.identifier === pkg.product.identifier}
-                        onSelect={() => onSelect(pkg)}
-                        isBestValue={index === 0}
-                    />
-                ))}
+                {packages.map((pkg) => {
+                    // Determine if this package should show "Best Value" badge
+                    let isBestValue = false;
+
+                    if (bestValueIdentifier) {
+                        // Use manual override if provided
+                        isBestValue = pkg.product.identifier === bestValueIdentifier;
+                    } else {
+                        // Auto-detect: mark yearly packages as best value
+                        isBestValue = isYearlyPackage(pkg);
+                    }
+
+                    return (
+                        <SubscriptionPlanCard
+                            key={pkg.product.identifier}
+                            package={pkg}
+                            isSelected={selectedPkg?.product.identifier === pkg.product.identifier}
+                            onSelect={() => onSelect(pkg)}
+                            isBestValue={isBestValue}
+                        />
+                    );
+                })}
             </View>
         );
     }
