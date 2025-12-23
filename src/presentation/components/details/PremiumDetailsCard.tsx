@@ -31,17 +31,30 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
 
   return (
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: tokens.colors.text }]}>
-          {translations.title}
-        </Text>
-        <PremiumStatusBadge
-          status={statusType}
-          activeLabel={translations.statusActive}
-          expiredLabel={translations.statusExpired}
-          noneLabel={translations.statusFree}
-        />
-      </View>
+      {(isPremium || showCredits) && (
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: tokens.colors.text }]}>
+            {translations.title}
+          </Text>
+          <PremiumStatusBadge
+            status={statusType}
+            activeLabel={translations.statusActive}
+            expiredLabel={translations.statusExpired}
+            noneLabel={translations.statusFree}
+          />
+        </View>
+      )}
+
+      {!isPremium && !showCredits && (
+        <View style={styles.freeUserHeader}>
+          <Text style={[styles.freeUserTitle, { color: tokens.colors.text }]}>
+            {translations.title}
+          </Text>
+          <Text style={[styles.freeUserDescription, { color: tokens.colors.textSecondary }]}>
+            {translations.upgradeButton ? `${translations.upgradeButton}` : "Unlock premium features"}
+          </Text>
+        </View>
+      )}
 
       {isPremium && (
         <View style={styles.detailsSection}>
@@ -140,6 +153,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "600",
+  },
+  freeUserHeader: {
+    gap: 4,
+  },
+  freeUserTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  freeUserDescription: {
+    fontSize: 14,
+    fontWeight: "400",
   },
   detailsSection: {
     gap: 8,
