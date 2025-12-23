@@ -103,7 +103,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
           <AtomicIcon
             name={isExpanded ? "ChevronUp" : "ChevronDown"}
             size={20}
-            color={tokens.colors.textSecondary}
+            color={tokens.colors.textSecondary as any}
           />
         </View>
       </View>
