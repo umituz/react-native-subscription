@@ -40,11 +40,11 @@ export interface PaywallModalProps {
   subscriptionTabLabel: string;
   purchaseButtonText: string;
   subscribeButtonText: string;
+  restoreButtonText: string;
   privacyUrl?: string;
   termsUrl?: string;
   privacyText?: string;
   termsOfServiceText?: string;
-  restoreButtonText?: string;
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
