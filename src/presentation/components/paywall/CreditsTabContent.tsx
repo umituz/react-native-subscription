@@ -5,8 +5,7 @@
 
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { AtomicText, AtomicButton } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicButton, Grid, useResponsiveDesignTokens } from "@umituz/react-native-design-system";
 import { useLocalization } from "@umituz/react-native-localization";
 import { CreditsPackageCard } from "./CreditsPackageCard";
 import { PaywallLegalFooter } from "./PaywallLegalFooter";
@@ -38,7 +37,7 @@ export const CreditsTabContent: React.FC<CreditsTabContentProps> = React.memo(
     creditsInfoText,
     processingText,
   }) => {
-    const tokens = useAppDesignTokens();
+    const tokens = useResponsiveDesignTokens();
     const { t } = useLocalization();
 
     const needsCredits = requiredCredits && requiredCredits > currentCredits;
@@ -72,10 +71,10 @@ export const CreditsTabContent: React.FC<CreditsTabContentProps> = React.memo(
 
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingHorizontal: tokens.spacing.lg, paddingBottom: tokens.spacing.md }]}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.packagesContainer}>
+          <Grid mobileColumns={1} tabletColumns={2} gap={tokens.spacing.sm}>
             {packages.map((pkg) => (
               <CreditsPackageCard
                 key={pkg.id}
@@ -84,7 +83,7 @@ export const CreditsTabContent: React.FC<CreditsTabContentProps> = React.memo(
                 onSelect={() => onSelectPackage(pkg.id)}
               />
             ))}
-          </View>
+          </Grid>
         </ScrollView>
 
         <View style={styles.footer}>
@@ -116,13 +115,7 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 16,
-  },
-  packagesContainer: {
-    gap: 12,
-  },
+  scrollContent: {},
   footer: {
     padding: 24,
     paddingTop: 16,
