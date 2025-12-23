@@ -3,7 +3,7 @@
  * Displays paywall with Credits and Subscription tabs
  */
 
-import React, { useEffect } from "react";
+import React from "react";
 import { View, StyleSheet } from "react-native";
 import { BaseModal } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";

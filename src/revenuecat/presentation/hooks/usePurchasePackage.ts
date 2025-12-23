@@ -1,0 +1,79 @@
+/**
+ * Purchase Package Hook
+ * TanStack mutation for purchasing subscription packages
+ */
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { PurchasesPackage } from "react-native-purchases";
+import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
+import {
+  trackPackageError,
+  addPackageBreadcrumb,
+} from "@umituz/react-native-sentry";
+import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
+
+/**
+ * Purchase a subscription package
+ */
+export const usePurchasePackage = (userId: string | undefined) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (pkg: PurchasesPackage) => {
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+
+      addPackageBreadcrumb("subscription", "Purchase started", {
+        packageId: pkg.identifier,
+        userId,
+      });
+
+      addPackageBreadcrumb("subscription", "Purchase mutation started", {
+        packageId: pkg.identifier,
+        userId,
+      });
+
+      const success = await SubscriptionManager.purchasePackage(pkg);
+
+      if (success) {
+        addPackageBreadcrumb("subscription", "Purchase success", {
+          packageId: pkg.identifier,
+          userId,
+        });
+
+        addPackageBreadcrumb("subscription", "Purchase mutation success", {
+          packageId: pkg.identifier,
+          userId,
+        });
+      } else {
+        addPackageBreadcrumb("subscription", "Purchase cancelled", {
+          packageId: pkg.identifier,
+          userId,
+        });
+
+        addPackageBreadcrumb("subscription", "Purchase mutation failed", {
+          packageId: pkg.identifier,
+          userId,
+        });
+      }
+
+      return success;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
+      });
+    },
+    onError: (error) => {
+      trackPackageError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          packageName: "subscription",
+          operation: "purchase_mutation",
+          userId: userId ?? "NO_USER",
+        }
+      );
+    },
+  });
+};

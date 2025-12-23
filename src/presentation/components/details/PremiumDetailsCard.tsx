@@ -7,45 +7,12 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
-import {
-  PremiumStatusBadge,
-  type SubscriptionStatusType,
-} from "./PremiumStatusBadge";
+import { PremiumStatusBadge } from "./PremiumStatusBadge";
+import { DetailRow } from "./DetailRow";
+import { CreditRow } from "./CreditRow";
+import type { PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 
-export interface CreditInfo {
-  id: string;
-  label: string;
-  current: number;
-  total: number;
-}
-
-export interface PremiumDetailsTranslations {
-  title: string;
-  statusLabel: string;
-  expiresLabel: string;
-  purchasedLabel: string;
-  creditsTitle?: string;
-  remainingLabel?: string;
-  manageButton?: string;
-  upgradeButton?: string;
-  lifetimeLabel?: string;
-  statusActive?: string;
-  statusExpired?: string;
-  statusFree?: string;
-}
-
-export interface PremiumDetailsCardProps {
-  statusType: SubscriptionStatusType;
-  isPremium: boolean;
-  expirationDate?: string | null;
-  purchaseDate?: string | null;
-  isLifetime?: boolean;
-  daysRemaining?: number | null;
-  credits?: CreditInfo[];
-  translations: PremiumDetailsTranslations;
-  onManageSubscription?: () => void;
-  onUpgrade?: () => void;
-}
+export type { CreditInfo, PremiumDetailsTranslations, PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 
 export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
   statusType,
@@ -82,7 +49,6 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
             <DetailRow
               label={translations.statusLabel}
               value={translations.lifetimeLabel || "Lifetime"}
-              tokens={tokens}
             />
           ) : (
             <>
@@ -95,14 +61,12 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
                     daysRemaining !== undefined &&
                     daysRemaining <= 7
                   }
-                  tokens={tokens}
                 />
               )}
               {purchaseDate && (
                 <DetailRow
                   label={translations.purchasedLabel}
                   value={purchaseDate}
-                  tokens={tokens}
                 />
               )}
             </>
@@ -126,7 +90,6 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
               current={credit.current}
               total={credit.total}
               remainingLabel={translations.remainingLabel}
-              tokens={tokens}
             />
           ))}
         </View>
@@ -163,84 +126,6 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
   );
 };
 
-interface DetailRowProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  tokens: ReturnType<typeof useAppDesignTokens>;
-}
-
-const DetailRow: React.FC<DetailRowProps> = ({
-  label,
-  value,
-  highlight = false,
-  tokens,
-}) => (
-  <View style={styles.detailRow}>
-    <Text style={[styles.detailLabel, { color: tokens.colors.textSecondary }]}>
-      {label}
-    </Text>
-    <Text
-      style={[
-        styles.detailValue,
-        { color: highlight ? tokens.colors.warning : tokens.colors.text },
-      ]}
-    >
-      {value}
-    </Text>
-  </View>
-);
-
-interface CreditRowProps {
-  label: string;
-  current: number;
-  total: number;
-  remainingLabel?: string;
-  tokens: ReturnType<typeof useAppDesignTokens>;
-}
-
-const CreditRow: React.FC<CreditRowProps> = ({
-  label,
-  current,
-  total,
-  remainingLabel = "remaining",
-  tokens,
-}) => {
-  const percentage = total > 0 ? (current / total) * 100 : 0;
-  const isLow = percentage <= 20;
-
-  return (
-    <View style={styles.creditRow}>
-      <View style={styles.creditHeader}>
-        <Text style={[styles.creditLabel, { color: tokens.colors.text }]}>
-          {label}
-        </Text>
-        <Text
-          style={[
-            styles.creditCount,
-            { color: isLow ? tokens.colors.warning : tokens.colors.textSecondary },
-          ]}
-        >
-          {current} / {total} {remainingLabel}
-        </Text>
-      </View>
-      <View
-        style={[styles.progressBar, { backgroundColor: tokens.colors.surfaceSecondary }]}
-      >
-        <View
-          style={[
-            styles.progressFill,
-            {
-              width: `${percentage}%`,
-              backgroundColor: isLow ? tokens.colors.warning : tokens.colors.primary,
-            },
-          ]}
-        />
-      </View>
-    </View>
-  );
-};
-
 const styles = StyleSheet.create({
   card: {
     borderRadius: 12,
@@ -264,45 +149,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 4,
   },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  detailLabel: {
-    fontSize: 14,
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
   creditsSection: {
     gap: 8,
     paddingTop: 12,
     borderTopWidth: 1,
-  },
-  creditRow: {
-    gap: 4,
-  },
-  creditHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  creditLabel: {
-    fontSize: 13,
-  },
-  creditCount: {
-    fontSize: 12,
-  },
-  progressBar: {
-    height: 6,
-    borderRadius: 3,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 3,
   },
   actionsSection: {
     gap: 8,

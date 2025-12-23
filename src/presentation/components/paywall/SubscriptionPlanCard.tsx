@@ -4,25 +4,18 @@
  */
 
 import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import type { PurchasesPackage } from "react-native-purchases";
+import { View, TouchableOpacity } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens, withAlpha } from "@umituz/react-native-design-system";
 import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
-
 import { getPeriodLabel, isYearlyPackage } from "../../../utils/packagePeriodUtils";
 import { LinearGradient } from "expo-linear-gradient";
+import type { SubscriptionPlanCardProps } from "./SubscriptionPlanCardTypes";
+import { styles } from "./SubscriptionPlanCardStyles";
 
-interface SubscriptionPlanCardProps {
-  package: PurchasesPackage;
-  isSelected: boolean;
-  onSelect: () => void;
-  isBestValue?: boolean;
-  /** Optional: Number of credits/generations included with this package */
-  creditAmount?: number;
-}
+export type { SubscriptionPlanCardProps } from "./SubscriptionPlanCardTypes";
 
 export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
   React.memo(({ package: pkg, isSelected, onSelect, isBestValue = false, creditAmount }) => {
@@ -148,58 +141,3 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
 
 
 SubscriptionPlanCard.displayName = "SubscriptionPlanCard";
-
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 16,
-    position: "relative",
-    overflow: "hidden", // Important for gradient borders/corners
-  },
-  gradientWrapper: {
-    flex: 1,
-    padding: 18,
-  },
-  content: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  leftSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  textContainer: {
-    flex: 1,
-  },
-  title: {
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  creditBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginBottom: 4,
-  },
-  rightSection: {
-    alignItems: "flex-end",
-  },
-  price: {
-    fontWeight: "700",
-  },
-});
