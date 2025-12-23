@@ -1,0 +1,93 @@
+/**
+ * Accordion Plan Card
+ * Expandable subscription plan card with credit display
+ */
+
+import React, { useCallback } from "react";
+import { View, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
+import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { formatPrice } from "../../../../utils/priceUtils";
+import { getPeriodLabel, isYearlyPackage } from "../../../../utils/packagePeriodUtils";
+import { useLocalization } from "@umituz/react-native-localization";
+import { PlanCardHeader } from "./PlanCardHeader";
+import { PlanCardDetails } from "./PlanCardDetails";
+import type { AccordionPlanCardProps } from "./AccordionPlanCardTypes";
+
+export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
+  ({
+    package: pkg,
+    isSelected,
+    isExpanded,
+    onSelect,
+    onToggleExpand,
+    isBestValue = false,
+    creditAmount,
+  }) => {
+    const tokens = useAppDesignTokens();
+    const { t } = useLocalization();
+
+    const period = pkg.product.subscriptionPeriod;
+    const isYearly = isYearlyPackage(pkg);
+    const periodLabel = getPeriodLabel(period);
+    const price = formatPrice(pkg.product.price, pkg.product.currencyCode);
+    const monthlyEquivalent = isYearly
+      ? formatPrice(pkg.product.price / 12, pkg.product.currencyCode)
+      : null;
+
+    const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
+    const displayPrice = isYearly && monthlyEquivalent
+      ? `${monthlyEquivalent}/mo`
+      : price;
+
+    const handleHeaderPress = useCallback(() => {
+      onSelect();
+      if (!isExpanded) {
+        onToggleExpand();
+      }
+    }, [onSelect, onToggleExpand, isExpanded]);
+
+    const containerStyle: StyleProp<ViewStyle> = [
+      styles.container,
+      {
+        borderColor: isSelected
+          ? tokens.colors.primary
+          : tokens.colors.borderLight,
+        borderWidth: isSelected ? 2 : 1,
+        backgroundColor: tokens.colors.surface,
+      },
+    ];
+
+    return (
+      <View style={containerStyle}>
+        <PlanCardHeader
+          title={title}
+          price={displayPrice}
+          creditAmount={creditAmount}
+          isSelected={isSelected}
+          isExpanded={isExpanded}
+          isBestValue={isBestValue}
+          onToggle={handleHeaderPress}
+        />
+
+        {isExpanded && (
+          <PlanCardDetails
+            fullPrice={price}
+            monthlyEquivalent={monthlyEquivalent}
+            periodLabel={periodLabel}
+            isYearly={isYearly}
+          />
+        )}
+      </View>
+    );
+  }
+);
+
+AccordionPlanCard.displayName = "AccordionPlanCard";
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
+});

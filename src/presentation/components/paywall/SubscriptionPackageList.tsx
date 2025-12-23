@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
-import { SubscriptionPlanCard } from "./SubscriptionPlanCard";
+import { AccordionPlanCard } from "./accordion";
 import { isYearlyPackage, isMonthlyPackage, isWeeklyPackage } from "../../../utils/packagePeriodUtils";
 
 interface SubscriptionPackageListProps {
@@ -33,6 +33,12 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         const tokens = useAppDesignTokens();
         const hasPackages = packages.length > 0;
         const showLoading = isLoading && !hasPackages;
+
+        const [expandedPackageId, setExpandedPackageId] = useState<string | null>(null);
+
+        const handleToggleExpand = useCallback((packageId: string) => {
+            setExpandedPackageId((prev) => (prev === packageId ? null : packageId));
+        }, []);
 
         if (showLoading) {
             return (
@@ -115,13 +121,16 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                     };
 
                     const creditAmount = findCreditAmount();
+                    const packageId = pkg.product.identifier;
 
                     return (
-                        <SubscriptionPlanCard
-                            key={pkg.product.identifier}
+                        <AccordionPlanCard
+                            key={packageId}
                             package={pkg}
-                            isSelected={selectedPkg?.product.identifier === pkg.product.identifier}
+                            isSelected={selectedPkg?.product.identifier === packageId}
+                            isExpanded={expandedPackageId === packageId}
                             onSelect={() => onSelect(pkg)}
+                            onToggleExpand={() => handleToggleExpand(packageId)}
                             isBestValue={isBestValue}
                             creditAmount={creditAmount}
                         />

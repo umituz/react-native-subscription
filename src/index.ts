@@ -71,6 +71,14 @@ export {
 export { SubscriptionModalHeader } from "./presentation/components/paywall/SubscriptionModalHeader";
 
 export { SubscriptionPlanCard } from "./presentation/components/paywall/SubscriptionPlanCard";
+export {
+  AccordionPlanCard,
+  PlanCardHeader,
+  PlanCardDetails,
+  type AccordionPlanCardProps,
+  type PlanCardHeaderProps,
+  type PlanCardDetailsProps,
+} from "./presentation/components/paywall/accordion";
 export { PaywallFeaturesList } from "./presentation/components/paywall/PaywallFeaturesList";
 export { PaywallFeatureItem } from "./presentation/components/paywall/PaywallFeatureItem";
 export { PaywallLegalFooter } from "./presentation/components/paywall/PaywallLegalFooter";

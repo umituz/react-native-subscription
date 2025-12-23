@@ -5,11 +5,10 @@
 
 import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { useAppDesignTokens, BaseModal } from "@umituz/react-native-design-system";
+import { BaseModal } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
 import { SubscriptionModalHeader } from "./SubscriptionModalHeader";
-import { PaywallFeaturesList } from "./PaywallFeaturesList";
 import { SubscriptionPackageList } from "./SubscriptionPackageList";
 import { SubscriptionFooter } from "./SubscriptionFooter";
 import { useSubscriptionModal } from "../../hooks/useSubscriptionModal";
@@ -22,7 +21,6 @@ export interface SubscriptionModalProps {
   onRestore: () => Promise<boolean>;
   title: string;
   subtitle?: string;
-  features?: Array<{ icon: string; text: string }>;
   isLoading?: boolean;
   purchaseButtonText: string;
   restoreButtonText: string;
@@ -49,7 +47,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     onRestore,
     title,
     subtitle,
-    features,
     isLoading = false,
     purchaseButtonText,
     restoreButtonText,
@@ -64,8 +61,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     creditAmounts,
     bestValueIdentifier,
   } = props;
-
-  const tokens = useAppDesignTokens();
 
   const {
     selectedPkg,
@@ -104,20 +99,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
             creditAmounts={creditAmounts}
             bestValueIdentifier={bestValueIdentifier}
           />
-
-          {features && features.length > 0 && (
-            <View
-              style={[
-                styles.featuresSection,
-                {
-                  backgroundColor: tokens.colors.surfaceSecondary,
-                  borderColor: tokens.colors.border
-                }
-              ]}
-            >
-              <PaywallFeaturesList features={features} gap={12} />
-            </View>
-          )}
         </ScrollView>
 
         <SubscriptionFooter
@@ -154,11 +135,5 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 32,
-  },
-  featuresSection: {
-    borderRadius: 24,
-    padding: 24,
-    marginTop: 12,
-    borderWidth: 1,
   },
 });
