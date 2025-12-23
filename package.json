@@ -47,7 +47,7 @@
   "devDependencies": {
     "@tanstack/react-query": "^5.0.0",
     "@types/react": "~19.1.10",
-    "@umituz/react-native-design-system": "^2.1.3",
+    "@umituz/react-native-design-system": "^2.2.0",
     "@umituz/react-native-firebase": "*",
     "@umituz/react-native-legal": "*",
     "@umituz/react-native-localization": "*",
