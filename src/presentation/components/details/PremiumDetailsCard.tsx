@@ -47,12 +47,14 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
 
       {!isPremium && !showCredits && (
         <View style={styles.freeUserHeader}>
-          <Text style={[styles.freeUserTitle, { color: tokens.colors.text }]}>
-            {translations.title}
-          </Text>
-          <Text style={[styles.freeUserDescription, { color: tokens.colors.textSecondary }]}>
-            {translations.upgradeButton ? `${translations.upgradeButton}` : "Unlock premium features"}
-          </Text>
+          <View style={styles.freeUserTextContainer}>
+            <Text style={[styles.freeUserTitle, { color: tokens.colors.text }]}>
+              {translations.title}
+            </Text>
+            <Text style={[styles.freeUserDescription, { color: tokens.colors.textSecondary }]}>
+              Unlock all features and create unlimited magic
+            </Text>
+          </View>
         </View>
       )}
 
@@ -124,11 +126,11 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
         )}
         {!isPremium && onUpgrade && translations.upgradeButton && (
           <TouchableOpacity
-            style={[styles.primaryButton, { backgroundColor: tokens.colors.primary }]}
+            style={[styles.premiumButton, { backgroundColor: tokens.colors.primary }]}
             onPress={onUpgrade}
           >
             <Text
-              style={[styles.primaryButtonText, { color: tokens.colors.onPrimary }]}
+              style={[styles.premiumButtonText, { color: tokens.colors.onPrimary }]}
             >
               {translations.upgradeButton}
             </Text>
@@ -155,15 +157,28 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   freeUserHeader: {
-    gap: 4,
+    marginBottom: 4,
+  },
+  freeUserTextContainer: {
+    gap: 6,
   },
   freeUserTitle: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
   },
   freeUserDescription: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "400",
+    lineHeight: 20,
+  },
+  premiumButton: {
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  premiumButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
   },
   detailsSection: {
     gap: 8,
