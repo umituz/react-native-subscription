@@ -67,7 +67,7 @@ export const usePremiumWithConfig = (
     async (pkg: PurchasesPackage): Promise<boolean> => {
       const success = await purchaseMutation.mutateAsync(pkg);
       if (success && userId) {
-        await initializeCredits();
+        await initializeCredits({ productId: pkg.product.identifier });
       }
       return success;
     },
