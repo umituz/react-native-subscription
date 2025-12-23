@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
 export interface DetailRowProps {
   label: string;
@@ -22,17 +22,18 @@ export const DetailRow: React.FC<DetailRowProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>
+      <AtomicText type="bodyMedium" style={{ color: tokens.colors.textSecondary }}>
         {label}
-      </Text>
-      <Text
-        style={[
-          styles.value,
-          { color: highlight ? tokens.colors.warning : tokens.colors.text },
-        ]}
+      </AtomicText>
+      <AtomicText
+        type="bodyMedium"
+        style={{
+          color: highlight ? tokens.colors.warning : tokens.colors.text,
+          fontWeight: "500",
+        }}
       >
         {value}
-      </Text>
+      </AtomicText>
     </View>
   );
 };
@@ -42,12 +43,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  label: {
-    fontSize: 14,
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: "500",
   },
 });

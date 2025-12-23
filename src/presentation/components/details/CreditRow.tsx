@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
 export interface CreditRowProps {
   label: string;
@@ -27,17 +27,17 @@ export const CreditRow: React.FC<CreditRowProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.label, { color: tokens.colors.text }]}>
+        <AtomicText type="bodySmall" style={{ color: tokens.colors.text }}>
           {label}
-        </Text>
-        <Text
-          style={[
-            styles.count,
-            { color: isLow ? tokens.colors.warning : tokens.colors.textSecondary },
-          ]}
+        </AtomicText>
+        <AtomicText
+          type="bodySmall"
+          style={{
+            color: isLow ? tokens.colors.warning : tokens.colors.textSecondary,
+          }}
         >
           {current} / {total} {remainingLabel}
-        </Text>
+        </AtomicText>
       </View>
       <View
         style={[styles.progressBar, { backgroundColor: tokens.colors.surfaceSecondary }]}
@@ -64,12 +64,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  },
-  label: {
-    fontSize: 13,
-  },
-  count: {
-    fontSize: 12,
   },
   progressBar: {
     height: 6,

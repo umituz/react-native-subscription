@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { SubscriptionStatusType } from "../../../domain/entities/SubscriptionStatus";
 export type { SubscriptionStatusType };
 
@@ -48,9 +48,9 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
 
   return (
     <View style={[styles.badge, { backgroundColor }]}>
-      <Text style={[styles.badgeText, { color: tokens.colors.onPrimary }]}>
+      <AtomicText type="labelSmall" style={[styles.badgeText, { color: tokens.colors.onPrimary }]}>
         {label}
-      </Text>
+      </AtomicText>
     </View>
   );
 };
@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   badgeText: {
-    fontSize: 12,
     fontWeight: "600",
   },
 });
