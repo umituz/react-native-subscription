@@ -31,15 +31,43 @@ export class CustomerInfoListenerManager {
   setupListener(config: RevenueCatConfig): void {
     this.removeListener();
 
+    if (__DEV__) {
+      console.log("[CustomerInfoListener] Setting up listener", {
+        userId: this.currentUserId,
+        entitlementId: this.entitlementIdentifier,
+      });
+    }
+
     addPackageBreadcrumb("subscription", "Setting up customer info listener", {
       userId: this.currentUserId,
     });
 
     this.listener = async (customerInfo: CustomerInfo) => {
-      if (!this.currentUserId) return;
+      if (__DEV__) {
+        console.log("[CustomerInfoListener] 🔔 Listener fired!", {
+          userId: this.currentUserId,
+          hasActiveEntitlements: Object.keys(customerInfo.entitlements.active).length > 0,
+        });
+      }
+
+      if (!this.currentUserId) {
+        if (__DEV__) {
+          console.warn("[CustomerInfoListener] ❌ No userId, skipping");
+        }
+        return;
+      }
 
       const hasPremium =
         !!customerInfo.entitlements.active[this.entitlementIdentifier];
+
+      if (__DEV__) {
+        console.log("[CustomerInfoListener] Customer info updated", {
+          userId: this.currentUserId,
+          hasPremium,
+          entitlementIdentifier: this.entitlementIdentifier,
+          activeEntitlements: Object.keys(customerInfo.entitlements.active),
+        });
+      }
 
       addPackageBreadcrumb("subscription", "Customer info updated", {
         userId: this.currentUserId,
@@ -55,6 +83,15 @@ export class CustomerInfoListenerManager {
         if (premiumEntitlement && premiumEntitlement.expirationDate) {
           const productId = premiumEntitlement.productIdentifier;
           const renewalId = `renewal_${productId}_${premiumEntitlement.expirationDate}`;
+
+          if (__DEV__) {
+            console.log("[CustomerInfoListener] 💰 Processing credit renewal", {
+              userId: this.currentUserId,
+              productId,
+              renewalId,
+              expirationDate: premiumEntitlement.expirationDate,
+            });
+          }
 
           addPackageBreadcrumb(
             "subscription",
@@ -73,6 +110,13 @@ export class CustomerInfoListenerManager {
               renewalId
             );
 
+            if (__DEV__) {
+              console.log("[CustomerInfoListener] ✅ Credit renewal completed", {
+                userId: this.currentUserId,
+                productId,
+              });
+            }
+
             addPackageBreadcrumb(
               "subscription",
               "Credit renewal completed",
@@ -82,6 +126,14 @@ export class CustomerInfoListenerManager {
               }
             );
           } catch (error) {
+            if (__DEV__) {
+              console.error("[CustomerInfoListener] ❌ Credit renewal failed", {
+                userId: this.currentUserId,
+                productId,
+                error: error instanceof Error ? error.message : String(error),
+              });
+            }
+
             addPackageBreadcrumb(
               "subscription",
               "Credit renewal failed",
@@ -92,6 +144,20 @@ export class CustomerInfoListenerManager {
               }
             );
           }
+        } else {
+          if (__DEV__) {
+            console.warn("[CustomerInfoListener] ⚠️ Premium but no entitlement/expiration", {
+              hasPremiumEntitlement: !!premiumEntitlement,
+              hasExpirationDate: !!(premiumEntitlement?.expirationDate),
+            });
+          }
+        }
+      } else {
+        if (__DEV__) {
+          console.log("[CustomerInfoListener] ℹ️ Skipping credit renewal", {
+            hasPremium,
+            hasCallback: !!config.onCreditRenewal,
+          });
         }
       }
 
