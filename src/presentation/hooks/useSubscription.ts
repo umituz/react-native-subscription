@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { getSubscriptionService } from '../../infrastructure/services/SubscriptionService';
 import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
+import { isSubscriptionValid } from '../../domain/entities/SubscriptionStatus';
 
 export interface UseSubscriptionResult {
   /** Current subscription status */
@@ -160,7 +161,7 @@ export function useSubscription(): UseSubscriptionResult {
     }
   }, []);
 
-  const isPremium = status?.isPremium && (status.expiresAt === null || new Date(status.expiresAt).getTime() > Date.now()) || false;
+  const isPremium = isSubscriptionValid(status);
 
   return {
     status,

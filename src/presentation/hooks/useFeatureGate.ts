@@ -66,43 +66,15 @@ export function useFeatureGate(
   });
 
   // User is premium if they have credits
+  // NOTE: This assumes credits system = premium subscription
+  // If your app uses CustomerInfo for premium status, use useCustomerInfo() instead
   const isPremium = credits !== null;
-
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    // eslint-disable-next-line no-console
-    console.log("[useFeatureGate] Hook state", {
-      userId,
-      isAuthenticated,
-      isPremium,
-      hasCredits: credits !== null,
-      isLoading,
-    });
-  }
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>) => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        // eslint-disable-next-line no-console
-        console.log("[useFeatureGate] requireFeature() called", {
-          isAuthenticated,
-          isPremium,
-        });
-      }
-
       // Step 1: Check authentication
       if (!isAuthenticated) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.log("[useFeatureGate] NOT authenticated → showing auth modal");
-        }
-        // After auth, re-check premium before executing
         onShowAuthModal(() => {
-          if (typeof __DEV__ !== "undefined" && __DEV__) {
-            // eslint-disable-next-line no-console
-            console.log(
-              "[useFeatureGate] Auth successful. Component will re-render to check premium status."
-            );
-          }
           // We NO LONGER call action() blindly here.
           // The component will re-render with the new auth state,
           // and the user should be allowed to try the action again.
@@ -113,19 +85,11 @@ export function useFeatureGate(
 
       // Step 2: Check premium (has credits from TanStack Query)
       if (!isPremium) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          // eslint-disable-next-line no-console
-          console.log("[useFeatureGate] NOT premium → showing paywall");
-        }
         onShowPaywall();
         return;
       }
 
       // Step 3: User is authenticated and premium - execute action
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        // eslint-disable-next-line no-console
-        console.log("[useFeatureGate] PREMIUM user → executing action");
-      }
       action();
     },
     [isAuthenticated, isPremium, onShowAuthModal, onShowPaywall]

@@ -57,6 +57,9 @@ export const usePremiumWithConfig = (
   const { showPaywall, setShowPaywall, closePaywall, openPaywall } =
     usePaywallVisibility();
 
+  // User is premium if they have credits
+  // NOTE: This assumes credits system = premium subscription
+  // If your app uses CustomerInfo for premium status, use useCustomerInfo() instead
   const isPremium = credits !== null;
 
   const handlePurchase = useCallback(
