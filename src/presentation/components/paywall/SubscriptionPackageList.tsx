@@ -15,6 +15,8 @@ interface SubscriptionPackageListProps {
     onSelect: (pkg: PurchasesPackage) => void;
     /** Optional: Manually specify which package should show "Best Value" badge by identifier */
     bestValueIdentifier?: string;
+    /** Optional: Map of product identifier to credit amount (e.g., { "weekly": 6, "monthly": 25, "yearly": 300 }) */
+    creditAmounts?: Record<string, number>;
 }
 
 export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = React.memo(
@@ -26,6 +28,7 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         emptyText,
         onSelect,
         bestValueIdentifier,
+        creditAmounts,
     }) => {
         const tokens = useAppDesignTokens();
         const hasPackages = packages.length > 0;
@@ -85,6 +88,9 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                         isBestValue = isYearlyPackage(pkg);
                     }
 
+                    // Get credit amount for this package if provided
+                    const creditAmount = creditAmounts?.[pkg.product.identifier];
+
                     return (
                         <SubscriptionPlanCard
                             key={pkg.product.identifier}
@@ -92,6 +98,7 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                             isSelected={selectedPkg?.product.identifier === pkg.product.identifier}
                             onSelect={() => onSelect(pkg)}
                             isBestValue={isBestValue}
+                            creditAmount={creditAmount}
                         />
                     );
                 })}

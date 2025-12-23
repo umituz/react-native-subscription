@@ -21,10 +21,12 @@ interface SubscriptionPlanCardProps {
   isSelected: boolean;
   onSelect: () => void;
   isBestValue?: boolean;
+  /** Optional: Number of credits/generations included with this package */
+  creditAmount?: number;
 }
 
 export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
-  React.memo(({ package: pkg, isSelected, onSelect, isBestValue = false }) => {
+  React.memo(({ package: pkg, isSelected, onSelect, isBestValue = false, creditAmount }) => {
     const tokens = useAppDesignTokens();
     const { t } = useLocalization();
 
@@ -105,6 +107,25 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
             </View>
 
             <View style={styles.rightSection}>
+              {creditAmount && (
+                <View
+                  style={[
+                    styles.creditBadge,
+                    { backgroundColor: tokens.colors.primary + "15" },
+                  ]}
+                >
+                  <AtomicText
+                    type="labelSmall"
+                    style={{
+                      color: tokens.colors.primary,
+                      fontWeight: "700",
+                      fontSize: 11,
+                    }}
+                  >
+                    {creditAmount} {t("paywall.credits")}
+                  </AtomicText>
+                </View>
+              )}
               <AtomicText
                 type="titleMedium"
                 style={[styles.price, { color: tokens.colors.textPrimary }]}
@@ -163,6 +184,12 @@ const styles = StyleSheet.create({
   title: {
     fontWeight: "600",
     marginBottom: 2,
+  },
+  creditBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 4,
   },
   rightSection: {
     alignItems: "flex-end",
