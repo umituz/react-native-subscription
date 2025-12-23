@@ -19,7 +19,6 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   price,
   creditAmount,
   isSelected,
-  isExpanded,
   isBestValue,
   onToggle,
 }) => {

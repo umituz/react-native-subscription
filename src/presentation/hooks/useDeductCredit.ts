@@ -106,8 +106,13 @@ export interface UseInitializeCreditsParams {
   userId: string | undefined;
 }
 
+export interface InitializeCreditsOptions {
+  purchaseId?: string;
+  productId?: string;
+}
+
 export interface UseInitializeCreditsResult {
-  initializeCredits: (purchaseId?: string) => Promise<boolean>;
+  initializeCredits: (options?: InitializeCreditsOptions) => Promise<boolean>;
   isInitializing: boolean;
 }
 
@@ -118,14 +123,31 @@ export const useInitializeCredits = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: async (purchaseId?: string) => {
+    mutationFn: async (options?: InitializeCreditsOptions) => {
       if (!userId) {
         throw new Error("User not authenticated");
       }
-      return repository.initializeCredits(userId, purchaseId);
+
+      if (__DEV__) {
+        console.log("[useInitializeCredits] Initializing credits:", {
+          userId,
+          purchaseId: options?.purchaseId,
+          productId: options?.productId,
+        });
+      }
+
+      return repository.initializeCredits(
+        userId,
+        options?.purchaseId,
+        options?.productId
+      );
     },
     onSuccess: (result) => {
       if (userId && result.success && result.data) {
+        if (__DEV__) {
+          console.log("[useInitializeCredits] Success, updating cache:", result.data);
+        }
+
         // Set the data immediately for optimistic UI
         queryClient.setQueryData(creditsQueryKeys.user(userId), result.data);
         // Also invalidate to ensure all subscribers get the update
@@ -134,16 +156,24 @@ export const useInitializeCredits = ({
         });
       }
     },
+    onError: (error) => {
+      if (__DEV__) {
+        console.error("[useInitializeCredits] Error:", error);
+      }
+    },
   });
 
-  const initializeCredits = useCallback(async (purchaseId?: string): Promise<boolean> => {
-    try {
-      const result = await mutation.mutateAsync(purchaseId);
-      return result.success;
-    } catch {
-      return false;
-    }
-  }, [mutation]);
+  const initializeCredits = useCallback(
+    async (options?: InitializeCreditsOptions): Promise<boolean> => {
+      try {
+        const result = await mutation.mutateAsync(options);
+        return result.success;
+      } catch {
+        return false;
+      }
+    },
+    [mutation]
+  );
 
   return {
     initializeCredits,

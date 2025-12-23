@@ -21,6 +21,14 @@ export async function initializeCreditsTransaction(
     config: CreditsConfig,
     purchaseId?: string
 ): Promise<InitializationResult> {
+    if (__DEV__) {
+        console.log("[CreditsInitializer] Starting transaction with config:", {
+            textCreditLimit: config.textCreditLimit,
+            imageCreditLimit: config.imageCreditLimit,
+            purchaseId,
+        });
+    }
+
     return runTransaction(db, async (transaction: Transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
         const now = serverTimestamp();
@@ -34,7 +42,21 @@ export async function initializeCreditsTransaction(
             const existing = creditsDoc.data() as UserCreditsDocumentRead;
             processedPurchases = existing.processedPurchases || [];
 
+            if (__DEV__) {
+                console.log("[CreditsInitializer] Existing credits found:", {
+                    textCredits: existing.textCredits,
+                    imageCredits: existing.imageCredits,
+                    processedPurchases,
+                });
+            }
+
             if (purchaseId && processedPurchases.includes(purchaseId)) {
+                if (__DEV__) {
+                    console.warn(
+                        "[CreditsInitializer] Purchase already processed:",
+                        purchaseId
+                    );
+                }
                 return {
                     textCredits: existing.textCredits,
                     imageCredits: existing.imageCredits,
@@ -44,8 +66,31 @@ export async function initializeCreditsTransaction(
 
             newTextCredits = (existing.textCredits || 0) + config.textCreditLimit;
             newImageCredits = (existing.imageCredits || 0) + config.imageCreditLimit;
+
+            if (__DEV__) {
+                console.log("[CreditsInitializer] Adding to existing credits:", {
+                    existingText: existing.textCredits || 0,
+                    existingImage: existing.imageCredits || 0,
+                    adding: {
+                        text: config.textCreditLimit,
+                        image: config.imageCreditLimit,
+                    },
+                    newTotal: {
+                        text: newTextCredits,
+                        image: newImageCredits,
+                    },
+                });
+            }
+
             if (existing.purchasedAt) {
                 purchasedAt = existing.purchasedAt as unknown as FieldValue;
+            }
+        } else {
+            if (__DEV__) {
+                console.log("[CreditsInitializer] Creating new credits document:", {
+                    textCredits: newTextCredits,
+                    imageCredits: newImageCredits,
+                });
             }
         }
 
@@ -61,6 +106,13 @@ export async function initializeCreditsTransaction(
             lastPurchaseAt: now,
             processedPurchases,
         });
+
+        if (__DEV__) {
+            console.log("[CreditsInitializer] Transaction completed successfully:", {
+                textCredits: newTextCredits,
+                imageCredits: newImageCredits,
+            });
+        }
 
         return { textCredits: newTextCredits, imageCredits: newImageCredits };
     });

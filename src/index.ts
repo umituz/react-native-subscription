@@ -227,6 +227,7 @@ export {
   type UseDeductCreditResult,
   type UseInitializeCreditsParams,
   type UseInitializeCreditsResult,
+  type InitializeCreditsOptions,
 } from "./presentation/hooks/useDeductCredit";
 
 export {
@@ -273,6 +274,19 @@ export {
   type AICreditHelpersConfig,
   type AICreditHelpers,
 } from "./utils/aiCreditHelpers";
+
+export {
+  detectPackageType,
+  type SubscriptionPackageType,
+} from "./utils/packageTypeDetector";
+
+export {
+  getCreditAllocation,
+  getImageCreditsForPackage,
+  getTextCreditsForPackage,
+  CREDIT_ALLOCATIONS,
+  type CreditAllocation,
+} from "./utils/creditMapper";
 
 // =============================================================================
 // REVENUECAT - Errors

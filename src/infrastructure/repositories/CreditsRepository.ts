@@ -23,6 +23,8 @@ import type {
 } from "../../domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../services/CreditsInitializer";
+import { detectPackageType } from "../../utils/packageTypeDetector";
+import { getCreditAllocation } from "../../utils/creditMapper";
 
 export class CreditsRepository extends BaseRepository {
   private config: CreditsConfig;
@@ -79,7 +81,8 @@ export class CreditsRepository extends BaseRepository {
 
   async initializeCredits(
     userId: string,
-    purchaseId?: string
+    purchaseId?: string,
+    productId?: string
   ): Promise<CreditsResult> {
     const db = getFirestore();
     if (!db) {
@@ -89,14 +92,62 @@ export class CreditsRepository extends BaseRepository {
       };
     }
 
+    if (__DEV__) {
+      console.log("[CreditsRepository] Initialize credits:", {
+        userId,
+        purchaseId,
+        productId,
+      });
+    }
+
     try {
       const creditsRef = this.getCreditsDocRef(db, userId);
+
+      // Determine credit allocation based on product ID
+      let configToUse = this.config;
+
+      if (productId) {
+        const packageType = detectPackageType(productId);
+        const allocation = getCreditAllocation(packageType);
+
+        if (allocation) {
+          // Override config with tier-specific credit amounts
+          configToUse = {
+            ...this.config,
+            imageCreditLimit: allocation.imageCredits,
+            textCreditLimit: allocation.textCredits,
+          };
+
+          if (__DEV__) {
+            console.log("[CreditsRepository] Using tier-based allocation:", {
+              packageType,
+              imageCredits: allocation.imageCredits,
+              textCredits: allocation.textCredits,
+            });
+          }
+        } else {
+          if (__DEV__) {
+            console.warn(
+              "[CreditsRepository] Could not determine package type, using default config:",
+              this.config
+            );
+          }
+        }
+      }
+
       const result = await initializeCreditsTransaction(
         db,
         creditsRef,
-        this.config,
+        configToUse,
         purchaseId
       );
+
+      if (__DEV__) {
+        console.log("[CreditsRepository] Credits initialized successfully:", {
+          imageCredits: result.imageCredits,
+          textCredits: result.textCredits,
+        });
+      }
 
       return {
         success: true,
@@ -108,6 +159,10 @@ export class CreditsRepository extends BaseRepository {
         },
       };
     } catch (error) {
+      if (__DEV__) {
+        console.error("[CreditsRepository] Failed to initialize credits:", error);
+      }
+
       return {
         success: false,
         error: {
