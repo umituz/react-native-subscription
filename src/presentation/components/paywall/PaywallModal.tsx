@@ -41,6 +41,9 @@ export interface PaywallModalProps {
   purchaseButtonText: string;
   subscribeButtonText: string;
   restoreButtonText: string;
+  loadingText: string;
+  emptyText: string;
+  processingText: string;
   privacyUrl?: string;
   termsUrl?: string;
   privacyText?: string;
@@ -141,12 +144,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
               features={subscriptionFeatures}
               isLoading={isLoading}
               purchaseButtonText={subscribeButtonText}
+              processingText={processingText}
+              restoreButtonText={restoreButtonText}
+              loadingText={loadingText}
+              emptyText={emptyText}
               onRestore={onRestore}
               privacyUrl={privacyUrl}
               termsUrl={termsUrl}
               privacyText={privacyText}
               termsOfServiceText={termsOfServiceText}
-              restoreButtonText={restoreButtonText}
             />
           )}
         </View>
