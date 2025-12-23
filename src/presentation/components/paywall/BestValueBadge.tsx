@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
     top: -12,
     right: 16,
     zIndex: 1,
+    alignSelf: "flex-end",
   },
   badge: {
     paddingHorizontal: 16,

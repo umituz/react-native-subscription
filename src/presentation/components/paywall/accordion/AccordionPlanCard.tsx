@@ -91,7 +91,6 @@ AccordionPlanCard.displayName = "AccordionPlanCard";
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16,
-    overflow: "hidden",
     marginBottom: 12,
   },
 });
