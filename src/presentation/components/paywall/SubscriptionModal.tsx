@@ -49,7 +49,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     onRestore,
     title,
     subtitle,
-    features = [],
+    features,
     isLoading = false,
     purchaseButtonText,
     restoreButtonText,
@@ -121,7 +121,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
             bestValueIdentifier={bestValueIdentifier}
           />
 
-          {features.length > 0 && (
+          {features && features.length > 0 && (
             <View
               style={[
                 styles.featuresSection,
