@@ -38,9 +38,7 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
       : null;
 
     const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
-    const displayPrice = isYearly && monthlyEquivalent
-      ? `${monthlyEquivalent}/mo`
-      : price;
+    const displayPrice = price;
 
     const handleHeaderPress = useCallback(() => {
       onSelect();
