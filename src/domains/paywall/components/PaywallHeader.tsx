@@ -1,6 +1,6 @@
 /**
- * Paywall Hero Header Component
- * Header with gradient background - theme aware
+ * Paywall Header
+ * Header with gradient, close button, title and subtitle
  */
 
 import React from "react";
@@ -13,21 +13,21 @@ import {
     useAppDesignTokens,
 } from "@umituz/react-native-design-system";
 
-interface PaywallHeroHeaderProps {
+interface PaywallHeaderProps {
     title: string;
     subtitle?: string;
     onClose: () => void;
 }
 
-export const PaywallHeroHeader: React.FC<PaywallHeroHeaderProps> = React.memo(
+export const PaywallHeader: React.FC<PaywallHeaderProps> = React.memo(
     ({ title, subtitle, onClose }) => {
         const tokens = useAppDesignTokens();
         const { themeMode } = useDesignSystemTheme();
         const isDark = themeMode === "dark";
 
-        const gradientColors: readonly [string, string, string] = isDark
-            ? [tokens.colors.background, tokens.colors.surfaceSecondary, tokens.colors.surface]
-            : [tokens.colors.primary, tokens.colors.primaryDark, tokens.colors.primary];
+        const gradientColors: readonly [string, string] = isDark
+            ? [tokens.colors.surface, tokens.colors.surfaceSecondary]
+            : [tokens.colors.primary, tokens.colors.primaryDark];
 
         return (
             <LinearGradient
@@ -36,19 +36,9 @@ export const PaywallHeroHeader: React.FC<PaywallHeroHeaderProps> = React.memo(
                 end={{ x: 1, y: 1 }}
                 style={styles.container}
             >
-                <View style={[styles.decorativeCircle, styles.circle1]} />
-                <View style={[styles.decorativeCircle, styles.circle2]} />
-
                 <TouchableOpacity
                     onPress={onClose}
-                    style={[
-                        styles.closeButton,
-                        {
-                            backgroundColor: isDark
-                                ? tokens.colors.surfaceSecondary
-                                : tokens.colors.onPrimary,
-                        },
-                    ]}
+                    style={[styles.closeButton, { backgroundColor: tokens.colors.onPrimary }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                     <AtomicIcon
@@ -81,36 +71,18 @@ export const PaywallHeroHeader: React.FC<PaywallHeroHeaderProps> = React.memo(
     }
 );
 
-PaywallHeroHeader.displayName = "PaywallHeroHeader";
+PaywallHeader.displayName = "PaywallHeader";
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: 60,
-        paddingBottom: 40,
+        paddingTop: 56,
+        paddingBottom: 36,
         paddingHorizontal: 24,
         position: "relative",
-        overflow: "hidden",
-    },
-    decorativeCircle: {
-        position: "absolute",
-        borderRadius: 9999,
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-    },
-    circle1: {
-        width: 200,
-        height: 200,
-        top: -100,
-        right: -50,
-    },
-    circle2: {
-        width: 150,
-        height: 150,
-        bottom: -75,
-        left: -40,
     },
     closeButton: {
         position: "absolute",
-        top: 50,
+        top: 48,
         right: 20,
         width: 36,
         height: 36,
@@ -121,7 +93,6 @@ const styles = StyleSheet.create({
     },
     content: {
         alignItems: "center",
-        zIndex: 1,
     },
     title: {
         fontWeight: "700",
@@ -137,8 +108,8 @@ const styles = StyleSheet.create({
         bottom: -1,
         left: 0,
         right: 0,
-        height: 30,
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
+        height: 24,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
     },
 });

@@ -60,35 +60,28 @@ export {
 } from "./presentation/hooks/useUserTierWithRepository";
 
 // =============================================================================
-// PRESENTATION LAYER - Paywall Components
+// PAYWALL DOMAIN
 // =============================================================================
 
 export {
-  SubscriptionModal,
-  type SubscriptionModalProps,
-} from "./presentation/components/paywall/SubscriptionModal";
-
-export { SubscriptionModalHeader } from "./presentation/components/paywall/SubscriptionModalHeader";
-
-export { SubscriptionPlanCard } from "./presentation/components/paywall/SubscriptionPlanCard";
-export {
-  AccordionPlanCard,
-  PlanCardHeader,
-  PlanCardDetails,
-  type AccordionPlanCardProps,
-  type PlanCardHeaderProps,
-  type PlanCardDetailsProps,
-} from "./presentation/components/paywall/accordion";
-export { PaywallFeaturesList } from "./presentation/components/paywall/PaywallFeaturesList";
-export { PaywallFeatureItem } from "./presentation/components/paywall/PaywallFeatureItem";
-export { PaywallLegalFooter } from "./presentation/components/paywall/PaywallLegalFooter";
-export {
   PaywallModal,
   type PaywallModalProps,
+  PaywallHeader,
+  PaywallTabBar,
+  PaywallFooter,
+  FeatureList,
+  FeatureItem,
+  PlanCard,
+  CreditCard,
+  usePaywall,
+  useSubscriptionModal,
+  type PaywallMode,
+  type PaywallTabType,
+  type CreditsPackage,
+  type SubscriptionFeature,
   type PaywallTranslations,
   type PaywallLegalUrls,
-} from "./presentation/components/paywall/PaywallModal";
-export type { PaywallMode } from "./domain/entities/paywall/PaywallMode";
+} from "./domains/paywall";
 
 // =============================================================================
 // PRESENTATION LAYER - Premium Details Components

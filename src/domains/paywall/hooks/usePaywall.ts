@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
-import type { PaywallTabType } from "../../domain/entities/paywall/PaywallTab";
+import type { PaywallTabType } from "../entities";
 
 interface UsePaywallProps {
     initialTab?: PaywallTabType;

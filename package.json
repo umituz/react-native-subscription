@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-subscription",
-  "version": "2.12.2",
+  "version": "2.12.3",
   "description": "Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -47,7 +47,7 @@
   "devDependencies": {
     "@tanstack/react-query": "^5.0.0",
     "@types/react": "~19.1.10",
-    "@umituz/react-native-design-system": "^2.3.1",
+    "@umituz/react-native-design-system": "*",
     "@umituz/react-native-firebase": "*",
     "@umituz/react-native-legal": "*",
     "@umituz/react-native-localization": "*",
