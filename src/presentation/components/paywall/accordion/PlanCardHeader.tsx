@@ -101,7 +101,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
           </AtomicText>
           <View style={styles.expandIconContainer}>
             <AtomicIcon
-              name={isExpanded ? "chevron-up-outline" : "chevron-down-outline"}
+              name={isExpanded ? "chevron-up" : "chevron-down"}
               size={18}
               color={tokens.colors.textSecondary as any}
             />
