@@ -11,6 +11,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { SubscriptionModalHeader } from "./SubscriptionModalHeader";
 import { SubscriptionPackageList } from "./SubscriptionPackageList";
 import { SubscriptionFooter } from "./SubscriptionFooter";
+import { PaywallFeaturesList } from "./PaywallFeaturesList";
 import { useSubscriptionModal } from "../../hooks/useSubscriptionModal";
 
 export interface SubscriptionModalProps {
@@ -40,6 +41,8 @@ export interface SubscriptionModalProps {
   billingPeriodLabel?: string;
   totalPriceLabel?: string;
   perMonthLabel?: string;
+  /** Optional: List of premium features to display */
+  features?: Array<{ icon: string; text: string }>;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((props) => {
@@ -67,6 +70,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     billingPeriodLabel,
     totalPriceLabel,
     perMonthLabel,
+    features = [],
   } = props;
 
   const {
@@ -96,6 +100,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
           showsVerticalScrollIndicator={false}
           bounces={false}
         >
+          {features.length > 0 && (
+            <PaywallFeaturesList
+              features={features}
+              containerStyle={styles.featuresList}
+            />
+          )}
+
           <SubscriptionPackageList
             packages={packages}
             isLoading={isLoading}
@@ -145,5 +156,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 32,
+  },
+  featuresList: {
+    paddingHorizontal: 24,
+    marginBottom: 24,
   },
 });
