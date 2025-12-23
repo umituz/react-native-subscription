@@ -71,7 +71,7 @@ export const createCreditChecker = (config: CreditCheckerConfig) => {
         return;
       }
       lastError = new Error(result.error?.message || "Deduction failed");
-      await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+      await new Promise<void>((r) => setTimeout(() => r(), 500 * (attempt + 1)));
     }
 
     if (lastError) {
