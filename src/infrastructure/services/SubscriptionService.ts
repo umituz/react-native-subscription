@@ -39,17 +39,11 @@ export class SubscriptionService implements ISubscriptionService {
     try {
       const status = await this.repository.getSubscriptionStatus(userId);
       if (!status) {
-        if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
-          console.log("[Subscription] No status found for user, returning default");
-        }
         return createDefaultSubscriptionStatus();
       }
 
       const isValid = this.repository.isSubscriptionValid(status);
       if (!isValid && status.isPremium) {
-        if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
-          console.log("[Subscription] Expired subscription found, deactivating");
-        }
         return await this.deactivateSubscription(userId);
       }
 
@@ -76,9 +70,6 @@ export class SubscriptionService implements ISubscriptionService {
     productId: string,
     expiresAt: string | null
   ): Promise<SubscriptionStatus> {
-    if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
-      console.log("[Subscription] Activating subscription", { userId, productId, expiresAt });
-    }
     return activateSubscription(
       this.handlerConfig,
       userId,
@@ -88,9 +79,6 @@ export class SubscriptionService implements ISubscriptionService {
   }
 
   async deactivateSubscription(userId: string): Promise<SubscriptionStatus> {
-    if (typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
-      console.log("[Subscription] Deactivating subscription", { userId });
-    }
     return deactivateSubscription(this.handlerConfig, userId);
   }
 
@@ -148,10 +136,6 @@ export function initializeSubscriptionService(
 }
 
 export function getSubscriptionService(): SubscriptionService | null {
-  if (!subscriptionServiceInstance && typeof globalThis !== 'undefined' && (globalThis as any).__DEV__) {
-    // eslint-disable-next-line no-console
-    console.warn("[Subscription] Service not initialized");
-  }
   return subscriptionServiceInstance;
 }
 

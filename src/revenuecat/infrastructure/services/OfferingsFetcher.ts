@@ -22,19 +22,8 @@ export async function fetchOfferings(
     isInitialized: deps.isInitialized(),
   });
 
-  if (__DEV__) {
-    console.log(
-      "[RevenueCat] fetchOfferings() called, isInitialized:",
-      deps.isInitialized()
-    );
-  }
-
   if (!deps.isInitialized()) {
     trackPackageWarning("subscription", "Fetch offerings called before initialization", {});
-
-    if (__DEV__) {
-      console.log("[RevenueCat] fetchOfferings() - NOT initialized");
-    }
     return null;
   }
 
@@ -48,13 +37,6 @@ export async function fetchOfferings(
       packagesCount,
     });
 
-    if (__DEV__) {
-      console.log("[RevenueCat] fetchOfferings() result:", {
-        hasCurrent: !!offerings.current,
-        packagesCount,
-      });
-    }
-
     return offerings.current;
   } catch (error) {
     trackPackageError(
@@ -64,10 +46,6 @@ export async function fetchOfferings(
         operation: "fetch_offerings",
       }
     );
-
-    if (__DEV__) {
-      console.log("[RevenueCat] fetchOfferings() error:", error);
-    }
     return null;
   }
 }

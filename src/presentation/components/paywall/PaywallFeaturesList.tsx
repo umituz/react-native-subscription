@@ -18,9 +18,6 @@ interface PaywallFeaturesListProps {
 
 export const PaywallFeaturesList: React.FC<PaywallFeaturesListProps> = React.memo(
   ({ features, containerStyle, gap = 12 }) => {
-    if (__DEV__) {
-      console.log("[PaywallFeaturesList] Rendering features count:", features.length);
-    }
     return (
       <View style={[styles.container, containerStyle]}>
         {features.map((feature, index) => (

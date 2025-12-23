@@ -21,9 +21,6 @@ export function shouldUseTestStore(config: RevenueCatConfig): boolean {
 
   // CRITICAL: Production builds should NEVER use test store
   if (isProductionBuild() && !isExpoGo()) {
-    if (__DEV__) {
-      console.log("[RevenueCat] Production build detected - using production API keys");
-    }
     return false;
   }
 
@@ -38,17 +35,6 @@ export function shouldUseTestStore(config: RevenueCatConfig): boolean {
 export function resolveApiKey(config: RevenueCatConfig): string | null {
   const useTestStore = shouldUseTestStore(config);
 
-  // Always log in development, log warnings in production for debugging
-  /* eslint-disable-next-line no-console */
-  console.log("[RevenueCat] resolveApiKey:", {
-    platform: Platform.OS,
-    useTestStore,
-    hasTestKey: !!config.testStoreKey,
-    hasIosKey: !!config.iosApiKey,
-    hasAndroidKey: !!config.androidApiKey,
-    isProduction: isProductionBuild(),
-  });
-
   if (useTestStore) {
     return config.testStoreKey ?? null;
   }
@@ -60,8 +46,6 @@ export function resolveApiKey(config: RevenueCatConfig): string | null {
       : config.iosApiKey;
 
   if (!key || key === "" || key.includes("YOUR_")) {
-    /* eslint-disable-next-line no-console */
-    console.warn("[RevenueCat] ⚠️ NO API KEY - packages will not load. Check env vars.");
     return null;
   }
 

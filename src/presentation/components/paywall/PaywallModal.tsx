@@ -95,17 +95,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     onSubscriptionPurchase,
   });
 
-  useEffect(() => {
-    if (__DEV__) {
-      console.log("[PaywallModal] State:", {
-        visible,
-        activeTab,
-        creditsPackagesCount: creditsPackages?.length ?? 0,
-        subscriptionPackagesCount: subscriptionPackages?.length ?? 0,
-      });
-    }
-  }, [visible, activeTab, creditsPackages?.length, subscriptionPackages?.length]);
-
   return (
     <BaseModal visible={visible} onClose={onClose}>
       <View style={styles.container}>

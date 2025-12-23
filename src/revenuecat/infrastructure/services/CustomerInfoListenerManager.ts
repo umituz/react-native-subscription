@@ -47,14 +47,6 @@ export class CustomerInfoListenerManager {
         entitlementIdentifier: this.entitlementIdentifier,
       });
 
-      if (__DEV__) {
-        console.log("[RevenueCat] CustomerInfo updated", {
-          userId: this.currentUserId,
-          hasPremium,
-          entitlementIdentifier: this.entitlementIdentifier,
-        });
-      }
-
       syncPremiumStatus(config, this.currentUserId, customerInfo);
     };
 

@@ -79,16 +79,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     onClose,
   });
 
-  if (__DEV__) {
-    console.log("[SubscriptionModal] State:", {
-      visible,
-      isLoading,
-      packagesCount: packages?.length ?? 0,
-      selectedPkg: selectedPkg?.identifier ?? null,
-      isProcessing,
-    });
-  }
-
   return (
     <BaseModal visible={visible} onClose={onClose}>
       <View style={styles.container}>

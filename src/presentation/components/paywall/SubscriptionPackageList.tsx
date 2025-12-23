@@ -4,7 +4,7 @@ import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { SubscriptionPlanCard } from "./SubscriptionPlanCard";
-import { isYearlyPackage } from "../../../utils/packagePeriodUtils";
+import { isYearlyPackage, isMonthlyPackage, isWeeklyPackage } from "../../../utils/packagePeriodUtils";
 
 interface SubscriptionPackageListProps {
     isLoading: boolean;
@@ -33,19 +33,6 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         const tokens = useAppDesignTokens();
         const hasPackages = packages.length > 0;
         const showLoading = isLoading && !hasPackages;
-
-        // Debug logging in development
-        if (__DEV__) {
-            console.log("[SubscriptionPackageList] State:", {
-                isLoading,
-                hasPackages,
-                showLoading,
-                packagesCount: packages?.length ?? 0,
-                loadingText,
-                emptyText,
-                selectedPkgId: selectedPkg?.identifier ?? null,
-            });
-        }
 
         if (showLoading) {
             return (
@@ -88,11 +75,46 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                         isBestValue = isYearlyPackage(pkg);
                     }
 
-                    // Get credit amount for this package if provided
-                    // check both product identifier (e.g., com.app.weekly) and package identifier (e.g., $rc_weekly)
-                    const creditAmount =
-                        creditAmounts?.[pkg.product.identifier] ??
-                        creditAmounts?.[pkg.identifier];
+                    // Smart matching for credit amounts
+                    const findCreditAmount = () => {
+                        if (!creditAmounts) return undefined;
+
+                        const productId = pkg.product.identifier;
+                        const packageId = pkg.identifier;
+                        const productTitle = pkg.product.title || "";
+
+                        // 1. Exact match
+                        if (creditAmounts[productId] !== undefined) return creditAmounts[productId];
+                        if (creditAmounts[packageId] !== undefined) return creditAmounts[packageId];
+
+                        // 2. Case-insensitive and Title matching
+                        const lowerProductId = productId.toLowerCase();
+                        const lowerPackageId = packageId.toLowerCase();
+                        const lowerTitle = productTitle.toLowerCase();
+
+                        for (const [key, value] of Object.entries(creditAmounts)) {
+                            const lowerKey = key.toLowerCase();
+                            if (lowerProductId === lowerKey || lowerPackageId === lowerKey || lowerTitle.includes(lowerKey)) {
+                                return value;
+                            }
+                        }
+
+                        // 3. Period-based fallback
+                        const isYearly = isYearlyPackage(pkg);
+                        const isMonthly = isMonthlyPackage(pkg);
+                        const isWeekly = isWeeklyPackage(pkg);
+
+                        for (const [key, value] of Object.entries(creditAmounts)) {
+                            const lowerKey = key.toLowerCase();
+                            if (isYearly && (lowerKey.includes("year") || lowerKey.includes("annual") || lowerKey === "yearly")) return value;
+                            if (isMonthly && (lowerKey.includes("month") || lowerKey === "monthly")) return value;
+                            if (isWeekly && (lowerKey.includes("week") || lowerKey === "weekly")) return value;
+                        }
+
+                        return undefined;
+                    };
+
+                    const creditAmount = findCreditAmount();
 
                     return (
                         <SubscriptionPlanCard

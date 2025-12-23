@@ -7,7 +7,7 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import type { PurchasesPackage } from "react-native-purchases";
 import { AtomicText } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens, withAlpha } from "@umituz/react-native-design-system";
 import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
@@ -40,16 +40,10 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
 
     const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
 
-    // Debug: Log product identifier and credit amount
-    if (__DEV__ && creditAmount) {
-      console.log("[SubscriptionPlanCard] Product:", pkg.product.identifier, "Credits:", creditAmount);
-    }
-
-
     const CardComponent = isSelected ? LinearGradient : View;
     const cardProps = isSelected
       ? {
-        colors: [tokens.colors.primary + "20", tokens.colors.surface],
+        colors: [withAlpha(tokens.colors.primary, 0.2), tokens.colors.surface],
         start: { x: 0, y: 0 },
         end: { x: 1, y: 1 },
       }
@@ -117,18 +111,24 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
                 <View
                   style={[
                     styles.creditBadge,
-                    { backgroundColor: tokens.colors.primary + "15" },
+                    {
+                      backgroundColor: withAlpha(tokens.colors.primary, 0.25), // Increased alpha
+                      borderColor: withAlpha(tokens.colors.primary, 0.4),
+                      borderWidth: 1,
+                      flexDirection: "row",
+                      alignItems: "center"
+                    },
                   ]}
                 >
                   <AtomicText
                     type="labelSmall"
                     style={{
                       color: tokens.colors.primary,
-                      fontWeight: "700",
+                      fontWeight: "800",
                       fontSize: 11,
                     }}
                   >
-                    {creditAmount} {t("paywall.credits")}
+                    {creditAmount} {t("paywall.credits") || "Credits"}
                   </AtomicText>
                 </View>
               )}

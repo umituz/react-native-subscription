@@ -36,15 +36,8 @@ export async function initializeSDK(
     isAlreadyConfigured: isPurchasesConfigured,
   });
 
-  if (__DEV__) {
-    console.log("[RevenueCat] initializeSDK() called with userId:", userId, "isPurchasesConfigured:", isPurchasesConfigured);
-  }
-
   // Case 1: Already initialized with the same user ID
   if (deps.isInitialized() && deps.getCurrentUserId() === userId) {
-    if (__DEV__) {
-      console.log("[RevenueCat] Already initialized with same userId, skipping configure");
-    }
 
     try {
       const [customerInfo, offerings] = await Promise.all([
@@ -69,10 +62,6 @@ export async function initializeSDK(
 
   // Case 2: Already configured but different user or re-initializing
   if (isPurchasesConfigured) {
-    if (__DEV__) {
-      console.log("[RevenueCat] SDK already configured, using logIn for userId:", userId);
-    }
-
     try {
       const { customerInfo } = await Purchases.logIn(userId);
 
@@ -85,7 +74,6 @@ export async function initializeSDK(
 
       return { success: true, offering: offerings.current, hasPremium };
     } catch (error) {
-      if (__DEV__) console.warn("[RevenueCat] logIn failed:", error);
       // If logIn fails, we don't necessarily want to re-configure if it's already configured
       // But we can return failure
       return { success: false, offering: null, hasPremium: false };
@@ -105,24 +93,10 @@ export async function initializeSDK(
   }
 
   try {
-    if (deps.isUsingTestStore()) {
-      if (__DEV__) {
-        console.log("[RevenueCat] Using Test Store key");
-      }
-    }
-
-    if (__DEV__) {
-      console.log("[RevenueCat] Calling Purchases.configure()...");
-    }
-
     await Purchases.configure({ apiKey: key, appUserID: userId });
     isPurchasesConfigured = true;
     deps.setInitialized(true);
     deps.setCurrentUserId(userId);
-
-    if (__DEV__) {
-      console.log("[RevenueCat] SDK configured successfully");
-    }
 
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),
@@ -137,14 +111,6 @@ export async function initializeSDK(
       packagesCount,
       allOfferingsCount: Object.keys(offerings.all).length,
     });
-
-    if (__DEV__) {
-      console.log("[RevenueCat] Fetched offerings:", {
-        hasCurrent: !!offerings.current,
-        packagesCount,
-        allOfferingsCount: Object.keys(offerings.all).length,
-      });
-    }
 
     const entitlementId = deps.config.entitlementIdentifier;
     const hasPremium = !!customerInfo.entitlements.active[entitlementId];
@@ -163,9 +129,6 @@ export async function initializeSDK(
       }
     );
 
-    if (__DEV__) {
-      console.log("[RevenueCat] Init failed:", errorMessage);
-    }
     return { success: false, offering: null, hasPremium: false };
   }
 }

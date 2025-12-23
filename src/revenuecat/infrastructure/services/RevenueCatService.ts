@@ -54,12 +54,10 @@ export class RevenueCatService implements IRevenueCatService {
 
   async initialize(userId: string, apiKey?: string): Promise<InitializeResult> {
     if (this.isInitialized() && this.getCurrentUserId() === userId) {
-      if (__DEV__) console.log("[RevenueCat] Already initialized for user:", userId);
       addPackageBreadcrumb("subscription", "Already initialized", { userId });
       return { success: true, offering: (await this.fetchOfferings()), hasPremium: false };
     }
 
-    if (__DEV__) console.log("[RevenueCat] Initializing for user:", userId, "API Key:", apiKey ? "provided" : "from config");
     addPackageBreadcrumb("subscription", "Initialization started", { userId });
 
     try {
@@ -77,12 +75,10 @@ export class RevenueCatService implements IRevenueCatService {
       );
 
       if (result.success) {
-        if (__DEV__) console.log("[RevenueCat] Initialization successful. Offering:", result.offering?.identifier, "Packages:", result.offering?.availablePackages.length);
         this.listenerManager.setUserId(userId);
         this.listenerManager.setupListener(this.stateManager.getConfig());
         addPackageBreadcrumb("subscription", "Initialization successful", { userId });
       } else {
-        if (__DEV__) console.warn("[RevenueCat] Initialization failed for user:", userId);
         trackPackageWarning("subscription", "Initialization failed", {
           userId,
           hasOffering: !!result.offering,
@@ -91,7 +87,6 @@ export class RevenueCatService implements IRevenueCatService {
 
       return result;
     } catch (error) {
-      if (__DEV__) console.error("[RevenueCat] Initialization error:", error);
       trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "initialize",
@@ -136,11 +131,9 @@ export class RevenueCatService implements IRevenueCatService {
 
   async reset(): Promise<void> {
     if (!this.isInitialized()) {
-      if (__DEV__) console.log("[RevenueCat] Reset called but not initialized");
       return;
     }
 
-    if (__DEV__) console.log("[RevenueCat] Resetting for user:", this.getCurrentUserId());
     addPackageBreadcrumb("subscription", "Reset started", {
       userId: this.getCurrentUserId(),
     });
@@ -150,10 +143,8 @@ export class RevenueCatService implements IRevenueCatService {
     try {
       await Purchases.logOut();
       this.stateManager.setInitialized(false);
-      if (__DEV__) console.log("[RevenueCat] Reset successful");
       addPackageBreadcrumb("subscription", "Reset successful", {});
     } catch (error) {
-      if (__DEV__) console.warn("[RevenueCat] Reset failed (non-critical):", error);
       trackPackageWarning("subscription", "Reset failed (non-critical)", {
         error: error instanceof Error ? error.message : String(error),
       });

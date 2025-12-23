@@ -63,12 +63,6 @@ export async function syncPremiumStatus(
         isPremium,
       }
     );
-
-    if (__DEV__) {
-      const message =
-        error instanceof Error ? error.message : "Premium sync failed";
-      console.log("[RevenueCat] Premium status sync failed:", message);
-    }
   }
 }
 
@@ -104,12 +98,6 @@ export async function notifyPurchaseCompleted(
         productId,
       }
     );
-
-    if (__DEV__) {
-      const message =
-        error instanceof Error ? error.message : "Purchase callback failed";
-      console.log("[RevenueCat] Purchase completion callback failed:", message);
-    }
   }
 }
 
@@ -145,11 +133,5 @@ export async function notifyRestoreCompleted(
         isPremium,
       }
     );
-
-    if (__DEV__) {
-      const message =
-        error instanceof Error ? error.message : "Restore callback failed";
-      console.log("[RevenueCat] Restore completion callback failed:", message);
-    }
   }
 }

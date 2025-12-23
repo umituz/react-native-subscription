@@ -46,14 +46,12 @@ export async function handlePurchase(
   pkg: PurchasesPackage,
   userId: string
 ): Promise<PurchaseResult> {
-  if (__DEV__) console.log("[RevenueCat] Purchase started. Product:", pkg.product.identifier, "User:", userId);
   addPackageBreadcrumb("subscription", "Purchase started", {
     productId: pkg.product.identifier,
     userId,
   });
 
   if (!deps.isInitialized()) {
-    if (__DEV__) console.error("[RevenueCat] Purchase failed - Not initialized");
     const error = new RevenueCatInitializationError();
     trackPackageError(error, {
       packageName: "subscription",
@@ -66,14 +64,12 @@ export async function handlePurchase(
 
   const consumableIds = deps.config.consumableProductIdentifiers || [];
   const isConsumable = isConsumableProduct(pkg, consumableIds);
-  if (__DEV__) console.log("[RevenueCat] Product type:", isConsumable ? "consumable" : "subscription");
 
   try {
     const purchaseResult = await Purchases.purchasePackage(pkg);
     const customerInfo = purchaseResult.customerInfo;
 
     if (isConsumable) {
-      if (__DEV__) console.log("[RevenueCat] Consumable purchase successful:", pkg.product.identifier);
       return {
         success: true,
         isPremium: false,
@@ -87,7 +83,6 @@ export async function handlePurchase(
     const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
 
     if (isPremium) {
-      if (__DEV__) console.log("[RevenueCat] Subscription purchase successful. Premium active:", isPremium);
       await syncPremiumStatus(deps.config, userId, customerInfo);
       await notifyPurchaseCompleted(
         deps.config,
@@ -98,7 +93,6 @@ export async function handlePurchase(
       return { success: true, isPremium: true, customerInfo };
     }
 
-    if (__DEV__) console.warn("[RevenueCat] Purchase completed but entitlement not active");
     const entitlementError = new RevenueCatPurchaseError(
       "Purchase completed but premium entitlement not active",
       pkg.product.identifier
@@ -113,14 +107,12 @@ export async function handlePurchase(
     throw entitlementError;
   } catch (error) {
     if (isUserCancelledError(error)) {
-      if (__DEV__) console.log("[RevenueCat] Purchase cancelled by user");
       addPackageBreadcrumb("subscription", "Purchase cancelled by user", {
         productId: pkg.product.identifier,
         userId,
       });
       return { success: false, isPremium: false };
     }
-    if (__DEV__) console.error("[RevenueCat] Purchase error:", error);
     const errorMessage = getErrorMessage(error, "Purchase failed");
     const purchaseError = new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
     trackPackageError(purchaseError, {

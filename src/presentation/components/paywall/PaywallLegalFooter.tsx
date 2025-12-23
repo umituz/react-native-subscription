@@ -39,13 +39,13 @@ export const PaywallLegalFooter: React.FC<PaywallLegalFooterProps> = React.memo(
 
     const handlePrivacyPress = () => {
       if (privacyUrl) {
-        Linking.openURL(privacyUrl).catch(console.error);
+        Linking.openURL(privacyUrl).catch(() => {});
       }
     };
 
     const handleTermsPress = () => {
       if (termsUrl) {
-        Linking.openURL(termsUrl).catch(console.error);
+        Linking.openURL(termsUrl).catch(() => {});
       }
     };
 
