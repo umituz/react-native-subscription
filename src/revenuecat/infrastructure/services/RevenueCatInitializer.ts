@@ -128,7 +128,11 @@ export async function initializeSDK(
       console.log("[RevenueCat] Calling Purchases.configure()...");
     }
 
-    await Purchases.configure({ apiKey: key, appUserID: userId });
+    if (deps.isUsingTestStore()) {
+      await Purchases.configureInAppBrowserMode();
+    } else {
+      await Purchases.configure({ apiKey: key, appUserID: userId });
+    }
     deps.setInitialized(true);
     deps.setCurrentUserId(userId);
 
