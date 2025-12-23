@@ -11,7 +11,6 @@ import { resolveApiKey } from "../utils/ApiKeyResolver";
 import {
   trackPackageError,
   addPackageBreadcrumb,
-  trackPackageWarning,
 } from "@umituz/react-native-sentry";
 
 export interface InitializerDeps {
@@ -23,6 +22,9 @@ export interface InitializerDeps {
   setCurrentUserId: (userId: string) => void;
 }
 
+// Track if Purchases.configure has been called globally
+let isPurchasesConfigured = false;
+
 export async function initializeSDK(
   deps: InitializerDeps,
   userId: string,
@@ -31,71 +33,66 @@ export async function initializeSDK(
   addPackageBreadcrumb("subscription", "SDK initialization started", {
     userId,
     hasApiKey: !!apiKey,
+    isAlreadyConfigured: isPurchasesConfigured,
   });
 
   if (__DEV__) {
-    console.log("[RevenueCat] initializeSDK() called with userId:", userId);
+    console.log("[RevenueCat] initializeSDK() called with userId:", userId, "isPurchasesConfigured:", isPurchasesConfigured);
   }
 
-  // Check if already initialized with same userId - skip re-configuration
-  if (deps.isInitialized()) {
-    const currentUserId = deps.getCurrentUserId();
-    if (currentUserId === userId) {
-      addPackageBreadcrumb("subscription", "Already initialized, fetching current state", {
-        userId,
-      });
+  // Case 1: Already initialized with the same user ID
+  if (deps.isInitialized() && deps.getCurrentUserId() === userId) {
+    if (__DEV__) {
+      console.log("[RevenueCat] Already initialized with same userId, skipping configure");
+    }
 
-      if (__DEV__) {
-        console.log("[RevenueCat] Already initialized with same userId, skipping configure");
-      }
-      // Just fetch current state without re-configuring
-      try {
-        const [customerInfo, offerings] = await Promise.all([
-          Purchases.getCustomerInfo(),
-          Purchases.getOfferings(),
-        ]);
-        const entitlementId = deps.config.entitlementIdentifier;
-        const hasPremium = !!customerInfo.entitlements.active[entitlementId];
-        return { success: true, offering: offerings.current, hasPremium };
-      } catch (error) {
-        trackPackageError(
-          error instanceof Error ? error : new Error(String(error)),
-          {
-            packageName: "subscription",
-            operation: "get_current_state",
-            userId,
-          }
-        );
-
-        if (__DEV__) {
-          console.log("[RevenueCat] Failed to get current state:", error);
+    try {
+      const [customerInfo, offerings] = await Promise.all([
+        Purchases.getCustomerInfo(),
+        Purchases.getOfferings(),
+      ]);
+      const entitlementId = deps.config.entitlementIdentifier;
+      const hasPremium = !!customerInfo.entitlements.active[entitlementId];
+      return { success: true, offering: offerings.current, hasPremium };
+    } catch (error) {
+      trackPackageError(
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          packageName: "subscription",
+          operation: "get_current_state",
+          userId,
         }
-        return { success: false, offering: null, hasPremium: false };
-      }
-    } else {
-      addPackageBreadcrumb("subscription", "User changed, logging out previous user", {
-        previousUserId: currentUserId,
-        newUserId: userId,
-      });
-
-      if (__DEV__) {
-        console.log("[RevenueCat] Different userId, will re-configure");
-      }
-      // Different userId - need to logout first
-      try {
-        await Purchases.logOut();
-      } catch (error) {
-        trackPackageWarning("subscription", "Logout failed during user change", {
-          error: error instanceof Error ? error.message : String(error),
-          previousUserId: currentUserId,
-          newUserId: userId,
-        });
-      }
+      );
+      return { success: false, offering: null, hasPremium: false };
     }
   }
 
+  // Case 2: Already configured but different user or re-initializing
+  if (isPurchasesConfigured) {
+    if (__DEV__) {
+      console.log("[RevenueCat] SDK already configured, using logIn for userId:", userId);
+    }
 
+    try {
+      const { customerInfo } = await Purchases.logIn(userId);
 
+      deps.setInitialized(true);
+      deps.setCurrentUserId(userId);
+
+      const offerings = await Purchases.getOfferings();
+      const entitlementId = deps.config.entitlementIdentifier;
+      const hasPremium = !!customerInfo.entitlements.active[entitlementId];
+
+      return { success: true, offering: offerings.current, hasPremium };
+    } catch (error) {
+      if (__DEV__) console.warn("[RevenueCat] logIn failed:", error);
+      // If logIn fails, we don't necessarily want to re-configure if it's already configured
+      // But we can return failure
+      return { success: false, offering: null, hasPremium: false };
+    }
+  }
+
+  // Case 3: First time configuration
   const key = apiKey || resolveApiKey(deps.config);
   if (!key) {
     const error = new Error("No RevenueCat API key available");
@@ -104,37 +101,24 @@ export async function initializeSDK(
       operation: "sdk_init_no_key",
       userId,
     });
-
-    if (__DEV__) {
-      console.log("[RevenueCat] No API key available");
-    }
     return { success: false, offering: null, hasPremium: false };
   }
 
   try {
     if (deps.isUsingTestStore()) {
-      addPackageBreadcrumb("subscription", "Using test store configuration", {
-        userId,
-      });
-
       if (__DEV__) {
         console.log("[RevenueCat] Using Test Store key");
       }
     }
-
-    addPackageBreadcrumb("subscription", "Configuring SDK", { userId });
 
     if (__DEV__) {
       console.log("[RevenueCat] Calling Purchases.configure()...");
     }
 
     await Purchases.configure({ apiKey: key, appUserID: userId });
+    isPurchasesConfigured = true;
     deps.setInitialized(true);
     deps.setCurrentUserId(userId);
-
-    addPackageBreadcrumb("subscription", "SDK configured successfully", {
-      userId,
-    });
 
     if (__DEV__) {
       console.log("[RevenueCat] SDK configured successfully");

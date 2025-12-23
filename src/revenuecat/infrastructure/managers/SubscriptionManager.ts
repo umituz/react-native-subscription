@@ -91,10 +91,6 @@ class SubscriptionManagerImpl {
       if (existingPromise) return existingPromise;
     }
 
-    if (this.initCache.shouldReinitialize(effectiveUserId) && this.serviceInstance) {
-      await this.serviceInstance.reset();
-    }
-
     const promise = this.performInitialization(effectiveUserId);
     this.initCache.setPromise(promise, effectiveUserId);
 
@@ -107,7 +103,7 @@ class SubscriptionManagerImpl {
 
   isInitializedForUser(userId: string): boolean {
     return this.serviceInstance?.isInitialized() === true &&
-           this.initCache.getCurrentUserId() === userId;
+      this.initCache.getCurrentUserId() === userId;
   }
 
   async getPackages(): Promise<PurchasesPackage[]> {
