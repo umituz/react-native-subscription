@@ -40,6 +40,12 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
 
     const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
 
+    // Debug: Log product identifier and credit amount
+    if (__DEV__ && creditAmount) {
+      console.log("[SubscriptionPlanCard] Product:", pkg.product.identifier, "Credits:", creditAmount);
+    }
+
+
     const CardComponent = isSelected ? LinearGradient : View;
     const cardProps = isSelected
       ? {
