@@ -9,7 +9,6 @@ import {
   AtomicText,
   useAppDesignTokens,
 } from "@umituz/react-native-design-system";
-import { useLocalization } from "@umituz/react-native-localization";
 import type { PlanCardDetailsProps } from "./AccordionPlanCardTypes";
 
 export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
@@ -17,9 +16,11 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
   monthlyEquivalent,
   periodLabel,
   isYearly,
+  billingPeriodLabel = "Billing Period",
+  totalPriceLabel = "Total Price",
+  perMonthLabel = "Per Month",
 }) => {
   const tokens = useAppDesignTokens();
-  const { t } = useLocalization();
 
   return (
     <View
@@ -36,13 +37,13 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
           type="bodyMedium"
           style={{ color: tokens.colors.textSecondary }}
         >
-          {t("paywall.billingPeriod") || "Billing Period"}
+          {billingPeriodLabel}
         </AtomicText>
         <AtomicText
           type="bodyMedium"
           style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}
         >
-          {t(`paywall.period.${periodLabel}`)}
+          {periodLabel}
         </AtomicText>
       </View>
 
@@ -52,7 +53,7 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
             type="bodyMedium"
             style={{ color: tokens.colors.textSecondary }}
           >
-            {t("paywall.totalPrice") || "Total Price"}
+            {totalPriceLabel}
           </AtomicText>
           <AtomicText
             type="bodyMedium"
@@ -69,7 +70,7 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
             type="bodyMedium"
             style={{ color: tokens.colors.textSecondary }}
           >
-            {t("paywall.perMonth") || "Per Month"}
+            {perMonthLabel}
           </AtomicText>
           <AtomicText
             type="bodyMedium"

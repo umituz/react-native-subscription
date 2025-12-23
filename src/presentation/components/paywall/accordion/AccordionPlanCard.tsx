@@ -22,6 +22,9 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
     onToggleExpand,
     isBestValue = false,
     creditAmount,
+    billingPeriodLabel,
+    totalPriceLabel,
+    perMonthLabel,
   }) => {
     const tokens = useAppDesignTokens();
     const { t } = useLocalization();
@@ -75,6 +78,9 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
             monthlyEquivalent={monthlyEquivalent}
             periodLabel={periodLabel}
             isYearly={isYearly}
+            billingPeriodLabel={billingPeriodLabel}
+            totalPriceLabel={totalPriceLabel}
+            perMonthLabel={perMonthLabel}
           />
         )}
       </View>

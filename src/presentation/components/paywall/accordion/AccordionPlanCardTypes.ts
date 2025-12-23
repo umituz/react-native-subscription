@@ -13,6 +13,9 @@ export interface AccordionPlanCardProps {
   onToggleExpand: () => void;
   isBestValue?: boolean;
   creditAmount?: number;
+  billingPeriodLabel?: string;
+  totalPriceLabel?: string;
+  perMonthLabel?: string;
 }
 
 export interface PlanCardHeaderProps {
@@ -30,4 +33,7 @@ export interface PlanCardDetailsProps {
   monthlyEquivalent: string | null;
   periodLabel: string;
   isYearly: boolean;
+  billingPeriodLabel?: string;
+  totalPriceLabel?: string;
+  perMonthLabel?: string;
 }

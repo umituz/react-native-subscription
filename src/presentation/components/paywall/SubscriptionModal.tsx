@@ -36,6 +36,10 @@ export interface SubscriptionModalProps {
   creditAmounts?: Record<string, number>;
   /** Optional: Manually specify which package should show "Best Value" badge */
   bestValueIdentifier?: string;
+  /** Optional: Text labels for accordion details */
+  billingPeriodLabel?: string;
+  totalPriceLabel?: string;
+  perMonthLabel?: string;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((props) => {
@@ -60,6 +64,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     showRestoreButton = true,
     creditAmounts,
     bestValueIdentifier,
+    billingPeriodLabel,
+    totalPriceLabel,
+    perMonthLabel,
   } = props;
 
   const {
@@ -98,6 +105,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
             emptyText={emptyText}
             creditAmounts={creditAmounts}
             bestValueIdentifier={bestValueIdentifier}
+            billingPeriodLabel={billingPeriodLabel}
+            totalPriceLabel={totalPriceLabel}
+            perMonthLabel={perMonthLabel}
           />
         </ScrollView>
 

@@ -17,6 +17,10 @@ interface SubscriptionPackageListProps {
     bestValueIdentifier?: string;
     /** Optional: Map of product identifier to credit amount (e.g., { "weekly": 6, "monthly": 25, "yearly": 300 }) */
     creditAmounts?: Record<string, number>;
+    /** Optional: Text labels for accordion details */
+    billingPeriodLabel?: string;
+    totalPriceLabel?: string;
+    perMonthLabel?: string;
 }
 
 export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = React.memo(
@@ -29,6 +33,9 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
         onSelect,
         bestValueIdentifier,
         creditAmounts,
+        billingPeriodLabel,
+        totalPriceLabel,
+        perMonthLabel,
     }) => {
         const tokens = useAppDesignTokens();
         const hasPackages = packages.length > 0;
@@ -133,6 +140,9 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                             onToggleExpand={() => handleToggleExpand(packageId)}
                             isBestValue={isBestValue}
                             creditAmount={creditAmount}
+                            billingPeriodLabel={billingPeriodLabel}
+                            totalPriceLabel={totalPriceLabel}
+                            perMonthLabel={perMonthLabel}
                         />
                     );
                 })}

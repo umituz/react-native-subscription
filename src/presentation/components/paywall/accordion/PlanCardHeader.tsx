@@ -95,16 +95,17 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
             style={{
               color: tokens.colors.textPrimary,
               fontWeight: "700",
-              marginRight: 8,
             }}
           >
             {price}
           </AtomicText>
-          <AtomicIcon
-            name={isExpanded ? "ChevronUp" : "ChevronDown"}
-            size={20}
-            color={tokens.colors.textSecondary as any}
-          />
+          <View style={styles.expandIconContainer}>
+            <AtomicIcon
+              name={isExpanded ? "ChevronUp" : "ChevronDown"}
+              size={18}
+              color={tokens.colors.textSecondary as any}
+            />
+          </View>
         </View>
       </View>
     </TouchableOpacity>
@@ -155,5 +156,12 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 12,
+  },
+  expandIconContainer: {
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
