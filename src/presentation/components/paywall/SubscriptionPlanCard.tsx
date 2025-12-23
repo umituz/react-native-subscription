@@ -12,6 +12,9 @@ import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
 
+// @ts-ignore
+import { LinearGradient } from "expo-linear-gradient";
+
 interface SubscriptionPlanCardProps {
   package: PurchasesPackage;
   isSelected: boolean;
@@ -47,6 +50,15 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
 
     const title = pkg.product.title || t(`paywall.period.${periodLabel}`);
 
+    const CardComponent = isSelected ? LinearGradient : View;
+    const cardProps = isSelected
+      ? {
+        colors: [tokens.colors.primary + "20", tokens.colors.surface],
+        start: { x: 0, y: 0 },
+        end: { x: 1, y: 1 },
+      }
+      : {};
+
     return (
       <TouchableOpacity
         onPress={onSelect}
@@ -54,82 +66,84 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
         style={[
           styles.container,
           {
-            backgroundColor: isSelected
-              ? tokens.colors.primaryLight
-              : tokens.colors.surface,
             borderColor: isSelected
               ? tokens.colors.primary
-              : tokens.colors.border,
+              : tokens.colors.borderLight,
             borderWidth: isSelected ? 2 : 1,
+            backgroundColor: isSelected ? undefined : tokens.colors.surface,
           },
         ]}
       >
-        <BestValueBadge
-          text={t("paywall.bestValue")}
-          visible={isBestValue}
-        />
+        <CardComponent {...(cardProps as any)} style={styles.gradientWrapper}>
+          <BestValueBadge text={t("paywall.bestValue")} visible={isBestValue} />
 
-        <View style={styles.content}>
-          <View style={styles.leftSection}>
-            <View
-              style={[
-                styles.radio,
-                {
-                  borderColor: isSelected
-                    ? tokens.colors.primary
-                    : tokens.colors.border,
-                },
-              ]}
-            >
-              {isSelected && (
-                <View
-                  style={[
-                    styles.radioInner,
-                    { backgroundColor: tokens.colors.primary },
-                  ]}
-                />
-              )}
+          <View style={styles.content}>
+            <View style={styles.leftSection}>
+              <View
+                style={[
+                  styles.radio,
+                  {
+                    borderColor: isSelected
+                      ? tokens.colors.primary
+                      : tokens.colors.border,
+                  },
+                ]}
+              >
+                {isSelected && (
+                  <View
+                    style={[
+                      styles.radioInner,
+                      { backgroundColor: tokens.colors.primary },
+                    ]}
+                  />
+                )}
+              </View>
+              <View style={styles.textContainer}>
+                <AtomicText
+                  type="titleSmall"
+                  style={[styles.title, { color: tokens.colors.textPrimary }]}
+                >
+                  {title}
+                </AtomicText>
+                {isYearly && (
+                  <AtomicText
+                    type="bodySmall"
+                    style={{ color: tokens.colors.textSecondary, fontSize: 11 }}
+                  >
+                    {price}
+                  </AtomicText>
+                )}
+              </View>
             </View>
-            <View style={styles.textContainer}>
+
+            <View style={styles.rightSection}>
               <AtomicText
                 type="titleMedium"
-                style={[styles.title, { color: tokens.colors.textPrimary }]}
+                style={[styles.price, { color: tokens.colors.textPrimary }]}
               >
-                {title}
+                {isYearly && monthlyEquivalent
+                  ? `${monthlyEquivalent}/mo`
+                  : price}
               </AtomicText>
-              {isYearly && (
-                <AtomicText
-                  type="bodySmall"
-                  style={{ color: tokens.colors.textSecondary }}
-                >
-                  {price}
-                </AtomicText>
-              )}
             </View>
           </View>
-
-          <View style={styles.rightSection}>
-            <AtomicText
-              type="titleMedium"
-              style={[styles.price, { color: tokens.colors.textPrimary }]}
-            >
-              {isYearly && monthlyEquivalent
-                ? `${monthlyEquivalent}/mo`
-                : price}
-            </AtomicText>
-          </View>
-        </View>
+        </CardComponent>
       </TouchableOpacity>
     );
   });
+
 
 SubscriptionPlanCard.displayName = "SubscriptionPlanCard";
 
 const styles = StyleSheet.create({
   container: {
     borderRadius: 16,
-    padding: 18,
     position: "relative",
+    overflow: "hidden", // Important for gradient borders/corners
+  },
+  gradientWrapper: {
+    flex: 1,
+    padding: 18,
   },
   content: {
     flexDirection: "row",

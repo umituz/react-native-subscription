@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { AtomicButton, AtomicText } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import { PaywallLegalFooter } from "./PaywallLegalFooter";
 
@@ -21,6 +21,9 @@ interface SubscriptionFooterProps {
     onRestore: () => void;
 }
 
+// @ts-ignore
+import { LinearGradient } from "expo-linear-gradient";
+
 export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
     ({
         isProcessing,
@@ -40,25 +43,38 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
     }) => {
         const tokens = useAppDesignTokens();
 
+        const isDisabled = !selectedPkg || isProcessing || isLoading;
+
         return (
             <View style={styles.container}>
                 <View style={styles.actions}>
                     {hasPackages && (
-                        <AtomicButton
-                            title={isProcessing ? processingText : purchaseButtonText}
-                            onPress={onPurchase}
-                            disabled={!selectedPkg || isProcessing || isLoading}
-                        />
-                    )}
-                    {showRestoreButton && (
                         <TouchableOpacity
-                            style={styles.restoreButton}
-                            onPress={onRestore}
-                            disabled={isProcessing || isLoading}
+                            onPress={onPurchase}
+                            disabled={isDisabled}
+                            activeOpacity={0.8}
                         >
-                            <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
-                                {restoreButtonText}
-                            </AtomicText>
+                            <LinearGradient
+                                colors={
+                                    isDisabled
+                                        ? [tokens.colors.border, tokens.colors.borderLight]
+                                        : [tokens.colors.primary, tokens.colors.secondary]
+                                }
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 0 }}
+                                style={[styles.gradientButton, isDisabled && { opacity: 0.6 }]}
+                            >
+                                <AtomicText
+                                    type="titleSmall"
+                                    style={{
+                                        color: tokens.colors.onPrimary,
+                                        fontWeight: "800",
+                                        fontSize: 16,
+                                    }}
+                                >
+                                    {isProcessing ? processingText : purchaseButtonText}
+                                </AtomicText>
+                            </LinearGradient>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -68,6 +84,10 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
                     termsUrl={termsUrl}
                     privacyText={privacyText}
                     termsOfServiceText={termsOfServiceText}
+                    showRestoreButton={showRestoreButton}
+                    restoreButtonText={restoreButtonText}
+                    onRestore={onRestore}
+                    isProcessing={isProcessing || isLoading}
                 />
             </View>
         );
@@ -81,10 +101,21 @@ const styles = StyleSheet.create({
     actions: {
         paddingHorizontal: 24,
         paddingVertical: 16,
-        gap: 12
+        gap: 12,
+    },
+    gradientButton: {
+        paddingVertical: 16,
+        borderRadius: 16,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+        elevation: 4,
     },
     restoreButton: {
         alignItems: "center",
-        paddingVertical: 8
+        paddingVertical: 8,
     },
 });

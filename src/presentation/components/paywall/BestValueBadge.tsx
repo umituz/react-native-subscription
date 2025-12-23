@@ -1,11 +1,8 @@
-/**
- * Best Value Badge Component
- * Single Responsibility: Display a "Best Value" badge for subscription packages
- */
-
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+// @ts-ignore
+import { LinearGradient } from "expo-linear-gradient";
 
 interface BestValueBadgeProps {
   text: string;
@@ -19,16 +16,19 @@ export const BestValueBadge: React.FC<BestValueBadgeProps> = React.memo(
     if (!visible) return null;
 
     return (
-      <View
-        style={[styles.badge, { backgroundColor: tokens.colors.primary }]}
+      <LinearGradient
+        colors={[tokens.colors.secondary, tokens.colors.primary]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.badge}
       >
         <AtomicText
           type="labelSmall"
-          style={{ color: tokens.colors.onPrimary, fontWeight: "700" }}
+          style={{ color: tokens.colors.onPrimary, fontWeight: "800", textTransform: "uppercase", fontSize: 10 }}
         >
           {text}
         </AtomicText>
-      </View>
+      </LinearGradient>
     );
   }
 );

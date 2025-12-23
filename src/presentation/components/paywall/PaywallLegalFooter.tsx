@@ -14,6 +14,10 @@ interface PaywallLegalFooterProps {
   termsUrl?: string;
   privacyText?: string;
   termsOfServiceText?: string;
+  showRestoreButton?: boolean;
+  restoreButtonText?: string;
+  onRestore?: () => void;
+  isProcessing?: boolean;
 }
 
 const DEFAULT_TERMS =
@@ -26,17 +30,12 @@ export const PaywallLegalFooter: React.FC<PaywallLegalFooterProps> = React.memo(
     termsUrl,
     privacyText = "Privacy Policy",
     termsOfServiceText = "Terms of Service",
+    showRestoreButton = false,
+    restoreButtonText = "Restore Purchases",
+    onRestore,
+    isProcessing = false,
   }) => {
     const tokens = useAppDesignTokens();
-
-    if (__DEV__) {
-      console.log("[PaywallLegalFooter] Rendering links:", {
-        privacy: !!privacyUrl,
-        terms: !!termsUrl,
-        pText: privacyText,
-        tText: termsOfServiceText
-      });
-    }
 
     const handlePrivacyPress = () => {
       if (privacyUrl) {
@@ -50,7 +49,7 @@ export const PaywallLegalFooter: React.FC<PaywallLegalFooterProps> = React.memo(
       }
     };
 
-    const hasLinks = privacyUrl || termsUrl;
+    const hasLinks = privacyUrl || termsUrl || showRestoreButton;
 
     return (
       <View style={styles.container}>
@@ -63,24 +62,69 @@ export const PaywallLegalFooter: React.FC<PaywallLegalFooterProps> = React.memo(
 
         {hasLinks && (
           <View style={styles.legalLinksWrapper}>
-            <View style={[styles.legalLinksContainer, { borderColor: tokens.colors.border }]}>
-              {privacyUrl && (
-                <TouchableOpacity
-                  onPress={handlePrivacyPress}
-                  activeOpacity={0.6}
-                  style={styles.linkItem}
-                >
-                  <AtomicText
-                    type="labelSmall"
-                    style={[styles.linkText, { color: tokens.colors.textSecondary }]}
+            <View
+              style={[
+                styles.legalLinksContainer,
+                { borderColor: tokens.colors.border },
+              ]}
+            >
+              {showRestoreButton && (
+                <>
+                  <TouchableOpacity
+                    onPress={onRestore}
+                    activeOpacity={0.6}
+                    style={styles.linkItem}
+                    disabled={isProcessing}
                   >
-                    {privacyText}
-                  </AtomicText>
-                </TouchableOpacity>
+                    <AtomicText
+                      type="labelSmall"
+                      style={[
+                        styles.linkText,
+                        {
+                          color: tokens.colors.textSecondary,
+                        },
+                      ]}
+                    >
+                      {restoreButtonText}
+                    </AtomicText>
+                  </TouchableOpacity>
+                  {(privacyUrl || termsUrl) && (
+                    <View
+                      style={[
+                        styles.dot,
+                        { backgroundColor: tokens.colors.border },
+                      ]}
+                    />
+                  )}
+                </>
               )}
 
-              {privacyUrl && termsUrl && (
-                <View style={[styles.dot, { backgroundColor: tokens.colors.border }]} />
+              {privacyUrl && (
+                <>
+                  <TouchableOpacity
+                    onPress={handlePrivacyPress}
+                    activeOpacity={0.6}
+                    style={styles.linkItem}
+                  >
+                    <AtomicText
+                      type="labelSmall"
+                      style={[
+                        styles.linkText,
+                        { color: tokens.colors.textSecondary },
+                      ]}
+                    >
+                      {privacyText}
+                    </AtomicText>
+                  </TouchableOpacity>
+                  {termsUrl && (
+                    <View
+                      style={[
+                        styles.dot,
+                        { backgroundColor: tokens.colors.border },
+                      ]}
+                    />
+                  )}
+                </>
               )}
 
               {termsUrl && (
@@ -91,7 +135,10 @@ export const PaywallLegalFooter: React.FC<PaywallLegalFooterProps> = React.memo(
                 >
                   <AtomicText
                     type="labelSmall"
-                    style={[styles.linkText, { color: tokens.colors.textSecondary }]}
+                    style={[
+                      styles.linkText,
+                      { color: tokens.colors.textSecondary },
+                    ]}
                   >
                     {termsOfServiceText}
                   </AtomicText>
