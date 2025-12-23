@@ -239,6 +239,22 @@ export {
   type UseCreditCheckerResult,
 } from "./presentation/hooks/useCreditChecker";
 
+export {
+  usePaywallVisibility,
+  type UsePaywallVisibilityResult,
+} from "./presentation/hooks/usePaywallVisibility";
+
+export {
+  usePremiumWithConfig,
+  type UsePremiumWithConfigParams,
+  type UsePremiumWithConfigResult,
+} from "./presentation/hooks/usePremiumWithConfig";
+
+export {
+  useAuthSubscriptionSync,
+  type AuthSubscriptionSyncConfig,
+} from "./presentation/hooks/useAuthSubscriptionSync";
+
 // =============================================================================
 // CREDITS SYSTEM - Utilities
 // =============================================================================
