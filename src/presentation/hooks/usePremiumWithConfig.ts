@@ -7,6 +7,7 @@
 
 import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
+import type { UserCredits } from "../../domain/entities/Credits";
 import { useCredits } from "./useCredits";
 import { useInitializeCredits } from "./useDeductCredit";
 import {
@@ -27,7 +28,7 @@ export interface UsePremiumWithConfigResult {
   isPremium: boolean;
   isLoading: boolean;
   packages: PurchasesPackage[];
-  credits: any; // UserCredits from subscription package
+  credits: UserCredits | null;
   showPaywall: boolean;
   purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
   restorePurchase: () => Promise<boolean>;

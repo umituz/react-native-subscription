@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
-// @ts-ignore
 import { LinearGradient } from "expo-linear-gradient";
 
 interface BestValueBadgeProps {

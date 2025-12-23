@@ -1,5 +1,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
+import type { PurchasesPackage } from "react-native-purchases";
 import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import { PaywallLegalFooter } from "./PaywallLegalFooter";
@@ -10,7 +11,7 @@ interface SubscriptionFooterProps {
     processingText: string;
     purchaseButtonText: string;
     hasPackages: boolean;
-    selectedPkg: any; // Using any to avoid circular deps if needed, but preferably strict
+    selectedPkg: PurchasesPackage | null;
     restoreButtonText: string;
     showRestoreButton: boolean;
     privacyUrl?: string;
@@ -21,7 +22,6 @@ interface SubscriptionFooterProps {
     onRestore: () => void;
 }
 
-// @ts-ignore
 import { LinearGradient } from "expo-linear-gradient";
 
 export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(

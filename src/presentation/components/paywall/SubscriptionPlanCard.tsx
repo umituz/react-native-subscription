@@ -13,7 +13,6 @@ import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
 
 import { getPeriodLabel, isYearlyPackage } from "../../../utils/packagePeriodUtils";
-// @ts-ignore
 import { LinearGradient } from "expo-linear-gradient";
 
 interface SubscriptionPlanCardProps {

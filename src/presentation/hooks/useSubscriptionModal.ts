@@ -23,7 +23,7 @@ export const useSubscriptionModal = ({
         } finally {
             setIsProcessing(false);
         }
-    }, [selectedPkg, isProcessing, onPurchase, onClose]);
+    }, [selectedPkg, onPurchase, onClose]);
 
     const handleRestore = useCallback(async () => {
         if (isProcessing) return;
@@ -33,7 +33,7 @@ export const useSubscriptionModal = ({
         } finally {
             setIsProcessing(false);
         }
-    }, [isProcessing, onRestore, onClose]);
+    }, [onRestore, onClose]);
 
     return {
         selectedPkg,

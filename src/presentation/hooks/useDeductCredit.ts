@@ -5,6 +5,7 @@
  * Generic and reusable - uses module-level repository.
  */
 
+import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreditType, UserCredits } from "../../domain/entities/Credits";
 import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
@@ -78,7 +79,7 @@ export const useDeductCredit = ({
     },
   });
 
-  const deductCredit = async (creditType: CreditType): Promise<boolean> => {
+  const deductCredit = useCallback(async (creditType: CreditType): Promise<boolean> => {
     try {
       const result = await mutation.mutateAsync(creditType);
 
@@ -93,7 +94,7 @@ export const useDeductCredit = ({
     } catch {
       return false;
     }
-  };
+  }, [mutation, onCreditsExhausted]);
 
   return {
     deductCredit,
@@ -135,14 +136,14 @@ export const useInitializeCredits = ({
     },
   });
 
-  const initializeCredits = async (purchaseId?: string): Promise<boolean> => {
+  const initializeCredits = useCallback(async (purchaseId?: string): Promise<boolean> => {
     try {
       const result = await mutation.mutateAsync(purchaseId);
       return result.success;
     } catch {
       return false;
     }
-  };
+  }, [mutation]);
 
   return {
     initializeCredits,
