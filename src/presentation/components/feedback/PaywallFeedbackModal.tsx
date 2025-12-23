@@ -11,7 +11,6 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     KeyboardAvoidingView,
-    Platform,
 } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
@@ -79,7 +78,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
             <TouchableWithoutFeedback onPress={handleSkip}>
                 <View style={styles.overlay}>
                     <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        behavior="padding"
                         style={styles.keyboardView}
                     >
                         <TouchableWithoutFeedback>

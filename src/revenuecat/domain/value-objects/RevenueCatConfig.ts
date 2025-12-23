@@ -6,10 +6,8 @@
 import type { CustomerInfo } from "react-native-purchases";
 
 export interface RevenueCatConfig {
-  /** iOS API key */
-  iosApiKey?: string;
-  /** Android API key */
-  androidApiKey?: string;
+  /** Primary API key - resolved by main app based on platform */
+  apiKey?: string;
   /** Test Store key for development/Expo Go testing */
   testStoreKey?: string;
   /** Entitlement identifier to check for premium status (REQUIRED - app specific) */
@@ -44,7 +42,6 @@ export interface RevenueCatConfig {
 }
 
 export interface RevenueCatConfigRequired {
-  iosApiKey: string;
-  androidApiKey: string;
+  apiKey: string;
 }
 

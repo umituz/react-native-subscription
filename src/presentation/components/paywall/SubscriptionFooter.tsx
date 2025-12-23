@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         alignItems: "center",
         justifyContent: "center",
-        elevation: 4,
     },
     restoreButton: {
         alignItems: "center",

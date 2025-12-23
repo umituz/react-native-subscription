@@ -1,9 +1,9 @@
 /**
  * API Key Resolver
  * Resolves RevenueCat API key from configuration
+ * NOTE: Main app is responsible for resolving platform-specific keys
  */
 
-import { Platform } from "react-native";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { isExpoGo, isProductionBuild } from "./ExpoGoDetector";
 
@@ -14,23 +14,21 @@ import { isExpoGo, isProductionBuild } from "./ExpoGoDetector";
 export function shouldUseTestStore(config: RevenueCatConfig): boolean {
   const testKey = config.testStoreKey;
 
-  // No test key configured - always use production keys
   if (!testKey) {
     return false;
   }
 
-  // CRITICAL: Production builds should NEVER use test store
   if (isProductionBuild() && !isExpoGo()) {
     return false;
   }
 
-  // Only use test store in Expo Go
   return isExpoGo();
 }
 
 /**
  * Get RevenueCat API key from config
  * Returns Test Store key if in Expo Go environment ONLY
+ * Main app must provide resolved platform-specific apiKey in config
  */
 export function resolveApiKey(config: RevenueCatConfig): string | null {
   const useTestStore = shouldUseTestStore(config);
@@ -39,11 +37,7 @@ export function resolveApiKey(config: RevenueCatConfig): string | null {
     return config.testStoreKey ?? null;
   }
 
-  const key = Platform.OS === 'ios'
-    ? config.iosApiKey
-    : Platform.OS === 'android'
-      ? config.androidApiKey
-      : config.iosApiKey;
+  const key = config.apiKey;
 
   if (!key || key === "" || key.includes("YOUR_")) {
     return null;
