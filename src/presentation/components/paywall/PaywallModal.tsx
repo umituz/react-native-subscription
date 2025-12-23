@@ -75,6 +75,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     privacyText,
     termsOfServiceText,
     restoreButtonText,
+    loadingText,
+    emptyText,
+    processingText,
   } = props;
 
   const { modalLayout } = useResponsive();
