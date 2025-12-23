@@ -3,24 +3,91 @@
  * Single Responsibility: Display a subscription plan option
  */
 
-import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import React, { useMemo } from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system";
-import { useAppDesignTokens, withAlpha } from "@umituz/react-native-design-system";
+import { useAppDesignTokens, withAlpha, useResponsive } from "@umituz/react-native-design-system";
 import { formatPrice } from "../../../utils/priceUtils";
 import { useLocalization } from "@umituz/react-native-localization";
 import { BestValueBadge } from "./BestValueBadge";
 import { getPeriodLabel, isYearlyPackage } from "../../../utils/packagePeriodUtils";
 import { LinearGradient } from "expo-linear-gradient";
 import type { SubscriptionPlanCardProps } from "./SubscriptionPlanCardTypes";
-import { styles } from "./SubscriptionPlanCardStyles";
 
 export type { SubscriptionPlanCardProps } from "./SubscriptionPlanCardTypes";
+
+/**
+ * Create responsive styles for subscription plan card
+ */
+const createStyles = (spacingMult: number, touchTarget: number) => {
+  const basePadding = 18;
+  const baseRadius = 16;
+  const baseCreditRadius = 12;
+
+  const radioSize = Math.max(touchTarget * 0.5, 24);
+  const radioInnerSize = radioSize * 0.5;
+
+  return StyleSheet.create({
+    container: {
+      borderRadius: baseRadius * spacingMult,
+      position: "relative",
+      overflow: "hidden",
+    },
+    gradientWrapper: {
+      flex: 1,
+      padding: basePadding * spacingMult,
+    },
+    content: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    leftSection: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+    },
+    radio: {
+      width: radioSize,
+      height: radioSize,
+      borderRadius: radioSize / 2,
+      borderWidth: 2,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 16 * spacingMult,
+    },
+    radioInner: {
+      width: radioInnerSize,
+      height: radioInnerSize,
+      borderRadius: radioInnerSize / 2,
+    },
+    textContainer: {
+      flex: 1,
+    },
+    title: {
+      fontWeight: "600",
+      marginBottom: 2 * spacingMult,
+    },
+    creditBadge: {
+      paddingHorizontal: 10 * spacingMult,
+      paddingVertical: 4 * spacingMult,
+      borderRadius: baseCreditRadius * spacingMult,
+      marginBottom: 4 * spacingMult,
+    },
+    rightSection: {
+      alignItems: "flex-end",
+    },
+    price: {
+      fontWeight: "700",
+    },
+  });
+};
 
 export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
   React.memo(({ package: pkg, isSelected, onSelect, isBestValue = false, creditAmount }) => {
     const tokens = useAppDesignTokens();
     const { t } = useLocalization();
+    const { spacingMultiplier, getFontSize, minTouchTarget } = useResponsive();
 
     const period = pkg.product.subscriptionPeriod;
     const isYearly = isYearlyPackage(pkg);
@@ -40,6 +107,11 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
         end: { x: 1, y: 1 },
       }
       : {};
+
+    // Responsive styles
+    const styles = useMemo(() => createStyles(spacingMultiplier, minTouchTarget), [spacingMultiplier, minTouchTarget]);
+    const secondaryFontSize = getFontSize(11);
+    const creditFontSize = getFontSize(11);
 
     return (
       <TouchableOpacity
@@ -87,12 +159,12 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
                 >
                   {title}
                 </AtomicText>
-                {isYearly && (
+                {isYearly && monthlyEquivalent && (
                   <AtomicText
                     type="bodySmall"
-                    style={{ color: tokens.colors.textSecondary, fontSize: 11 }}
+                    style={{ color: tokens.colors.textSecondary, fontSize: secondaryFontSize }}
                   >
-                    {price}
+                    {monthlyEquivalent}/mo
                   </AtomicText>
                 )}
               </View>
@@ -117,7 +189,7 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
                     style={{
                       color: tokens.colors.primary,
                       fontWeight: "800",
-                      fontSize: 11,
+                      fontSize: creditFontSize,
                     }}
                   >
                     {creditAmount} {t("paywall.credits") || "Credits"}
@@ -128,9 +200,7 @@ export const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> =
                 type="titleMedium"
                 style={[styles.price, { color: tokens.colors.textPrimary }]}
               >
-                {isYearly && monthlyEquivalent
-                  ? `${monthlyEquivalent}/mo`
-                  : price}
+                {price}
               </AtomicText>
             </View>
           </View>

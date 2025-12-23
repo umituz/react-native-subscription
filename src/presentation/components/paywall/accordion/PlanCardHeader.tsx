@@ -3,12 +3,13 @@
  * Collapsed state of accordion subscription card
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import {
   AtomicText,
   useAppDesignTokens,
   withAlpha,
+  useResponsive,
 } from "@umituz/react-native-design-system";
 import { BestValueBadge } from "../BestValueBadge";
 import { useLocalization } from "@umituz/react-native-localization";
@@ -24,6 +25,13 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
 }) => {
   const tokens = useAppDesignTokens();
   const { t } = useLocalization();
+  const { spacingMultiplier, getFontSize, minTouchTarget } = useResponsive();
+
+  const styles = useMemo(
+    () => createStyles(spacingMultiplier, minTouchTarget),
+    [spacingMultiplier, minTouchTarget]
+  );
+  const creditFontSize = getFontSize(11);
 
   return (
     <TouchableOpacity
@@ -77,7 +85,7 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
                   style={{
                     color: tokens.colors.primary,
                     fontWeight: "700",
-                    fontSize: 11,
+                    fontSize: creditFontSize,
                   }}
                 >
                   {creditAmount} {t("paywall.credits") || "Credits"}
@@ -103,50 +111,55 @@ export const PlanCardHeader: React.FC<PlanCardHeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  leftSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  radioInner: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  textContainer: {
-    flex: 1,
-    gap: 6,
-  },
-  creditBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignSelf: "flex-start",
-  },
-  rightSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-});
+const createStyles = (spacingMult: number, touchTarget: number) => {
+  const radioSize = Math.max(touchTarget * 0.4, 22);
+  const radioInnerSize = radioSize * 0.55;
+
+  return StyleSheet.create({
+    container: {
+      width: "100%",
+    },
+    content: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 16 * spacingMult,
+      paddingHorizontal: 16 * spacingMult,
+    },
+    leftSection: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+    },
+    radio: {
+      width: radioSize,
+      height: radioSize,
+      borderRadius: radioSize / 2,
+      borderWidth: 2,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12 * spacingMult,
+    },
+    radioInner: {
+      width: radioInnerSize,
+      height: radioInnerSize,
+      borderRadius: radioInnerSize / 2,
+    },
+    textContainer: {
+      flex: 1,
+      gap: 6 * spacingMult,
+    },
+    creditBadge: {
+      paddingHorizontal: 10 * spacingMult,
+      paddingVertical: 4 * spacingMult,
+      borderRadius: 12 * spacingMult,
+      borderWidth: 1,
+      alignSelf: "flex-start",
+    },
+    rightSection: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12 * spacingMult,
+    },
+  });
+};

@@ -3,11 +3,12 @@
  * Expanded state of accordion subscription card
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import {
   AtomicText,
   useAppDesignTokens,
+  useResponsive,
 } from "@umituz/react-native-design-system";
 import type { PlanCardDetailsProps } from "./AccordionPlanCardTypes";
 
@@ -21,6 +22,9 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
   perMonthLabel = "Per Month",
 }) => {
   const tokens = useAppDesignTokens();
+  const { spacingMultiplier } = useResponsive();
+
+  const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
 
   return (
     <View
@@ -57,7 +61,10 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
           </AtomicText>
           <AtomicText
             type="bodyMedium"
-            style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}
+            style={{
+              color: tokens.colors.primary,
+              fontWeight: "700",
+            }}
           >
             {fullPrice}
           </AtomicText>
@@ -74,10 +81,7 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
           </AtomicText>
           <AtomicText
             type="bodyMedium"
-            style={{
-              color: tokens.colors.primary,
-              fontWeight: "700",
-            }}
+            style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}
           >
             {monthlyEquivalent}
           </AtomicText>
@@ -87,16 +91,17 @@ export const PlanCardDetails: React.FC<PlanCardDetailsProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    gap: 10,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-});
+const createStyles = (spacingMult: number) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16 * spacingMult,
+      paddingVertical: 12 * spacingMult,
+      borderTopWidth: 1,
+      gap: 10 * spacingMult,
+    },
+    row: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+  });

@@ -5,8 +5,7 @@
 
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon, useAppDesignTokens, useResponsive } from "@umituz/react-native-design-system";
 
 interface PaywallFeatureItemProps {
   icon: string;
@@ -16,6 +15,12 @@ interface PaywallFeatureItemProps {
 export const PaywallFeatureItem: React.FC<PaywallFeatureItemProps> = React.memo(
   ({ icon, text }) => {
     const tokens = useAppDesignTokens();
+    const { spacingMultiplier, getFontSize } = useResponsive();
+
+    const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
+    const fontSize = getFontSize(15);
+    const lineHeight = getFontSize(22);
+    const iconSize = getFontSize(20);
 
     // Pass icon name directly to AtomicIcon (which uses Ionicons)
     // Do NOT capitalize, as Ionicons names are lowercase/kebab-case.
@@ -28,13 +33,13 @@ export const PaywallFeatureItem: React.FC<PaywallFeatureItemProps> = React.memo(
       <View style={styles.featureItem}>
         <AtomicIcon
           name={iconName}
-          customSize={20}
+          customSize={iconSize}
           customColor={tokens.colors.primary}
           style={styles.featureIcon}
         />
         <AtomicText
           type="bodyMedium"
-          style={[styles.featureText, { color: tokens.colors.textPrimary }]}
+          style={[styles.featureText, { color: tokens.colors.textPrimary, fontSize, lineHeight }]}
         >
           {text}
         </AtomicText>
@@ -45,17 +50,16 @@ export const PaywallFeatureItem: React.FC<PaywallFeatureItemProps> = React.memo(
 
 PaywallFeatureItem.displayName = "PaywallFeatureItem";
 
-const styles = StyleSheet.create({
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  featureIcon: {
-    marginRight: 12,
-  },
-  featureText: {
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 22,
-  },
-});
+const createStyles = (spacingMult: number) =>
+  StyleSheet.create({
+    featureItem: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    featureIcon: {
+      marginRight: 12 * spacingMult,
+    },
+    featureText: {
+      flex: 1,
+    },
+  });

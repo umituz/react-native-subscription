@@ -3,9 +3,9 @@
  * Expandable subscription plan card with credit display
  */
 
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { View, StyleSheet, type StyleProp, type ViewStyle } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens, useResponsive } from "@umituz/react-native-design-system";
 import { formatPrice } from "../../../../utils/priceUtils";
 import { getPeriodLabel, isYearlyPackage } from "../../../../utils/packagePeriodUtils";
 import { useLocalization } from "@umituz/react-native-localization";
@@ -28,6 +28,9 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
   }) => {
     const tokens = useAppDesignTokens();
     const { t } = useLocalization();
+    const { spacingMultiplier } = useResponsive();
+
+    const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
 
     const period = pkg.product.subscriptionPeriod;
     const isYearly = isYearlyPackage(pkg);
@@ -88,9 +91,10 @@ export const AccordionPlanCard: React.FC<AccordionPlanCardProps> = React.memo(
 
 AccordionPlanCard.displayName = "AccordionPlanCard";
 
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-});
+const createStyles = (spacingMult: number) =>
+  StyleSheet.create({
+    container: {
+      borderRadius: 16 * spacingMult,
+      marginBottom: 12 * spacingMult,
+    },
+  });

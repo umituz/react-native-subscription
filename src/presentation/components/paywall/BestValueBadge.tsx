@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText, useAppDesignTokens, useResponsive } from "@umituz/react-native-design-system";
 import { LinearGradient } from "expo-linear-gradient";
 
 interface BestValueBadgeProps {
@@ -11,6 +11,10 @@ interface BestValueBadgeProps {
 export const BestValueBadge: React.FC<BestValueBadgeProps> = React.memo(
   ({ text, visible = true }) => {
     const tokens = useAppDesignTokens();
+    const { spacingMultiplier, getFontSize } = useResponsive();
+
+    const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
+    const fontSize = getFontSize(10);
 
     if (!visible) return null;
 
@@ -24,7 +28,7 @@ export const BestValueBadge: React.FC<BestValueBadgeProps> = React.memo(
         >
           <AtomicText
             type="labelSmall"
-            style={{ color: tokens.colors.onPrimary, fontWeight: "800", textTransform: "uppercase", fontSize: 10 }}
+            style={{ color: tokens.colors.onPrimary, fontWeight: "800", textTransform: "uppercase", fontSize }}
           >
             {text}
           </AtomicText>
@@ -36,19 +40,20 @@ export const BestValueBadge: React.FC<BestValueBadgeProps> = React.memo(
 
 BestValueBadge.displayName = "BestValueBadge";
 
-const styles = StyleSheet.create({
-  badgeContainer: {
-    position: "absolute",
-    top: -12,
-    right: 16,
-    zIndex: 1,
-    alignSelf: "flex-end",
-  },
-  badge: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+const createStyles = (spacingMult: number) =>
+  StyleSheet.create({
+    badgeContainer: {
+      position: "absolute",
+      top: -12 * spacingMult,
+      right: 16 * spacingMult,
+      zIndex: 1,
+      alignSelf: "flex-end",
+    },
+    badge: {
+      paddingHorizontal: 16 * spacingMult,
+      paddingVertical: 6 * spacingMult,
+      borderRadius: 16 * spacingMult,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

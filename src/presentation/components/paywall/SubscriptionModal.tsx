@@ -3,9 +3,9 @@
  * Fullscreen subscription flow using BaseModal from design system
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
-import { BaseModal } from "@umituz/react-native-design-system";
+import { BaseModal, useResponsive } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
 import { SubscriptionModalHeader } from "./SubscriptionModalHeader";
@@ -85,6 +85,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     onClose,
   });
 
+  const { spacingMultiplier } = useResponsive();
+  const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
+
   return (
     <BaseModal visible={visible} onClose={onClose}>
       <View style={styles.container}>
@@ -145,20 +148,21 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
 
 SubscriptionModal.displayName = "SubscriptionModal";
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width: "100%",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 32,
-  },
-  featuresList: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-});
+const createStyles = (spacingMult: number) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      width: "100%",
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 32 * spacingMult,
+    },
+    featuresList: {
+      paddingHorizontal: 24 * spacingMult,
+      marginBottom: 24 * spacingMult,
+    },
+  });

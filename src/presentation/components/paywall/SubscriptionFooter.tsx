@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import type { PurchasesPackage } from "react-native-purchases";
-import { AtomicText } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText, useAppDesignTokens, useResponsive } from "@umituz/react-native-design-system";
 import { PaywallLegalFooter } from "./PaywallLegalFooter";
 
 interface SubscriptionFooterProps {
@@ -42,6 +41,10 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
         onRestore,
     }) => {
         const tokens = useAppDesignTokens();
+        const { spacingMultiplier, getFontSize } = useResponsive();
+
+        const styles = useMemo(() => createStyles(spacingMultiplier), [spacingMultiplier]);
+        const buttonFontSize = getFontSize(16);
 
         const isDisabled = !selectedPkg || isProcessing || isLoading;
 
@@ -65,7 +68,7 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
                                     style={{
                                         color: tokens.colors.onPrimary,
                                         fontWeight: "800",
-                                        fontSize: 16,
+                                        fontSize: buttonFontSize,
                                     }}
                                 >
                                     {isProcessing ? processingText : purchaseButtonText}
@@ -92,21 +95,22 @@ export const SubscriptionFooter: React.FC<SubscriptionFooterProps> = React.memo(
 
 SubscriptionFooter.displayName = "SubscriptionFooter";
 
-const styles = StyleSheet.create({
-    container: {},
-    actions: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        gap: 12,
-    },
-    gradientButton: {
-        paddingVertical: 16,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    restoreButton: {
-        alignItems: "center",
-        paddingVertical: 8,
-    },
-});
+const createStyles = (spacingMult: number) =>
+    StyleSheet.create({
+        container: {},
+        actions: {
+            paddingHorizontal: 24 * spacingMult,
+            paddingVertical: 16 * spacingMult,
+            gap: 12 * spacingMult,
+        },
+        gradientButton: {
+            paddingVertical: 16 * spacingMult,
+            borderRadius: 16 * spacingMult,
+            alignItems: "center",
+            justifyContent: "center",
+        },
+        restoreButton: {
+            alignItems: "center",
+            paddingVertical: 8 * spacingMult,
+        },
+    });
