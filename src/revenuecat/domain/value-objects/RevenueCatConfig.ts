@@ -35,6 +35,12 @@ export interface RevenueCatConfig {
     isPremium: boolean,
     customerInfo: CustomerInfo
   ) => Promise<void> | void;
+  /** Callback for credit renewal (subscription auto-renewal) */
+  onCreditRenewal?: (
+    userId: string,
+    productId: string,
+    renewalId: string
+  ) => Promise<void> | void;
 }
 
 export interface RevenueCatConfigRequired {

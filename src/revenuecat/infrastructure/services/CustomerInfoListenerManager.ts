@@ -35,7 +35,7 @@ export class CustomerInfoListenerManager {
       userId: this.currentUserId,
     });
 
-    this.listener = (customerInfo: CustomerInfo) => {
+    this.listener = async (customerInfo: CustomerInfo) => {
       if (!this.currentUserId) return;
 
       const hasPremium =
@@ -46,6 +46,54 @@ export class CustomerInfoListenerManager {
         hasPremium,
         entitlementIdentifier: this.entitlementIdentifier,
       });
+
+      // Handle credit renewal for subscription renewals
+      if (hasPremium && config.onCreditRenewal) {
+        const premiumEntitlement =
+          customerInfo.entitlements.active[this.entitlementIdentifier];
+
+        if (premiumEntitlement && premiumEntitlement.expirationDate) {
+          const productId = premiumEntitlement.productIdentifier;
+          const renewalId = `renewal_${productId}_${premiumEntitlement.expirationDate}`;
+
+          addPackageBreadcrumb(
+            "subscription",
+            "Processing credit renewal",
+            {
+              userId: this.currentUserId,
+              productId,
+              renewalId,
+            }
+          );
+
+          try {
+            await config.onCreditRenewal(
+              this.currentUserId,
+              productId,
+              renewalId
+            );
+
+            addPackageBreadcrumb(
+              "subscription",
+              "Credit renewal completed",
+              {
+                userId: this.currentUserId,
+                productId,
+              }
+            );
+          } catch (error) {
+            addPackageBreadcrumb(
+              "subscription",
+              "Credit renewal failed",
+              {
+                userId: this.currentUserId,
+                productId,
+                error: error instanceof Error ? error.message : String(error),
+              }
+            );
+          }
+        }
+      }
 
       syncPremiumStatus(config, this.currentUserId, customerInfo);
     };
