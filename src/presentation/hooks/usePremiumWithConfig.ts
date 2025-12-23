@@ -3,13 +3,16 @@
  * Premium status from TanStack Query (credits)
  * Subscription state from TanStack Query
  * Generic implementation for 100+ apps with auth provider abstraction
+ *
+ * Note: Credit allocation is handled by CustomerInfo Listener (onCreditRenewal)
+ * configured in SubscriptionManager. Manual credit initialization removed to
+ * prevent duplicate allocation.
  */
 
 import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import type { UserCredits } from "../../domain/entities/Credits";
 import { useCredits } from "./useCredits";
-import { useInitializeCredits } from "./useDeductCredit";
 import {
   useSubscriptionPackages,
   usePurchasePackage,
@@ -48,8 +51,6 @@ export const usePremiumWithConfig = (
     enabled: enabled && !!userId,
   });
 
-  const { initializeCredits } = useInitializeCredits({ userId });
-
   const { data: packages = [], isLoading: packagesLoading } =
     useSubscriptionPackages(userId);
   const purchaseMutation = usePurchasePackage(userId);
@@ -66,21 +67,17 @@ export const usePremiumWithConfig = (
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
       const success = await purchaseMutation.mutateAsync(pkg);
-      if (success && userId) {
-        await initializeCredits({ productId: pkg.product.identifier });
-      }
+      // Credit allocation handled by CustomerInfo Listener (onCreditRenewal)
       return success;
     },
-    [purchaseMutation, userId, initializeCredits],
+    [purchaseMutation],
   );
 
   const handleRestore = useCallback(async (): Promise<boolean> => {
     const success = await restoreMutation.mutateAsync();
-    if (success && userId) {
-      await initializeCredits();
-    }
+    // Credit allocation handled by CustomerInfo Listener (onCreditRenewal)
     return success;
-  }, [restoreMutation, userId, initializeCredits]);
+  }, [restoreMutation]);
 
   return {
     isPremium,
