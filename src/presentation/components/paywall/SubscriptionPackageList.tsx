@@ -89,7 +89,10 @@ export const SubscriptionPackageList: React.FC<SubscriptionPackageListProps> = R
                     }
 
                     // Get credit amount for this package if provided
-                    const creditAmount = creditAmounts?.[pkg.product.identifier];
+                    // check both product identifier (e.g., com.app.weekly) and package identifier (e.g., $rc_weekly)
+                    const creditAmount =
+                        creditAmounts?.[pkg.product.identifier] ??
+                        creditAmounts?.[pkg.identifier];
 
                     return (
                         <SubscriptionPlanCard
