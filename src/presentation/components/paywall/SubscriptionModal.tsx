@@ -34,6 +34,10 @@ export interface SubscriptionModalProps {
   privacyText?: string;
   termsOfServiceText?: string;
   showRestoreButton?: boolean;
+  /** Optional: Map of product identifier to credit amount */
+  creditAmounts?: Record<string, number>;
+  /** Optional: Manually specify which package should show "Best Value" badge */
+  bestValueIdentifier?: string;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((props) => {
@@ -57,6 +61,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
     privacyText,
     termsOfServiceText,
     showRestoreButton = true,
+    creditAmounts,
+    bestValueIdentifier,
   } = props;
 
   const tokens = useAppDesignTokens();
@@ -111,6 +117,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = React.memo((p
             onSelect={setSelectedPkg}
             loadingText={loadingText}
             emptyText={emptyText}
+            creditAmounts={creditAmounts}
+            bestValueIdentifier={bestValueIdentifier}
           />
 
           {features.length > 0 && (
