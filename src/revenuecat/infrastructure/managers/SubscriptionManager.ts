@@ -108,11 +108,27 @@ class SubscriptionManagerImpl {
 
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] getPackages called', {
+        hasServiceInstance: !!this.serviceInstance,
+        hasPackageHandler: !!this.packageHandler,
+      });
+    }
     if (!this.serviceInstance) {
+      if (__DEV__) {
+        console.log('[DEBUG SubscriptionManager] Creating service instance...');
+      }
       this.serviceInstance = getRevenueCatService();
       this.packageHandler!.setService(this.serviceInstance);
     }
-    return this.packageHandler!.fetchPackages();
+    const packages = await this.packageHandler!.fetchPackages();
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] fetchPackages returned', {
+        count: packages.length,
+        packages: packages.map(p => ({ id: p.identifier, type: p.packageType })),
+      });
+    }
+    return packages;
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {

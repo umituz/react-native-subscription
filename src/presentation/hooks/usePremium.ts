@@ -50,6 +50,10 @@ export interface UsePremiumResult {
  * ```
  */
 export const usePremium = (userId?: string): UsePremiumResult => {
+  if (__DEV__) {
+    console.log('[DEBUG usePremium] Hook called', { userId: userId || 'ANONYMOUS' });
+  }
+
   // Fetch user credits (server state)
   const { credits, isLoading: creditsLoading } = useCredits({
     userId,
@@ -59,6 +63,16 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   // Fetch subscription packages (works for anonymous too)
   const { data: packages = [], isLoading: packagesLoading } =
     useSubscriptionPackages(userId);
+
+  if (__DEV__) {
+    console.log('[DEBUG usePremium] State', {
+      userId: userId || 'ANONYMOUS',
+      packagesCount: packages?.length || 0,
+      packagesLoading,
+      creditsLoading,
+      isPremium: credits !== null,
+    });
+  }
 
   // Purchase and restore mutations
   const purchaseMutation = usePurchasePackage(userId);
