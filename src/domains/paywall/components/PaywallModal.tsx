@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
 import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
@@ -79,6 +79,18 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
             setIsProcessing(false);
         }
     }, [onRestore, isProcessing]);
+
+    const handleLegalUrl = useCallback(async (url: string | undefined) => {
+        if (!url) return;
+        try {
+            const supported = await Linking.canOpenURL(url);
+            if (supported) {
+                await Linking.openURL(url);
+            }
+        } catch (error) {
+            // Silent fail
+        }
+    }, []);
 
     const isPurchaseDisabled = showSubscription ? !selectedPlanId : !selectedCreditId;
 
@@ -161,22 +173,26 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
                     <View style={styles.footer}>
                         {onRestore && (
-                            <TouchableOpacity onPress={handleRestore} style={styles.restoreButton}>
+                            <TouchableOpacity
+                                onPress={handleRestore}
+                                disabled={isProcessing}
+                                style={[styles.restoreButton, isProcessing && styles.restoreButtonDisabled]}
+                            >
                                 <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
-                                    {translations.restoreButtonText}
+                                    {isProcessing ? translations.processingText : translations.restoreButtonText}
                                 </AtomicText>
                             </TouchableOpacity>
                         )}
                         <View style={styles.legalRow}>
                             {legalUrls.termsUrl && (
-                                <TouchableOpacity onPress={() => {}}>
+                                <TouchableOpacity onPress={() => handleLegalUrl(legalUrls.termsUrl)}>
                                     <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                         {translations.termsOfServiceText}
                                     </AtomicText>
                                 </TouchableOpacity>
                             )}
                             {legalUrls.privacyUrl && (
-                                <TouchableOpacity onPress={() => {}}>
+                                <TouchableOpacity onPress={() => handleLegalUrl(legalUrls.privacyUrl)}>
                                     <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                         {translations.privacyText}
                                     </AtomicText>
@@ -212,6 +228,7 @@ const styles = StyleSheet.create({
     ctaText: { fontWeight: "700" },
     footer: { flexDirection: "column", alignItems: "center", gap: 8 },
     restoreButton: { marginBottom: 8 },
+    restoreButtonDisabled: { opacity: 0.5 },
     legalRow: { flexDirection: "row", justifyContent: "center", gap: 16 },
     footerLink: {},
 });
