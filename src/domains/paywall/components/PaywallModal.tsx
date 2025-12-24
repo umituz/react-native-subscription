@@ -154,7 +154,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                         style={[styles.cta, { backgroundColor: tokens.colors.primary }, (isPurchaseDisabled || isProcessing) && styles.ctaDisabled]}
                         activeOpacity={0.8}
                     >
-                        <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
+                        <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.white }]}>
                             {isProcessing ? translations.processingText : showSubscription ? translations.subscribeButtonText : translations.purchaseButtonText}
                         </AtomicText>
                     </TouchableOpacity>
