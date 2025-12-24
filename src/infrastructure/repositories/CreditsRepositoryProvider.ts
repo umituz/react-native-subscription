@@ -4,8 +4,8 @@
  * Replaces Context API with a simpler, testable approach
  */
 
-import type { CreditsConfig } from "@domain/entities/Credits";
-import { DEFAULT_CREDITS_CONFIG } from "@domain/entities/Credits";
+import type { CreditsConfig } from "../../domain/entities/Credits";
+import { DEFAULT_CREDITS_CONFIG } from "../../domain/entities/Credits";
 import type { CreditsRepository } from "./CreditsRepository";
 import { createCreditsRepository } from "./CreditsRepository";
 

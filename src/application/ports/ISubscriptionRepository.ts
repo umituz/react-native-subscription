@@ -2,7 +2,7 @@
  * ISubscriptionRepository Interface
  */
 
-import { SubscriptionStatus } from '@domain/entities/SubscriptionStatus';
+import { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
 
 export interface ISubscriptionRepository {
     getSubscriptionStatus(userId: string): Promise<SubscriptionStatus | null>;

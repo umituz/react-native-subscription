@@ -4,20 +4,20 @@
  */
 
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
-import type { PurchaseResult } from "@revenuecat/application/ports/IRevenueCatService";
+import type { PurchaseResult } from "../application/ports/IRevenueCatService";
 import {
   RevenueCatPurchaseError,
   RevenueCatInitializationError,
-} from "@revenuecat/domain/errors/RevenueCatError";
-import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
+} from "../domain/errors/RevenueCatError";
+import type { RevenueCatConfig } from "../domain/value-objects/RevenueCatConfig";
 import {
   isUserCancelledError,
   getErrorMessage,
-} from "@revenuecat/domain/types/RevenueCatTypes";
+} from "../domain/types/RevenueCatTypes";
 import {
   syncPremiumStatus,
   notifyPurchaseCompleted,
-} from "@revenuecat/infrastructure/utils/PremiumStatusSyncer";
+} from "../infrastructure/utils/PremiumStatusSyncer";
 import {
   trackPackageError,
   addPackageBreadcrumb,

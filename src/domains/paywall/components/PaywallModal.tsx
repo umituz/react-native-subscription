@@ -9,7 +9,7 @@ import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/r
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { CreditCard } from "./CreditCard";
-import type { PaywallMode, CreditsPackage, SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "@domains/paywall/entities";
+import type { PaywallMode, CreditsPackage, SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "../paywall/entities";
 
 export interface PaywallModalProps {
     visible: boolean;

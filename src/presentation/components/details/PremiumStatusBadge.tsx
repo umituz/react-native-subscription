@@ -6,7 +6,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import { SubscriptionStatusType } from "@domain/entities/SubscriptionStatus";
+import { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
 export type { SubscriptionStatusType };
 
 export interface PremiumStatusBadgeProps {

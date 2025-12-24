@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import type { UserCredits, CreditType } from "@domain/entities/Credits";
+import type { UserCredits, CreditType } from "../../domain/entities/Credits";
 import {
   getCreditsRepository,
   getCreditsConfig,
-} from "@infrastructure/repositories/CreditsRepositoryProvider";
+} from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
 const CACHE_CONFIG = {
   staleTime: 30 * 1000,

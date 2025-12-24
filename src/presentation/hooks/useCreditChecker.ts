@@ -5,12 +5,12 @@
  */
 
 import { useMemo } from "react";
-import type { CreditType } from "@domain/entities/Credits";
-import { getCreditsRepository } from "@infrastructure/repositories/CreditsRepositoryProvider";
+import type { CreditType } from "../../domain/entities/Credits";
+import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import {
   createCreditChecker,
   type CreditCheckResult,
-} from "@utils/creditChecker";
+} from "../../utils/creditChecker";
 
 export interface UseCreditCheckerParams {
   getCreditType: (operationType: string) => CreditType;

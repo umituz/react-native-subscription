@@ -4,7 +4,7 @@
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { SubscriptionManager } from "@revenuecat/infrastructure/managers/SubscriptionManager";
+import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import {
   trackPackageError,
   addPackageBreadcrumb,

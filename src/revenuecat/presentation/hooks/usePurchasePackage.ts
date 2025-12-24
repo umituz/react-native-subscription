@@ -5,7 +5,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PurchasesPackage } from "react-native-purchases";
-import { SubscriptionManager } from "@revenuecat/infrastructure/managers/SubscriptionManager";
+import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import {
   trackPackageError,
   addPackageBreadcrumb,

@@ -3,9 +3,9 @@
  * Handles subscription activation and deactivation
  */
 
-import type { ISubscriptionRepository } from "@application/ports/ISubscriptionRepository";
-import type { SubscriptionStatus } from "@domain/entities/SubscriptionStatus";
-import { SubscriptionRepositoryError } from "@domain/errors/SubscriptionError";
+import type { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
+import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
+import { SubscriptionRepositoryError } from "../../domain/errors/SubscriptionError";
 
 export interface ActivationHandlerConfig {
   repository: ISubscriptionRepository;

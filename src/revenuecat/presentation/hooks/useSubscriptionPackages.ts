@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { SubscriptionManager } from "@revenuecat/infrastructure/managers/SubscriptionManager";
+import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { addPackageBreadcrumb } from "@umituz/react-native-sentry";
 import {
   SUBSCRIPTION_QUERY_KEYS,

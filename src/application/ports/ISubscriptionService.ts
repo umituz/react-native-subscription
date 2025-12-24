@@ -3,7 +3,7 @@
  * Defines the contract for subscription service operations
  */
 
-import type { SubscriptionStatus } from '@domain/entities/SubscriptionStatus';
+import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
 
 export interface ISubscriptionService {
     /**

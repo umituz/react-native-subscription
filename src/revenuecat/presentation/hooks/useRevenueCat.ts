@@ -5,8 +5,8 @@
 
 import { useState, useCallback } from "react";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
-import { getRevenueCatService } from "@revenuecat/infrastructure/services/RevenueCatService";
-import type { PurchaseResult, RestoreResult } from "@revenuecat/application/ports/IRevenueCatService";
+import { getRevenueCatService } from "../infrastructure/services/RevenueCatService";
+import type { PurchaseResult, RestoreResult } from "../application/ports/IRevenueCatService";
 
 export interface UseRevenueCatResult {
   /** Current offering */
