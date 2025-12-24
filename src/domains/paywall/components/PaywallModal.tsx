@@ -160,27 +160,29 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                     </TouchableOpacity>
 
                     <View style={styles.footer}>
-                        {legalUrls.termsUrl && (
-                            <TouchableOpacity onPress={() => {}}>
-                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
-                                    {translations.termsOfServiceText}
-                                </AtomicText>
-                            </TouchableOpacity>
-                        )}
                         {onRestore && (
-                            <TouchableOpacity onPress={handleRestore}>
+                            <TouchableOpacity onPress={handleRestore} style={styles.restoreButton}>
                                 <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                     {translations.restoreButtonText}
                                 </AtomicText>
                             </TouchableOpacity>
                         )}
-                        {legalUrls.privacyUrl && (
-                            <TouchableOpacity onPress={() => {}}>
-                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
-                                    {translations.privacyText}
-                                </AtomicText>
-                            </TouchableOpacity>
-                        )}
+                        <View style={styles.legalRow}>
+                            {legalUrls.termsUrl && (
+                                <TouchableOpacity onPress={() => {}}>
+                                    <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
+                                        {translations.termsOfServiceText}
+                                    </AtomicText>
+                                </TouchableOpacity>
+                            )}
+                            {legalUrls.privacyUrl && (
+                                <TouchableOpacity onPress={() => {}}>
+                                    <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
+                                        {translations.privacyText}
+                                    </AtomicText>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                     </View>
                 </ScrollView>
             </View>
@@ -208,6 +210,8 @@ const styles = StyleSheet.create({
     cta: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
     ctaDisabled: { opacity: 0.5 },
     ctaText: { fontWeight: "700" },
-    footer: { flexDirection: "row", justifyContent: "center", gap: 16, flexWrap: "wrap" },
+    footer: { flexDirection: "column", alignItems: "center", gap: 8 },
+    restoreButton: { marginBottom: 8 },
+    legalRow: { flexDirection: "row", justifyContent: "center", gap: 16 },
     footerLink: {},
 });
