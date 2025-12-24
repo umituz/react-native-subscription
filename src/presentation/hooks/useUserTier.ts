@@ -27,8 +27,8 @@
  */
 
 import { useMemo } from 'react';
-import { getUserTierInfo } from '@utils/tierUtils';
-import type { UserTierInfo } from '@utils/types';
+import { getUserTierInfo } from '../../utils/tierUtils';
+import type { UserTierInfo } from '../../utils/types';
 
 export interface UseUserTierParams {
   /** Whether user is a guest */

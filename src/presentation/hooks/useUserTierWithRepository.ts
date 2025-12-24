@@ -13,7 +13,7 @@
  * @example
  * ```typescript
  * import { useUserTierWithRepository } from '@umituz/react-native-premium';
- * import { useAuth } from '@domains/auth';
+ * import { useAuth } from '../../domains/auth';
  * import { premiumRepository } from '@/infrastructure/repositories/PremiumRepository';
  *
  * const { tier, isPremium, isGuest, isLoading, refresh } = useUserTierWithRepository({
@@ -25,7 +25,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useUserTier, type UseUserTierParams } from './useUserTier';
-import type { ISubscriptionRepository } from '@application/ports/ISubscriptionRepository';
+import type { ISubscriptionRepository } from '../../application/ports/ISubscriptionRepository';
 
 /**
  * Auth provider interface
