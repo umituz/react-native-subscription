@@ -249,6 +249,8 @@ export {
   type AuthSubscriptionSyncConfig,
 } from "./presentation/hooks/useAuthSubscriptionSync";
 
+export { useDevTestCallbacks } from "./presentation/hooks/useDevTestCallbacks";
+
 // =============================================================================
 // CREDITS SYSTEM - Utilities
 // =============================================================================
