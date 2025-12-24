@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
     container: { flex: 1 },
     closeBtn: { position: "absolute", top: 16, right: 16, width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center", zIndex: 10 },
-    scroll: { padding: 24, paddingTop: 56 },
+    scroll: { flexGrow: 1, padding: 24, paddingTop: 56 },
     header: { alignItems: "center", marginBottom: 24 },
     title: { fontWeight: "700", textAlign: "center", marginBottom: 8 },
     subtitle: { textAlign: "center", lineHeight: 24 },
