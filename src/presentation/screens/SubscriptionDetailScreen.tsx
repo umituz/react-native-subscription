@@ -5,11 +5,12 @@
  */
 
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { View, ScrollView, StyleSheet } from "react-native";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";
 import { SubscriptionActions } from "./components/SubscriptionActions";
+import { DevTestSection, type DevTestActions } from "./components/DevTestSection";
 import type { SubscriptionStatusType } from "../components/details/PremiumStatusBadge";
 import type { CreditInfo } from "../components/details/PremiumDetailsCard";
 
@@ -41,6 +42,10 @@ export interface SubscriptionDetailConfig {
     translations: SubscriptionDetailTranslations;
     onManageSubscription?: () => void;
     onUpgrade?: () => void;
+    devTools?: {
+        actions: DevTestActions;
+        title?: string;
+    };
 }
 
 export interface SubscriptionDetailScreenProps {
@@ -54,39 +59,48 @@ export const SubscriptionDetailScreen: React.FC<
     const showCredits = config.credits && config.credits.length > 0;
 
     return (
-        <ScrollView
-            style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}
-            contentContainerStyle={styles.content}
-        >
-            <SubscriptionHeader
-                statusType={config.statusType}
-                isPremium={config.isPremium}
-                isLifetime={config.isLifetime}
-                expirationDate={config.expirationDate}
-                purchaseDate={config.purchaseDate}
-                daysRemaining={config.daysRemaining}
-                translations={config.translations}
-            />
+        <View style={{ flex: 1 }}>
+            <ScrollView
+                style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}
+                contentContainerStyle={styles.content}
+            >
+                <SubscriptionHeader
+                    statusType={config.statusType}
+                    isPremium={config.isPremium}
+                    isLifetime={config.isLifetime}
+                    expirationDate={config.expirationDate}
+                    purchaseDate={config.purchaseDate}
+                    daysRemaining={config.daysRemaining}
+                    translations={config.translations}
+                />
 
-            {showCredits && (
-                <CreditsList
-                    credits={config.credits!}
-                    title={
-                        config.translations.usageTitle || config.translations.creditsTitle
-                    }
-                    description={config.translations.creditsResetInfo}
-                    remainingLabel={config.translations.remainingLabel}
+                {showCredits && (
+                    <CreditsList
+                        credits={config.credits!}
+                        title={
+                            config.translations.usageTitle || config.translations.creditsTitle
+                        }
+                        description={config.translations.creditsResetInfo}
+                        remainingLabel={config.translations.remainingLabel}
+                    />
+                )}
+
+                <SubscriptionActions
+                    isPremium={config.isPremium}
+                    manageButtonLabel={config.translations.manageButton}
+                    upgradeButtonLabel={config.translations.upgradeButton}
+                    onManage={config.onManageSubscription}
+                    onUpgrade={config.onUpgrade}
+                />
+            </ScrollView>
+
+            {config.devTools && (
+                <DevTestSection
+                    actions={config.devTools.actions}
+                    title={config.devTools.title}
                 />
             )}
-
-            <SubscriptionActions
-                isPremium={config.isPremium}
-                manageButtonLabel={config.translations.manageButton}
-                upgradeButtonLabel={config.translations.upgradeButton}
-                onManage={config.onManageSubscription}
-                onUpgrade={config.onUpgrade}
-            />
-        </ScrollView>
+        </View>
     );
 };
 
