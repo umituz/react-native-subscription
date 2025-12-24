@@ -10,9 +10,9 @@ import type {
   InitializeResult,
   PurchaseResult,
   RestoreResult,
-} from "../../application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import { resolveApiKey } from "../utils/ApiKeyResolver";
+} from "@revenuecat/application/ports/IRevenueCatService";
+import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
+import { resolveApiKey } from "@revenuecat/infrastructure/utils/ApiKeyResolver";
 import { initializeSDK } from "./RevenueCatInitializer";
 import { fetchOfferings } from "./OfferingsFetcher";
 import { handlePurchase } from "./PurchaseHandler";

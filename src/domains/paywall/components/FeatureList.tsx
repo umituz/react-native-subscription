@@ -6,7 +6,7 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { FeatureItem } from "./FeatureItem";
-import type { SubscriptionFeature } from "../entities";
+import type { SubscriptionFeature } from "@domains/paywall/entities";
 
 interface FeatureListProps {
     features: SubscriptionFeature[];

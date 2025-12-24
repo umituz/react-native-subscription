@@ -6,7 +6,9 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicIcon, AtomicBadge, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { CreditsPackage } from "../entities";
+import type { CreditsPackage } from "@domains/paywall/entities";
+
+import { formatPrice } from "@utils/priceUtils";
 
 interface CreditCardProps {
     pkg: CreditsPackage;
@@ -17,6 +19,7 @@ interface CreditCardProps {
 export const CreditCard: React.FC<CreditCardProps> = React.memo(({ pkg, isSelected, onSelect }) => {
     const tokens = useAppDesignTokens();
     const totalCredits = pkg.credits + (pkg.bonus ?? 0);
+    const price = formatPrice(pkg.price, pkg.currency);
 
     return (
         <TouchableOpacity onPress={onSelect} activeOpacity={0.7} style={styles.touchable}>
@@ -52,7 +55,7 @@ export const CreditCard: React.FC<CreditCardProps> = React.memo(({ pkg, isSelect
                             type="titleLarge"
                             style={[styles.price, { color: isSelected ? tokens.colors.primary : tokens.colors.textPrimary }]}
                         >
-                            {pkg.currency}{pkg.price.toFixed(2)}
+                            {price}
                         </AtomicText>
                         {isSelected && <AtomicIcon name="checkmark-circle" size="md" color="primary" />}
                     </View>

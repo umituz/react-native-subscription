@@ -20,11 +20,11 @@ import type {
   CreditsConfig,
   CreditsResult,
   DeductCreditsResult,
-} from "../../domain/entities/Credits";
+} from "@domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../services/CreditsInitializer";
-import { detectPackageType } from "../../utils/packageTypeDetector";
-import { getCreditAllocation } from "../../utils/creditMapper";
+import { detectPackageType } from "@utils/packageTypeDetector";
+import { getCreditAllocation } from "@utils/creditMapper";
 
 export class CreditsRepository extends BaseRepository {
   private config: CreditsConfig;

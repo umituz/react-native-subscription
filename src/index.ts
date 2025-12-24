@@ -16,48 +16,48 @@
 export {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
-} from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionStatus, SubscriptionStatusType } from "./domain/entities/SubscriptionStatus";
+} from "@domain/entities/SubscriptionStatus";
+export type { SubscriptionStatus, SubscriptionStatusType } from "@domain/entities/SubscriptionStatus";
 
-export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
+export type { SubscriptionConfig } from "@domain/value-objects/SubscriptionConfig";
 
-export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
+export type { ISubscriptionRepository } from "@application/ports/ISubscriptionRepository";
 
 export {
   SubscriptionService,
   initializeSubscriptionService,
-} from "./infrastructure/services/SubscriptionService";
+} from "@infrastructure/services/SubscriptionService";
 
-export { useSubscription } from "./presentation/hooks/useSubscription";
-export type { UseSubscriptionResult } from "./presentation/hooks/useSubscription";
+export { useSubscription } from "@presentation/hooks/useSubscription";
+export type { UseSubscriptionResult } from "@presentation/hooks/useSubscription";
 
 export {
   useSubscriptionDetails,
   type SubscriptionDetails,
-} from "./presentation/hooks/useSubscriptionDetails";
+} from "@presentation/hooks/useSubscriptionDetails";
 
 // Feedback
-export * from "./presentation/components/feedback/PaywallFeedbackModal";
-export * from "./presentation/hooks/feedback/usePaywallFeedback";
+export * from "@presentation/components/feedback/PaywallFeedbackModal";
+export * from "@presentation/hooks/feedback/usePaywallFeedback";
 
 export {
   usePremiumGate,
   type UsePremiumGateParams,
   type UsePremiumGateResult,
-} from "./presentation/hooks/usePremiumGate";
+} from "@presentation/hooks/usePremiumGate";
 
 export {
   useFeatureGate,
   type UseFeatureGateParams,
   type UseFeatureGateResult,
-} from "./presentation/hooks/useFeatureGate";
+} from "@presentation/hooks/useFeatureGate";
 
 export {
   useUserTierWithRepository,
   type UseUserTierWithRepositoryParams,
   type UseUserTierWithRepositoryResult,
   type AuthProvider,
-} from "./presentation/hooks/useUserTierWithRepository";
+} from "@presentation/hooks/useUserTierWithRepository";
 
 // =============================================================================
 // PAYWALL DOMAIN
@@ -81,7 +81,7 @@ export {
   type SubscriptionFeature,
   type PaywallTranslations,
   type PaywallLegalUrls,
-} from "./domains/paywall";
+} from "@domains/paywall";
 
 // =============================================================================
 // PRESENTATION LAYER - Premium Details Components
@@ -92,12 +92,12 @@ export {
   type PremiumDetailsCardProps,
   type PremiumDetailsTranslations,
   type CreditInfo,
-} from "./presentation/components/details/PremiumDetailsCard";
+} from "@presentation/components/details/PremiumDetailsCard";
 
 export {
   PremiumStatusBadge,
   type PremiumStatusBadgeProps,
-} from "./presentation/components/details/PremiumStatusBadge";
+} from "@presentation/components/details/PremiumStatusBadge";
 
 // =============================================================================
 // PRESENTATION LAYER - Settings Section Component
@@ -107,7 +107,7 @@ export {
   SubscriptionSection,
   type SubscriptionSectionProps,
   type SubscriptionSectionConfig,
-} from "./presentation/components/sections/SubscriptionSection";
+} from "@presentation/components/sections/SubscriptionSection";
 
 // =============================================================================
 // PRESENTATION LAYER - Subscription Detail Screen
@@ -118,16 +118,16 @@ export {
   type SubscriptionDetailScreenProps,
   type SubscriptionDetailConfig,
   type SubscriptionDetailTranslations,
-} from "./presentation/screens/SubscriptionDetailScreen";
+} from "@presentation/screens/SubscriptionDetailScreen";
 
-export { type DevTestActions } from "./presentation/screens/components/DevTestSection";
+export { type DevTestActions } from "@presentation/screens/components/DevTestSection";
 
 
 // =============================================================================
 // UTILS - Date & Price
 // =============================================================================
 
-export { formatPrice } from "./utils/priceUtils";
+export { formatPrice } from "@utils/priceUtils";
 
 // =============================================================================
 // UTILS - User Tier
@@ -137,24 +137,24 @@ export type {
   UserTier,
   UserTierInfo,
   PremiumStatusFetcher,
-} from "./utils/types";
+} from "@utils/types";
 
 export {
   getUserTierInfo,
   checkPremiumAccess,
-} from "./utils/tierUtils";
+} from "@utils/tierUtils";
 
 export {
   hasTierAccess,
   isTierPremium,
   isTierFreemium,
   isTierGuest,
-} from "./utils/userTierUtils";
+} from "@utils/userTierUtils";
 
 export {
   isAuthenticated,
   isGuest,
-} from "./utils/authUtils";
+} from "@utils/authUtils";
 
 export {
   isValidUserTier,
@@ -163,7 +163,7 @@ export {
   validateIsGuest,
   validateIsPremium,
   validateFetcher,
-} from "./utils/validation";
+} from "@utils/validation";
 
 // =============================================================================
 // CREDITS SYSTEM - Domain Entities
@@ -175,9 +175,9 @@ export type {
   CreditsConfig,
   CreditsResult,
   DeductCreditsResult,
-} from "./domain/entities/Credits";
+} from "@domain/entities/Credits";
 
-export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
+export { DEFAULT_CREDITS_CONFIG } from "@domain/entities/Credits";
 
 // =============================================================================
 // CREDITS SYSTEM - Repository
@@ -186,7 +186,7 @@ export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
 export {
   CreditsRepository,
   createCreditsRepository,
-} from "./infrastructure/repositories/CreditsRepository";
+} from "@infrastructure/repositories/CreditsRepository";
 
 // =============================================================================
 // CREDITS SYSTEM - Configuration (Module-Level Provider)
@@ -197,7 +197,7 @@ export {
   getCreditsRepository,
   getCreditsConfig,
   resetCreditsRepository,
-} from "./infrastructure/repositories/CreditsRepositoryProvider";
+} from "@infrastructure/repositories/CreditsRepositoryProvider";
 
 // =============================================================================
 // CREDITS SYSTEM - Hooks
@@ -209,7 +209,7 @@ export {
   creditsQueryKeys,
   type UseCreditsParams,
   type UseCreditsResult,
-} from "./presentation/hooks/useCredits";
+} from "@presentation/hooks/useCredits";
 
 export {
   useDeductCredit,
@@ -219,37 +219,37 @@ export {
   type UseInitializeCreditsParams,
   type UseInitializeCreditsResult,
   type InitializeCreditsOptions,
-} from "./presentation/hooks/useDeductCredit";
+} from "@presentation/hooks/useDeductCredit";
 
 export {
   usePremiumWithCredits,
   type UsePremiumWithCreditsParams,
   type UsePremiumWithCreditsResult,
-} from "./presentation/hooks/usePremiumWithCredits";
+} from "@presentation/hooks/usePremiumWithCredits";
 
 export {
   useCreditChecker,
   type UseCreditCheckerParams,
   type UseCreditCheckerResult,
-} from "./presentation/hooks/useCreditChecker";
+} from "@presentation/hooks/useCreditChecker";
 
 export {
   usePaywallVisibility,
   type UsePaywallVisibilityResult,
-} from "./presentation/hooks/usePaywallVisibility";
+} from "@presentation/hooks/usePaywallVisibility";
 
 export {
   usePremiumWithConfig,
   type UsePremiumWithConfigParams,
   type UsePremiumWithConfigResult,
-} from "./presentation/hooks/usePremiumWithConfig";
+} from "@presentation/hooks/usePremiumWithConfig";
 
 export {
   useAuthSubscriptionSync,
   type AuthSubscriptionSyncConfig,
-} from "./presentation/hooks/useAuthSubscriptionSync";
+} from "@presentation/hooks/useAuthSubscriptionSync";
 
-export { useDevTestCallbacks } from "./presentation/hooks/useDevTestCallbacks";
+export { useDevTestCallbacks } from "@presentation/hooks/useDevTestCallbacks";
 
 // =============================================================================
 // CREDITS SYSTEM - Utilities
@@ -260,18 +260,18 @@ export {
   type CreditCheckResult,
   type CreditCheckerConfig,
   type CreditChecker,
-} from "./utils/creditChecker";
+} from "@utils/creditChecker";
 
 export {
   createAICreditHelpers,
   type AICreditHelpersConfig,
   type AICreditHelpers,
-} from "./utils/aiCreditHelpers";
+} from "@utils/aiCreditHelpers";
 
 export {
   detectPackageType,
   type SubscriptionPackageType,
-} from "./utils/packageTypeDetector";
+} from "@utils/packageTypeDetector";
 
 export {
   getCreditAllocation,
@@ -279,7 +279,7 @@ export {
   getTextCreditsForPackage,
   CREDIT_ALLOCATIONS,
   type CreditAllocation,
-} from "./utils/creditMapper";
+} from "@utils/creditMapper";
 
 // =============================================================================
 // REVENUECAT - Errors
@@ -293,26 +293,26 @@ export {
   RevenueCatRestoreError,
   RevenueCatNetworkError,
   RevenueCatExpoGoError,
-} from "./revenuecat/domain/errors/RevenueCatError";
+} from "@revenuecat/domain/errors/RevenueCatError";
 
 // =============================================================================
 // REVENUECAT - Types & Config
 // =============================================================================
 
-export type { RevenueCatConfig } from "./revenuecat/domain/value-objects/RevenueCatConfig";
+export type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
 
 export type {
   RevenueCatEntitlement,
   RevenueCatPurchaseErrorInfo,
-} from "./revenuecat/domain/types/RevenueCatTypes";
+} from "@revenuecat/domain/types/RevenueCatTypes";
 
-export { REVENUECAT_LOG_PREFIX } from "./revenuecat/domain/constants/RevenueCatConstants";
+export { REVENUECAT_LOG_PREFIX } from "@revenuecat/domain/constants/RevenueCatConstants";
 
 export {
   getPremiumEntitlement,
   isUserCancelledError,
   getErrorMessage,
-} from "./revenuecat/domain/types/RevenueCatTypes";
+} from "@revenuecat/domain/types/RevenueCatTypes";
 
 // =============================================================================
 // REVENUECAT - Ports
@@ -323,7 +323,7 @@ export type {
   InitializeResult,
   PurchaseResult,
   RestoreResult,
-} from "./revenuecat/application/ports/IRevenueCatService";
+} from "@revenuecat/application/ports/IRevenueCatService";
 
 // =============================================================================
 // REVENUECAT - Service
@@ -334,23 +334,23 @@ export {
   initializeRevenueCatService,
   getRevenueCatService,
   resetRevenueCatService,
-} from "./revenuecat/infrastructure/services/RevenueCatService";
+} from "@revenuecat/infrastructure/services/RevenueCatService";
 
 export {
   SubscriptionManager,
   type SubscriptionManagerConfig,
   type PremiumStatus,
-} from "./revenuecat/infrastructure/managers/SubscriptionManager";
+} from "@revenuecat/infrastructure/managers/SubscriptionManager";
 
 // =============================================================================
 // REVENUECAT - Hooks
 // =============================================================================
 
-export { useRevenueCat } from "./revenuecat/presentation/hooks/useRevenueCat";
-export type { UseRevenueCatResult } from "./revenuecat/presentation/hooks/useRevenueCat";
+export { useRevenueCat } from "@revenuecat/presentation/hooks/useRevenueCat";
+export type { UseRevenueCatResult } from "@revenuecat/presentation/hooks/useRevenueCat";
 
-export { useCustomerInfo } from "./revenuecat/presentation/hooks/useCustomerInfo";
-export type { UseCustomerInfoResult } from "./revenuecat/presentation/hooks/useCustomerInfo";
+export { useCustomerInfo } from "@revenuecat/presentation/hooks/useCustomerInfo";
+export type { UseCustomerInfoResult } from "@revenuecat/presentation/hooks/useCustomerInfo";
 
 export {
   useInitializeSubscription,
@@ -358,4 +358,4 @@ export {
   usePurchasePackage,
   useRestorePurchase,
   SUBSCRIPTION_QUERY_KEYS,
-} from "./revenuecat/presentation/hooks/useSubscriptionQueries";
+} from "@revenuecat/presentation/hooks/useSubscriptionQueries";

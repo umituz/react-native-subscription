@@ -4,7 +4,7 @@
  * NOTE: Main app is responsible for resolving platform-specific keys
  */
 
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
 import { isExpoGo, isProductionBuild } from "./ExpoGoDetector";
 
 /**

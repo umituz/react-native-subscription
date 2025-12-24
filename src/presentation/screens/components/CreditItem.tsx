@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
 interface CreditItemProps {
     label: string;
@@ -34,13 +34,13 @@ export const CreditItem: React.FC<CreditItemProps> = ({
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={[styles.label, { color: tokens.colors.textPrimary }]}>
+                <AtomicText type="bodyMedium" style={[styles.label, { color: tokens.colors.textPrimary }]}>
                     {label}
-                </Text>
+                </AtomicText>
                 <View style={[styles.badge, { backgroundColor: tokens.colors.surfaceSecondary }]}>
-                    <Text style={[styles.count, { color: getColor() }]}>
+                    <AtomicText type="labelSmall" style={[styles.count, { color: getColor() }]}>
                         {current} / {total}
-                    </Text>
+                    </AtomicText>
                 </View>
             </View>
             <View
@@ -59,9 +59,9 @@ export const CreditItem: React.FC<CreditItemProps> = ({
                     ]}
                 />
             </View>
-            <Text style={[styles.remaining, { color: tokens.colors.textSecondary }]}>
+            <AtomicText type="bodySmall" style={[styles.remaining, { color: tokens.colors.textSecondary }]}>
                 {current} {remainingLabel}
-            </Text>
+            </AtomicText>
         </View>
     );
 };
@@ -76,7 +76,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     label: {
-        fontSize: 15,
         fontWeight: "500",
     },
     badge: {
@@ -85,7 +84,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     count: {
-        fontSize: 13,
         fontWeight: "600",
     },
     progressBar: {
@@ -98,6 +96,5 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     remaining: {
-        fontSize: 12,
     },
 });

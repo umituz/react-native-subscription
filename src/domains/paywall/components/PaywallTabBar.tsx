@@ -6,7 +6,7 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { PaywallTabType } from "../entities";
+import type { PaywallTabType } from "@domains/paywall/entities";
 
 interface PaywallTabBarProps {
     activeTab: PaywallTabType;

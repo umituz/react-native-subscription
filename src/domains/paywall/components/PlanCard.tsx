@@ -8,6 +8,8 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicIcon, AtomicBadge, useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
+import { formatPrice } from "@utils/priceUtils";
+
 interface PlanCardProps {
     pkg: PurchasesPackage;
     isSelected: boolean;
@@ -21,7 +23,7 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
     ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel }) => {
         const tokens = useAppDesignTokens();
         const title = pkg.product.title;
-        const price = `${pkg.product.currencyCode} ${pkg.product.price.toFixed(2)}`;
+        const price = formatPrice(pkg.product.price, pkg.product.currencyCode);
 
         return (
             <TouchableOpacity onPress={onSelect} activeOpacity={0.7} style={styles.touchable}>

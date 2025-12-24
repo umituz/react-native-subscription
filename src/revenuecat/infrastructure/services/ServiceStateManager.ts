@@ -3,8 +3,8 @@
  * Manages RevenueCat service state
  */
 
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import { isExpoGo, isDevelopment } from "../utils/ExpoGoDetector";
+import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
+import { isExpoGo, isDevelopment } from "@revenuecat/infrastructure/utils/ExpoGoDetector";
 
 export class ServiceStateManager {
   private isInitializedFlag: boolean = false;

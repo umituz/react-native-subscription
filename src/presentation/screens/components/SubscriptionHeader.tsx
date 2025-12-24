@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import {
     PremiumStatusBadge,
     type SubscriptionStatusType,
@@ -13,13 +13,14 @@ import {
 
 interface SubscriptionHeaderTranslations {
     title: string;
-    statusLabel?: string;
-    statusActive?: string;
-    statusExpired?: string;
-    statusFree?: string;
-    expiresLabel?: string;
-    purchasedLabel?: string;
-    lifetimeLabel?: string;
+    statusLabel: string;
+    statusActive: string;
+    statusExpired: string;
+    statusFree: string;
+    statusCanceled: string;
+    expiresLabel: string;
+    purchasedLabel: string;
+    lifetimeLabel: string;
 }
 
 interface SubscriptionHeaderProps {
@@ -50,14 +51,15 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
     return (
         <View style={[styles.container, { backgroundColor: tokens.colors.surface }]}>
             <View style={styles.header}>
-                <Text style={[styles.title, { color: tokens.colors.textPrimary }]}>
+                <AtomicText type="headlineSmall" style={[styles.title, { color: tokens.colors.textPrimary }]}>
                     {translations.title}
-                </Text>
+                </AtomicText>
                 <PremiumStatusBadge
                     status={statusType}
                     activeLabel={translations.statusActive}
                     expiredLabel={translations.statusExpired}
                     noneLabel={translations.statusFree}
+                    canceledLabel={translations.statusCanceled}
                 />
             </View>
 
@@ -65,15 +67,15 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
                 <View style={styles.details}>
                     {isLifetime ? (
                         <DetailRow
-                            label={translations.statusLabel || "Subscription"}
-                            value={translations.lifetimeLabel || "Lifetime Access"}
+                            label={translations.statusLabel}
+                            value={translations.lifetimeLabel}
                             tokens={tokens}
                         />
                     ) : (
                         <>
                             {expirationDate && (
                                 <DetailRow
-                                    label={translations.expiresLabel || "Expires"}
+                                    label={translations.expiresLabel}
                                     value={expirationDate}
                                     highlight={showExpiring}
                                     tokens={tokens}
@@ -81,7 +83,7 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
                             )}
                             {purchaseDate && (
                                 <DetailRow
-                                    label={translations.purchasedLabel || "Purchased"}
+                                    label={translations.purchasedLabel}
                                     value={purchaseDate}
                                     tokens={tokens}
                                 />
@@ -108,17 +110,18 @@ const DetailRow: React.FC<DetailRowProps> = ({
     tokens,
 }) => (
     <View style={styles.row}>
-        <Text style={[styles.label, { color: tokens.colors.textSecondary }]}>
+        <AtomicText type="bodyMedium" style={[styles.label, { color: tokens.colors.textSecondary }]}>
             {label}
-        </Text>
-        <Text
+        </AtomicText>
+        <AtomicText
+            type="bodyMedium"
             style={[
                 styles.value,
                 { color: highlight ? tokens.colors.warning : tokens.colors.textPrimary },
             ]}
         >
             {value}
-        </Text>
+        </AtomicText>
     </View>
 );
 
@@ -134,7 +137,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     title: {
-        fontSize: 24,
         fontWeight: "700",
     },
     details: {
@@ -147,10 +149,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     label: {
-        fontSize: 15,
     },
     value: {
-        fontSize: 15,
         fontWeight: "600",
     },
 });

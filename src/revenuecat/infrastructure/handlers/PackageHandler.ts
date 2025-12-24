@@ -4,8 +4,8 @@
  */
 
 import type { PurchasesPackage } from "react-native-purchases";
-import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
-import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
+import type { IRevenueCatService } from "@revenuecat/application/ports/IRevenueCatService";
+import { getPremiumEntitlement } from "@revenuecat/domain/types/RevenueCatTypes";
 import {
   trackPackageError,
   addPackageBreadcrumb,

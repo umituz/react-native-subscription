@@ -9,7 +9,7 @@ import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/r
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { CreditCard } from "./CreditCard";
-import type { PaywallMode, CreditsPackage, SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "../entities";
+import type { PaywallMode, CreditsPackage, SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "@domains/paywall/entities";
 
 export interface PaywallModalProps {
     visible: boolean;
@@ -148,7 +148,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                                         pkg={pkg}
                                         isSelected={selectedPlanId === pkg.product.identifier}
                                         onSelect={() => setSelectedPlanId(pkg.product.identifier)}
-                                        badge={pkg.product.identifier === bestValueIdentifier ? "Best Value" : undefined}
+                                        badge={pkg.product.identifier === bestValueIdentifier ? translations.bestValueBadgeText : undefined}
                                         creditAmount={creditAmounts?.[pkg.product.identifier]}
                                         creditsLabel={creditsLabel}
                                     />
@@ -167,7 +167,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                         activeOpacity={0.8}
                     >
                         <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
-                            {isProcessing ? "Processing..." : showSubscription ? "Subscribe Now" : "Buy Credits"}
+                            {isProcessing
+                                ? translations.processingText
+                                : showSubscription
+                                    ? (translations.subscribeButtonText || translations.purchaseButtonText)
+                                    : translations.purchaseButtonText}
                         </AtomicText>
                     </TouchableOpacity>
 

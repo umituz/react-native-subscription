@@ -25,7 +25,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useUserTier, type UseUserTierParams } from './useUserTier';
-import type { ISubscriptionRepository } from '../../application/ports/ISubscriptionRepository';
+import type { ISubscriptionRepository } from '@application/ports/ISubscriptionRepository';
 
 /**
  * Auth provider interface

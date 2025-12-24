@@ -6,15 +6,15 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import { SubscriptionStatusType } from "../../../domain/entities/SubscriptionStatus";
+import { SubscriptionStatusType } from "@domain/entities/SubscriptionStatus";
 export type { SubscriptionStatusType };
 
 export interface PremiumStatusBadgeProps {
   status: SubscriptionStatusType;
-  activeLabel?: string;
-  expiredLabel?: string;
-  noneLabel?: string;
-  canceledLabel?: string;
+  activeLabel: string;
+  expiredLabel: string;
+  noneLabel: string;
+  canceledLabel: string;
 }
 
 /**
@@ -22,10 +22,10 @@ export interface PremiumStatusBadgeProps {
  */
 export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   status,
-  activeLabel = "Active",
-  expiredLabel = "Expired",
-  noneLabel = "Free",
-  canceledLabel = "Canceled",
+  activeLabel,
+  expiredLabel,
+  noneLabel,
+  canceledLabel,
 }) => {
   const tokens = useAppDesignTokens();
 

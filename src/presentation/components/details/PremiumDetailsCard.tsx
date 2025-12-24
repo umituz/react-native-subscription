@@ -5,8 +5,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { PremiumStatusBadge } from "./PremiumStatusBadge";
 import { DetailRow } from "./DetailRow";
 import { CreditRow } from "./CreditRow";
@@ -33,14 +33,15 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
       {(isPremium || showCredits) && (
         <View style={styles.header}>
-          <Text style={[styles.title, { color: tokens.colors.text }]}>
+          <AtomicText type="titleLarge" style={{ color: tokens.colors.textPrimary }}>
             {translations.title}
-          </Text>
+          </AtomicText>
           <PremiumStatusBadge
             status={statusType}
             activeLabel={translations.statusActive}
             expiredLabel={translations.statusExpired}
             noneLabel={translations.statusFree}
+            canceledLabel={translations.statusCanceled}
           />
         </View>
       )}
@@ -48,12 +49,12 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
       {!isPremium && !showCredits && (
         <View style={styles.freeUserHeader}>
           <View style={styles.freeUserTextContainer}>
-            <Text style={[styles.freeUserTitle, { color: tokens.colors.text }]}>
+            <AtomicText type="headlineSmall" style={{ color: tokens.colors.textPrimary, fontWeight: "700" }}>
               {translations.title}
-            </Text>
-            <Text style={[styles.freeUserDescription, { color: tokens.colors.textSecondary }]}>
-              Unlock all features and create unlimited magic
-            </Text>
+            </AtomicText>
+            <AtomicText type="bodyMedium" style={{ color: tokens.colors.textSecondary }}>
+              {translations.freeDescription}
+            </AtomicText>
           </View>
         </View>
       )}
@@ -94,9 +95,9 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
           style={[styles.creditsSection, { borderTopColor: tokens.colors.border }]}
         >
           {translations.creditsTitle && (
-            <Text style={[styles.sectionTitle, { color: tokens.colors.text }]}>
+            <AtomicText type="labelMedium" style={[styles.sectionTitle, { color: tokens.colors.textPrimary }]}>
               {translations.creditsTitle}
-            </Text>
+            </AtomicText>
           )}
           {credits.map((credit) => (
             <CreditRow
@@ -119,9 +120,9 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
             ]}
             onPress={onManageSubscription}
           >
-            <Text style={[styles.secondaryButtonText, { color: tokens.colors.text }]}>
+            <AtomicText type="labelLarge" style={{ color: tokens.colors.textPrimary }}>
               {translations.manageButton}
-            </Text>
+            </AtomicText>
           </TouchableOpacity>
         )}
         {!isPremium && onUpgrade && translations.upgradeButton && (
@@ -129,11 +130,12 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
             style={[styles.premiumButton, { backgroundColor: tokens.colors.primary }]}
             onPress={onUpgrade}
           >
-            <Text
-              style={[styles.premiumButtonText, { color: tokens.colors.onPrimary }]}
+            <AtomicText
+              type="titleMedium"
+              style={{ color: tokens.colors.onPrimary, fontWeight: "700" }}
             >
               {translations.upgradeButton}
-            </Text>
+            </AtomicText>
           </TouchableOpacity>
         )}
       </View>
@@ -152,41 +154,23 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  title: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
   freeUserHeader: {
     marginBottom: 4,
   },
   freeUserTextContainer: {
     gap: 6,
   },
-  freeUserTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  freeUserDescription: {
-    fontSize: 15,
-    fontWeight: "400",
-    lineHeight: 20,
-  },
   premiumButton: {
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-  premiumButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
   detailsSection: {
     gap: 8,
   },
   sectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
     marginBottom: 4,
+    fontWeight: "600",
   },
   creditsSection: {
     gap: 8,
@@ -196,22 +180,9 @@ const styles = StyleSheet.create({
   actionsSection: {
     gap: 8,
   },
-  primaryButton: {
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  primaryButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-  },
   secondaryButton: {
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: "500",
   },
 });

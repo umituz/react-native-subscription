@@ -7,8 +7,8 @@
 
 import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CreditType, UserCredits } from "../../domain/entities/Credits";
-import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
+import type { CreditType, UserCredits } from "@domain/entities/Credits";
+import { getCreditsRepository } from "@infrastructure/repositories/CreditsRepositoryProvider";
 import { creditsQueryKeys } from "./useCredits";
 
 export interface UseDeductCreditParams {

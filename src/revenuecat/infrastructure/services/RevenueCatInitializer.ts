@@ -4,10 +4,10 @@
  */
 
 import Purchases from "react-native-purchases";
-import type { InitializeResult } from "../../application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import { getErrorMessage } from "../../domain/types/RevenueCatTypes";
-import { resolveApiKey } from "../utils/ApiKeyResolver";
+import type { InitializeResult } from "@revenuecat/application/ports/IRevenueCatService";
+import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
+import { getErrorMessage } from "@revenuecat/domain/types/RevenueCatTypes";
+import { resolveApiKey } from "@revenuecat/infrastructure/utils/ApiKeyResolver";
 import {
   trackPackageError,
   addPackageBreadcrumb,

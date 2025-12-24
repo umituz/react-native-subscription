@@ -3,7 +3,7 @@
  * Handles RevenueCat expiration date extraction
  */
 
-import type { RevenueCatEntitlement } from "../../domain/types/RevenueCatTypes";
+import type { RevenueCatEntitlement } from "@revenuecat/domain/types/RevenueCatTypes";
 
 export function getExpirationDate(
   entitlement: RevenueCatEntitlement | null

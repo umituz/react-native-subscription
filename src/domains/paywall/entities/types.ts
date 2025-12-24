@@ -40,6 +40,7 @@ export interface PaywallTranslations {
     processingText: string;
     privacyText?: string;
     termsOfServiceText?: string;
+    bestValueBadgeText?: string;
 }
 
 export interface PaywallLegalUrls {

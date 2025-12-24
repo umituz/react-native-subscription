@@ -4,8 +4,8 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
+import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
+import { getPremiumEntitlement } from "@revenuecat/domain/types/RevenueCatTypes";
 import { getExpirationDate } from "./ExpirationDateCalculator";
 import {
   trackPackageError,

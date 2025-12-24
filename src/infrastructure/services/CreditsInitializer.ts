@@ -7,7 +7,7 @@ import {
     type Transaction,
     type DocumentReference,
 } from "firebase/firestore";
-import type { CreditsConfig } from "../../domain/entities/Credits";
+import type { CreditsConfig } from "@domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
 interface InitializationResult {

@@ -16,18 +16,19 @@ import type { CreditInfo } from "../components/details/PremiumDetailsCard";
 
 export interface SubscriptionDetailTranslations {
     title: string;
-    statusLabel?: string;
-    statusActive?: string;
-    statusExpired?: string;
-    statusFree?: string;
-    expiresLabel?: string;
-    purchasedLabel?: string;
-    lifetimeLabel?: string;
-    creditsTitle?: string;
-    remainingLabel?: string;
+    statusLabel: string;
+    statusActive: string;
+    statusExpired: string;
+    statusFree: string;
+    statusCanceled: string;
+    expiresLabel: string;
+    purchasedLabel: string;
+    lifetimeLabel: string;
+    creditsTitle: string;
+    remainingLabel: string;
     usageTitle?: string;
-    manageButton?: string;
-    upgradeButton?: string;
+    manageButton: string;
+    upgradeButton: string;
     creditsResetInfo?: string;
 }
 

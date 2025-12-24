@@ -4,8 +4,8 @@
  */
 
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
 interface SubscriptionActionsProps {
     isPremium: boolean;
@@ -34,14 +34,12 @@ export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
                     ]}
                     onPress={onManage}
                 >
-                    <Text
-                        style={[
-                            styles.secondaryButtonText,
-                            { color: tokens.colors.textPrimary },
-                        ]}
+                    <AtomicText
+                        type="titleMedium"
+                        style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}
                     >
                         {manageButtonLabel}
-                    </Text>
+                    </AtomicText>
                 </TouchableOpacity>
             )}
             {!isPremium && onUpgrade && upgradeButtonLabel && (
@@ -49,14 +47,12 @@ export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
                     style={[styles.primaryButton, { backgroundColor: tokens.colors.primary }]}
                     onPress={onUpgrade}
                 >
-                    <Text
-                        style={[
-                            styles.primaryButtonText,
-                            { color: tokens.colors.onPrimary },
-                        ]}
+                    <AtomicText
+                        type="titleMedium"
+                        style={{ color: tokens.colors.onPrimary, fontWeight: "700" }}
                     >
                         {upgradeButtonLabel}
-                    </Text>
+                    </AtomicText>
                 </TouchableOpacity>
             )}
         </View>
@@ -73,17 +69,9 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: "center",
     },
-    primaryButtonText: {
-        fontSize: 16,
-        fontWeight: "700",
-    },
     secondaryButton: {
         paddingVertical: 16,
         borderRadius: 12,
         alignItems: "center",
-    },
-    secondaryButtonText: {
-        fontSize: 16,
-        fontWeight: "600",
     },
 });

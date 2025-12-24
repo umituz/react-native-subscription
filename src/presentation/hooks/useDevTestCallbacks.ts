@@ -7,9 +7,9 @@
 import { useCallback } from "react";
 import { Alert } from "react-native";
 import { useAuth } from "@umituz/react-native-auth";
-import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
+import { getCreditsRepository } from "@infrastructure/repositories/CreditsRepositoryProvider";
 import { useCredits } from "./useCredits";
-import type { DevTestActions } from "../screens/components/DevTestSection";
+import type { DevTestActions } from "@presentation/screens/components/DevTestSection";
 
 export const useDevTestCallbacks = (): DevTestActions | undefined => {
   const { user } = useAuth();
