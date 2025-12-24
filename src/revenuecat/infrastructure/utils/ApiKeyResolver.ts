@@ -5,11 +5,12 @@
  */
 
 import type { RevenueCatConfig } from "@revenuecat/domain/value-objects/RevenueCatConfig";
-import { isExpoGo, isProductionBuild } from "./ExpoGoDetector";
+import { isTestStoreEnvironment } from "./ExpoGoDetector";
 
 /**
  * Check if Test Store key should be used
  * CRITICAL: Never use test store in production builds
+ * Uses Test Store in development environments (Expo Go, dev builds, simulators)
  */
 export function shouldUseTestStore(config: RevenueCatConfig): boolean {
   const testKey = config.testStoreKey;
@@ -18,16 +19,13 @@ export function shouldUseTestStore(config: RevenueCatConfig): boolean {
     return false;
   }
 
-  if (isProductionBuild() && !isExpoGo()) {
-    return false;
-  }
-
-  return isExpoGo();
+  return isTestStoreEnvironment();
 }
 
 /**
  * Get RevenueCat API key from config
- * Returns Test Store key if in Expo Go environment ONLY
+ * Returns Test Store key in development environments (Expo Go, dev builds, simulators)
+ * Returns production API key in production builds
  * Main app must provide resolved platform-specific apiKey in config
  */
 export function resolveApiKey(config: RevenueCatConfig): string | null {
