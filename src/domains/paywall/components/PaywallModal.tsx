@@ -95,11 +95,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
                     <View style={styles.header}>
-                        <AtomicText type="headlineLarge" style={[styles.title, { color: tokens.colors.textPrimary }]}>
+                        <AtomicText type="headlineMedium" style={[styles.title, { color: tokens.colors.textPrimary }]}>
                             {translations.title}
                         </AtomicText>
                         {translations.subtitle && (
-                            <AtomicText type="bodyLarge" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>
+                            <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>
                                 {translations.subtitle}
                             </AtomicText>
                         )}
@@ -110,9 +110,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                             {features.map((feature, idx) => (
                                 <View key={idx} style={styles.featureRow}>
                                     <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primaryLight }]}>
-                                        <AtomicIcon name={feature.icon} customSize={20} customColor={tokens.colors.primary} />
+                                        <AtomicIcon name={feature.icon} customSize={16} customColor={tokens.colors.primary} />
                                     </View>
-                                    <AtomicText type="bodyLarge" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
+                                    <AtomicText type="bodyMedium" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
                                         {feature.text}
                                     </AtomicText>
                                 </View>
@@ -193,21 +193,21 @@ PaywallModal.displayName = "PaywallModal";
 const styles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
     container: { flex: 1 },
-    closeBtn: { position: "absolute", top: 16, right: 16, width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center", zIndex: 10 },
-    scroll: { flexGrow: 1, padding: 24, paddingTop: 56 },
-    header: { alignItems: "center", marginBottom: 24 },
-    title: { fontWeight: "700", textAlign: "center", marginBottom: 8 },
-    subtitle: { textAlign: "center", lineHeight: 24 },
-    features: { borderRadius: 16, padding: 16, marginBottom: 20, gap: 12 },
+    closeBtn: { position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", zIndex: 10 },
+    scroll: { flexGrow: 1, padding: 16, paddingTop: 48 },
+    header: { alignItems: "center", marginBottom: 12 },
+    title: { fontWeight: "700", textAlign: "center", marginBottom: 4 },
+    subtitle: { textAlign: "center", lineHeight: 20, fontSize: 14 },
+    features: { borderRadius: 12, padding: 12, marginBottom: 12, gap: 8 },
     featureRow: { flexDirection: "row", alignItems: "center" },
-    featureIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: "center", alignItems: "center", marginRight: 12 },
-    featureText: { flex: 1, fontWeight: "500" },
-    loading: { alignItems: "center", paddingVertical: 40 },
-    loadingText: { marginTop: 12 },
-    plans: { marginBottom: 20 },
-    cta: { borderRadius: 16, paddingVertical: 18, alignItems: "center", marginBottom: 16 },
+    featureIcon: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", marginRight: 8 },
+    featureText: { flex: 1, fontWeight: "500", fontSize: 14 },
+    loading: { alignItems: "center", paddingVertical: 24 },
+    loadingText: { marginTop: 8 },
+    plans: { marginBottom: 12 },
+    cta: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
     ctaDisabled: { opacity: 0.5 },
     ctaText: { fontWeight: "700" },
-    footer: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 8 },
+    footer: { flexDirection: "row", justifyContent: "center", gap: 16, flexWrap: "wrap" },
     footerLink: {},
 });
