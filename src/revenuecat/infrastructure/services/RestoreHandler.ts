@@ -4,17 +4,17 @@
  */
 
 import Purchases from "react-native-purchases";
-import type { RestoreResult } from "../application/ports/IRevenueCatService";
+import type { RestoreResult } from '../../application/ports/IRevenueCatService';
 import {
   RevenueCatRestoreError,
   RevenueCatInitializationError,
-} from "../domain/errors/RevenueCatError";
-import type { RevenueCatConfig } from "../domain/value-objects/RevenueCatConfig";
-import { getErrorMessage } from "../domain/types/RevenueCatTypes";
+} from '../../domain/errors/RevenueCatError';
+import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
+import { getErrorMessage } from '../../domain/types/RevenueCatTypes';
 import {
   syncPremiumStatus,
   notifyRestoreCompleted,
-} from "../infrastructure/utils/PremiumStatusSyncer";
+} from '../utils/PremiumStatusSyncer';
 import {
   trackPackageError,
   addPackageBreadcrumb,

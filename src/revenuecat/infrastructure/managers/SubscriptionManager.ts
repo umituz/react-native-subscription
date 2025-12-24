@@ -5,13 +5,13 @@
  */
 
 import type { PurchasesPackage } from "react-native-purchases";
-import type { RevenueCatConfig } from "../domain/value-objects/RevenueCatConfig";
-import type { IRevenueCatService } from "../application/ports/IRevenueCatService";
-import { initializeRevenueCatService, getRevenueCatService } from "../infrastructure/services/RevenueCatService";
-import { UserIdProvider } from "../infrastructure/utils/UserIdProvider";
-import { InitializationCache } from "../infrastructure/utils/InitializationCache";
-import { PackageHandler } from "../infrastructure/handlers/PackageHandler";
-import type { PremiumStatus } from "../infrastructure/handlers/PackageHandler";
+import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
+import type { IRevenueCatService } from '../../application/ports/IRevenueCatService';
+import { initializeRevenueCatService, getRevenueCatService } from '../services/RevenueCatService';
+import { UserIdProvider } from '../utils/UserIdProvider';
+import { InitializationCache } from '../utils/InitializationCache';
+import { PackageHandler } from '../handlers/PackageHandler';
+import type { PremiumStatus } from '../handlers/PackageHandler';
 import {
   trackPackageError,
   addPackageBreadcrumb,

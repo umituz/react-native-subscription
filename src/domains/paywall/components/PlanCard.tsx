@@ -8,7 +8,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicIcon, AtomicBadge, useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 
-import { formatPrice } from "../../utils/priceUtils";
+import { formatPrice } from '../../../utils/priceUtils';
 
 interface PlanCardProps {
     pkg: PurchasesPackage;

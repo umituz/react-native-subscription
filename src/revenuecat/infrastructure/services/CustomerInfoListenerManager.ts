@@ -7,8 +7,8 @@ import Purchases, {
   type CustomerInfo,
   type CustomerInfoUpdateListener,
 } from "react-native-purchases";
-import type { RevenueCatConfig } from "../domain/value-objects/RevenueCatConfig";
-import { syncPremiumStatus } from "../infrastructure/utils/PremiumStatusSyncer";
+import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
+import { syncPremiumStatus } from '../utils/PremiumStatusSyncer';
 import { addPackageBreadcrumb } from "@umituz/react-native-sentry";
 
 export class CustomerInfoListenerManager {

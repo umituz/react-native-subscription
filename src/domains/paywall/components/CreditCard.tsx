@@ -6,9 +6,9 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicIcon, AtomicBadge, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { CreditsPackage } from "../paywall/entities";
+import type { CreditsPackage } from '../entities';
 
-import { formatPrice } from "../../utils/priceUtils";
+import { formatPrice } from '../../../utils/priceUtils';
 
 interface CreditCardProps {
     pkg: CreditsPackage;
