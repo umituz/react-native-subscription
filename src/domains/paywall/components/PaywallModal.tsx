@@ -1,18 +1,11 @@
 /**
  * Paywall Modal
- * Modern paywall with gradient container and responsive design
+ * Modern paywall with responsive design and theme support
  */
 
 import React, { useState, useCallback } from "react";
 import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import {
-    BaseModal,
-    useAppDesignTokens,
-    AtomicText,
-    AtomicIcon,
-    useDesignSystemTheme,
-} from "@umituz/react-native-design-system";
+import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { CreditCard } from "./CreditCard";
@@ -56,19 +49,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     } = props;
 
     const tokens = useAppDesignTokens();
-    const { themeMode } = useDesignSystemTheme();
-    const isDark = themeMode === "dark";
-
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [selectedCreditId, setSelectedCreditId] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
     const showCredits = mode === "credits";
     const showSubscription = mode === "subscription" || mode === "hybrid";
-
-    const gradientColors: readonly [string, string, string] = isDark
-        ? ["#1e3a5f", "#2d1e3f", "#1a1a2e"]
-        : ["#4a5568", "#5a4a78", "#3a3a4a"];
 
     const handlePurchase = useCallback(async () => {
         setIsProcessing(true);
@@ -98,10 +84,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
     return (
         <BaseModal visible={visible} onClose={onClose} contentStyle={styles.modalContent}>
-            <LinearGradient colors={gradientColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradient}>
+            <View style={[styles.container, { backgroundColor: tokens.colors.surface }]}>
                 <TouchableOpacity
                     onPress={onClose}
-                    style={[styles.closeBtn, { backgroundColor: tokens.colors.surface }]}
+                    style={[styles.closeBtn, { backgroundColor: tokens.colors.surfaceSecondary }]}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                     <AtomicIcon name="close-outline" size="md" customColor={tokens.colors.textPrimary} />
@@ -109,24 +95,24 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
                     <View style={styles.header}>
-                        <AtomicText type="headlineLarge" style={[styles.title, { color: tokens.colors.onPrimary }]}>
+                        <AtomicText type="headlineLarge" style={[styles.title, { color: tokens.colors.textPrimary }]}>
                             {translations.title}
                         </AtomicText>
                         {translations.subtitle && (
-                            <AtomicText type="bodyLarge" style={[styles.subtitle, { color: tokens.colors.onPrimary }]}>
+                            <AtomicText type="bodyLarge" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>
                                 {translations.subtitle}
                             </AtomicText>
                         )}
                     </View>
 
                     {features.length > 0 && (
-                        <View style={[styles.features, { backgroundColor: `${tokens.colors.surface}15` }]}>
+                        <View style={[styles.features, { backgroundColor: tokens.colors.surfaceSecondary }]}>
                             {features.map((feature, idx) => (
                                 <View key={idx} style={styles.featureRow}>
                                     <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primaryLight }]}>
                                         <AtomicIcon name={feature.icon} customSize={20} customColor={tokens.colors.primary} />
                                     </View>
-                                    <AtomicText type="bodyLarge" style={[styles.featureText, { color: tokens.colors.onPrimary }]}>
+                                    <AtomicText type="bodyLarge" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
                                         {feature.text}
                                     </AtomicText>
                                 </View>
@@ -136,8 +122,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
                     {isLoading ? (
                         <View style={styles.loading}>
-                            <ActivityIndicator color={tokens.colors.onPrimary} />
-                            <AtomicText type="bodyMedium" style={[styles.loadingText, { color: tokens.colors.onPrimary }]}>
+                            <ActivityIndicator color={tokens.colors.primary} />
+                            <AtomicText type="bodyMedium" style={[styles.loadingText, { color: tokens.colors.textSecondary }]}>
                                 {translations.loadingText}
                             </AtomicText>
                         </View>
@@ -176,28 +162,28 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                     <View style={styles.footer}>
                         {legalUrls.termsUrl && (
                             <TouchableOpacity onPress={() => {}}>
-                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.onPrimary }]}>
+                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                     {translations.termsOfServiceText}
                                 </AtomicText>
                             </TouchableOpacity>
                         )}
                         {onRestore && (
                             <TouchableOpacity onPress={handleRestore}>
-                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.onPrimary }]}>
+                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                     {translations.restoreButtonText}
                                 </AtomicText>
                             </TouchableOpacity>
                         )}
                         {legalUrls.privacyUrl && (
                             <TouchableOpacity onPress={() => {}}>
-                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.onPrimary }]}>
+                                <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
                                     {translations.privacyText}
                                 </AtomicText>
                             </TouchableOpacity>
                         )}
                     </View>
                 </ScrollView>
-            </LinearGradient>
+            </View>
         </BaseModal>
     );
 });
@@ -206,22 +192,22 @@ PaywallModal.displayName = "PaywallModal";
 
 const styles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
-    gradient: { flex: 1 },
+    container: { flex: 1 },
     closeBtn: { position: "absolute", top: 16, right: 16, width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center", zIndex: 10 },
     scroll: { padding: 24, paddingTop: 56 },
     header: { alignItems: "center", marginBottom: 24 },
     title: { fontWeight: "700", textAlign: "center", marginBottom: 8 },
-    subtitle: { textAlign: "center", lineHeight: 24, opacity: 0.8 },
+    subtitle: { textAlign: "center", lineHeight: 24 },
     features: { borderRadius: 16, padding: 16, marginBottom: 20, gap: 12 },
     featureRow: { flexDirection: "row", alignItems: "center" },
     featureIcon: { width: 40, height: 40, borderRadius: 20, justifyContent: "center", alignItems: "center", marginRight: 12 },
     featureText: { flex: 1, fontWeight: "500" },
     loading: { alignItems: "center", paddingVertical: 40 },
-    loadingText: { marginTop: 12, opacity: 0.7 },
+    loadingText: { marginTop: 12 },
     plans: { marginBottom: 20 },
     cta: { borderRadius: 16, paddingVertical: 18, alignItems: "center", marginBottom: 16 },
     ctaDisabled: { opacity: 0.5 },
     ctaText: { fontWeight: "700" },
     footer: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 8 },
-    footerLink: { opacity: 0.6 },
+    footerLink: {},
 });
