@@ -21,7 +21,7 @@ export class PackageHandler {
   constructor(
     private service: IRevenueCatService | null,
     private entitlementId: string
-  ) {}
+  ) { }
 
   setService(service: IRevenueCatService | null): void {
     this.service = service;
@@ -36,6 +36,19 @@ export class PackageHandler {
     try {
       const offering = await this.service.fetchOfferings();
 
+      if (__DEV__) {
+        console.log('[DEBUG PackageHandler] fetchOfferings result:', {
+          hasOffering: !!offering,
+          identifier: offering?.identifier,
+          packagesCount: offering?.availablePackages?.length ?? 0,
+          packages: offering?.availablePackages?.map(p => ({
+            identifier: p.identifier,
+            productIdentifier: p.product.identifier,
+            offeringIdentifier: p.offeringIdentifier
+          }))
+        });
+      }
+
       addPackageBreadcrumb("subscription", "Packages fetched", {
         identifier: offering?.identifier,
         count: offering?.availablePackages?.length ?? 0,
@@ -43,6 +56,9 @@ export class PackageHandler {
 
       return offering?.availablePackages ?? [];
     } catch (error) {
+      if (__DEV__) {
+        console.error('[DEBUG PackageHandler] fetchOfferings failed:', error);
+      }
       trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "fetch_packages",

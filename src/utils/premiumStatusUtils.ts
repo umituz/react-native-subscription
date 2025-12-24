@@ -26,21 +26,6 @@ import type { PremiumStatusFetcher } from './types';
  * @param isPremiumOrFetcher - Either boolean (sync) or PremiumStatusFetcher (async)
  * @returns boolean (sync) or Promise<boolean> (async) - Whether user has premium subscription
  */
-// Sync overload: when isPremium value is already known
-export function getIsPremium(
-  isGuestFlag: boolean,
-  userId: string | null,
-  isPremium: boolean,
-): boolean;
-
-// Async overload: when fetcher is provided
-export function getIsPremium(
-  isGuestFlag: boolean,
-  userId: string | null,
-  fetcher: PremiumStatusFetcher,
-): Promise<boolean>;
-
-// Implementation
 export function getIsPremium(
   isGuestFlag: boolean,
   userId: string | null,

@@ -33,28 +33,35 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
       });
 
       // Initialize if needed (works for both authenticated and anonymous users)
-      if (userId) {
-        if (!SubscriptionManager.isInitializedForUser(userId)) {
-          if (__DEV__) {
-            console.log('[DEBUG useSubscriptionPackages] Initializing for user:', userId);
+      try {
+        if (userId) {
+          if (!SubscriptionManager.isInitializedForUser(userId)) {
+            if (__DEV__) {
+              console.log('[DEBUG useSubscriptionPackages] Initializing for user:', userId);
+            }
+            await SubscriptionManager.initialize(userId);
+          } else {
+            if (__DEV__) {
+              console.log('[DEBUG useSubscriptionPackages] Already initialized for user:', userId);
+            }
           }
-          await SubscriptionManager.initialize(userId);
         } else {
-          if (__DEV__) {
-            console.log('[DEBUG useSubscriptionPackages] Already initialized for user:', userId);
+          if (!SubscriptionManager.isInitialized()) {
+            if (__DEV__) {
+              console.log('[DEBUG useSubscriptionPackages] Initializing for ANONYMOUS user');
+            }
+            await SubscriptionManager.initialize(undefined);
+          } else {
+            if (__DEV__) {
+              console.log('[DEBUG useSubscriptionPackages] Already initialized for ANONYMOUS');
+            }
           }
         }
-      } else {
-        if (!SubscriptionManager.isInitialized()) {
-          if (__DEV__) {
-            console.log('[DEBUG useSubscriptionPackages] Initializing for ANONYMOUS user');
-          }
-          await SubscriptionManager.initialize(undefined);
-        } else {
-          if (__DEV__) {
-            console.log('[DEBUG useSubscriptionPackages] Already initialized for ANONYMOUS');
-          }
+      } catch (error) {
+        if (__DEV__) {
+          console.error('[DEBUG useSubscriptionPackages] Initialization failed:', error);
         }
+        throw error;
       }
 
       if (__DEV__) {

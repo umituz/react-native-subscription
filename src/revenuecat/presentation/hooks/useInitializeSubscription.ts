@@ -48,7 +48,7 @@ export const useInitializeSubscription = (userId: string | undefined) => {
         {
           packageName: "subscription",
           operation: "initialize_mutation",
-          userId: userId ?? "NO_USER",
+          userId: userId ?? "ANONYMOUS",
         }
       );
     },

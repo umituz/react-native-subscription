@@ -244,6 +244,12 @@ export {
 } from "./presentation/hooks/usePremium";
 
 export {
+  usePaywallOperations,
+  type UsePaywallOperationsProps,
+  type UsePaywallOperationsResult,
+} from "./presentation/hooks/usePaywallOperations";
+
+export {
   useAuthSubscriptionSync,
   type AuthSubscriptionSyncConfig,
 } from "./presentation/hooks/useAuthSubscriptionSync";
