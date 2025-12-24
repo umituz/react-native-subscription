@@ -30,6 +30,16 @@ export async function initializeSDK(
   userId: string,
   apiKey?: string
 ): Promise<InitializeResult> {
+  if (__DEV__) {
+    console.log('[DEBUG RevenueCatInitializer] initializeSDK called', {
+      userId,
+      hasApiKey: !!apiKey,
+      isAlreadyConfigured: isPurchasesConfigured,
+      isInitialized: deps.isInitialized(),
+      currentUserId: deps.getCurrentUserId(),
+    });
+  }
+
   addPackageBreadcrumb("subscription", "SDK initialization started", {
     userId,
     hasApiKey: !!apiKey,
@@ -82,7 +92,20 @@ export async function initializeSDK(
 
   // Case 3: First time configuration
   const key = apiKey || resolveApiKey(deps.config);
+  if (__DEV__) {
+    console.log('[DEBUG RevenueCatInitializer] Resolved API key', {
+      hasKey: !!key,
+      keyPrefix: key ? key.substring(0, 10) + '...' : 'null',
+      isTestStore: deps.isUsingTestStore(),
+      configApiKey: deps.config.apiKey ? deps.config.apiKey.substring(0, 10) + '...' : 'null',
+      configTestStoreKey: deps.config.testStoreKey ? deps.config.testStoreKey.substring(0, 10) + '...' : 'null',
+    });
+  }
+
   if (!key) {
+    if (__DEV__) {
+      console.log('[DEBUG RevenueCatInitializer] ERROR: No API key available!');
+    }
     const error = new Error("No RevenueCat API key available");
     trackPackageError(error, {
       packageName: "subscription",
@@ -93,10 +116,20 @@ export async function initializeSDK(
   }
 
   try {
+    if (__DEV__) {
+      console.log('[DEBUG RevenueCatInitializer] Calling Purchases.configure', {
+        apiKey: key.substring(0, 10) + '...',
+        appUserID: userId,
+      });
+    }
     await Purchases.configure({ apiKey: key, appUserID: userId });
     isPurchasesConfigured = true;
     deps.setInitialized(true);
     deps.setCurrentUserId(userId);
+
+    if (__DEV__) {
+      console.log('[DEBUG RevenueCatInitializer] Purchases.configure succeeded, fetching data...');
+    }
 
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),
@@ -104,6 +137,20 @@ export async function initializeSDK(
     ]);
 
     const packagesCount = offerings.current?.availablePackages?.length ?? 0;
+
+    if (__DEV__) {
+      console.log('[DEBUG RevenueCatInitializer] Data fetched', {
+        hasCurrent: !!offerings.current,
+        currentIdentifier: offerings.current?.identifier,
+        packagesCount,
+        allOfferingsCount: Object.keys(offerings.all).length,
+        allOfferingIds: Object.keys(offerings.all),
+        packages: offerings.current?.availablePackages?.map(p => ({
+          identifier: p.identifier,
+          packageType: p.packageType,
+        })),
+      });
+    }
 
     addPackageBreadcrumb("subscription", "Offerings fetched", {
       userId,
@@ -118,6 +165,14 @@ export async function initializeSDK(
     return { success: true, offering: offerings.current, hasPremium };
   } catch (error) {
     const errorMessage = getErrorMessage(error, "RevenueCat init failed");
+
+    if (__DEV__) {
+      console.log('[DEBUG RevenueCatInitializer] ERROR during initialization', {
+        error,
+        errorMessage,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+      });
+    }
 
     trackPackageError(
       error instanceof Error ? error : new Error(errorMessage),

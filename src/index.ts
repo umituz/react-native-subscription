@@ -239,10 +239,9 @@ export {
 } from "./presentation/hooks/usePaywallVisibility";
 
 export {
-  usePremiumWithConfig,
-  type UsePremiumWithConfigParams,
-  type UsePremiumWithConfigResult,
-} from "./presentation/hooks/usePremiumWithConfig";
+  usePremium,
+  type UsePremiumResult,
+} from "./presentation/hooks/usePremium";
 
 export {
   useAuthSubscriptionSync,
