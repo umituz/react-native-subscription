@@ -9,11 +9,13 @@ import type { DesignTokens } from "@umituz/react-native-design-system";
 export const createPaywallFeedbackStyles = (
     tokens: DesignTokens,
     canSubmit: boolean
-) =>
-    StyleSheet.create({
+) => {
+    const overlayColor = tokens.colors.backgroundPrimary + '99';
+
+    return StyleSheet.create({
         overlay: {
             flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backgroundColor: overlayColor,
             justifyContent: "center",
             alignItems: "center",
             padding: 20,
@@ -119,3 +121,4 @@ export const createPaywallFeedbackStyles = (
             fontWeight: "600",
         },
     });
+};
