@@ -269,6 +269,14 @@ export {
 } from "./presentation/hooks/useCreditChecker";
 
 export {
+  useAuthAwarePurchase,
+  type UseAuthAwarePurchaseParams,
+  type UseAuthAwarePurchaseResult,
+  type PurchaseAuthProvider,
+} from "./presentation/hooks/useAuthAwarePurchase";
+
+
+export {
   usePaywallVisibility,
   type UsePaywallVisibilityResult,
 } from "./presentation/hooks/usePaywallVisibility";
