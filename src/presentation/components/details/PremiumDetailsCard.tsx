@@ -33,9 +33,11 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
       {(isPremium || showCredits) && (
         <View style={styles.header}>
-          <AtomicText type="titleLarge" style={{ color: tokens.colors.textPrimary }}>
-            {translations.title}
-          </AtomicText>
+          <View style={styles.headerTitleContainer}>
+            <AtomicText type="titleLarge" style={{ color: tokens.colors.textPrimary }}>
+              {translations.title}
+            </AtomicText>
+          </View>
           <PremiumStatusBadge
             status={statusType}
             activeLabel={translations.statusActive}
@@ -153,6 +155,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  headerTitleContainer: {
+    flex: 1,
+    marginRight: 12,
   },
   freeUserHeader: {
     marginBottom: 4,

@@ -60,7 +60,7 @@ export const useRestorePurchase = (userId: string | undefined) => {
         {
           packageName: "subscription",
           operation: "restore_mutation",
-          userId: userId ?? "NO_USER",
+          userId: userId ?? "ANONYMOUS",
         }
       );
     },

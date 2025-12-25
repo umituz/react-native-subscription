@@ -5,8 +5,8 @@
  */
 
 import React from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { StyleSheet } from "react-native";
+import { useAppDesignTokens, ScreenLayout } from "@umituz/react-native-design-system";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";
 import { SubscriptionActions } from "./components/SubscriptionActions";
@@ -39,6 +39,7 @@ export interface SubscriptionDetailConfig {
     purchaseDate?: string | null;
     isLifetime?: boolean;
     daysRemaining?: number | null;
+    willRenew?: boolean;
     credits?: CreditInfo[];
     translations: SubscriptionDetailTranslations;
     onManageSubscription?: () => void;
@@ -60,57 +61,55 @@ export const SubscriptionDetailScreen: React.FC<
     const showCredits = config.credits && config.credits.length > 0;
 
     return (
-        <View style={{ flex: 1 }}>
-            <ScrollView
-                style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}
-                contentContainerStyle={styles.content}
-            >
-                <SubscriptionHeader
-                    statusType={config.statusType}
-                    isPremium={config.isPremium}
-                    isLifetime={config.isLifetime}
-                    expirationDate={config.expirationDate}
-                    purchaseDate={config.purchaseDate}
-                    daysRemaining={config.daysRemaining}
-                    translations={config.translations}
-                />
-
-                {showCredits && (
-                    <CreditsList
-                        credits={config.credits!}
-                        title={
-                            config.translations.usageTitle || config.translations.creditsTitle
-                        }
-                        description={config.translations.creditsResetInfo}
-                        remainingLabel={config.translations.remainingLabel}
+        <ScreenLayout
+            scrollable={true}
+            edges={['bottom']}
+            backgroundColor={tokens.colors.backgroundPrimary}
+            contentContainerStyle={styles.content}
+            footer={
+                config.devTools ? (
+                    <DevTestSection
+                        actions={config.devTools.actions}
+                        title={config.devTools.title}
                     />
-                )}
+                ) : undefined
+            }
+        >
+            <SubscriptionHeader
+                statusType={config.statusType}
+                isPremium={config.isPremium}
+                isLifetime={config.isLifetime}
+                expirationDate={config.expirationDate}
+                purchaseDate={config.purchaseDate}
+                daysRemaining={config.daysRemaining}
+                translations={config.translations}
+            />
 
-                <SubscriptionActions
-                    isPremium={config.isPremium}
-                    manageButtonLabel={config.translations.manageButton}
-                    upgradeButtonLabel={config.translations.upgradeButton}
-                    onManage={config.onManageSubscription}
-                    onUpgrade={config.onUpgrade}
-                />
-            </ScrollView>
-
-            {config.devTools && (
-                <DevTestSection
-                    actions={config.devTools.actions}
-                    title={config.devTools.title}
+            {showCredits && (
+                <CreditsList
+                    credits={config.credits!}
+                    title={
+                        config.translations.usageTitle || config.translations.creditsTitle
+                    }
+                    description={config.translations.creditsResetInfo}
+                    remainingLabel={config.translations.remainingLabel}
                 />
             )}
-        </View>
+
+            <SubscriptionActions
+                isPremium={config.isPremium}
+                manageButtonLabel={config.translations.manageButton}
+                upgradeButtonLabel={config.translations.upgradeButton}
+                onManage={config.onManageSubscription}
+                onUpgrade={config.onUpgrade}
+            />
+        </ScreenLayout>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    content: {
-        padding: 16,
-        gap: 16,
-    },
+  content: {
+    padding: 16,
+    gap: 16,
+  },
 });

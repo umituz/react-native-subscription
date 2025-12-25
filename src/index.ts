@@ -110,6 +110,18 @@ export {
 } from "./presentation/components/sections/SubscriptionSection";
 
 // =============================================================================
+// PRESENTATION LAYER - Subscription Settings Config Hook
+// =============================================================================
+
+export {
+  useSubscriptionSettingsConfig,
+  type SubscriptionSettingsConfig,
+  type SubscriptionSettingsItemConfig,
+  type SubscriptionSettingsTranslations,
+  type UseSubscriptionSettingsConfigParams,
+} from "./presentation/hooks/useSubscriptionSettingsConfig";
+
+// =============================================================================
 // PRESENTATION LAYER - Subscription Detail Screen
 // =============================================================================
 

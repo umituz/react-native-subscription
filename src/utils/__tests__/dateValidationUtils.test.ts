@@ -5,7 +5,7 @@
 import {
   isSubscriptionExpired,
   getDaysUntilExpiration,
-} from '../utils/dateValidationUtils';
+} from '../dateValidationUtils';
 
 describe('Date Validation Utils', () => {
   describe('isSubscriptionExpired', () => {
@@ -22,7 +22,7 @@ describe('Date Validation Utils', () => {
         customerId: null,
         syncedAt: null,
       };
-      
+
       expect(isSubscriptionExpired(status)).toBe(true);
     });
 
@@ -35,14 +35,14 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(isSubscriptionExpired(status)).toBe(false);
     });
 
     it('should return false for future expiration', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 30);
-      
+
       const status = {
         isPremium: true,
         expiresAt: futureDate.toISOString(),
@@ -51,14 +51,14 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(isSubscriptionExpired(status)).toBe(false);
     });
 
     it('should return true for past expiration', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 1);
-      
+
       const status = {
         isPremium: true,
         expiresAt: pastDate.toISOString(),
@@ -67,7 +67,7 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       const result = getDaysUntilExpiration(status);
       expect(result === 0 || result === -0).toBe(true);
     });
@@ -87,14 +87,14 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(getDaysUntilExpiration(status)).toBeNull();
     });
 
     it('should return positive days for future expiration', () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 5);
-      
+
       const status = {
         isPremium: true,
         expiresAt: futureDate.toISOString(),
@@ -103,14 +103,14 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(getDaysUntilExpiration(status)).toBe(5);
     });
 
     it('should return 0 for past expiration', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 5);
-      
+
       const status = {
         isPremium: true,
         expiresAt: pastDate.toISOString(),
@@ -119,14 +119,14 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(getDaysUntilExpiration(status)).toBe(0);
     });
 
     it('should return 0 for today expiration', () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Start of today
-      
+
       const status = {
         isPremium: true,
         expiresAt: today.toISOString(),
@@ -135,7 +135,7 @@ describe('Date Validation Utils', () => {
         customerId: 'customer123',
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
-      
+
       expect(getDaysUntilExpiration(status)).toBe(0);
     });
   });

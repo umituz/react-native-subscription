@@ -51,9 +51,11 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
     return (
         <View style={[styles.container, { backgroundColor: tokens.colors.surface }]}>
             <View style={styles.header}>
-                <AtomicText type="headlineSmall" style={[styles.title, { color: tokens.colors.textPrimary }]}>
-                    {translations.title}
-                </AtomicText>
+                <View style={styles.titleContainer}>
+                    <AtomicText type="headlineSmall" style={[styles.title, { color: tokens.colors.textPrimary }]}>
+                        {translations.title}
+                    </AtomicText>
+                </View>
                 <PremiumStatusBadge
                     status={statusType}
                     activeLabel={translations.statusActive}
@@ -135,6 +137,10 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
+    },
+    titleContainer: {
+        flex: 1,
+        marginRight: 12,
     },
     title: {
         fontWeight: "700",
