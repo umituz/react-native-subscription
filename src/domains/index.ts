@@ -3,3 +3,4 @@
  */
 
 export * from "./paywall";
+export * from "./config";

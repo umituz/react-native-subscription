@@ -84,6 +84,29 @@ export {
 } from "./domains/paywall";
 
 // =============================================================================
+// CONFIG DOMAIN
+// =============================================================================
+
+export type {
+  Plan,
+  PlanType,
+  PlanMetadata,
+  Config,
+  ConfigTranslations,
+} from "./domains/config";
+
+export { calculatePlanMetadata } from "./domains/config";
+
+export {
+  getPlanByType,
+  getPlanById,
+  getBestValuePlan,
+  getPopularPlan,
+  getCreditLimitForPlan,
+  determinePlanFromCredits,
+} from "./domains/config";
+
+// =============================================================================
 // PRESENTATION LAYER - Premium Details Components
 // =============================================================================
 
