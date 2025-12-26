@@ -4,7 +4,7 @@
  * Based on SUBSCRIPTION_GUIDE.md pricing strategy
  */
 
-import type { SubscriptionPackageType } from "./packageTypeDetector";
+import { detectPackageType, type SubscriptionPackageType } from "./packageTypeDetector";
 
 export interface CreditAllocation {
   imageCredits: number;
@@ -80,4 +80,70 @@ export function getTextCreditsForPackage(
 ): number | null {
   const allocation = getCreditAllocation(packageType);
   return allocation?.textCredits ?? null;
+}
+
+/**
+ * Create credit amounts mapping for PaywallModal from RevenueCat packages
+ * Maps product.identifier to credit amount
+ *
+ * @example
+ * ```typescript
+ * const creditAmounts = createCreditAmountsFromPackages(packages);
+ * // { "futureus_weekly_2_99": 6, "futureus_monthly_9_99": 25, "futureus_yearly_79_99": 300 }
+ * ```
+ */
+export function createCreditAmountsFromPackages(
+  packages: Array<{ product: { identifier: string } }>
+): Record<string, number> {
+  const result: Record<string, number> = {};
+
+  if (__DEV__) {
+    console.log("[CreditMapper] Input packages count:", packages?.length || 0);
+  }
+
+  if (!packages || packages.length === 0) {
+    if (__DEV__) {
+      console.log("[CreditMapper] No packages provided, returning empty object");
+    }
+    return result;
+  }
+
+  for (const pkg of packages) {
+    const identifier = pkg?.product?.identifier;
+
+    if (__DEV__) {
+      console.log("[CreditMapper] Processing package:", {
+        hasProduct: !!pkg?.product,
+        identifier,
+      });
+    }
+
+    if (!identifier) {
+      if (__DEV__) {
+        console.warn("[CreditMapper] Package missing product.identifier:", pkg);
+      }
+      continue;
+    }
+
+    const packageType = detectPackageType(identifier);
+    const credits = getImageCreditsForPackage(packageType);
+
+    if (__DEV__) {
+      console.log("[CreditMapper] Package mapping:", {
+        identifier,
+        packageType,
+        credits,
+      });
+    }
+
+    if (credits !== null) {
+      result[identifier] = credits;
+    }
+  }
+
+  if (__DEV__) {
+    console.log("[CreditMapper] Final credit amounts:", result);
+  }
+
+  return result;
 }

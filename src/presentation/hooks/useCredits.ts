@@ -7,6 +7,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { UserCredits, CreditType } from "../../domain/entities/Credits";
+
+declare const __DEV__: boolean;
 import {
   getCreditsRepository,
   getCreditsConfig,
@@ -63,6 +65,18 @@ export const useCredits = ({
   const credits = data ?? null;
   const hasTextCredits = (credits?.textCredits ?? 0) > 0;
   const hasImageCredits = (credits?.imageCredits ?? 0) > 0;
+
+  if (__DEV__) {
+    console.log("[useCredits] State", {
+      userId,
+      enabled,
+      isLoading,
+      imageCredits: credits?.imageCredits ?? 0,
+      textCredits: credits?.textCredits ?? 0,
+      hasImageCredits,
+      hasTextCredits,
+    });
+  }
 
   const textCreditsPercent = credits
     ? Math.round((credits.textCredits / config.textCreditLimit) * 100)

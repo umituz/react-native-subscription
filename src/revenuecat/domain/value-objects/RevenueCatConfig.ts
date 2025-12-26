@@ -39,6 +39,8 @@ export interface RevenueCatConfig {
     productId: string,
     renewalId: string
   ) => Promise<void> | void;
+  /** Callback after credits are successfully updated (for cache invalidation) */
+  onCreditsUpdated?: (userId: string) => void;
 }
 
 export interface RevenueCatConfigRequired {

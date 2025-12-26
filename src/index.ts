@@ -270,7 +270,7 @@ export {
 
 export {
   useAuthAwarePurchase,
-  type UseAuthAwarePurchaseParams,
+  configureAuthProvider,
   type UseAuthAwarePurchaseResult,
   type PurchaseAuthProvider,
 } from "./presentation/hooks/useAuthAwarePurchase";
@@ -325,6 +325,7 @@ export {
   getCreditAllocation,
   getImageCreditsForPackage,
   getTextCreditsForPackage,
+  createCreditAmountsFromPackages,
   CREDIT_ALLOCATIONS,
   type CreditAllocation,
 } from "./utils/creditMapper";
@@ -389,6 +390,8 @@ export {
   type SubscriptionManagerConfig,
   type PremiumStatus,
 } from "./revenuecat/infrastructure/managers/SubscriptionManager";
+
+export type { RestoreResultInfo } from "./revenuecat/infrastructure/handlers/PackageHandler";
 
 // =============================================================================
 // REVENUECAT - Hooks

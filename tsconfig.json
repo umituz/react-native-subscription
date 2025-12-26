@@ -46,8 +46,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "noEmit": false,
-    "outDir": "./lib",
-    "rootDir": "./src",
+    "noEmit": true,
     "removeComments": false,
     /* Interop Constraints */
     "esModuleInterop": true,

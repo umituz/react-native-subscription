@@ -6,7 +6,7 @@
  * Follows "Package Driven Design" by accepting dynamic props.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Alert } from "react-native";
 import { useLocalization } from "@umituz/react-native-localization";
 import { usePremium } from "./usePremium";
@@ -36,6 +36,10 @@ export interface UsePaywallOperationsResult {
     handleInAppPurchase: (pkg: PurchasesPackage) => Promise<boolean>;
     /** Handle in-app restore (with auto-close logic) */
     handleInAppRestore: () => Promise<boolean>;
+    /** Complete pending purchase after authentication */
+    completePendingPurchase: () => Promise<boolean>;
+    /** Clear pending package without purchasing */
+    clearPendingPackage: () => void;
 }
 
 export function usePaywallOperations({
@@ -48,6 +52,18 @@ export function usePaywallOperations({
     const { t } = useLocalization();
     const { purchasePackage, restorePurchase, closePaywall } = usePremium(userId);
     const [pendingPackage, setPendingPackage] = useState<PurchasesPackage | null>(null);
+
+    // Ref to always have latest purchasePackage function (avoids stale closure)
+    const purchasePackageRef = useRef(purchasePackage);
+    const onPurchaseSuccessRef = useRef(onPurchaseSuccess);
+
+    useEffect(() => {
+        purchasePackageRef.current = purchasePackage;
+    }, [purchasePackage]);
+
+    useEffect(() => {
+        onPurchaseSuccessRef.current = onPurchaseSuccess;
+    }, [onPurchaseSuccess]);
 
     /**
      * Check if action requires authentication
@@ -155,11 +171,48 @@ export function usePaywallOperations({
         [executeRestore, closePaywall]
     );
 
+    const completePendingPurchase = useCallback(async (): Promise<boolean> => {
+        if (!pendingPackage) {
+            if (__DEV__) {
+                console.log("[usePaywallOperations] No pending package to complete");
+            }
+            return false;
+        }
+
+        if (__DEV__) {
+            console.log("[usePaywallOperations] Completing pending purchase:", pendingPackage.identifier);
+        }
+
+        const pkg = pendingPackage;
+        setPendingPackage(null);
+
+        // Use ref to get latest purchasePackage (avoids stale closure after auth)
+        const success = await purchasePackageRef.current(pkg);
+
+        if (success) {
+            // Use ref to get latest callback
+            if (onPurchaseSuccessRef.current) onPurchaseSuccessRef.current();
+        } else {
+            Alert.alert(
+                t("premium.purchaseError"),
+                t("premium.purchaseErrorMessage")
+            );
+        }
+
+        return success;
+    }, [pendingPackage, t]);
+
+    const clearPendingPackage = useCallback(() => {
+        setPendingPackage(null);
+    }, []);
+
     return {
         pendingPackage,
         handlePurchase,
         handleRestore,
         handleInAppPurchase,
         handleInAppRestore,
+        completePendingPurchase,
+        clearPendingPackage,
     };
 }

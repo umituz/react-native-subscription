@@ -4,8 +4,8 @@
  */
 
 import type { PurchasesPackage } from "react-native-purchases";
-import type { IRevenueCatService } from '../../application/ports/IRevenueCatService';
-import { getPremiumEntitlement } from '../../domain/types/RevenueCatTypes';
+import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
+import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 import {
   trackPackageError,
   addPackageBreadcrumb,
@@ -15,6 +15,11 @@ import {
 export interface PremiumStatus {
   isPremium: boolean;
   expirationDate: Date | null;
+}
+
+export interface RestoreResultInfo {
+  success: boolean;
+  productId: string | null;
 }
 
 export class PackageHandler {
@@ -89,22 +94,35 @@ export class PackageHandler {
     }
   }
 
-  async restore(userId: string): Promise<boolean> {
+  async restore(userId: string): Promise<RestoreResultInfo> {
     if (!this.service?.isInitialized()) {
       trackPackageWarning("subscription", "Restore attempted but not initialized", {});
-      return false;
+      return { success: false, productId: null };
     }
 
     try {
       const result = await this.service.restorePurchases(userId);
-      return result.success;
+
+      // Extract product ID from active entitlement
+      let productId: string | null = null;
+      if (result.success && result.customerInfo) {
+        const entitlement = getPremiumEntitlement(
+          result.customerInfo,
+          this.entitlementId
+        );
+        if (entitlement) {
+          productId = entitlement.productIdentifier;
+        }
+      }
+
+      return { success: result.success, productId };
     } catch (error) {
       trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "restore",
         userId,
       });
-      return false;
+      return { success: false, productId: null };
     }
   }
 

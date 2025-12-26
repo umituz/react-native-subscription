@@ -56,6 +56,17 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     const showCredits = mode === "credits";
     const showSubscription = mode === "subscription" || mode === "hybrid";
 
+    // Debug logging for credit amounts
+    if (__DEV__ && visible && showSubscription) {
+        console.log("[PaywallModal] Credit amounts debug:", {
+            creditAmountsKeys: creditAmounts ? Object.keys(creditAmounts) : [],
+            creditAmountsValues: creditAmounts,
+            creditsLabel,
+            packagesCount: subscriptionPackages.length,
+            packageIdentifiers: subscriptionPackages.map(p => p.product?.identifier),
+        });
+    }
+
     const handlePurchase = useCallback(async () => {
         setIsProcessing(true);
         try {
@@ -216,7 +227,7 @@ const styles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
     container: { flex: 1 },
     closeBtn: { position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", zIndex: 10 },
-    scroll: { flexGrow: 1, padding: 16, paddingTop: 48 },
+    scroll: { flexGrow: 1, padding: 16, paddingTop: 48, paddingBottom: 32 },
     header: { alignItems: "center", marginBottom: 12 },
     title: { fontWeight: "700", textAlign: "center", marginBottom: 4 },
     subtitle: { textAlign: "center" },

@@ -85,19 +85,33 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   // Premium status = has credits
   const isPremium = credits !== null;
 
-  // Purchase handler
+  // Purchase handler with proper error handling
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
-      const success = await purchaseMutation.mutateAsync(pkg);
-      return success;
+      try {
+        const result = await purchaseMutation.mutateAsync(pkg);
+        return result.success;
+      } catch (error) {
+        if (__DEV__) {
+          console.error("[usePremium] Purchase failed:", error);
+        }
+        return false;
+      }
     },
     [purchaseMutation],
   );
 
-  // Restore handler
+  // Restore handler with proper error handling
   const handleRestore = useCallback(async (): Promise<boolean> => {
-    const success = await restoreMutation.mutateAsync();
-    return success;
+    try {
+      const result = await restoreMutation.mutateAsync();
+      return result.success;
+    } catch (error) {
+      if (__DEV__) {
+        console.error("[usePremium] Restore failed:", error);
+      }
+      return false;
+    }
   }, [restoreMutation]);
 
   return {

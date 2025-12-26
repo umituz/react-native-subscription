@@ -125,6 +125,11 @@ export class CustomerInfoListenerManager {
                 productId,
               }
             );
+
+            // Notify app to invalidate credits cache
+            if (config.onCreditsUpdated && this.currentUserId) {
+              config.onCreditsUpdated(this.currentUserId);
+            }
           } catch (error) {
             if (__DEV__) {
               console.error("[CustomerInfoListener] ❌ Credit renewal failed", {

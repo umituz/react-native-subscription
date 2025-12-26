@@ -5,13 +5,13 @@
  */
 
 import type { PurchasesPackage } from "react-native-purchases";
-import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
-import type { IRevenueCatService } from '../../application/ports/IRevenueCatService';
-import { initializeRevenueCatService, getRevenueCatService } from '../services/RevenueCatService';
-import { UserIdProvider } from '../utils/UserIdProvider';
-import { InitializationCache } from '../utils/InitializationCache';
-import { PackageHandler } from '../handlers/PackageHandler';
-import type { PremiumStatus } from '../handlers/PackageHandler';
+import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
+import { initializeRevenueCatService, getRevenueCatService } from "../services/RevenueCatService";
+import { UserIdProvider } from "../utils/UserIdProvider";
+import { InitializationCache } from "../utils/InitializationCache";
+import { PackageHandler } from "../handlers/PackageHandler";
+import type { PremiumStatus, RestoreResultInfo } from "../handlers/PackageHandler";
 import {
   trackPackageError,
   addPackageBreadcrumb,
@@ -138,10 +138,10 @@ class SubscriptionManagerImpl {
     return this.packageHandler!.purchase(pkg, userId);
   }
 
-  async restore(): Promise<boolean> {
+  async restore(): Promise<RestoreResultInfo> {
     this.ensureConfigured();
     const userId = this.initCache.getCurrentUserId();
-    if (!userId) return false;
+    if (!userId) return { success: false, productId: null };
     return this.packageHandler!.restore(userId);
   }
 

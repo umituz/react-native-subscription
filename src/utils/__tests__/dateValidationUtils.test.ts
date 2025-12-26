@@ -68,8 +68,7 @@ describe('Date Validation Utils', () => {
         syncedAt: '2024-01-01T00:00:00.000Z',
       };
 
-      const result = getDaysUntilExpiration(status);
-      expect(result === 0 || result === -0).toBe(true);
+      expect(getDaysUntilExpiration(status)).toBe(0);
     });
   });
 

@@ -1,11 +1,12 @@
 /**
  * Purchase Package Hook
  * TanStack mutation for purchasing subscription packages
+ * Credits are initialized by CustomerInfoListener (not here to avoid duplicates)
  */
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PurchasesPackage } from "react-native-purchases";
-import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
+import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import {
   trackPackageError,
   addPackageBreadcrumb,
@@ -13,25 +14,29 @@ import {
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
+interface PurchaseResult {
+  success: boolean;
+  productId: string;
+}
+
 /**
  * Purchase a subscription package
+ * Credits are initialized by CustomerInfoListener when entitlement becomes active
  */
 export const usePurchasePackage = (userId: string | undefined) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (pkg: PurchasesPackage) => {
+    mutationFn: async (pkg: PurchasesPackage): Promise<PurchaseResult> => {
       if (!userId) {
         throw new Error("User not authenticated");
       }
 
+      const productId = pkg.product.identifier;
+
       addPackageBreadcrumb("subscription", "Purchase started", {
         packageId: pkg.identifier,
-        userId,
-      });
-
-      addPackageBreadcrumb("subscription", "Purchase mutation started", {
-        packageId: pkg.identifier,
+        productId,
         userId,
       });
 
@@ -40,35 +45,29 @@ export const usePurchasePackage = (userId: string | undefined) => {
       if (success) {
         addPackageBreadcrumb("subscription", "Purchase success", {
           packageId: pkg.identifier,
+          productId,
           userId,
         });
-
-        addPackageBreadcrumb("subscription", "Purchase mutation success", {
-          packageId: pkg.identifier,
-          userId,
-        });
+        // Credits will be initialized by CustomerInfoListener
       } else {
         addPackageBreadcrumb("subscription", "Purchase cancelled", {
           packageId: pkg.identifier,
           userId,
         });
-
-        addPackageBreadcrumb("subscription", "Purchase mutation failed", {
-          packageId: pkg.identifier,
-          userId,
-        });
       }
 
-      return success;
+      return { success, productId };
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
-      });
-      if (userId) {
+    onSuccess: (result) => {
+      if (result.success) {
         queryClient.invalidateQueries({
-          queryKey: creditsQueryKeys.user(userId),
+          queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
         });
+        if (userId) {
+          queryClient.invalidateQueries({
+            queryKey: creditsQueryKeys.user(userId),
+          });
+        }
       }
     },
     onError: (error) => {
