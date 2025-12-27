@@ -28,6 +28,11 @@ export {
   initializeSubscriptionService,
 } from "./infrastructure/services/SubscriptionService";
 
+export {
+  initializeSubscription,
+  type SubscriptionInitConfig,
+} from "./infrastructure/services/SubscriptionInitializer";
+
 export { useSubscription } from "./presentation/hooks/useSubscription";
 export type { UseSubscriptionResult } from "./presentation/hooks/useSubscription";
 

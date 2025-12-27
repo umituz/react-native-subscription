@@ -83,7 +83,7 @@ export async function initializeSDK(
       const hasPremium = !!customerInfo.entitlements.active[entitlementId];
 
       return { success: true, offering: offerings.current, hasPremium };
-    } catch (error) {
+    } catch {
       // If logIn fails, we don't necessarily want to re-configure if it's already configured
       // But we can return failure
       return { success: false, offering: null, hasPremium: false };

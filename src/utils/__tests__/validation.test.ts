@@ -11,7 +11,6 @@ import {
   validateIsGuest,
   validateIsPremium,
   validateFetcher,
-  type UserTier,
   type UserTierInfo,
   type PremiumStatusFetcher,
 } from '../validation';

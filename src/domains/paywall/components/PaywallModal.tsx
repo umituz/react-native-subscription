@@ -98,7 +98,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
             if (supported) {
                 await Linking.openURL(url);
             }
-        } catch (error) {
+        } catch {
             // Silent fail
         }
     }, []);

@@ -34,7 +34,7 @@ export const useCreditChecker = ({
 
   const checker = useMemo(
     () => createCreditChecker({ repository, getCreditType }),
-    [getCreditType]
+    [getCreditType, repository]
   );
 
   return checker;
