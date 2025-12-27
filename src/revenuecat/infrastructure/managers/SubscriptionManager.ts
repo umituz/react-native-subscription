@@ -69,7 +69,8 @@ class SubscriptionManagerImpl {
 
       this.packageHandler!.setService(this.serviceInstance);
 
-      const result = await this.serviceInstance.initialize(userId, this.managerConfig!.apiKey);
+      // Don't pass apiKey - let resolveApiKey decide based on environment (Expo Go = test store key)
+      const result = await this.serviceInstance.initialize(userId);
       return result.success;
     } catch (error) {
       trackPackageError(error instanceof Error ? error : new Error(String(error)), {
