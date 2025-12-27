@@ -28,8 +28,10 @@ export interface RestoreResult {
 export interface IRevenueCatService {
   /**
    * Initialize RevenueCat SDK
+   * @param userId User identifier
+   * @param apiKey Optional API key (auto-resolved if not provided)
    */
-  initialize(userId: string, apiKey: string): Promise<InitializeResult>;
+  initialize(userId: string, apiKey?: string): Promise<InitializeResult>;
 
   /**
    * Fetch offerings from RevenueCat
