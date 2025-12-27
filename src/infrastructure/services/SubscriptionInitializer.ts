@@ -11,6 +11,7 @@ import { configureAuthProvider } from "../../presentation/hooks/useAuthAwarePurc
 
 export interface SubscriptionInitConfig {
   apiKey: string;
+  testStoreKey?: string;
   entitlementId: string;
   credits: CreditsConfig;
   getAnonymousUserId: () => Promise<string>;
@@ -26,6 +27,7 @@ export const initializeSubscription = async (
 ): Promise<void> => {
   const {
     apiKey,
+    testStoreKey,
     entitlementId,
     credits,
     getAnonymousUserId,
@@ -45,6 +47,7 @@ export const initializeSubscription = async (
   SubscriptionManager.configure({
     config: {
       apiKey,
+      testStoreKey,
       entitlementIdentifier: entitlementId,
       onCreditRenewal,
       onCreditsUpdated,
