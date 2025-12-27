@@ -90,5 +90,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
     enabled: true, // Always enabled - works for both authenticated and anonymous users
+    refetchOnMount: "always", // Always refetch to get fresh packages (fixes cached empty results)
   });
 };
