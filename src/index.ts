@@ -6,8 +6,10 @@
  */
 
 // =============================================================================
-// DOMAIN LAYER - Errors
+// WALLET DOMAIN (Complete)
 // =============================================================================
+
+export * from "./domains/wallet";
 
 // =============================================================================
 // DOMAIN LAYER - Subscription Status
@@ -232,6 +234,15 @@ export type {
 export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
 
 // =============================================================================
+// CREDITS SYSTEM - Errors
+// =============================================================================
+
+export { InsufficientCreditsError } from "./domain/errors/InsufficientCreditsError";
+
+// CreditCost, Transaction types, Wallet types, Credit-cost types
+// are now exported from "./domains/wallet"
+
+// =============================================================================
 // CREDITS SYSTEM - Repository
 // =============================================================================
 
@@ -239,6 +250,9 @@ export {
   CreditsRepository,
   createCreditsRepository,
 } from "./infrastructure/repositories/CreditsRepository";
+
+// TransactionRepository and ProductMetadataService
+// are now exported from "./domains/wallet"
 
 // =============================================================================
 // CREDITS SYSTEM - Configuration (Module-Level Provider)
@@ -315,6 +329,9 @@ export {
 } from "./presentation/hooks/useAuthSubscriptionSync";
 
 export { useDevTestCallbacks } from "./presentation/hooks/useDevTestCallbacks";
+
+// Wallet hooks, components, and screens
+// are now exported from "./domains/wallet"
 
 // =============================================================================
 // CREDITS SYSTEM - Utilities

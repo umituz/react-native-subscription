@@ -62,7 +62,7 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
         return (
             <View style={[styles.container, { backgroundColor: tokens.colors.surfaceSecondary }]}>
                 <Animated.View
-                    style={[styles.indicator, { backgroundColor: tokens.colors.surface, left: indicatorLeft }]}
+                    style={[styles.indicator, { backgroundColor: tokens.colors.surface, left: indicatorLeft }] as any}
                 />
                 {renderTab("credits", creditsLabel)}
                 {renderTab("subscription", subscriptionLabel)}

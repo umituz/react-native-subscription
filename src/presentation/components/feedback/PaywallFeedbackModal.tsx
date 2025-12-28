@@ -8,7 +8,7 @@ import {
     View,
     Modal,
     TouchableOpacity,
-    TouchableWithoutFeedback,
+    Pressable,
     TextInput,
     KeyboardAvoidingView,
 } from "react-native";
@@ -75,14 +75,13 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
             animationType="fade"
             onRequestClose={handleSkip}
         >
-            <TouchableWithoutFeedback onPress={handleSkip}>
-                <View style={styles.overlay}>
-                    <KeyboardAvoidingView
-                        behavior="padding"
-                        style={styles.keyboardView}
-                    >
-                        <TouchableWithoutFeedback>
-                            <View style={styles.container}>
+            <Pressable onPress={handleSkip} style={styles.overlay}>
+                <KeyboardAvoidingView
+                    behavior="padding"
+                    style={styles.keyboardView}
+                >
+                    <Pressable onPress={(e) => e.stopPropagation()}>
+                        <View style={styles.container}>
                                 <View style={styles.header}>
                                     <AtomicText type="headlineMedium" style={styles.title}>
                                         {displayTitle}
@@ -159,11 +158,10 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
                                         {displaySubmitText}
                                     </AtomicText>
                                 </TouchableOpacity>
-                            </View>
-                        </TouchableWithoutFeedback>
-                    </KeyboardAvoidingView>
-                </View>
-            </TouchableWithoutFeedback>
+                        </View>
+                    </Pressable>
+                </KeyboardAvoidingView>
+            </Pressable>
         </Modal>
     );
 });

@@ -38,6 +38,8 @@ export interface UseCreditsResult {
   textCreditsPercent: number;
   imageCreditsPercent: number;
   refetch: () => void;
+  /** Check if user can afford a specific credit cost */
+  canAfford: (cost: number, type?: CreditType) => boolean;
 }
 
 export const useCredits = ({
@@ -86,6 +88,13 @@ export const useCredits = ({
     ? Math.round((credits.imageCredits / config.imageCreditLimit) * 100)
     : 0;
 
+  const canAfford = (cost: number, type: CreditType = "text"): boolean => {
+    if (!credits) return false;
+    return type === "text"
+      ? credits.textCredits >= cost
+      : credits.imageCredits >= cost;
+  };
+
   return {
     credits,
     isLoading,
@@ -95,6 +104,7 @@ export const useCredits = ({
     textCreditsPercent,
     imageCreditsPercent,
     refetch,
+    canAfford,
   };
 };
 
