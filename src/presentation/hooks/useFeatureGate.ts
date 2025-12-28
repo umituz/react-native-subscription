@@ -1,158 +1,180 @@
 /**
  * useFeatureGate Hook
  *
- * Feature gating with TanStack Query for server state.
- * Checks auth, premium status, AND credit balance before allowing actions.
+ * Combines auth, subscription, and credits gates into a unified feature gate.
+ * Uses composition of smaller, single-responsibility hooks.
  *
  * Flow:
- * 1. NOT authenticated → onShowAuthModal(callback)
- * 2. Authenticated but no credits → onShowPaywall()
- * 3. Authenticated with credits → Execute action
+ * 1. Auth check → Show auth modal if not authenticated
+ * 2. Subscription check → If subscribed, bypass credits and execute
+ * 3. Credits check → Show paywall if no credits
+ * 4. Execute action
  *
  * @example
  * ```typescript
  * const { requireFeature } = useFeatureGate({
- *   userId: user?.uid,
- *   isAuthenticated: !!user,
- *   onShowAuthModal: (cb) => authModal.show(cb),
- *   onShowPaywall: () => setShowPaywall(true),
- *   creditType: 'image', // or 'text'
+ *   // Auth config
+ *   isAuthenticated: !!user && !user.isAnonymous,
+ *   onShowAuthModal: (cb) => showAuthModal(cb),
+ *
+ *   // Subscription config (optional)
+ *   hasSubscription: isPremium,
+ *
+ *   // Credits config
+ *   hasCredits: canAfford(cost),
+ *   creditBalance: credits,
+ *   requiredCredits: cost,
+ *   onShowPaywall: (cost) => showPaywall(cost),
  * });
  *
- * // Gate a premium feature
  * const handleGenerate = () => {
- *   requireFeature(() => generateContent());
+ *   requireFeature(() => generate());
  * };
  * ```
  */
 
 import { useCallback } from "react";
-import { useCredits } from "./useCredits";
-import type { CreditType } from "../../domain/entities/Credits";
+import { useAuthGate } from "./useAuthGate";
+import { useSubscriptionGate } from "./useSubscriptionGate";
+import { useCreditsGate } from "./useCreditsGate";
 
 declare const __DEV__: boolean;
 
 export interface UseFeatureGateParams {
-  /** User ID for credits check */
-  userId: string | undefined;
-  /** Whether user is authenticated */
+  /** Whether user is authenticated (not guest/anonymous) */
   isAuthenticated: boolean;
   /** Callback to show auth modal with pending action */
   onShowAuthModal: (pendingCallback: () => void | Promise<void>) => void;
-  /** Callback to show paywall */
-  onShowPaywall: () => void;
-  /** Credit type to check (default: 'image') */
-  creditType?: CreditType;
+  /** Whether user has active subscription (optional, defaults to false) */
+  hasSubscription?: boolean;
+  /** Whether user has enough credits for the action */
+  hasCredits: boolean;
+  /** Current credit balance */
+  creditBalance: number;
+  /** Credits required for this action (optional, for paywall display) */
+  requiredCredits?: number;
+  /** Callback to show paywall - receives required credits */
+  onShowPaywall: (requiredCredits?: number) => void;
 }
 
 export interface UseFeatureGateResult {
-  /** Gate a feature - checks auth first, then credits balance */
+  /** Gate a feature - checks auth, subscription, then credits */
   requireFeature: (action: () => void | Promise<void>) => void;
   /** Whether user is authenticated */
   isAuthenticated: boolean;
-  /** Whether user has credits remaining */
+  /** Whether user has active subscription */
+  hasSubscription: boolean;
+  /** Whether user has enough credits */
   hasCredits: boolean;
+  /** Current credit balance */
+  creditBalance: number;
   /** Whether feature access is allowed */
   canAccess: boolean;
-  /** Loading state */
-  isLoading: boolean;
-  /** Current credit balance for the specified type */
-  creditBalance: number;
 }
 
 export function useFeatureGate(
   params: UseFeatureGateParams
 ): UseFeatureGateResult {
   const {
-    userId,
     isAuthenticated,
     onShowAuthModal,
+    hasSubscription = false,
+    hasCredits,
+    creditBalance,
+    requiredCredits,
     onShowPaywall,
-    creditType = "image",
   } = params;
 
-  // Use TanStack Query to get credits (server state)
-  const { credits, isLoading, hasImageCredits, hasTextCredits } = useCredits({
-    userId,
-    enabled: isAuthenticated && !!userId,
+  // Compose individual gates
+  const authGate = useAuthGate({
+    isAuthenticated,
+    onAuthRequired: onShowAuthModal,
   });
 
-  // Check actual credit balance, not just existence
-  const hasCredits = creditType === "image" ? hasImageCredits : hasTextCredits;
-  const creditBalance =
-    creditType === "image"
-      ? credits?.imageCredits ?? 0
-      : credits?.textCredits ?? 0;
+  const subscriptionGate = useSubscriptionGate({
+    hasSubscription,
+    onSubscriptionRequired: () => onShowPaywall(requiredCredits),
+  });
 
-  if (__DEV__) {
-    console.log("[useFeatureGate] Hook state", {
-      userId,
-      isAuthenticated,
-      creditType,
-      hasCredits,
-      creditBalance,
-      isLoading,
-    });
-  }
+  const creditsGate = useCreditsGate({
+    hasCredits,
+    creditBalance,
+    requiredCredits,
+    onCreditsRequired: onShowPaywall,
+  });
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>) => {
       if (__DEV__) {
-        console.log("[useFeatureGate] requireFeature called", {
+         
+        console.log("[useFeatureGate] Checking gates", {
           isAuthenticated,
+          hasSubscription,
           hasCredits,
           creditBalance,
-          creditType,
         });
       }
 
-      // Step 1: Check authentication
-      if (!isAuthenticated) {
-        if (__DEV__) {
-          console.log("[useFeatureGate] Not authenticated, showing auth modal");
-        }
-        onShowAuthModal(() => {
-          // We NO LONGER call action() blindly here.
-          // The component will re-render with the new auth state,
-          // and the user should be allowed to try the action again.
-        });
+      // Step 1: Auth check
+      if (!authGate.requireAuth(() => {})) {
+        onShowAuthModal(action);
         return;
       }
 
-      // Step 2: Check credit balance (not just existence)
-      if (!hasCredits) {
+      // Step 2: Subscription check (bypasses credits if subscribed)
+      if (hasSubscription) {
         if (__DEV__) {
-          console.log("[useFeatureGate] No credits, showing paywall", {
-            creditBalance,
-            creditType,
-          });
+           
+          console.log("[useFeatureGate] Has subscription, executing action");
         }
-        onShowPaywall();
+        action();
         return;
       }
 
-      // Step 3: User is authenticated with credits - execute action
+      // Step 3: Credits check
+      if (!creditsGate.requireCredits(() => {})) {
+        return;
+      }
+
+      // Step 4: All checks passed, execute action
       if (__DEV__) {
-        console.log("[useFeatureGate] Access granted, executing action");
+         
+        console.log("[useFeatureGate] All gates passed, executing action");
       }
       action();
     },
     [
+      authGate,
+      creditsGate,
+      hasSubscription,
       isAuthenticated,
       hasCredits,
       creditBalance,
-      creditType,
       onShowAuthModal,
-      onShowPaywall,
     ]
   );
 
   return {
     requireFeature,
-    isAuthenticated,
-    hasCredits,
-    canAccess: isAuthenticated && hasCredits,
-    isLoading,
-    creditBalance,
+    isAuthenticated: authGate.isAuthenticated,
+    hasSubscription: subscriptionGate.hasSubscription,
+    hasCredits: creditsGate.hasCredits,
+    creditBalance: creditsGate.creditBalance,
+    canAccess: isAuthenticated && (hasSubscription || hasCredits),
   };
 }
+
+// Re-export individual gates for standalone use
+export { useAuthGate, useSubscriptionGate, useCreditsGate };
+export type {
+  UseAuthGateParams,
+  UseAuthGateResult,
+} from "./useAuthGate";
+export type {
+  UseSubscriptionGateParams,
+  UseSubscriptionGateResult,
+} from "./useSubscriptionGate";
+export type {
+  UseCreditsGateParams,
+  UseCreditsGateResult,
+} from "./useCreditsGate";

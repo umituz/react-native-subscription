@@ -53,8 +53,17 @@ export {
 
 export {
   useFeatureGate,
+  useAuthGate,
+  useSubscriptionGate,
+  useCreditsGate,
   type UseFeatureGateParams,
   type UseFeatureGateResult,
+  type UseAuthGateParams,
+  type UseAuthGateResult,
+  type UseSubscriptionGateParams,
+  type UseSubscriptionGateResult,
+  type UseCreditsGateParams,
+  type UseCreditsGateResult,
 } from "./presentation/hooks/useFeatureGate";
 
 export {
