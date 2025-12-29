@@ -63,10 +63,10 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
 
       {isPremium && (
         <View style={styles.detailsSection}>
-          {isLifetime ? (
+          {isLifetime && translations.lifetimeLabel ? (
             <DetailRow
               label={translations.statusLabel}
-              value={translations.lifetimeLabel || "Lifetime"}
+              value={translations.lifetimeLabel}
             />
           ) : (
             <>

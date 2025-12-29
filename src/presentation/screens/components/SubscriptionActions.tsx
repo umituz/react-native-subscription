@@ -1,77 +1,51 @@
 /**
  * Subscription Actions Component
- * Displays action buttons for subscription management
+ * Displays upgrade button for non-premium users
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-
-interface SubscriptionActionsProps {
-    isPremium: boolean;
-    manageButtonLabel?: string;
-    upgradeButtonLabel?: string;
-    onManage?: () => void;
-    onUpgrade?: () => void;
-}
+import type { SubscriptionActionsProps } from "../../types/SubscriptionDetailTypes";
 
 export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
-    isPremium,
-    manageButtonLabel,
-    upgradeButtonLabel,
-    onManage,
-    onUpgrade,
+  isPremium,
+  upgradeButtonLabel,
+  onUpgrade,
 }) => {
-    const tokens = useAppDesignTokens();
+  const tokens = useAppDesignTokens();
 
-    return (
-        <View style={styles.container}>
-            {isPremium && onManage && manageButtonLabel && (
-                <TouchableOpacity
-                    style={[
-                        styles.secondaryButton,
-                        { backgroundColor: tokens.colors.surfaceSecondary },
-                    ]}
-                    onPress={onManage}
-                >
-                    <AtomicText
-                        type="titleMedium"
-                        style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}
-                    >
-                        {manageButtonLabel}
-                    </AtomicText>
-                </TouchableOpacity>
-            )}
-            {!isPremium && onUpgrade && upgradeButtonLabel && (
-                <TouchableOpacity
-                    style={[styles.primaryButton, { backgroundColor: tokens.colors.primary }]}
-                    onPress={onUpgrade}
-                >
-                    <AtomicText
-                        type="titleMedium"
-                        style={{ color: tokens.colors.onPrimary, fontWeight: "700" }}
-                    >
-                        {upgradeButtonLabel}
-                    </AtomicText>
-                </TouchableOpacity>
-            )}
-        </View>
-    );
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          paddingBottom: tokens.spacing.xl,
+        },
+        primaryButton: {
+          paddingVertical: tokens.spacing.md,
+          borderRadius: tokens.borderRadius.lg,
+          alignItems: "center",
+          backgroundColor: tokens.colors.primary,
+        },
+        buttonText: {
+          color: tokens.colors.onPrimary,
+          fontWeight: "700",
+        },
+      }),
+    [tokens]
+  );
+
+  if (isPremium || !onUpgrade || !upgradeButtonLabel) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.primaryButton} onPress={onUpgrade}>
+        <AtomicText type="titleMedium" style={styles.buttonText}>
+          {upgradeButtonLabel}
+        </AtomicText>
+      </TouchableOpacity>
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        gap: 12,
-        paddingBottom: 32,
-    },
-    primaryButton: {
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: "center",
-    },
-    secondaryButton: {
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: "center",
-    },
-});

@@ -2,12 +2,16 @@
  * usePremium Hook
  * Complete subscription management for 100+ apps
  * Works for both authenticated and anonymous users
+ *
+ * IMPORTANT: isPremium is based on actual RevenueCat subscription status,
+ * NOT on whether credits document exists.
  */
 
 import { useCallback } from 'react';
 import type { PurchasesPackage } from 'react-native-purchases';
 import type { UserCredits } from '../../domain/entities/Credits';
 import { useCredits } from './useCredits';
+import { useSubscriptionStatus } from './useSubscriptionStatus';
 import {
   useSubscriptionPackages,
   usePurchasePackage,
@@ -54,6 +58,13 @@ export const usePremium = (userId?: string): UsePremiumResult => {
     console.log('[DEBUG usePremium] Hook called', { userId: userId || 'ANONYMOUS' });
   }
 
+  // Fetch real subscription status from RevenueCat
+  const { isPremium: subscriptionActive, isLoading: statusLoading } =
+    useSubscriptionStatus({
+      userId,
+      enabled: !!userId,
+    });
+
   // Fetch user credits (server state)
   const { credits, isLoading: creditsLoading } = useCredits({
     userId,
@@ -70,7 +81,8 @@ export const usePremium = (userId?: string): UsePremiumResult => {
       packagesCount: packages?.length || 0,
       packagesLoading,
       creditsLoading,
-      isPremium: credits !== null,
+      statusLoading,
+      isPremium: subscriptionActive,
     });
   }
 
@@ -82,8 +94,8 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   const { showPaywall, setShowPaywall, closePaywall, openPaywall } =
     usePaywallVisibility();
 
-  // Premium status = has credits
-  const isPremium = credits !== null;
+  // Premium status = actual subscription status from RevenueCat
+  const isPremium = subscriptionActive;
 
   // Purchase handler with proper error handling
   const handlePurchase = useCallback(
@@ -117,6 +129,7 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   return {
     isPremium,
     isLoading:
+      statusLoading ||
       creditsLoading ||
       packagesLoading ||
       purchaseMutation.isPending ||

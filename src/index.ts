@@ -172,9 +172,17 @@ export {
   type SubscriptionDetailScreenProps,
   type SubscriptionDetailConfig,
   type SubscriptionDetailTranslations,
+  type DevTestActions,
+  type DevToolsConfig,
 } from "./presentation/screens/SubscriptionDetailScreen";
 
-export { type DevTestActions } from "./presentation/screens/components/DevTestSection";
+export type {
+  SubscriptionHeaderProps,
+  CreditsListProps,
+  CreditItemProps,
+  SubscriptionActionsProps,
+  DevTestSectionProps,
+} from "./presentation/types/SubscriptionDetailTypes";
 
 
 // =============================================================================
@@ -316,6 +324,13 @@ export {
   usePremium,
   type UsePremiumResult,
 } from "./presentation/hooks/usePremium";
+
+export {
+  useSubscriptionStatus,
+  subscriptionStatusQueryKeys,
+  type SubscriptionStatusResult,
+  type UseSubscriptionStatusParams,
+} from "./presentation/hooks/useSubscriptionStatus";
 
 export {
   usePaywallOperations,

@@ -3,69 +3,71 @@
  * Displays list of credit usages
  */
 
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import React, { useMemo } from "react";
+import { View, StyleSheet } from "react-native";
+import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { CreditItem } from "./CreditItem";
-import type { CreditInfo } from "../../components/details/PremiumDetailsCard";
-
-interface CreditsListProps {
-    credits: CreditInfo[];
-    title?: string;
-    description?: string;
-    remainingLabel?: string;
-}
+import type { CreditsListProps } from "../../types/SubscriptionDetailTypes";
 
 export const CreditsList: React.FC<CreditsListProps> = ({
-    credits,
-    title,
-    description,
-    remainingLabel,
+  credits,
+  title,
+  description,
+  remainingLabel,
 }) => {
-    const tokens = useAppDesignTokens();
+  const tokens = useAppDesignTokens();
 
-    return (
-        <View style={[styles.container, { backgroundColor: tokens.colors.surface }]}>
-            {title && (
-                <Text style={[styles.title, { color: tokens.colors.textPrimary }]}>
-                    {title}
-                </Text>
-            )}
-            {description && (
-                <Text style={[styles.description, { color: tokens.colors.textSecondary }]}>
-                    {description}
-                </Text>
-            )}
-            <View style={styles.list}>
-                {credits.map((credit) => (
-                    <CreditItem
-                        key={credit.id}
-                        label={credit.label}
-                        current={credit.current}
-                        total={credit.total}
-                        remainingLabel={remainingLabel}
-                    />
-                ))}
-            </View>
-        </View>
-    );
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          borderRadius: tokens.borderRadius.lg,
+          padding: tokens.spacing.lg,
+          gap: tokens.spacing.lg,
+          backgroundColor: tokens.colors.surface,
+        },
+        title: {
+          fontWeight: "700",
+        },
+        description: {
+          marginTop: -tokens.spacing.sm,
+        },
+        list: {
+          gap: tokens.spacing.lg,
+        },
+      }),
+    [tokens]
+  );
+
+  return (
+    <View style={styles.container}>
+      {title && (
+        <AtomicText
+          type="titleMedium"
+          style={[styles.title, { color: tokens.colors.textPrimary }]}
+        >
+          {title}
+        </AtomicText>
+      )}
+      {description && (
+        <AtomicText
+          type="bodySmall"
+          style={[styles.description, { color: tokens.colors.textSecondary }]}
+        >
+          {description}
+        </AtomicText>
+      )}
+      <View style={styles.list}>
+        {credits.map((credit) => (
+          <CreditItem
+            key={credit.id}
+            label={credit.label}
+            current={credit.current}
+            total={credit.total}
+            remainingLabel={remainingLabel}
+          />
+        ))}
+      </View>
+    </View>
+  );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        borderRadius: 16,
-        padding: 20,
-        gap: 16,
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: "700",
-    },
-    description: {
-        fontSize: 14,
-        marginTop: -8,
-    },
-    list: {
-        gap: 16,
-    },
-});

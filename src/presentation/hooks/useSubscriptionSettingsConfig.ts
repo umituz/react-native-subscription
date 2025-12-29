@@ -4,9 +4,9 @@
  * Package-driven: all logic handled internally
  */
 
-import { useMemo, useCallback } from "react";
-import { Linking } from "react-native";
+import { useMemo } from "react";
 import { useCredits } from "./useCredits";
+import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomerInfo";
 import { usePaywallVisibility } from "./usePaywallVisibility";
 import {
@@ -45,11 +45,15 @@ export const useSubscriptionSettingsConfig = (
 
   // Internal hooks
   const { credits } = useCredits({ userId, enabled: !!userId });
+  const { isPremium: subscriptionActive } = useSubscriptionStatus({
+    userId,
+    enabled: !!userId,
+  });
   const { customerInfo } = useCustomerInfo();
   const { openPaywall } = usePaywallVisibility();
 
-  // Premium status from credits
-  const isPremium = credits !== null;
+  // Premium status from actual RevenueCat subscription
+  const isPremium = subscriptionActive;
 
   // RevenueCat entitlement info
   const premiumEntitlement = customerInfo?.entitlements.active["premium"];
@@ -73,15 +77,6 @@ export const useSubscriptionSettingsConfig = (
     () => calculateDaysRemaining(expiresAtIso),
     [expiresAtIso]
   );
-
-  // Subscription press handler
-  const handleSubscriptionPress = useCallback(() => {
-    if (isPremium) {
-      Linking.openURL("https://apps.apple.com/account/subscriptions");
-    } else {
-      openPaywall();
-    }
-  }, [isPremium, openPaywall]);
 
   // Status type
   const statusType: SubscriptionStatusType = isPremium ? "active" : "none";
@@ -114,7 +109,7 @@ export const useSubscriptionSettingsConfig = (
           ? translations.statusActive
           : translations.statusFree,
         icon: "diamond",
-        onPress: handleSubscriptionPress,
+        onPress: openPaywall,
       },
       sectionConfig: {
         statusType,
@@ -140,7 +135,6 @@ export const useSubscriptionSettingsConfig = (
           manageButton: translations.manageButton,
           upgradeButton: translations.upgradeButton,
         },
-        onManageSubscription: handleSubscriptionPress,
         onUpgrade: openPaywall,
       },
     }),
@@ -154,7 +148,6 @@ export const useSubscriptionSettingsConfig = (
       daysRemaining,
       willRenew,
       creditsArray,
-      handleSubscriptionPress,
       openPaywall,
     ]
   );

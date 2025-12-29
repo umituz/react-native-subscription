@@ -3,10 +3,11 @@
  * Displays subscription status as a colored badge
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import { SubscriptionStatusType } from '../../../domain/entities/SubscriptionStatus';
+import type { SubscriptionStatusType } from "../../../domain/entities/SubscriptionStatus";
+
 export type { SubscriptionStatusType };
 
 export interface PremiumStatusBadgeProps {
@@ -17,9 +18,6 @@ export interface PremiumStatusBadgeProps {
   canceledLabel: string;
 }
 
-/**
- * Badge component showing subscription status
- */
 export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   status,
   activeLabel,
@@ -36,32 +34,38 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
     canceled: canceledLabel,
   };
 
-  const colors: Record<SubscriptionStatusType, string> = {
-    active: tokens.colors.success,
-    expired: tokens.colors.error,
-    none: tokens.colors.textTertiary,
-    canceled: tokens.colors.warning,
-  };
+  const backgroundColor = useMemo(() => {
+    const colors: Record<SubscriptionStatusType, string> = {
+      active: tokens.colors.success,
+      expired: tokens.colors.error,
+      none: tokens.colors.textTertiary,
+      canceled: tokens.colors.warning,
+    };
+    return colors[status];
+  }, [status, tokens.colors]);
 
-  const backgroundColor = colors[status];
-  const label = labels[status];
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        badge: {
+          paddingHorizontal: tokens.spacing.sm,
+          paddingVertical: tokens.spacing.xs,
+          borderRadius: tokens.borderRadius.xs,
+          backgroundColor,
+        },
+        badgeText: {
+          fontWeight: "600",
+          color: tokens.colors.onPrimary,
+        },
+      }),
+    [tokens, backgroundColor]
+  );
 
   return (
-    <View style={[styles.badge, { backgroundColor }]}>
-      <AtomicText type="labelSmall" style={[styles.badgeText, { color: tokens.colors.onPrimary }]}>
-        {label}
+    <View style={styles.badge}>
+      <AtomicText type="labelSmall" style={styles.badgeText}>
+        {labels[status]}
       </AtomicText>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-  },
-  badgeText: {
-    fontWeight: "600",
-  },
-});

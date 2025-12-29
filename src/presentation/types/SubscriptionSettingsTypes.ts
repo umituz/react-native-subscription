@@ -3,10 +3,10 @@
  * Type definitions for subscription settings configuration
  */
 
-import type { SubscriptionDetailConfig } from "../screens/SubscriptionDetailScreen";
+import type { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
+import type { SubscriptionDetailConfig } from "./SubscriptionDetailTypes";
 
-/** Status type for subscription state */
-export type SubscriptionStatusType = "none" | "active" | "expired";
+export type { SubscriptionStatusType };
 
 /** Configuration for settings list item */
 export interface SubscriptionSettingsItemConfig {

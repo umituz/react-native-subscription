@@ -37,15 +37,19 @@ export const useAuthAwarePurchase = (): UseAuthAwarePurchaseResult => {
 
     const handlePurchase = useCallback(
         async (pkg: PurchasesPackage): Promise<boolean> => {
+            // SECURITY: Block purchase if auth provider not configured
             if (!globalAuthProvider) {
                 if (__DEV__) {
-                    console.warn(
-                        "[useAuthAwarePurchase] Auth provider not configured. Call configureAuthProvider() at app start.",
+                    console.error(
+                        "[useAuthAwarePurchase] CRITICAL: Auth provider not configured. " +
+                        "Call configureAuthProvider() at app start. Purchase blocked for security.",
                     );
                 }
-                return purchasePackage(pkg);
+                // Block purchase - never allow without auth provider
+                return false;
             }
 
+            // Block purchase if user not authenticated (anonymous users cannot purchase)
             if (!globalAuthProvider.isAuthenticated()) {
                 if (__DEV__) {
                     console.log(
@@ -63,15 +67,19 @@ export const useAuthAwarePurchase = (): UseAuthAwarePurchaseResult => {
     );
 
     const handleRestore = useCallback(async (): Promise<boolean> => {
+        // SECURITY: Block restore if auth provider not configured
         if (!globalAuthProvider) {
             if (__DEV__) {
-                console.warn(
-                    "[useAuthAwarePurchase] Auth provider not configured. Call configureAuthProvider() at app start.",
+                console.error(
+                    "[useAuthAwarePurchase] CRITICAL: Auth provider not configured. " +
+                    "Call configureAuthProvider() at app start. Restore blocked for security.",
                 );
             }
-            return restorePurchase();
+            // Block restore - never allow without auth provider
+            return false;
         }
 
+        // Block restore if user not authenticated
         if (!globalAuthProvider.isAuthenticated()) {
             if (__DEV__) {
                 console.log(

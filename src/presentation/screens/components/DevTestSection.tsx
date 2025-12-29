@@ -4,118 +4,122 @@
  * Only visible in __DEV__ mode
  */
 
-import React from "react";
+import React, { useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+import type { DevTestSectionProps } from "../../types/SubscriptionDetailTypes";
 
-export interface DevTestActions {
-  onTestRenewal: () => Promise<void>;
-  onCheckCredits: () => void;
-  onTestDuplicate: () => Promise<void>;
+export type { DevTestActions, DevTestSectionProps } from "../../types/SubscriptionDetailTypes";
+
+/** Dev test button translations */
+export interface DevTestTranslations {
+  title: string;
+  testRenewal: string;
+  checkCredits: string;
+  testDuplicate: string;
 }
 
-export interface DevTestSectionProps {
-  actions: DevTestActions;
-  title?: string;
+export interface DevTestSectionWithTranslationsProps extends DevTestSectionProps {
+  translations?: DevTestTranslations;
 }
 
-export const DevTestSection: React.FC<DevTestSectionProps> = ({
+export const DevTestSection: React.FC<DevTestSectionWithTranslationsProps> = ({
   actions,
-  title = "🧪 Developer Testing",
+  title,
+  translations,
 }) => {
   const tokens = useAppDesignTokens();
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          padding: tokens.spacing.lg,
+          gap: tokens.spacing.md,
+          borderTopWidth: 1,
+          backgroundColor: tokens.colors.surfaceSecondary,
+          borderTopColor: tokens.colors.border,
+        },
+        title: {
+          fontWeight: "600",
+          marginBottom: tokens.spacing.xs,
+        },
+        button: {
+          paddingVertical: tokens.spacing.md,
+          paddingHorizontal: tokens.spacing.lg,
+          borderRadius: tokens.borderRadius.md,
+          alignItems: "center",
+        },
+        primaryButton: {
+          backgroundColor: tokens.colors.primary,
+        },
+        secondaryButton: {
+          backgroundColor: tokens.colors.surfaceSecondary,
+          borderWidth: 1,
+          borderColor: tokens.colors.border,
+        },
+        buttonText: {
+          fontWeight: "500",
+        },
+      }),
+    [tokens]
+  );
 
   if (!__DEV__) {
     return null;
   }
 
+  const displayTitle = title || translations?.title;
+  const renewalText = translations?.testRenewal || "Test Auto-Renewal";
+  const creditsText = translations?.checkCredits || "Check Credits";
+  const duplicateText = translations?.testDuplicate || "Test Duplicate Protection";
+
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: tokens.colors.surfaceSecondary,
-          borderTopColor: tokens.colors.border,
-        },
-      ]}
-    >
-      <AtomicText
-        type="titleMedium"
-        style={[styles.title, { color: tokens.colors.textPrimary }]}
-      >
-        {title}
-      </AtomicText>
+    <View style={styles.container}>
+      {displayTitle && (
+        <AtomicText
+          type="titleMedium"
+          style={[styles.title, { color: tokens.colors.textPrimary }]}
+        >
+          {displayTitle}
+        </AtomicText>
+      )}
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: tokens.colors.primary }]}
+        style={[styles.button, styles.primaryButton]}
         onPress={actions.onTestRenewal}
       >
         <AtomicText
           type="bodyMedium"
           style={[styles.buttonText, { color: tokens.colors.onPrimary }]}
         >
-          ⚡ Test Auto-Renewal (Add Credits)
+          {renewalText}
         </AtomicText>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          {
-            backgroundColor: tokens.colors.surfaceSecondary,
-            borderWidth: 1,
-            borderColor: tokens.colors.border,
-          },
-        ]}
+        style={[styles.button, styles.secondaryButton]}
         onPress={actions.onCheckCredits}
       >
         <AtomicText
           type="bodyMedium"
           style={[styles.buttonText, { color: tokens.colors.textPrimary }]}
         >
-          📊 Check Current Credits
+          {creditsText}
         </AtomicText>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          {
-            backgroundColor: tokens.colors.surfaceSecondary,
-            borderWidth: 1,
-            borderColor: tokens.colors.border,
-          },
-        ]}
+        style={[styles.button, styles.secondaryButton]}
         onPress={actions.onTestDuplicate}
       >
         <AtomicText
           type="bodyMedium"
           style={[styles.buttonText, { color: tokens.colors.textPrimary }]}
         >
-          🔒 Test Duplicate Protection
+          {duplicateText}
         </AtomicText>
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    gap: 12,
-    borderTopWidth: 1,
-  },
-  title: {
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    alignItems: "center",
-  },
-  buttonText: {
-    fontWeight: "500",
-  },
-});

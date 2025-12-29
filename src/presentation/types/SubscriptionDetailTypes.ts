@@ -1,0 +1,113 @@
+/**
+ * Subscription Detail Types
+ * Type definitions for subscription detail screen and components
+ */
+
+import type { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
+import type { CreditInfo } from "../components/details/PremiumDetailsCardTypes";
+
+export type { SubscriptionStatusType, CreditInfo };
+
+/** Translation strings for subscription detail screen */
+export interface SubscriptionDetailTranslations {
+  title: string;
+  statusLabel: string;
+  statusActive: string;
+  statusExpired: string;
+  statusFree: string;
+  statusCanceled: string;
+  expiresLabel: string;
+  purchasedLabel: string;
+  lifetimeLabel: string;
+  creditsTitle: string;
+  remainingLabel: string;
+  usageTitle?: string;
+  manageButton: string;
+  upgradeButton: string;
+  creditsResetInfo?: string;
+}
+
+/** Dev test action callbacks */
+export interface DevTestActions {
+  onTestRenewal: () => Promise<void>;
+  onCheckCredits: () => void;
+  onTestDuplicate: () => Promise<void>;
+}
+
+/** Dev tools configuration */
+export interface DevToolsConfig {
+  actions: DevTestActions;
+  title?: string;
+}
+
+/** Configuration for subscription detail screen */
+export interface SubscriptionDetailConfig {
+  statusType: SubscriptionStatusType;
+  isPremium: boolean;
+  expirationDate?: string | null;
+  purchaseDate?: string | null;
+  isLifetime?: boolean;
+  daysRemaining?: number | null;
+  willRenew?: boolean;
+  credits?: CreditInfo[];
+  translations: SubscriptionDetailTranslations;
+  onManageSubscription?: () => void;
+  onUpgrade?: () => void;
+  devTools?: DevToolsConfig;
+}
+
+/** Props for subscription detail screen */
+export interface SubscriptionDetailScreenProps {
+  config: SubscriptionDetailConfig;
+}
+
+/** Props for subscription header component */
+export interface SubscriptionHeaderProps {
+  statusType: SubscriptionStatusType;
+  isPremium: boolean;
+  isLifetime?: boolean;
+  expirationDate?: string | null;
+  purchaseDate?: string | null;
+  daysRemaining?: number | null;
+  translations: Pick<
+    SubscriptionDetailTranslations,
+    | "title"
+    | "statusLabel"
+    | "statusActive"
+    | "statusExpired"
+    | "statusFree"
+    | "statusCanceled"
+    | "expiresLabel"
+    | "purchasedLabel"
+    | "lifetimeLabel"
+  >;
+}
+
+/** Props for credits list component */
+export interface CreditsListProps {
+  credits: CreditInfo[];
+  title?: string;
+  description?: string;
+  remainingLabel?: string;
+}
+
+/** Props for credit item component */
+export interface CreditItemProps {
+  label: string;
+  current: number;
+  total: number;
+  remainingLabel?: string;
+}
+
+/** Props for subscription actions component */
+export interface SubscriptionActionsProps {
+  isPremium: boolean;
+  upgradeButtonLabel?: string;
+  onUpgrade?: () => void;
+}
+
+/** Props for dev test section */
+export interface DevTestSectionProps {
+  actions: DevTestActions;
+  title?: string;
+}
