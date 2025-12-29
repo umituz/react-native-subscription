@@ -196,8 +196,6 @@ export async function initializeSDK(
     await Purchases.configure({ 
       apiKey: key, 
       appUserID: userId,
-      // Disable StoreKit 2 to prevent Apple Sign In dialog on simulator
-      usesStoreKit2IfAvailable: false,
     });
     isPurchasesConfigured = true;
     deps.setInitialized(true);
