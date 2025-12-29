@@ -117,7 +117,31 @@ export async function initializeSDK(
   // Case 2: Already configured but different user or re-initializing
   if (isPurchasesConfigured) {
     try {
-      const { customerInfo } = await Purchases.logIn(userId);
+      // Check if we're already logged in with this user ID
+      const currentAppUserId = await Purchases.getAppUserID();
+      
+      if (__DEV__) {
+        console.log('[DEBUG RevenueCatInitializer] Current app user ID check', {
+          currentAppUserId,
+          requestedUserId: userId,
+          needsLogin: currentAppUserId !== userId,
+        });
+      }
+
+      // Only call logIn if the user ID is different
+      let customerInfo;
+      if (currentAppUserId !== userId) {
+        if (__DEV__) {
+          console.log('[DEBUG RevenueCatInitializer] User ID changed, calling logIn');
+        }
+        const result = await Purchases.logIn(userId);
+        customerInfo = result.customerInfo;
+      } else {
+        if (__DEV__) {
+          console.log('[DEBUG RevenueCatInitializer] Already logged in with same user ID, skipping logIn');
+        }
+        customerInfo = await Purchases.getCustomerInfo();
+      }
 
       deps.setInitialized(true);
       deps.setCurrentUserId(userId);
