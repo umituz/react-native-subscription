@@ -4,7 +4,7 @@
  */
 
 import Purchases from "react-native-purchases";
-import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
+import type { PurchasesOffering, PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type {
   IRevenueCatService,
   InitializeResult,
@@ -127,6 +127,13 @@ export class RevenueCatService implements IRevenueCatService {
       },
       userId
     );
+  }
+
+  async getCustomerInfo(): Promise<CustomerInfo | null> {
+    if (!this.isInitialized()) {
+      return null;
+    }
+    return Purchases.getCustomerInfo();
   }
 
   async reset(): Promise<void> {

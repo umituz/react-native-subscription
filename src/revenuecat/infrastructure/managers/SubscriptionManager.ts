@@ -107,6 +107,10 @@ class SubscriptionManagerImpl {
       this.initCache.getCurrentUserId() === userId;
   }
 
+  getEntitlementId(): string | null {
+    return this.managerConfig?.config.entitlementIdentifier || null;
+  }
+
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
     if (__DEV__) {
@@ -150,7 +154,13 @@ class SubscriptionManagerImpl {
     this.ensureConfigured();
     const userId = this.initCache.getCurrentUserId();
     if (!userId) return { isPremium: false, expirationDate: null };
-    return this.packageHandler!.checkPremiumStatus(userId);
+
+    const customerInfo = await this.serviceInstance?.getCustomerInfo();
+    if (customerInfo) {
+      return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
+    }
+
+    return { isPremium: false, expirationDate: null };
   }
 
   async reset(): Promise<void> {

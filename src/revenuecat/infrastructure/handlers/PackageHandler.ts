@@ -3,7 +3,7 @@
  * Handles package operations (fetch, purchase, restore, premium status)
  */
 
-import type { PurchasesPackage } from "react-native-purchases";
+import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 import {
@@ -126,37 +126,24 @@ export class PackageHandler {
     }
   }
 
-  async checkPremiumStatus(userId: string): Promise<PremiumStatus> {
-    if (!this.service?.isInitialized()) {
-      return { isPremium: false, expirationDate: null };
+  checkPremiumStatusFromInfo(customerInfo: CustomerInfo): PremiumStatus {
+    const entitlement = getPremiumEntitlement(
+      customerInfo,
+      this.entitlementId
+    );
+
+    if (entitlement) {
+      return {
+        isPremium: true,
+        expirationDate: entitlement.expirationDate
+          ? new Date(entitlement.expirationDate)
+          : null,
+      };
     }
 
-    try {
-      const restoreResult = await this.service.restorePurchases(userId);
-
-      if (restoreResult.customerInfo) {
-        const entitlement = getPremiumEntitlement(
-          restoreResult.customerInfo,
-          this.entitlementId
-        );
-        if (entitlement) {
-          return {
-            isPremium: true,
-            expirationDate: entitlement.expirationDate
-              ? new Date(entitlement.expirationDate)
-              : null,
-          };
-        }
-      }
-
-      return { isPremium: restoreResult.isPremium, expirationDate: null };
-    } catch (error) {
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
-        packageName: "subscription",
-        operation: "check_premium_status",
-        userId,
-      });
-      return { isPremium: false, expirationDate: null };
-    }
+    return {
+      isPremium: !!customerInfo.entitlements.active[this.entitlementId],
+      expirationDate: null,
+    };
   }
 }

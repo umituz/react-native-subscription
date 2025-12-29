@@ -9,6 +9,7 @@ import { useCredits } from "./useCredits";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomerInfo";
 import { usePaywallVisibility } from "./usePaywallVisibility";
+import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 import {
   convertPurchasedAt,
   formatDateForLocale,
@@ -45,7 +46,10 @@ export const useSubscriptionSettingsConfig = (
 
   // Internal hooks
   const { credits } = useCredits({ userId, enabled: !!userId });
-  const { isPremium: subscriptionActive } = useSubscriptionStatus({
+  const {
+    isPremium: subscriptionActive,
+    expirationDate: statusExpirationDate,
+  } = useSubscriptionStatus({
     userId,
     enabled: !!userId,
   });
@@ -55,9 +59,16 @@ export const useSubscriptionSettingsConfig = (
   // Premium status from actual RevenueCat subscription
   const isPremium = subscriptionActive;
 
-  // RevenueCat entitlement info
-  const premiumEntitlement = customerInfo?.entitlements.active["premium"];
-  const expiresAtIso = premiumEntitlement?.expirationDate || null;
+  // RevenueCat entitlement info - dynamically using configured entitlementId
+  const entitlementId = SubscriptionManager.getEntitlementId() || "premium";
+  const premiumEntitlement = customerInfo?.entitlements.active[entitlementId];
+
+  // Prefer expiration date from useSubscriptionStatus (checkPremiumStatus)
+  // as it is already processed and typed. Fallback to CustomerInfo ISO string.
+  const expiresAtIso = statusExpirationDate
+    ? statusExpirationDate.toISOString()
+    : premiumEntitlement?.expirationDate || null;
+
   const willRenew = premiumEntitlement?.willRenew || false;
   const purchasedAtIso = convertPurchasedAt(credits?.purchasedAt);
 

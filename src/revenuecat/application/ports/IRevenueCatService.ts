@@ -54,6 +54,11 @@ export interface IRevenueCatService {
   reset(): Promise<void>;
 
   /**
+   * Get current customer info
+   */
+  getCustomerInfo(): Promise<CustomerInfo | null>;
+
+  /**
    * Get RevenueCat API key for current platform
    */
   getRevenueCatKey(): string | null;
