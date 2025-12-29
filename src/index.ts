@@ -174,6 +174,9 @@ export {
   type SubscriptionDetailTranslations,
   type DevTestActions,
   type DevToolsConfig,
+  type UpgradeBenefit,
+  type UpgradePromptConfig,
+  type UpgradePromptProps,
 } from "./presentation/screens/SubscriptionDetailScreen";
 
 export type {

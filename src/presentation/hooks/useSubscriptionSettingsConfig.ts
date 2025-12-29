@@ -42,6 +42,7 @@ export const useSubscriptionSettingsConfig = (
     currentLanguage = "en",
     translations,
     getCreditLimit,
+    upgradePrompt,
   } = params;
 
   // Internal hooks
@@ -147,6 +148,7 @@ export const useSubscriptionSettingsConfig = (
           upgradeButton: translations.upgradeButton,
         },
         onUpgrade: openPaywall,
+        upgradePrompt,
       },
     }),
     [
@@ -160,6 +162,7 @@ export const useSubscriptionSettingsConfig = (
       willRenew,
       creditsArray,
       openPaywall,
+      upgradePrompt,
     ]
   );
 

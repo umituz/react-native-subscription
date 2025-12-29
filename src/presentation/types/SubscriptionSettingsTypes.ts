@@ -4,9 +4,12 @@
  */
 
 import type { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
-import type { SubscriptionDetailConfig } from "./SubscriptionDetailTypes";
+import type {
+  SubscriptionDetailConfig,
+  UpgradePromptConfig,
+} from "./SubscriptionDetailTypes";
 
-export type { SubscriptionStatusType };
+export type { SubscriptionStatusType, UpgradePromptConfig };
 
 /** Configuration for settings list item */
 export interface SubscriptionSettingsItemConfig {
@@ -64,4 +67,6 @@ export interface UseSubscriptionSettingsConfigParams {
   translations: SubscriptionSettingsTranslations;
   /** Credit limit calculator */
   getCreditLimit?: (currentCredits: number) => number;
+  /** Upgrade prompt configuration for free users */
+  upgradePrompt?: UpgradePromptConfig;
 }

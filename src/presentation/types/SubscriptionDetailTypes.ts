@@ -40,6 +40,19 @@ export interface DevToolsConfig {
   title?: string;
 }
 
+/** Benefit item for upgrade prompt */
+export interface UpgradeBenefit {
+  icon?: string;
+  text: string;
+}
+
+/** Upgrade prompt configuration */
+export interface UpgradePromptConfig {
+  title: string;
+  subtitle?: string;
+  benefits?: UpgradeBenefit[];
+}
+
 /** Configuration for subscription detail screen */
 export interface SubscriptionDetailConfig {
   statusType: SubscriptionStatusType;
@@ -54,6 +67,7 @@ export interface SubscriptionDetailConfig {
   onManageSubscription?: () => void;
   onUpgrade?: () => void;
   devTools?: DevToolsConfig;
+  upgradePrompt?: UpgradePromptConfig;
 }
 
 /** Props for subscription detail screen */
@@ -110,4 +124,13 @@ export interface SubscriptionActionsProps {
 export interface DevTestSectionProps {
   actions: DevTestActions;
   title?: string;
+}
+
+/** Props for upgrade prompt component */
+export interface UpgradePromptProps {
+  title: string;
+  subtitle?: string;
+  benefits?: UpgradeBenefit[];
+  upgradeButtonLabel?: string;
+  onUpgrade?: () => void;
 }
