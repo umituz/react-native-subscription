@@ -88,7 +88,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <AtomicIcon name="Sparkles" customSize={32} color="primary" />
+          <AtomicIcon name="sparkles" customSize={32} color="primary" />
         </View>
         <AtomicText
           type="headlineSmall"
@@ -112,7 +112,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
             <View key={index} style={styles.benefitItem}>
               <View style={styles.benefitIconWrapper}>
                 <AtomicIcon
-                  name={benefit.icon || "Check"}
+                  name={benefit.icon || "checkmark"}
                   customSize={16}
                   color="primary"
                 />

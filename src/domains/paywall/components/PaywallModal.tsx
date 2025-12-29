@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Linking } from "react-native";
+import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Linking, type ImageSourcePropType } from "react-native";
 import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
+import { Image } from "expo-image";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { CreditCard } from "./CreditCard";
@@ -24,6 +25,8 @@ export interface PaywallModalProps {
     bestValueIdentifier?: string;
     creditAmounts?: Record<string, number>;
     creditsLabel?: string;
+    /** Hero image source (require or uri) */
+    heroImage?: ImageSourcePropType;
     onSubscriptionPurchase?: (pkg: PurchasesPackage) => Promise<void>;
     onCreditsPurchase?: (packageId: string) => Promise<void>;
     onRestore?: () => Promise<void>;
@@ -43,6 +46,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
         bestValueIdentifier,
         creditAmounts,
         creditsLabel,
+        heroImage,
         onSubscriptionPurchase,
         onCreditsPurchase,
         onRestore,
@@ -56,14 +60,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     const showCredits = mode === "credits";
     const showSubscription = mode === "subscription" || mode === "hybrid";
 
-    // Debug logging for credit amounts
-    if (__DEV__ && visible && showSubscription) {
-        console.log("[PaywallModal] Credit amounts debug:", {
-            creditAmountsKeys: creditAmounts ? Object.keys(creditAmounts) : [],
-            creditAmountsValues: creditAmounts,
-            creditsLabel,
+    // Debug logging
+    if (__DEV__ && visible) {
+        console.log("[PaywallModal] Props:", {
+            hasHeroImage: !!heroImage,
+            heroImageType: typeof heroImage,
             packagesCount: subscriptionPackages.length,
-            packageIdentifiers: subscriptionPackages.map(p => p.product?.identifier),
         });
     }
 
@@ -117,6 +119,16 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
                 </TouchableOpacity>
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+                    {heroImage && (
+                        <View style={styles.heroContainer}>
+                            <Image
+                                source={heroImage}
+                                style={styles.heroImage}
+                                contentFit="cover"
+                                transition={300}
+                            />
+                        </View>
+                    )}
                     <View style={styles.header}>
                         <AtomicText type="headlineMedium" style={[styles.title, { color: tokens.colors.textPrimary }]}>
                             {translations.title}
@@ -227,7 +239,9 @@ const styles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
     container: { flex: 1 },
     closeBtn: { position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", zIndex: 10 },
-    scroll: { flexGrow: 1, padding: 16, paddingTop: 48, paddingBottom: 32 },
+    scroll: { flexGrow: 1, padding: 16, paddingTop: 16, paddingBottom: 32 },
+    heroContainer: { alignItems: "center", marginBottom: 20, marginTop: 32 },
+    heroImage: { width: 180, height: 180, borderRadius: 90 },
     header: { alignItems: "center", marginBottom: 12 },
     title: { fontWeight: "700", textAlign: "center", marginBottom: 4 },
     subtitle: { textAlign: "center" },
