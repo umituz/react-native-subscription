@@ -3,7 +3,7 @@
  * Handles SDK initialization logic
  */
 
-import Purchases from "react-native-purchases";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import type { InitializeResult } from '../../application/ports/IRevenueCatService';
 import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
 import { getErrorMessage } from '../../domain/types/RevenueCatTypes';
@@ -24,6 +24,50 @@ export interface InitializerDeps {
 
 // Track if Purchases.configure has been called globally
 let isPurchasesConfigured = false;
+let isLogHandlerConfigured = false;
+
+/**
+ * Configures custom log handler to filter StoreKit 2 internal errors
+ * These errors occur on simulator when no prior purchases exist
+ */
+function configureLogHandler(): void {
+  if (isLogHandlerConfigured) return;
+
+  Purchases.setLogHandler((logLevel, message) => {
+    // Filter out StoreKit 2 AppTransaction errors (normal on simulator)
+    const isAppTransactionError =
+      message.includes("Purchase was cancelled") ||
+      message.includes("AppTransaction") ||
+      message.includes("Couldn't find previous transactions");
+
+    if (isAppTransactionError) {
+      // Downgrade to debug level - only show in __DEV__
+      if (__DEV__) {
+        console.debug("[RevenueCat] (filtered)", message);
+      }
+      return;
+    }
+
+    // Normal logging for other messages
+    switch (logLevel) {
+      case LOG_LEVEL.VERBOSE:
+      case LOG_LEVEL.DEBUG:
+        if (__DEV__) console.debug("[RevenueCat]", message);
+        break;
+      case LOG_LEVEL.INFO:
+        if (__DEV__) console.info("[RevenueCat]", message);
+        break;
+      case LOG_LEVEL.WARN:
+        if (__DEV__) console.warn("[RevenueCat]", message);
+        break;
+      case LOG_LEVEL.ERROR:
+        console.error("[RevenueCat]", message);
+        break;
+    }
+  });
+
+  isLogHandlerConfigured = true;
+}
 
 export async function initializeSDK(
   deps: InitializerDeps,
@@ -116,6 +160,9 @@ export async function initializeSDK(
   }
 
   try {
+    // Configure log handler before SDK initialization
+    configureLogHandler();
+
     if (__DEV__) {
       console.log('[DEBUG RevenueCatInitializer] Calling Purchases.configure', {
         apiKey: key.substring(0, 10) + '...',
