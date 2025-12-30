@@ -17,8 +17,13 @@ import {
  * Works for both authenticated and anonymous users
  */
 export const useSubscriptionPackages = (userId: string | undefined) => {
+  const isConfigured = SubscriptionManager.isConfigured();
+
   if (__DEV__) {
-    console.log('[DEBUG useSubscriptionPackages] Hook called', { userId: userId || 'ANONYMOUS' });
+    console.log('[DEBUG useSubscriptionPackages] Hook called', {
+      userId: userId || 'ANONYMOUS',
+      isConfigured,
+    });
   }
 
   return useQuery({
@@ -89,7 +94,7 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
     },
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
-    enabled: true, // Always enabled - works for both authenticated and anonymous users
+    enabled: isConfigured, // Only enabled when SubscriptionManager is configured
     refetchOnMount: "always", // Always refetch to get fresh packages (fixes cached empty results)
   });
 };

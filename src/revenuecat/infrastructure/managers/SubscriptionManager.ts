@@ -98,6 +98,10 @@ class SubscriptionManagerImpl {
     return promise;
   }
 
+  isConfigured(): boolean {
+    return this.managerConfig !== null && this.packageHandler !== null;
+  }
+
   isInitialized(): boolean {
     return this.serviceInstance?.isInitialized() ?? false;
   }
