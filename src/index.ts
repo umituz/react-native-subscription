@@ -274,6 +274,7 @@ export {
   getCreditsRepository,
   getCreditsConfig,
   resetCreditsRepository,
+  isCreditsRepositoryConfigured,
 } from "./infrastructure/repositories/CreditsRepositoryProvider";
 
 // =============================================================================

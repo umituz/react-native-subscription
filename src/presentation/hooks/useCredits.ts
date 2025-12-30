@@ -12,6 +12,7 @@ declare const __DEV__: boolean;
 import {
   getCreditsRepository,
   getCreditsConfig,
+  isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
 const CACHE_CONFIG = {
@@ -46,20 +47,21 @@ export const useCredits = ({
   userId,
   enabled = true,
 }: UseCreditsParams): UseCreditsResult => {
-  const repository = getCreditsRepository();
+  const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
     queryFn: async () => {
-      if (!userId) return null;
+      if (!userId || !isConfigured) return null;
+      const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
       return result.data || null;
     },
-    enabled: enabled && !!userId,
+    enabled: enabled && !!userId && isConfigured,
     staleTime: CACHE_CONFIG.staleTime,
     gcTime: CACHE_CONFIG.gcTime,
   });

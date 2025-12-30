@@ -25,6 +25,13 @@ export function configureCreditsRepository(config: Partial<CreditsConfig>): void
 }
 
 /**
+ * Check if credits repository is configured
+ */
+export function isCreditsRepositoryConfigured(): boolean {
+  return globalRepository !== null;
+}
+
+/**
  * Get the configured credits repository
  * Throws if repository not configured
  */
