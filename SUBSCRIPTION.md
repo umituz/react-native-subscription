@@ -1,351 +1,267 @@
-# Subscription Package Usage Guide
+# Subscription Package - Best Practices
 
-## Quick Start
+## Infinite Re-render Loop Prevention
 
-### 1. Install Package
+### Problem Description
 
-```bash
-npm install @umituz/react-native-subscription@latest
-```
+Using `usePremium` or subscription hooks in navigation components can cause infinite re-render loops if not properly memoized. The symptoms include:
 
-### 2. Minimum Configuration
+- `HomeStack` or tab components constantly unmounting/remounting
+- `creditsLoading` toggling between `true` and `false` endlessly
+- App becoming unresponsive or extremely slow
+- Console logs showing repeated render cycles
 
-```typescript
-// src/domains/subscription/config/subscriptionConfig.ts
+### Root Causes
 
-import type { Config, Plan, CreditsConfig } from "@umituz/react-native-subscription";
-
-export const CREDIT_LIMITS = {
-  TEXT_GENERATION: 250,
-  IMAGE_GENERATION: 25,
-} as const;
-
-export const CREDITS_COLLECTION = "user_credits";
-
-export const creditsRepositoryConfig: CreditsConfig = {
-  collectionName: CREDITS_COLLECTION,
-  textCreditLimit: CREDIT_LIMITS.TEXT_GENERATION,
-  imageCreditLimit: CREDIT_LIMITS.IMAGE_GENERATION,
-  useUserSubcollection: true,
-};
-
-const yearlyPlan: Plan = {
-  id: "yearly",
-  type: "yearly",
-  credits: 0,
-  price: 79.99,
-  currency: "USD",
-  labelKey: "subscription.plans.yearly.title",
-  descriptionKey: "subscription.plans.yearly.description",
-  isBestValue: true,
-};
-
-export const appSubscriptionConfig: Config = {
-  plans: [yearlyPlan],
-  collectionName: CREDITS_COLLECTION,
-  entitlementId: "premium",
-  translations: {
-    title: "subscription.title",
-    subtitle: "subscription.subtitle",
-    creditsLabel: "subscription.credits",
-    creditsRemaining: "subscription.creditsRemaining",
-    creditsTotal: "subscription.creditsTotal",
-    upgradeButton: "subscription.upgrade",
-    manageButton: "subscription.manage",
-    restoreButton: "subscription.restore",
-  },
-  showCreditDetails: false,
-  allowRestore: true,
-};
-```
-
-### 3. Initialize in AppProviders
-
-```typescript
-// src/core/providers/AppProviders.tsx
-
-import { TanstackProvider } from "@umituz/react-native-tanstack";
-import { configureCreditsRepository } from "@umituz/react-native-subscription";
-import { creditsRepositoryConfig } from "@domains/subscription";
-
-const AppInitializer: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-    configureCreditsRepository(creditsRepositoryConfig);
-  }, []);
-
-  return <>{children}</>;
-};
-
-export const AppProviders: React.FC<{ children: ReactNode }> = ({ children }) => (
-  <TanstackProvider>
-    <AppInitializer>{children}</AppInitializer>
-  </TanstackProvider>
-);
-```
-
-### 4. RevenueCat Configuration (app.json)
-
-```json
-{
-  "expo": {
-    "extra": {
-      "revenueCatApiKeyIos": "appl_YOUR_IOS_KEY",
-      "revenueCatApiKeyAndroid": "goog_YOUR_ANDROID_KEY"
-    }
-  }
-}
-```
+1. **Inline object creation in hook parameters**
+2. **Missing memoization in navigation components**
+3. **Unstable references passed to navigation config**
 
 ---
 
-## Core Hooks
+## Prevention Strategies
 
-### usePremium
+### 1. Always Memoize Navigation Config Objects
 
-Main hook for subscription state and actions.
-
+**WRONG - Creates new object every render:**
 ```typescript
-import { usePremium } from "@umituz/react-native-subscription";
-
-const {
-  isPremium,      // boolean - user has active subscription
-  isLoading,      // boolean - loading state
-  packages,       // PurchasesPackage[] - available packages
-  credits,        // UserCredits | null
-  showPaywall,    // boolean - paywall visibility
-  openPaywall,    // () => void
-  closePaywall,   // () => void
-  purchasePackage,// (pkg) => Promise<boolean>
-  restorePurchase // () => Promise<boolean>
-} = usePremium(userId);
+const tabConfig = useTabConfig({
+  config: {
+    screens: tabScreens,        // New object reference!
+    initialRouteName: "Home",
+  },
+});
 ```
 
-### usePaywallOperations
+**CORRECT - Memoized config:**
+```typescript
+const tabNavigatorConfig = useMemo(
+  () => ({
+    screens: tabScreens,
+    initialRouteName: "Home" as const,
+  }),
+  [tabScreens],  // Only recreate when tabScreens changes
+);
 
-Handles purchase flow with auth integration.
+const tabConfig = useTabConfig({
+  config: tabNavigatorConfig,
+});
+```
+
+### 2. Memoize Tab Screen Components
+
+**WRONG - Creates new component every render:**
+```typescript
+const TabsScreen = () => <TabsNavigator config={tabConfig} />;
+```
+
+**CORRECT - Memoized component:**
+```typescript
+const TabsScreen = useCallback(
+  () => <TabsNavigator config={tabConfig} />,
+  [tabConfig],
+);
+```
+
+### 3. Ensure Hook Dependencies are Stable
+
+When using `usePremium` or similar hooks, ensure the `userId` parameter is stable:
 
 ```typescript
-import { usePaywallOperations } from "@umituz/react-native-subscription";
+// userId from useAuth should be stable
+const { user } = useAuth();
+const { packages, isLoading, isPremium } = usePremium(user?.uid);
+```
 
-const {
-  handlePurchase,           // Post-onboarding purchase
-  handleRestore,            // Post-onboarding restore
-  handleInAppPurchase,      // In-app purchase (auto-close)
-  handleInAppRestore,       // In-app restore (auto-close)
-  completePendingPurchase,  // Complete after auth
-  pendingPackage,           // Package waiting for auth
-} = usePaywallOperations({
-  userId: user?.uid,
-  isAnonymous: user?.isAnonymous ?? true,
-  onPaywallClose: () => { /* hide paywall */ },
-  onPurchaseSuccess: () => { /* handle success */ },
-  onAuthRequired: () => {
-    showAuthModal(async () => {
-      await completePendingPurchase();
-    });
+### 4. Use Proper staleTime for TanStack Query
+
+The subscription package uses these defaults to prevent excessive refetching:
+
+| Hook | staleTime | gcTime |
+|------|-----------|--------|
+| `useCredits` | 30 seconds | 5 minutes |
+| `useSubscriptionPackages` | 5 minutes | 30 minutes |
+| `useSubscriptionStatus` | 30 seconds | 5 minutes |
+
+If you need to customize:
+```typescript
+const { credits } = useCredits({
+  userId,
+  cache: {
+    staleTime: 60 * 1000,  // 1 minute
+    gcTime: 10 * 60 * 1000, // 10 minutes
   },
 });
 ```
 
 ---
 
-## PaywallModal Usage
+## Complete Example: Properly Configured MainNavigator
 
 ```typescript
-import { PaywallModal, usePremium } from "@umituz/react-native-subscription";
+import React, { useCallback, useMemo } from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import { TabsNavigator, useTabConfig } from "@umituz/react-native-design-system";
+import { useTabScreens } from "../hooks/useTabScreens";
+import { useStackScreens } from "../hooks/useStackScreens";
 
-const { packages, isLoading, showPaywall, closePaywall } = usePremium(userId);
+const Stack = createStackNavigator();
 
-<PaywallModal
-  visible={showPaywall}
-  onClose={closePaywall}
-  mode="subscription"
-  subscriptionPackages={packages}
-  onSubscriptionPurchase={handleInAppPurchase}
-  onRestore={handleInAppRestore}
-  isLoading={isLoading}
-  features={[
-    { icon: "star", title: "Feature 1", description: "Description" },
-  ]}
-  bestValueIdentifier="yearly"
-  translations={{
-    title: t("premium.title"),
-    subtitle: t("premium.subtitle"),
-    subscribeButtonText: t("paywall.subscribe"),
-    restoreButtonText: t("paywall.restore"),
-  }}
-  legalUrls={{
-    privacyUrl: "https://...",
-    termsUrl: "https://...",
+export const MainNavigator: React.FC = () => {
+  // 1. Get tab screens (should be memoized in the hook itself)
+  const tabScreens = useTabScreens();
+  const stackScreens = useStackScreens();
+
+  // 2. Memoize the config object
+  const tabNavigatorConfig = useMemo(
+    () => ({
+      screens: tabScreens,
+      initialRouteName: "Home" as const,
+    }),
+    [tabScreens],
+  );
+
+  // 3. Use memoized config
+  const tabConfig = useTabConfig({
+    config: tabNavigatorConfig,
+  });
+
+  // 4. Memoize the tabs component
+  const TabsScreen = useCallback(
+    () => <TabsNavigator config={tabConfig} />,
+    [tabConfig],
+  );
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={TabsScreen} />
+      {stackScreens.map((screen) => (
+        <Stack.Screen
+          key={screen.name}
+          name={screen.name}
+          component={screen.component}
+          options={screen.options}
+        />
+      ))}
+    </Stack.Navigator>
+  );
+};
+```
+
+---
+
+## Debugging Infinite Loops
+
+### 1. Add Debug Logs
+
+```typescript
+// In your component
+React.useEffect(() => {
+  if (__DEV__) console.log("[MyComponent] Mounted");
+  return () => {
+    if (__DEV__) console.log("[MyComponent] Unmounting");
+  };
+}, []);
+```
+
+### 2. Check for Repeated Mount/Unmount Patterns
+
+Look for these patterns in console:
+```
+[HomeStack] Mounted
+[HomeStack] Unmounting
+[HomeStack] Mounted
+[HomeStack] Unmounting
+...
+```
+
+### 3. Track Loading State Changes
+
+```typescript
+const { isLoading, creditsLoading, packagesLoading } = usePremium(userId);
+
+if (__DEV__) {
+  console.log('[DEBUG] Loading states:', {
+    isLoading,
+    creditsLoading,
+    packagesLoading,
+  });
+}
+```
+
+If `creditsLoading` toggles rapidly between `true` and `false`, you have a re-render loop.
+
+---
+
+## Common Mistakes to Avoid
+
+### 1. Using Translation Function in Dependencies
+
+**WRONG:**
+```typescript
+const screens = useMemo(() => [
+  { name: "Home", label: t("home") },
+], [t]);  // t changes on every render in some i18n libraries
+```
+
+**CORRECT:**
+```typescript
+// Keep t in useMemo but ensure i18n library provides stable reference
+// Or extract labels outside the memoization
+```
+
+### 2. Inline Functions in Navigation Options
+
+**WRONG:**
+```typescript
+<Stack.Screen
+  options={{
+    headerRight: () => <Button onPress={() => doSomething()} />,
   }}
 />
 ```
 
----
-
-## Feature Gating
-
-### useFeatureGate
-
-Gate premium features with auth + subscription check.
-
+**CORRECT:**
 ```typescript
-import { useFeatureGate } from "@umituz/react-native-subscription";
+const headerRight = useCallback(() => (
+  <Button onPress={handlePress} />
+), [handlePress]);
 
-const { requireFeature, isPremium, isAuthenticated } = useFeatureGate({
-  userId,
-  isAnonymous,
-  onAuthRequired: () => showAuthModal(),
-  onPremiumRequired: () => openPaywall(),
-});
-
-// Usage
-const handlePremiumAction = () => {
-  requireFeature(() => {
-    // This runs only if user is authenticated AND premium
-    performPremiumAction();
-  });
-};
+<Stack.Screen options={{ headerRight }} />
 ```
 
----
+### 3. Non-Memoized Callbacks Passed to Hooks
 
-## Credits System
-
-### Check Credits
-
+**WRONG:**
 ```typescript
-import { useCreditChecker } from "@umituz/react-native-subscription";
-
-const { hasCredits, remainingCredits } = useCreditChecker({
-  userId,
-  creditType: "text", // or "image"
+const { handlePurchase } = usePaywallOperations({
+  onPurchaseSuccess: () => {
+    // This creates new function every render
+    closePaywall();
+  },
 });
 ```
 
-### Deduct Credits
-
+**CORRECT:**
 ```typescript
-import { useDeductCredit } from "@umituz/react-native-subscription";
+const handlePurchaseSuccess = useCallback(() => {
+  closePaywall();
+}, [closePaywall]);
 
-const { deductCredit, isDeducting } = useDeductCredit({ userId });
-
-// After successful AI generation
-await deductCredit("text"); // or "image"
-```
-
----
-
-## Settings Integration
-
-### useSubscriptionSettingsConfig
-
-```typescript
-import { useSubscriptionSettingsConfig } from "@umituz/react-native-subscription";
-
-const config = useSubscriptionSettingsConfig({
-  userId,
-  isAnonymous,
-  currentLanguage,
-  translations: {
-    title: t("credits.title"),
-    statusActive: t("credits.statusActive"),
-    upgradeButton: t("premium.upgradeNow"),
-  },
-  getCreditLimit: () => CREDIT_LIMITS.TEXT_GENERATION,
-  upgradePrompt: {
-    title: t("premium.title"),
-    benefits: [
-      { icon: "star", text: t("premium.feature1") },
-    ],
-  },
+const { handlePurchase } = usePaywallOperations({
+  onPurchaseSuccess: handlePurchaseSuccess,
 });
 ```
 
 ---
 
-## File Structure
+## Quick Checklist
 
-```
-src/domains/subscription/
-├── index.ts                    # Barrel exports
-└── config/
-    └── subscriptionConfig.ts   # All config in one place
-        ├── CREDIT_LIMITS
-        ├── CREDITS_COLLECTION
-        ├── creditsRepositoryConfig
-        └── appSubscriptionConfig
-```
+Before deploying, verify:
 
----
-
-## Required Translation Keys
-
-```typescript
-// Minimum required translations
-{
-  "premium": {
-    "title": "Go Premium",
-    "subtitle": "Unlock all features",
-    "purchaseError": "Purchase Failed",
-    "purchaseErrorMessage": "Could not complete purchase",
-    "restoreSuccess": "Restored",
-    "restoreMessage": "Your purchases have been restored",
-    "restoreError": "Restore Failed",
-    "restoreErrorMessage": "Could not restore purchases"
-  },
-  "paywall": {
-    "subscribe": "Subscribe",
-    "restore": "Restore Purchases",
-    "loading": "Loading...",
-    "empty": "No packages available"
-  }
-}
-```
-
----
-
-## Common Patterns
-
-### Anonymous User Purchase Flow
-
-1. User taps "Subscribe"
-2. `handleInAppPurchase` detects anonymous user
-3. `onAuthRequired` callback triggered
-4. Auth modal shows
-5. User registers/logs in
-6. `completePendingPurchase()` called
-7. Purchase completes with new userId
-
-### Post-Onboarding Paywall
-
-```typescript
-if (showPostOnboardingPaywall && !paywallShown) {
-  return (
-    <PaywallModal
-      visible={true}
-      onClose={() => closePostOnboardingPaywall(isPremium)}
-      onSubscriptionPurchase={handlePurchase}
-      onRestore={handleRestore}
-      // ...
-    />
-  );
-}
-```
-
----
-
-## Checklist for New Apps
-
-- [ ] Install `@umituz/react-native-subscription@latest`
-- [ ] Create `subscriptionConfig.ts` with credit limits
-- [ ] Add RevenueCat keys to `app.json`
-- [ ] Call `configureCreditsRepository()` in AppProviders
-- [ ] Add PaywallModal to AppNavigator
-- [ ] Configure `usePaywallOperations` with auth callbacks
-- [ ] Add translation keys
-- [ ] Create RevenueCat products matching config
+- [ ] All config objects passed to hooks are memoized with `useMemo`
+- [ ] Tab/Stack screen components are wrapped with `useCallback`
+- [ ] No inline object/function creation in render
+- [ ] Dependencies in `useMemo`/`useCallback` are stable
+- [ ] No rapid mount/unmount cycles in console logs
+- [ ] `creditsLoading` settles to `false` and stays stable
