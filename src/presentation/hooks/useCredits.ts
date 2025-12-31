@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useMemo } from "react";
 import type { UserCredits, CreditType } from "../../domain/entities/Credits";
 
 declare const __DEV__: boolean;
@@ -20,17 +21,22 @@ export const creditsQueryKeys = {
   user: (userId: string) => ["credits", userId] as const,
 };
 
+/** Default stale time: 30 seconds - prevents infinite re-render loops */
+const DEFAULT_STALE_TIME = 30 * 1000;
+/** Default gc time: 5 minutes */
+const DEFAULT_GC_TIME = 5 * 60 * 1000;
+
 export interface CreditsCacheConfig {
-  /** Time in ms before data is considered stale. Default: 0 (always fresh) */
+  /** Time in ms before data is considered stale. Default: 30 seconds */
   staleTime?: number;
-  /** Time in ms before inactive data is garbage collected. Default: 0 */
+  /** Time in ms before inactive data is garbage collected. Default: 5 minutes */
   gcTime?: number;
 }
 
 export interface UseCreditsParams {
   userId: string | undefined;
   enabled?: boolean;
-  /** Cache configuration. Default: no caching (always fresh data) */
+  /** Cache configuration. Default: 30 second staleTime, 5 minute gcTime */
   cache?: CreditsCacheConfig;
 }
 
@@ -55,9 +61,9 @@ export const useCredits = ({
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
 
-  // Default: no caching (always fresh data)
-  const staleTime = cache?.staleTime ?? 0;
-  const gcTime = cache?.gcTime ?? 0;
+  // Default: 30 second stale time to prevent infinite re-render loops
+  const staleTime = cache?.staleTime ?? DEFAULT_STALE_TIME;
+  const gcTime = cache?.gcTime ?? DEFAULT_GC_TIME;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
@@ -76,44 +82,45 @@ export const useCredits = ({
   });
 
   const credits = data ?? null;
-  const hasTextCredits = (credits?.textCredits ?? 0) > 0;
-  const hasImageCredits = (credits?.imageCredits ?? 0) > 0;
 
-  if (__DEV__) {
-    console.log("[useCredits] State", {
-      userId,
-      enabled,
-      isLoading,
-      imageCredits: credits?.imageCredits ?? 0,
-      textCredits: credits?.textCredits ?? 0,
-      hasImageCredits,
-      hasTextCredits,
-    });
-  }
+  // Memoize derived values to prevent unnecessary re-renders
+  const derivedValues = useMemo(() => {
+    const hasText = (credits?.textCredits ?? 0) > 0;
+    const hasImage = (credits?.imageCredits ?? 0) > 0;
+    const textPercent = credits
+      ? Math.round((credits.textCredits / config.textCreditLimit) * 100)
+      : 0;
+    const imagePercent = credits
+      ? Math.round((credits.imageCredits / config.imageCreditLimit) * 100)
+      : 0;
 
-  const textCreditsPercent = credits
-    ? Math.round((credits.textCredits / config.textCreditLimit) * 100)
-    : 0;
+    return {
+      hasTextCredits: hasText,
+      hasImageCredits: hasImage,
+      textCreditsPercent: textPercent,
+      imageCreditsPercent: imagePercent,
+    };
+  }, [credits, config.textCreditLimit, config.imageCreditLimit]);
 
-  const imageCreditsPercent = credits
-    ? Math.round((credits.imageCredits / config.imageCreditLimit) * 100)
-    : 0;
-
-  const canAfford = (cost: number, type: CreditType = "text"): boolean => {
-    if (!credits) return false;
-    return type === "text"
-      ? credits.textCredits >= cost
-      : credits.imageCredits >= cost;
-  };
+  // Memoize canAfford to prevent recreation on every render
+  const canAfford = useCallback(
+    (cost: number, type: CreditType = "text"): boolean => {
+      if (!credits) return false;
+      return type === "text"
+        ? credits.textCredits >= cost
+        : credits.imageCredits >= cost;
+    },
+    [credits]
+  );
 
   return {
     credits,
     isLoading,
     error: error as Error | null,
-    hasTextCredits,
-    hasImageCredits,
-    textCreditsPercent,
-    imageCreditsPercent,
+    hasTextCredits: derivedValues.hasTextCredits,
+    hasImageCredits: derivedValues.hasImageCredits,
+    textCreditsPercent: derivedValues.textCreditsPercent,
+    imageCreditsPercent: derivedValues.imageCreditsPercent,
     refetch,
     canAfford,
   };

@@ -95,6 +95,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
     enabled: isConfigured, // Only enabled when SubscriptionManager is configured
-    refetchOnMount: "always", // Always refetch to get fresh packages (fixes cached empty results)
+    refetchOnMount: true, // Respects staleTime - refetches only if data is stale
   });
 };
