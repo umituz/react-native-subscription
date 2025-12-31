@@ -15,19 +15,23 @@ import {
   isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
-const CACHE_CONFIG = {
-  staleTime: 30 * 1000,
-  gcTime: 5 * 60 * 1000,
-};
-
 export const creditsQueryKeys = {
   all: ["credits"] as const,
   user: (userId: string) => ["credits", userId] as const,
 };
 
+export interface CreditsCacheConfig {
+  /** Time in ms before data is considered stale. Default: 0 (always fresh) */
+  staleTime?: number;
+  /** Time in ms before inactive data is garbage collected. Default: 0 */
+  gcTime?: number;
+}
+
 export interface UseCreditsParams {
   userId: string | undefined;
   enabled?: boolean;
+  /** Cache configuration. Default: no caching (always fresh data) */
+  cache?: CreditsCacheConfig;
 }
 
 export interface UseCreditsResult {
@@ -46,9 +50,14 @@ export interface UseCreditsResult {
 export const useCredits = ({
   userId,
   enabled = true,
+  cache,
 }: UseCreditsParams): UseCreditsResult => {
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
+
+  // Default: no caching (always fresh data)
+  const staleTime = cache?.staleTime ?? 0;
+  const gcTime = cache?.gcTime ?? 0;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
@@ -62,8 +71,8 @@ export const useCredits = ({
       return result.data || null;
     },
     enabled: enabled && !!userId && isConfigured,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
+    staleTime,
+    gcTime,
   });
 
   const credits = data ?? null;
