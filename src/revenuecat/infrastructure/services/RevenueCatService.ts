@@ -20,10 +20,6 @@ import { handleRestore } from "./RestoreHandler";
 import { CustomerInfoListenerManager } from "./CustomerInfoListenerManager";
 import { ServiceStateManager } from "./ServiceStateManager";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-  trackPackageWarning,
-} from "@umituz/react-native-sentry";
 
 export class RevenueCatService implements IRevenueCatService {
   private stateManager: ServiceStateManager;
@@ -54,11 +50,9 @@ export class RevenueCatService implements IRevenueCatService {
 
   async initialize(userId: string, apiKey?: string): Promise<InitializeResult> {
     if (this.isInitialized() && this.getCurrentUserId() === userId) {
-      addPackageBreadcrumb("subscription", "Already initialized", { userId });
       return { success: true, offering: (await this.fetchOfferings()), hasPremium: false };
     }
 
-    addPackageBreadcrumb("subscription", "Initialization started", { userId });
 
     try {
       const result = await initializeSDK(
@@ -77,9 +71,7 @@ export class RevenueCatService implements IRevenueCatService {
       if (result.success) {
         this.listenerManager.setUserId(userId);
         this.listenerManager.setupListener(this.stateManager.getConfig());
-        addPackageBreadcrumb("subscription", "Initialization successful", { userId });
       } else {
-        trackPackageWarning("subscription", "Initialization failed", {
           userId,
           hasOffering: !!result.offering,
         });
@@ -87,7 +79,6 @@ export class RevenueCatService implements IRevenueCatService {
 
       return result;
     } catch (error) {
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "initialize",
         userId,
@@ -141,7 +132,6 @@ export class RevenueCatService implements IRevenueCatService {
       return;
     }
 
-    addPackageBreadcrumb("subscription", "Reset started", {
       userId: this.getCurrentUserId(),
     });
 
@@ -150,9 +140,7 @@ export class RevenueCatService implements IRevenueCatService {
     try {
       await Purchases.logOut();
       this.stateManager.setInitialized(false);
-      addPackageBreadcrumb("subscription", "Reset successful", {});
     } catch (error) {
-      trackPackageWarning("subscription", "Reset failed (non-critical)", {
         error: error instanceof Error ? error.message : String(error),
       });
     }

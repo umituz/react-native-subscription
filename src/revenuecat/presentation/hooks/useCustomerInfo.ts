@@ -16,7 +16,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Purchases, { type CustomerInfo } from "react-native-purchases";
-import { addPackageBreadcrumb, trackPackageError } from "@umituz/react-native-sentry";
 
 export interface UseCustomerInfoResult {
   /** Current CustomerInfo from RevenueCat SDK */
@@ -67,7 +66,6 @@ export function useCustomerInfo(): UseCustomerInfoResult {
       setIsFetching(true);
       setError(null);
 
-      addPackageBreadcrumb("subscription", "Fetching CustomerInfo", {});
 
       // SDK returns cached data instantly if available
       // Network fetch happens in background automatically
@@ -75,7 +73,6 @@ export function useCustomerInfo(): UseCustomerInfoResult {
 
       setCustomerInfo(info);
 
-      addPackageBreadcrumb("subscription", "CustomerInfo fetched", {
         hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
         latestExpiration: info.latestExpirationDate || "none",
       });
@@ -84,7 +81,6 @@ export function useCustomerInfo(): UseCustomerInfoResult {
         err instanceof Error ? err.message : "Failed to fetch customer info";
       setError(errorMessage);
 
-      trackPackageError(
         err instanceof Error ? err : new Error(String(err)),
         {
           packageName: "subscription",
@@ -103,7 +99,6 @@ export function useCustomerInfo(): UseCustomerInfoResult {
 
     // Listen for real-time updates (renewals, purchases, restore)
     const listener = (info: CustomerInfo) => {
-      addPackageBreadcrumb("subscription", "CustomerInfo updated via listener", {
         hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
       });
 

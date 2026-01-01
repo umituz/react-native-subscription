@@ -3,7 +3,6 @@
  * Manages promise caching and user state for initialization
  */
 
-import { addPackageBreadcrumb } from "@umituz/react-native-sentry";
 
 export class InitializationCache {
   private initPromise: Promise<boolean> | null = null;
@@ -15,7 +14,6 @@ export class InitializationCache {
     }
 
     if (this.currentUserId !== userId) {
-      addPackageBreadcrumb("subscription", "User changed, reinitialize needed", {
         oldUserId: this.currentUserId,
         newUserId: userId,
       });

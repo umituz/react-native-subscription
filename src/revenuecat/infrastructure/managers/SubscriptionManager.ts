@@ -13,10 +13,6 @@ import { InitializationCache } from "../utils/InitializationCache";
 import { PackageHandler } from "../handlers/PackageHandler";
 import type { PremiumStatus, RestoreResultInfo } from "../handlers/PackageHandler";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-  trackPackageWarning,
-} from "@umituz/react-native-sentry";
 
 export interface SubscriptionManagerConfig {
   config: RevenueCatConfig;
@@ -39,7 +35,6 @@ class SubscriptionManagerImpl {
       this.userIdProvider.configure(config.getAnonymousUserId);
     }
 
-    addPackageBreadcrumb("subscription", "Manager configured", {
       entitlementId: config.config.entitlementIdentifier,
     });
   }
@@ -47,7 +42,6 @@ class SubscriptionManagerImpl {
   private ensureConfigured(): void {
     if (!this.managerConfig || !this.packageHandler) {
       const error = new Error("SubscriptionManager not configured");
-      trackPackageError(error, {
         packageName: "subscription",
         operation: "ensure_configured",
       });
@@ -63,7 +57,6 @@ class SubscriptionManagerImpl {
       this.serviceInstance = getRevenueCatService();
 
       if (!this.serviceInstance) {
-        trackPackageWarning("subscription", "Service instance not created", { userId });
         return false;
       }
 
@@ -73,7 +66,6 @@ class SubscriptionManagerImpl {
       const result = await this.serviceInstance.initialize(userId);
       return result.success;
     } catch (error) {
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "initialize",
         userId,
@@ -174,7 +166,6 @@ class SubscriptionManagerImpl {
     this.initCache.reset();
     this.userIdProvider.reset();
     this.serviceInstance = null;
-    addPackageBreadcrumb("subscription", "Manager reset completed", {});
   }
 }
 

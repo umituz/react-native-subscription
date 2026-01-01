@@ -4,9 +4,6 @@
  */
 
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 
 export class UserIdProvider {
   private cachedAnonUserId: string | null = null;
@@ -14,7 +11,6 @@ export class UserIdProvider {
 
   configure(getAnonymousUserId: () => Promise<string>): void {
     this.getAnonymousUserIdFn = getAnonymousUserId;
-    addPackageBreadcrumb("subscription", "UserIdProvider configured", {});
   }
 
   async getOrCreateAnonymousUserId(): Promise<string> {
@@ -24,7 +20,6 @@ export class UserIdProvider {
 
     if (!this.getAnonymousUserIdFn) {
       const error = new Error("Anonymous user ID provider not configured");
-      trackPackageError(error, {
         packageName: "subscription",
         operation: "get_anon_user_id",
       });
@@ -32,7 +27,6 @@ export class UserIdProvider {
     }
 
     this.cachedAnonUserId = await this.getAnonymousUserIdFn();
-    addPackageBreadcrumb("subscription", "Anonymous user ID created", {
       userId: this.cachedAnonUserId,
     });
 

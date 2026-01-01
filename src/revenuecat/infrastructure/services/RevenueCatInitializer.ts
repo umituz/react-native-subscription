@@ -9,9 +9,6 @@ import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConf
 import { getErrorMessage } from '../../domain/types/RevenueCatTypes';
 import { resolveApiKey } from '../utils/ApiKeyResolver';
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 
 export interface InitializerDeps {
   config: RevenueCatConfig;
@@ -84,7 +81,6 @@ export async function initializeSDK(
     });
   }
 
-  addPackageBreadcrumb("subscription", "SDK initialization started", {
     userId,
     hasApiKey: !!apiKey,
     isAlreadyConfigured: isPurchasesConfigured,
@@ -102,7 +98,6 @@ export async function initializeSDK(
       const hasPremium = !!customerInfo.entitlements.active[entitlementId];
       return { success: true, offering: offerings.current, hasPremium };
     } catch (error) {
-      trackPackageError(
         error instanceof Error ? error : new Error(String(error)),
         {
           packageName: "subscription",
@@ -175,7 +170,6 @@ export async function initializeSDK(
       console.log('[DEBUG RevenueCatInitializer] ERROR: No API key available!');
     }
     const error = new Error("No RevenueCat API key available");
-    trackPackageError(error, {
       packageName: "subscription",
       operation: "sdk_init_no_key",
       userId,
@@ -226,7 +220,6 @@ export async function initializeSDK(
       });
     }
 
-    addPackageBreadcrumb("subscription", "Offerings fetched", {
       userId,
       hasCurrent: !!offerings.current,
       packagesCount,
@@ -248,7 +241,6 @@ export async function initializeSDK(
       });
     }
 
-    trackPackageError(
       error instanceof Error ? error : new Error(errorMessage),
       {
         packageName: "subscription",

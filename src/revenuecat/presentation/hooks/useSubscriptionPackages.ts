@@ -5,7 +5,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
-import { addPackageBreadcrumb } from "@umituz/react-native-sentry";
 import {
   SUBSCRIPTION_QUERY_KEYS,
   STALE_TIME,
@@ -33,7 +32,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
         console.log('[DEBUG useSubscriptionPackages] QueryFn executing...', { userId: userId || 'ANONYMOUS' });
       }
 
-      addPackageBreadcrumb("subscription", "Fetch packages query started", {
         userId: userId ?? "ANONYMOUS",
       });
 
@@ -85,7 +83,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
         });
       }
 
-      addPackageBreadcrumb("subscription", "Fetch packages query success", {
         userId: userId ?? "ANONYMOUS",
         count: packages.length,
       });

@@ -7,10 +7,6 @@ import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-  trackPackageWarning,
-} from "@umituz/react-native-sentry";
 
 export interface PremiumStatus {
   isPremium: boolean;
@@ -34,7 +30,6 @@ export class PackageHandler {
 
   async fetchPackages(): Promise<PurchasesPackage[]> {
     if (!this.service?.isInitialized()) {
-      trackPackageWarning("subscription", "Fetch packages called but not initialized", {});
       return [];
     }
 
@@ -54,7 +49,6 @@ export class PackageHandler {
         });
       }
 
-      addPackageBreadcrumb("subscription", "Packages fetched", {
         identifier: offering?.identifier,
         count: offering?.availablePackages?.length ?? 0,
       });
@@ -64,7 +58,6 @@ export class PackageHandler {
       if (__DEV__) {
         console.error('[DEBUG PackageHandler] fetchOfferings failed:', error);
       }
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "fetch_packages",
       });
@@ -74,7 +67,6 @@ export class PackageHandler {
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {
     if (!this.service?.isInitialized()) {
-      trackPackageWarning("subscription", "Purchase attempted but not initialized", {
         productId: pkg.product.identifier,
       });
       return false;
@@ -84,7 +76,6 @@ export class PackageHandler {
       const result = await this.service.purchasePackage(pkg, userId);
       return result.success;
     } catch (error) {
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "purchase",
         userId,
@@ -96,7 +87,6 @@ export class PackageHandler {
 
   async restore(userId: string): Promise<RestoreResultInfo> {
     if (!this.service?.isInitialized()) {
-      trackPackageWarning("subscription", "Restore attempted but not initialized", {});
       return { success: false, productId: null };
     }
 
@@ -117,7 +107,6 @@ export class PackageHandler {
 
       return { success: result.success, productId };
     } catch (error) {
-      trackPackageError(error instanceof Error ? error : new Error(String(error)), {
         packageName: "subscription",
         operation: "restore",
         userId,

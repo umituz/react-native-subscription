@@ -16,9 +16,6 @@ import {
   notifyRestoreCompleted,
 } from '../utils/PremiumStatusSyncer';
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 
 export interface RestoreHandlerDeps {
   config: RevenueCatConfig;
@@ -33,11 +30,9 @@ export async function handleRestore(
   deps: RestoreHandlerDeps,
   userId: string
 ): Promise<RestoreResult> {
-  addPackageBreadcrumb("subscription", "Restore started", { userId });
 
   if (!deps.isInitialized()) {
     const error = new RevenueCatInitializationError();
-    trackPackageError(error, {
       packageName: "subscription",
       operation: "restore",
       userId,
@@ -52,12 +47,10 @@ export async function handleRestore(
 
     if (isPremium) {
       await syncPremiumStatus(deps.config, userId, customerInfo);
-      addPackageBreadcrumb("subscription", "Restore successful - premium active", {
         userId,
         entitlementId: entitlementIdentifier,
       });
     } else {
-      addPackageBreadcrumb("subscription", "Restore completed - no premium found", {
         userId,
       });
     }
@@ -68,7 +61,6 @@ export async function handleRestore(
   } catch (error) {
     const errorMessage = getErrorMessage(error, "Restore failed");
     const restoreError = new RevenueCatRestoreError(errorMessage);
-    trackPackageError(restoreError, {
       packageName: "subscription",
       operation: "restore",
       userId,

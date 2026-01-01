@@ -7,9 +7,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
@@ -31,20 +28,17 @@ export const useRestorePurchase = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-      addPackageBreadcrumb("subscription", "Restore started", {
         userId,
       });
 
       const result = await SubscriptionManager.restore();
 
       if (result.success) {
-        addPackageBreadcrumb("subscription", "Restore success", {
           userId,
           productId: result.productId,
         });
         // Credits will be initialized by CustomerInfoListener
       } else {
-        addPackageBreadcrumb("subscription", "Restore failed - no premium found", {
           userId,
         });
       }
@@ -64,7 +58,6 @@ export const useRestorePurchase = (userId: string | undefined) => {
       }
     },
     onError: (error) => {
-      trackPackageError(
         error instanceof Error ? error : new Error(String(error)),
         {
           packageName: "subscription",

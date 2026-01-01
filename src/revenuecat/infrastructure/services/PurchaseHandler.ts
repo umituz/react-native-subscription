@@ -19,9 +19,6 @@ import {
   notifyPurchaseCompleted,
 } from '../utils/PremiumStatusSyncer';
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
@@ -46,14 +43,12 @@ export async function handlePurchase(
   pkg: PurchasesPackage,
   userId: string
 ): Promise<PurchaseResult> {
-  addPackageBreadcrumb("subscription", "Purchase started", {
     productId: pkg.product.identifier,
     userId,
   });
 
   if (!deps.isInitialized()) {
     const error = new RevenueCatInitializationError();
-    trackPackageError(error, {
       packageName: "subscription",
       operation: "purchase",
       userId,
@@ -97,7 +92,6 @@ export async function handlePurchase(
       "Purchase completed but premium entitlement not active",
       pkg.product.identifier
     );
-    trackPackageError(entitlementError, {
       packageName: "subscription",
       operation: "purchase",
       userId,
@@ -107,7 +101,6 @@ export async function handlePurchase(
     throw entitlementError;
   } catch (error) {
     if (isUserCancelledError(error)) {
-      addPackageBreadcrumb("subscription", "Purchase cancelled by user", {
         productId: pkg.product.identifier,
         userId,
       });
@@ -115,7 +108,6 @@ export async function handlePurchase(
     }
     const errorMessage = getErrorMessage(error, "Purchase failed");
     const purchaseError = new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
-    trackPackageError(purchaseError, {
       packageName: "subscription",
       operation: "purchase",
       userId,

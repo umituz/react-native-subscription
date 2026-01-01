@@ -8,9 +8,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PurchasesPackage } from "react-native-purchases";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
@@ -34,7 +31,6 @@ export const usePurchasePackage = (userId: string | undefined) => {
 
       const productId = pkg.product.identifier;
 
-      addPackageBreadcrumb("subscription", "Purchase started", {
         packageId: pkg.identifier,
         productId,
         userId,
@@ -43,14 +39,12 @@ export const usePurchasePackage = (userId: string | undefined) => {
       const success = await SubscriptionManager.purchasePackage(pkg);
 
       if (success) {
-        addPackageBreadcrumb("subscription", "Purchase success", {
           packageId: pkg.identifier,
           productId,
           userId,
         });
         // Credits will be initialized by CustomerInfoListener
       } else {
-        addPackageBreadcrumb("subscription", "Purchase cancelled", {
           packageId: pkg.identifier,
           userId,
         });
@@ -71,7 +65,6 @@ export const usePurchasePackage = (userId: string | undefined) => {
       }
     },
     onError: (error) => {
-      trackPackageError(
         error instanceof Error ? error : new Error(String(error)),
         {
           packageName: "subscription",

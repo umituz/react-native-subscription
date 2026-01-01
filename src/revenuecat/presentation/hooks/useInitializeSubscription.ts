@@ -6,9 +6,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 
 /**
@@ -23,7 +20,6 @@ export const useInitializeSubscription = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-      addPackageBreadcrumb("subscription", "Initialize mutation started", {
         userId,
       });
 
@@ -35,7 +31,6 @@ export const useInitializeSubscription = (userId: string | undefined) => {
           queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
         });
 
-        addPackageBreadcrumb(
           "subscription",
           "Initialize mutation success - packages invalidated",
           { userId }
@@ -43,7 +38,6 @@ export const useInitializeSubscription = (userId: string | undefined) => {
       }
     },
     onError: (error) => {
-      trackPackageError(
         error instanceof Error ? error : new Error(String(error)),
         {
           packageName: "subscription",

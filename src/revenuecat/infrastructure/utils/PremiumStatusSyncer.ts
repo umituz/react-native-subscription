@@ -8,9 +8,6 @@ import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConf
 import { getPremiumEntitlement } from '../../domain/types/RevenueCatTypes';
 import { getExpirationDate } from "./ExpirationDateCalculator";
 import {
-  trackPackageError,
-  addPackageBreadcrumb,
-} from "@umituz/react-native-sentry";
 
 export async function syncPremiumStatus(
   config: RevenueCatConfig,
@@ -29,7 +26,6 @@ export async function syncPremiumStatus(
 
   const isPremium = !!premiumEntitlement;
 
-  addPackageBreadcrumb("subscription", "Syncing premium status", {
     userId,
     isPremium,
     productId: premiumEntitlement?.productIdentifier,
@@ -49,12 +45,10 @@ export async function syncPremiumStatus(
       await config.onPremiumStatusChanged(userId, false);
     }
 
-    addPackageBreadcrumb("subscription", "Premium status synced successfully", {
       userId,
       isPremium,
     });
   } catch (error) {
-    trackPackageError(
       error instanceof Error ? error : new Error(String(error)),
       {
         packageName: "subscription",
@@ -76,7 +70,6 @@ export async function notifyPurchaseCompleted(
     return;
   }
 
-  addPackageBreadcrumb("subscription", "Notifying purchase completed", {
     userId,
     productId,
   });
@@ -84,12 +77,10 @@ export async function notifyPurchaseCompleted(
   try {
     await config.onPurchaseCompleted(userId, productId, customerInfo);
 
-    addPackageBreadcrumb("subscription", "Purchase callback completed", {
       userId,
       productId,
     });
   } catch (error) {
-    trackPackageError(
       error instanceof Error ? error : new Error(String(error)),
       {
         packageName: "subscription",
@@ -111,7 +102,6 @@ export async function notifyRestoreCompleted(
     return;
   }
 
-  addPackageBreadcrumb("subscription", "Notifying restore completed", {
     userId,
     isPremium,
   });
@@ -119,12 +109,10 @@ export async function notifyRestoreCompleted(
   try {
     await config.onRestoreCompleted(userId, isPremium, customerInfo);
 
-    addPackageBreadcrumb("subscription", "Restore callback completed", {
       userId,
       isPremium,
     });
   } catch (error) {
-    trackPackageError(
       error instanceof Error ? error : new Error(String(error)),
       {
         packageName: "subscription",
