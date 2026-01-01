@@ -31,12 +31,14 @@
     "type": "git",
     "url": "https://github.com/umituz/react-native-subscription"
   },
-  "peerDependencies": {
-    "@tanstack/react-query": ">=5.0.0",
+  "dependencies": {
     "@umituz/react-native-design-system": "latest",
     "@umituz/react-native-firebase": "latest",
     "@umituz/react-native-legal": "latest",
-    "@umituz/react-native-localization": "latest",
+    "@umituz/react-native-localization": "latest"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
     "expo-constants": ">=16.0.0",
     "expo-image": ">=2.0.0",
     "expo-linear-gradient": ">=14.0.0",
