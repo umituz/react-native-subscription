@@ -6,7 +6,6 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import {
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
@@ -28,19 +27,24 @@ export const useRestorePurchase = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-        userId,
-      });
+      if (__DEV__) {
+        console.log('[DEBUG useRestorePurchase] Starting restore:', { userId });
+      }
 
       const result = await SubscriptionManager.restore();
 
       if (result.success) {
-          userId,
-          productId: result.productId,
-        });
+        if (__DEV__) {
+          console.log('[DEBUG useRestorePurchase] Restore successful:', {
+            userId,
+            productId: result.productId,
+          });
+        }
         // Credits will be initialized by CustomerInfoListener
       } else {
-          userId,
-        });
+        if (__DEV__) {
+          console.log('[DEBUG useRestorePurchase] Restore failed:', { userId });
+        }
       }
 
       return result;
@@ -58,13 +62,12 @@ export const useRestorePurchase = (userId: string | undefined) => {
       }
     },
     onError: (error) => {
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          packageName: "subscription",
-          operation: "restore_mutation",
+      if (__DEV__) {
+        console.error('[DEBUG useRestorePurchase] Restore mutation failed:', {
+          error,
           userId: userId ?? "ANONYMOUS",
-        }
-      );
+        });
+      }
     },
   });
 };

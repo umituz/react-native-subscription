@@ -6,11 +6,9 @@
  */
 
 import { useCallback, useMemo } from "react";
-import {
   useCredits,
   type UseCreditsParams,
 } from "../../../../presentation/hooks/useCredits";
-import {
   useTransactionHistory,
   type UseTransactionHistoryParams,
 } from "./useTransactionHistory";

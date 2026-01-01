@@ -7,7 +7,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { PurchasesPackage } from "react-native-purchases";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import {
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
@@ -31,23 +30,32 @@ export const usePurchasePackage = (userId: string | undefined) => {
 
       const productId = pkg.product.identifier;
 
-        packageId: pkg.identifier,
-        productId,
-        userId,
-      });
-
-      const success = await SubscriptionManager.purchasePackage(pkg);
-
-      if (success) {
+      if (__DEV__) {
+        console.log('[DEBUG usePurchasePackage] Starting purchase:', {
           packageId: pkg.identifier,
           productId,
           userId,
         });
+      }
+
+      const success = await SubscriptionManager.purchasePackage(pkg);
+
+      if (success) {
+        if (__DEV__) {
+          console.log('[DEBUG usePurchasePackage] Purchase successful:', {
+            packageId: pkg.identifier,
+            productId,
+            userId,
+          });
+        }
         // Credits will be initialized by CustomerInfoListener
       } else {
-          packageId: pkg.identifier,
-          userId,
-        });
+        if (__DEV__) {
+          console.log('[DEBUG usePurchasePackage] Purchase failed:', {
+            packageId: pkg.identifier,
+            userId,
+          });
+        }
       }
 
       return { success, productId };
@@ -65,13 +73,12 @@ export const usePurchasePackage = (userId: string | undefined) => {
       }
     },
     onError: (error) => {
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          packageName: "subscription",
-          operation: "purchase_mutation",
+      if (__DEV__) {
+        console.error('[DEBUG usePurchasePackage] Purchase mutation failed:', {
+          error,
           userId: userId ?? "ANONYMOUS",
-        }
-      );
+        });
+      }
     },
   });
 };

@@ -6,7 +6,6 @@
  * Extends BaseRepository from @umituz/react-native-firebase.
  */
 
-import {
   doc,
   getDoc,
   runTransaction,

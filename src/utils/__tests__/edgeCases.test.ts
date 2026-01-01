@@ -4,10 +4,8 @@
  * Tests for edge cases and special scenarios
  */
 
-import {
   getUserTierInfo,
 } from '../tierUtils';
-import {
   isAuthenticated,
   isGuest,
 } from '../authUtils';

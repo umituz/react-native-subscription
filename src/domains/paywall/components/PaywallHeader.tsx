@@ -6,7 +6,6 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
     AtomicText,
     AtomicIcon,
     useDesignSystemTheme,

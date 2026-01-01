@@ -8,7 +8,6 @@ import type { InitializeResult } from '../../application/ports/IRevenueCatServic
 import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
 import { getErrorMessage } from '../../domain/types/RevenueCatTypes';
 import { resolveApiKey } from '../utils/ApiKeyResolver';
-import {
 
 export interface InitializerDeps {
   config: RevenueCatConfig;

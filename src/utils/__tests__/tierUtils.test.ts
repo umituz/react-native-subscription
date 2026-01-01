@@ -4,11 +4,9 @@
  * Tests for tier determination and comparison functions
  */
 
-import {
   getUserTierInfo,
   checkPremiumAccess,
 } from '../tierUtils';
-import {
   hasTierAccess,
   isTierPremium,
   isTierFreemium,

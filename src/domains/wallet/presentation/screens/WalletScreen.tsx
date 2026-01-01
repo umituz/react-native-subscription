@@ -9,17 +9,14 @@
 import React from "react";
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import {
   useAppDesignTokens,
   AtomicText,
   AtomicIcon,
   ScreenLayout,
 } from "@umituz/react-native-design-system";
-import {
   BalanceCard,
   type BalanceCardTranslations,
 } from "../components/BalanceCard";
-import {
   TransactionList,
   type TransactionListTranslations,
 } from "../components/TransactionList";

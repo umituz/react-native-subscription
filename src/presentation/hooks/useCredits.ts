@@ -10,7 +10,6 @@ import { useCallback, useMemo } from "react";
 import type { UserCredits, CreditType } from "../../domain/entities/Credits";
 
 declare const __DEV__: boolean;
-import {
   getCreditsRepository,
   getCreditsConfig,
   isCreditsRepositoryConfigured,

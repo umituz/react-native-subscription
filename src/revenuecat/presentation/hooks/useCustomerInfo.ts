@@ -66,27 +66,28 @@ export function useCustomerInfo(): UseCustomerInfoResult {
       setIsFetching(true);
       setError(null);
 
-
       // SDK returns cached data instantly if available
       // Network fetch happens in background automatically
       const info = await Purchases.getCustomerInfo();
 
       setCustomerInfo(info);
 
-        hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
-        latestExpiration: info.latestExpirationDate || "none",
-      });
+      if (__DEV__) {
+        console.log('[DEBUG useCustomerInfo] Fetched:', {
+          hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
+          latestExpiration: info.latestExpirationDate || "none",
+        });
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch customer info";
       setError(errorMessage);
 
-        err instanceof Error ? err : new Error(String(err)),
-        {
-          packageName: "subscription",
-          operation: "fetch_customer_info",
-        }
-      );
+      if (__DEV__) {
+        console.error('[DEBUG useCustomerInfo] Error:', {
+          error: err,
+        });
+      }
     } finally {
       setLoading(false);
       setIsFetching(false);
@@ -99,8 +100,11 @@ export function useCustomerInfo(): UseCustomerInfoResult {
 
     // Listen for real-time updates (renewals, purchases, restore)
     const listener = (info: CustomerInfo) => {
-        hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
-      });
+      if (__DEV__) {
+        console.log('[DEBUG useCustomerInfo] Listener update:', {
+          hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
+        });
+      }
 
       setCustomerInfo(info);
       setError(null);

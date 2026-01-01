@@ -464,3 +464,4 @@ export {
   useRestorePurchase,
   SUBSCRIPTION_QUERY_KEYS,
 } from "./revenuecat/presentation/hooks/useSubscriptionQueries";
+export { usePaywallFlow, type UsePaywallFlowOptions, type UsePaywallFlowResult } from './revenuecat/presentation/hooks/usePaywallFlow';

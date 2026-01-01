@@ -2,7 +2,6 @@
  * Tests for Subscription Status Entity
  */
 
-import {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
 } from './SubscriptionStatus';

@@ -4,7 +4,6 @@
  * Tests for validation functions and type guards
  */
 
-import {
   isValidUserTier,
   isUserTierInfo,
   validateUserId,

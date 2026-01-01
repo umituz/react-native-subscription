@@ -7,7 +7,6 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
-import {
   PremiumDetailsCard,
   type CreditInfo,
   type PremiumDetailsTranslations,

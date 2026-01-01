@@ -4,7 +4,6 @@
  * Tests for authentication check functions
  */
 
-import {
   isAuthenticated,
   isGuest,
 } from '../authUtils';

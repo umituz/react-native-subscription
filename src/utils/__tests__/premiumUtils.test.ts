@@ -4,10 +4,8 @@
  * Tests for premium status fetching and async functions
  */
 
-import {
   getIsPremium,
 } from '../premiumStatusUtils';
-import {
   getUserTierInfoAsync,
   checkPremiumAccessAsync,
 } from '../premiumAsyncUtils';

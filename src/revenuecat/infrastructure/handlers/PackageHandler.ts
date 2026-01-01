@@ -6,7 +6,6 @@
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
-import {
 
 export interface PremiumStatus {
   isPremium: boolean;
@@ -49,26 +48,22 @@ export class PackageHandler {
         });
       }
 
-        identifier: offering?.identifier,
-        count: offering?.availablePackages?.length ?? 0,
-      });
-
       return offering?.availablePackages ?? [];
     } catch (error) {
       if (__DEV__) {
         console.error('[DEBUG PackageHandler] fetchOfferings failed:', error);
       }
-        packageName: "subscription",
-        operation: "fetch_packages",
-      });
       return [];
     }
   }
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {
     if (!this.service?.isInitialized()) {
-        productId: pkg.product.identifier,
-      });
+      if (__DEV__) {
+        console.log('[DEBUG PackageHandler] Service not initialized', {
+          productId: pkg.product.identifier,
+        });
+      }
       return false;
     }
 
@@ -76,11 +71,12 @@ export class PackageHandler {
       const result = await this.service.purchasePackage(pkg, userId);
       return result.success;
     } catch (error) {
-        packageName: "subscription",
-        operation: "purchase",
-        userId,
-        productId: pkg.product.identifier,
-      });
+      if (__DEV__) {
+        console.error('[DEBUG PackageHandler] Purchase failed:', {
+          error,
+          productId: pkg.product.identifier,
+        });
+      }
       return false;
     }
   }
@@ -107,10 +103,12 @@ export class PackageHandler {
 
       return { success: result.success, productId };
     } catch (error) {
-        packageName: "subscription",
-        operation: "restore",
-        userId,
-      });
+      if (__DEV__) {
+        console.error('[DEBUG PackageHandler] Restore failed:', {
+          error,
+          userId,
+        });
+      }
       return { success: false, productId: null };
     }
   }

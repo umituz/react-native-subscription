@@ -19,7 +19,6 @@ import { handlePurchase } from "./PurchaseHandler";
 import { handleRestore } from "./RestoreHandler";
 import { CustomerInfoListenerManager } from "./CustomerInfoListenerManager";
 import { ServiceStateManager } from "./ServiceStateManager";
-import {
 
 export class RevenueCatService implements IRevenueCatService {
   private stateManager: ServiceStateManager;

@@ -32,9 +32,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
         console.log('[DEBUG useSubscriptionPackages] QueryFn executing...', { userId: userId || 'ANONYMOUS' });
       }
 
-        userId: userId ?? "ANONYMOUS",
-      });
-
       // Initialize if needed (works for both authenticated and anonymous users)
       try {
         if (userId) {
@@ -82,10 +79,6 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
           })),
         });
       }
-
-        userId: userId ?? "ANONYMOUS",
-        count: packages.length,
-      });
 
       return packages;
     },

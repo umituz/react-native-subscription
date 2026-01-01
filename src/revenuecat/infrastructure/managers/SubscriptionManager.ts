@@ -12,7 +12,6 @@ import { UserIdProvider } from "../utils/UserIdProvider";
 import { InitializationCache } from "../utils/InitializationCache";
 import { PackageHandler } from "../handlers/PackageHandler";
 import type { PremiumStatus, RestoreResultInfo } from "../handlers/PackageHandler";
-import {
 
 export interface SubscriptionManagerConfig {
   config: RevenueCatConfig;
@@ -35,16 +34,22 @@ class SubscriptionManagerImpl {
       this.userIdProvider.configure(config.getAnonymousUserId);
     }
 
-      entitlementId: config.config.entitlementIdentifier,
-    });
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] Configured:', {
+        entitlementId: config.config.entitlementIdentifier,
+      });
+    }
   }
 
   private ensureConfigured(): void {
     if (!this.managerConfig || !this.packageHandler) {
       const error = new Error("SubscriptionManager not configured");
-        packageName: "subscription",
-        operation: "ensure_configured",
-      });
+      if (__DEV__) {
+        console.error('[DEBUG SubscriptionManager] Not configured:', {
+          hasConfig: !!this.managerConfig,
+          hasHandler: !!this.packageHandler,
+        });
+      }
       throw error;
     }
   }
@@ -66,10 +71,12 @@ class SubscriptionManagerImpl {
       const result = await this.serviceInstance.initialize(userId);
       return result.success;
     } catch (error) {
-        packageName: "subscription",
-        operation: "initialize",
-        userId,
-      });
+      if (__DEV__) {
+        console.error('[DEBUG SubscriptionManager] Initialization failed:', {
+          error,
+          userId,
+        });
+      }
       throw error;
     }
   }

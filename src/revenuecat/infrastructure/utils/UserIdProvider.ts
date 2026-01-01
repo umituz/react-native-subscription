@@ -3,7 +3,6 @@
  * Manages user ID retrieval (anonymous or authenticated)
  */
 
-import {
 
 export class UserIdProvider {
   private cachedAnonUserId: string | null = null;

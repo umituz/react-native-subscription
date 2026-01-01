@@ -5,7 +5,6 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
-import {
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 
 /**
@@ -20,8 +19,9 @@ export const useInitializeSubscription = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-        userId,
-      });
+      if (__DEV__) {
+        console.log('[DEBUG useInitializeSubscription] Initializing:', { userId });
+      }
 
       return SubscriptionManager.initialize(userId);
     },
@@ -31,20 +31,18 @@ export const useInitializeSubscription = (userId: string | undefined) => {
           queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
         });
 
-          "subscription",
-          "Initialize mutation success - packages invalidated",
-          { userId }
-        );
+        if (__DEV__) {
+          console.log('[DEBUG useInitializeSubscription] Success:', { userId });
+        }
       }
     },
     onError: (error) => {
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          packageName: "subscription",
-          operation: "initialize_mutation",
+      if (__DEV__) {
+        console.error('[DEBUG useInitializeSubscription] Error:', {
+          error,
           userId: userId ?? "ANONYMOUS",
-        }
-      );
+        });
+      }
     },
   });
 };

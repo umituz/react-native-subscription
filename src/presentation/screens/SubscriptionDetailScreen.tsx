@@ -6,7 +6,6 @@
 
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
-import {
   useAppDesignTokens,
   ScreenLayout,
 } from "@umituz/react-native-design-system";

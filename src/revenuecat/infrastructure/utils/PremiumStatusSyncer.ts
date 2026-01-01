@@ -7,7 +7,6 @@ import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
 import { getPremiumEntitlement } from '../../domain/types/RevenueCatTypes';
 import { getExpirationDate } from "./ExpirationDateCalculator";
-import {
 
 export async function syncPremiumStatus(
   config: RevenueCatConfig,

@@ -7,7 +7,6 @@
 
 import type { AICreditCosts } from "../types/credit-cost.types";
 
-import {
   DEFAULT_AI_CREDIT_COSTS,
   createCreditCostConfig,
 } from "../types/credit-cost.types";
