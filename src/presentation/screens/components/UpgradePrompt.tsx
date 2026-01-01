@@ -5,9 +5,10 @@
 
 import React, { useMemo } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-  useAppDesignTokens,
-  AtomicText,
-  AtomicIcon,
+import {
+    useAppDesignTokens,
+    AtomicText,
+    AtomicIcon,
 } from "@umituz/react-native-design-system";
 import type { UpgradePromptProps } from "../../types/SubscriptionDetailTypes";
 

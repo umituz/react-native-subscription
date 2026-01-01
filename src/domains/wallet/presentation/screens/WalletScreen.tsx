@@ -9,16 +9,19 @@
 import React from "react";
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-  useAppDesignTokens,
-  AtomicText,
-  AtomicIcon,
-  ScreenLayout,
+import {
+    useAppDesignTokens,
+    AtomicText,
+    AtomicIcon,
+    ScreenLayout,
 } from "@umituz/react-native-design-system";
-  BalanceCard,
-  type BalanceCardTranslations,
+import {
+    BalanceCard,
+    type BalanceCardTranslations,
 } from "../components/BalanceCard";
-  TransactionList,
-  type TransactionListTranslations,
+import {
+    TransactionList,
+    type TransactionListTranslations,
 } from "../components/TransactionList";
 import type { CreditLog } from "../../domain/types/transaction.types";
 

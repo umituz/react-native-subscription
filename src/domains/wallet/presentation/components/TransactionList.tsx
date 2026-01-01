@@ -7,13 +7,15 @@
 
 import React from "react";
 import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-  useAppDesignTokens,
-  AtomicText,
-  AtomicIcon,
+import {
+    useAppDesignTokens,
+    AtomicText,
+    AtomicIcon,
 } from "@umituz/react-native-design-system";
 import type { CreditLog } from "../../domain/types/transaction.types";
-  TransactionItem,
-  type TransactionItemTranslations,
+import {
+    TransactionItem,
+    type TransactionItemTranslations,
 } from "./TransactionItem";
 
 export interface TransactionListTranslations extends TransactionItemTranslations {

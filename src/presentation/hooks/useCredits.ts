@@ -10,9 +10,10 @@ import { useCallback, useMemo } from "react";
 import type { UserCredits, CreditType } from "../../domain/entities/Credits";
 
 declare const __DEV__: boolean;
-  getCreditsRepository,
-  getCreditsConfig,
-  isCreditsRepositoryConfigured,
+import {
+    getCreditsRepository,
+    getCreditsConfig,
+    isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
 export const creditsQueryKeys = {

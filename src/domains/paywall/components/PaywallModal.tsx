@@ -4,13 +4,14 @@
  */
 
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Linking, type ImageSourcePropType } from "react-native";
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Linking, type ImageSourcePropType } from "react-native";
 import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
 import { Image } from "expo-image";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { CreditCard } from "./CreditCard";
 import type { PaywallMode, CreditsPackage, SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from '../entities';
+import { paywallModalStyles as styles } from "./PaywallModal.styles";
 
 export interface PaywallModalProps {
     visible: boolean;
@@ -59,15 +60,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
     const showCredits = mode === "credits";
     const showSubscription = mode === "subscription" || mode === "hybrid";
-
-    // Debug logging
-    if (__DEV__ && visible) {
-        console.log("[PaywallModal] Props:", {
-            hasHeroImage: !!heroImage,
-            heroImageType: typeof heroImage,
-            packagesCount: subscriptionPackages.length,
-        });
-    }
 
     const handlePurchase = useCallback(async () => {
         setIsProcessing(true);
@@ -234,30 +226,3 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 });
 
 PaywallModal.displayName = "PaywallModal";
-
-const styles = StyleSheet.create({
-    modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
-    container: { flex: 1 },
-    closeBtn: { position: "absolute", top: 12, right: 12, width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", zIndex: 10 },
-    scroll: { flexGrow: 1, padding: 16, paddingTop: 16, paddingBottom: 32 },
-    heroContainer: { alignItems: "center", marginBottom: 20, marginTop: 32 },
-    heroImage: { width: 180, height: 180, borderRadius: 90 },
-    header: { alignItems: "center", marginBottom: 12 },
-    title: { fontWeight: "700", textAlign: "center", marginBottom: 4 },
-    subtitle: { textAlign: "center" },
-    features: { borderRadius: 12, padding: 12, marginBottom: 12, gap: 8 },
-    featureRow: { flexDirection: "row", alignItems: "center" },
-    featureIcon: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center", marginRight: 8 },
-    featureText: { flex: 1, fontWeight: "500" },
-    loading: { alignItems: "center", paddingVertical: 24 },
-    loadingText: { marginTop: 8 },
-    plans: { marginBottom: 12 },
-    cta: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
-    ctaDisabled: { opacity: 0.5 },
-    ctaText: { fontWeight: "700" },
-    footer: { flexDirection: "column", alignItems: "center", gap: 8 },
-    restoreButton: { marginBottom: 8 },
-    restoreButtonDisabled: { opacity: 0.5 },
-    legalRow: { flexDirection: "row", justifyContent: "center", gap: 16 },
-    footerLink: {},
-});

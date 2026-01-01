@@ -7,9 +7,10 @@
 
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
-  useAppDesignTokens,
-  AtomicText,
-  AtomicIcon,
+import {
+    useAppDesignTokens,
+    AtomicText,
+    AtomicIcon,
 } from "@umituz/react-native-design-system";
 import type { CreditLog, TransactionReason } from "../../domain/types/transaction.types";
 

@@ -8,9 +8,10 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-  useAppDesignTokens,
-  AtomicText,
-  AtomicIcon,
+import {
+    useAppDesignTokens,
+    AtomicText,
+    AtomicIcon,
 } from "@umituz/react-native-design-system";
 
 export interface BalanceCardTranslations {

@@ -6,8 +6,9 @@
 
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
-  useAppDesignTokens,
-  ScreenLayout,
+import {
+    useAppDesignTokens,
+    ScreenLayout,
 } from "@umituz/react-native-design-system";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";

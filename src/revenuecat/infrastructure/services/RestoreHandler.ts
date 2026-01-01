@@ -4,65 +4,49 @@
  */
 
 import Purchases from "react-native-purchases";
-import type { RestoreResult } from '../../application/ports/IRevenueCatService';
-  RevenueCatRestoreError,
-  RevenueCatInitializationError,
-} from '../../domain/errors/RevenueCatError';
-import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
-import { getErrorMessage } from '../../domain/types/RevenueCatTypes';
-  syncPremiumStatus,
-  notifyRestoreCompleted,
-} from '../utils/PremiumStatusSyncer';
+import type { RestoreResult } from "../../application/ports/IRevenueCatService";
+import {
+    RevenueCatRestoreError,
+    RevenueCatInitializationError,
+} from "../../domain/errors/RevenueCatError";
+import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import { getErrorMessage } from "../../domain/types/RevenueCatTypes";
+import {
+    syncPremiumStatus,
+    notifyRestoreCompleted,
+} from "../utils/PremiumStatusSyncer";
 
 export interface RestoreHandlerDeps {
-  config: RevenueCatConfig;
-  isInitialized: () => boolean;
-  isUsingTestStore: () => boolean;
+    config: RevenueCatConfig;
+    isInitialized: () => boolean;
+    isUsingTestStore: () => boolean;
 }
 
 /**
  * Handle restore purchases
  */
 export async function handleRestore(
-  deps: RestoreHandlerDeps,
-  userId: string
+    deps: RestoreHandlerDeps,
+    userId: string
 ): Promise<RestoreResult> {
-
-  if (!deps.isInitialized()) {
-    const error = new RevenueCatInitializationError();
-      packageName: "subscription",
-      operation: "restore",
-      userId,
-    });
-    throw error;
-  }
-
-  try {
-    const customerInfo = await Purchases.restorePurchases();
-    const entitlementIdentifier = deps.config.entitlementIdentifier;
-    const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
-
-    if (isPremium) {
-      await syncPremiumStatus(deps.config, userId, customerInfo);
-        userId,
-        entitlementId: entitlementIdentifier,
-      });
-    } else {
-        userId,
-      });
+    if (!deps.isInitialized()) {
+        throw new RevenueCatInitializationError();
     }
 
-    await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
+    try {
+        const customerInfo = await Purchases.restorePurchases();
+        const entitlementIdentifier = deps.config.entitlementIdentifier;
+        const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
 
-    return { success: isPremium, isPremium, customerInfo };
-  } catch (error) {
-    const errorMessage = getErrorMessage(error, "Restore failed");
-    const restoreError = new RevenueCatRestoreError(errorMessage);
-      packageName: "subscription",
-      operation: "restore",
-      userId,
-      originalError: error instanceof Error ? error.message : String(error),
-    });
-    throw restoreError;
-  }
+        if (isPremium) {
+            await syncPremiumStatus(deps.config, userId, customerInfo);
+        }
+
+        await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
+
+        return { success: isPremium, isPremium, customerInfo };
+    } catch (error) {
+        const errorMessage = getErrorMessage(error, "Restore failed");
+        throw new RevenueCatRestoreError(errorMessage);
+    }
 }

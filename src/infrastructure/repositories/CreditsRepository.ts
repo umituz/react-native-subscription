@@ -1,4 +1,3 @@
-
 /**
  * Credits Repository
  *
@@ -6,12 +5,13 @@
  * Extends BaseRepository from @umituz/react-native-firebase.
  */
 
-  doc,
-  getDoc,
-  runTransaction,
-  serverTimestamp,
-  type Firestore,
-  type Transaction,
+import {
+    doc,
+    getDoc,
+    runTransaction,
+    serverTimestamp,
+    type Firestore,
+    type Transaction,
 } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type {
@@ -91,14 +91,6 @@ export class CreditsRepository extends BaseRepository {
       };
     }
 
-    if (__DEV__) {
-      console.log("[CreditsRepository] Initialize credits:", {
-        userId,
-        purchaseId,
-        productId,
-      });
-    }
-
     try {
       const creditsRef = this.getCreditsDocRef(db, userId);
 
@@ -110,27 +102,11 @@ export class CreditsRepository extends BaseRepository {
         const allocation = getCreditAllocation(packageType);
 
         if (allocation) {
-          // Override config with tier-specific credit amounts
           configToUse = {
             ...this.config,
             imageCreditLimit: allocation.imageCredits,
             textCreditLimit: allocation.textCredits,
           };
-
-          if (__DEV__) {
-            console.log("[CreditsRepository] Using tier-based allocation:", {
-              packageType,
-              imageCredits: allocation.imageCredits,
-              textCredits: allocation.textCredits,
-            });
-          }
-        } else {
-          if (__DEV__) {
-            console.warn(
-              "[CreditsRepository] Could not determine package type, using default config:",
-              this.config
-            );
-          }
         }
       }
 
@@ -140,13 +116,6 @@ export class CreditsRepository extends BaseRepository {
         configToUse,
         purchaseId
       );
-
-      if (__DEV__) {
-        console.log("[CreditsRepository] Credits initialized successfully:", {
-          imageCredits: result.imageCredits,
-          textCredits: result.textCredits,
-        });
-      }
 
       return {
         success: true,
@@ -158,10 +127,6 @@ export class CreditsRepository extends BaseRepository {
         },
       };
     } catch (error) {
-      if (__DEV__) {
-        console.error("[CreditsRepository] Failed to initialize credits:", error);
-      }
-
       return {
         success: false,
         error: {

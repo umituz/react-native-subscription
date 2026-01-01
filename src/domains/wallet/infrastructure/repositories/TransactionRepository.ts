@@ -5,16 +5,17 @@
  * Generic repository for use across hundreds of apps.
  */
 
-  collection,
-  getDocs,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  limit as firestoreLimit,
-  serverTimestamp,
-  type Firestore,
-  type QueryConstraint,
+import {
+    collection,
+    getDocs,
+    addDoc,
+    query,
+    where,
+    orderBy,
+    limit as firestoreLimit,
+    serverTimestamp,
+    type Firestore,
+    type QueryConstraint,
 } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type {
@@ -83,9 +84,6 @@ export class TransactionRepository extends BaseRepository {
 
       return { success: true, data: transactions };
     } catch (error) {
-      if (__DEV__) {
-        console.error("[TransactionRepository] Error:", error);
-      }
       return {
         success: false,
         error: {
@@ -127,10 +125,6 @@ export class TransactionRepository extends BaseRepository {
 
       const docRef = await addDoc(colRef, docData);
 
-      if (__DEV__) {
-        console.log("[TransactionRepository] Added:", docRef.id);
-      }
-
       return {
         success: true,
         data: {
@@ -143,9 +137,6 @@ export class TransactionRepository extends BaseRepository {
         },
       };
     } catch (error) {
-      if (__DEV__) {
-        console.error("[TransactionRepository] Add error:", error);
-      }
       return {
         success: false,
         error: {

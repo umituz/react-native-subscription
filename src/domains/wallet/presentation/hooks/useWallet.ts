@@ -6,11 +6,13 @@
  */
 
 import { useCallback, useMemo } from "react";
-  useCredits,
-  type UseCreditsParams,
+import {
+    useCredits,
+    type UseCreditsParams,
 } from "../../../../presentation/hooks/useCredits";
-  useTransactionHistory,
-  type UseTransactionHistoryParams,
+import {
+    useTransactionHistory,
+    type UseTransactionHistoryParams,
 } from "./useTransactionHistory";
 import type { CreditLog } from "../../domain/types/transaction.types";
 

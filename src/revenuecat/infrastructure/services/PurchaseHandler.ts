@@ -4,112 +4,88 @@
  */
 
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
-import type { PurchaseResult } from '../../application/ports/IRevenueCatService';
-  RevenueCatPurchaseError,
-  RevenueCatInitializationError,
-} from '../../domain/errors/RevenueCatError';
-import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
-  isUserCancelledError,
-  getErrorMessage,
-} from '../../domain/types/RevenueCatTypes';
-  syncPremiumStatus,
-  notifyPurchaseCompleted,
-} from '../utils/PremiumStatusSyncer';
+import type { PurchaseResult } from "../../application/ports/IRevenueCatService";
+import {
+    RevenueCatPurchaseError,
+    RevenueCatInitializationError,
+} from "../../domain/errors/RevenueCatError";
+import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import {
+    isUserCancelledError,
+    getErrorMessage,
+} from "../../domain/types/RevenueCatTypes";
+import {
+    syncPremiumStatus,
+    notifyPurchaseCompleted,
+} from "../utils/PremiumStatusSyncer";
 
 export interface PurchaseHandlerDeps {
-  config: RevenueCatConfig;
-  isInitialized: () => boolean;
-  isUsingTestStore: () => boolean;
+    config: RevenueCatConfig;
+    isInitialized: () => boolean;
+    isUsingTestStore: () => boolean;
 }
 
 function isConsumableProduct(
-  pkg: PurchasesPackage,
-  consumableIds: string[]
+    pkg: PurchasesPackage,
+    consumableIds: string[]
 ): boolean {
-  if (consumableIds.length === 0) return false;
-  const identifier = pkg.product.identifier.toLowerCase();
-  return consumableIds.some((id) => identifier.includes(id.toLowerCase()));
+    if (consumableIds.length === 0) return false;
+    const identifier = pkg.product.identifier.toLowerCase();
+    return consumableIds.some((id) => identifier.includes(id.toLowerCase()));
 }
 
 /**
  * Handle package purchase - supports both subscriptions and consumables
  */
 export async function handlePurchase(
-  deps: PurchaseHandlerDeps,
-  pkg: PurchasesPackage,
-  userId: string
+    deps: PurchaseHandlerDeps,
+    pkg: PurchasesPackage,
+    userId: string
 ): Promise<PurchaseResult> {
-    productId: pkg.product.identifier,
-    userId,
-  });
-
-  if (!deps.isInitialized()) {
-    const error = new RevenueCatInitializationError();
-      packageName: "subscription",
-      operation: "purchase",
-      userId,
-      productId: pkg.product.identifier,
-    });
-    throw error;
-  }
-
-  const consumableIds = deps.config.consumableProductIdentifiers || [];
-  const isConsumable = isConsumableProduct(pkg, consumableIds);
-
-  try {
-    const purchaseResult = await Purchases.purchasePackage(pkg);
-    const customerInfo = purchaseResult.customerInfo;
-
-    if (isConsumable) {
-      return {
-        success: true,
-        isPremium: false,
-        customerInfo,
-        isConsumable: true,
-        productId: pkg.product.identifier,
-      };
+    if (!deps.isInitialized()) {
+        throw new RevenueCatInitializationError();
     }
 
-    const entitlementIdentifier = deps.config.entitlementIdentifier;
-    const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
+    const consumableIds = deps.config.consumableProductIdentifiers || [];
+    const isConsumable = isConsumableProduct(pkg, consumableIds);
 
-    if (isPremium) {
-      await syncPremiumStatus(deps.config, userId, customerInfo);
-      await notifyPurchaseCompleted(
-        deps.config,
-        userId,
-        pkg.product.identifier,
-        customerInfo
-      );
-      return { success: true, isPremium: true, customerInfo };
-    }
+    try {
+        const purchaseResult = await Purchases.purchasePackage(pkg);
+        const customerInfo = purchaseResult.customerInfo;
 
-    const entitlementError = new RevenueCatPurchaseError(
-      "Purchase completed but premium entitlement not active",
-      pkg.product.identifier
-    );
-      packageName: "subscription",
-      operation: "purchase",
-      userId,
-      productId: pkg.product.identifier,
-      reason: "entitlement_not_active",
-    });
-    throw entitlementError;
-  } catch (error) {
-    if (isUserCancelledError(error)) {
-        productId: pkg.product.identifier,
-        userId,
-      });
-      return { success: false, isPremium: false };
+        if (isConsumable) {
+            return {
+                success: true,
+                isPremium: false,
+                customerInfo,
+                isConsumable: true,
+                productId: pkg.product.identifier,
+            };
+        }
+
+        const entitlementIdentifier = deps.config.entitlementIdentifier;
+        const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
+
+        if (isPremium) {
+            await syncPremiumStatus(deps.config, userId, customerInfo);
+            await notifyPurchaseCompleted(
+                deps.config,
+                userId,
+                pkg.product.identifier,
+                customerInfo
+            );
+            return { success: true, isPremium: true, customerInfo };
+        }
+
+        throw new RevenueCatPurchaseError(
+            "Purchase completed but premium entitlement not active",
+            pkg.product.identifier
+        );
+    } catch (error) {
+        if (isUserCancelledError(error)) {
+            return { success: false, isPremium: false };
+        }
+        const errorMessage = getErrorMessage(error, "Purchase failed");
+        throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
     }
-    const errorMessage = getErrorMessage(error, "Purchase failed");
-    const purchaseError = new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
-      packageName: "subscription",
-      operation: "purchase",
-      userId,
-      productId: pkg.product.identifier,
-      originalError: error instanceof Error ? error.message : String(error),
-    });
-    throw purchaseError;
-  }
 }

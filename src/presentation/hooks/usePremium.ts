@@ -12,9 +12,10 @@ import type { PurchasesPackage } from 'react-native-purchases';
 import type { UserCredits } from '../../domain/entities/Credits';
 import { useCredits } from './useCredits';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
-  useSubscriptionPackages,
-  usePurchasePackage,
-  useRestorePurchase,
+import {
+    useSubscriptionPackages,
+    usePurchasePackage,
+    useRestorePurchase,
 } from '../../revenuecat/presentation/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
 

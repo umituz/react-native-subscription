@@ -10,9 +10,10 @@ import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomerInfo";
 import { usePaywallVisibility } from "./usePaywallVisibility";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
-  convertPurchasedAt,
-  formatDateForLocale,
-  calculateDaysRemaining,
+import {
+    convertPurchasedAt,
+    formatDateForLocale,
+    calculateDaysRemaining,
 } from "../utils/subscriptionDateUtils";
 import type {
   SubscriptionSettingsConfig,

@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useStorage } from '@umituz/react-native-storage';
 
 const PAYWALL_SHOWN_KEY = 'post_onboarding_paywall_shown';
 
@@ -23,33 +23,34 @@ export interface UsePaywallFlowResult {
 
 export const usePaywallFlow = (options: UsePaywallFlowOptions = {}): UsePaywallFlowResult => {
   const { showAfterOnboarding = false } = options;
+  const { getString, setString } = useStorage();
   const [showPostOnboardingPaywall, setShowPostOnboardingPaywall] = useState(showAfterOnboarding);
   const [paywallShown, setPaywallShown] = useState(false);
 
   // Load persisted state
   useEffect(() => {
     const loadPersistedState = async () => {
-      const value = await AsyncStorage.getItem(PAYWALL_SHOWN_KEY);
+      const value = await getString(PAYWALL_SHOWN_KEY, '');
       setPaywallShown(value === 'true');
     };
 
     loadPersistedState();
-  }, []);
+  }, [getString]);
 
-  const closePostOnboardingPaywall = useCallback(async (isPremium: boolean) => {
-    await AsyncStorage.setItem(PAYWALL_SHOWN_KEY, 'true');
+  const closePostOnboardingPaywall = useCallback(async (_isPremium: boolean) => {
+    await setString(PAYWALL_SHOWN_KEY, 'true');
     setShowPostOnboardingPaywall(false);
     setPaywallShown(true);
-  }, []);
+  }, [setString]);
 
   const hidePostOnboardingPaywall = useCallback(() => {
     setShowPostOnboardingPaywall(false);
   }, []);
 
   const markPaywallShown = useCallback(async () => {
-    await AsyncStorage.setItem(PAYWALL_SHOWN_KEY, 'true');
+    await setString(PAYWALL_SHOWN_KEY, 'true');
     setPaywallShown(true);
-  }, []);
+  }, [setString]);
 
   return {
     showPostOnboardingPaywall,

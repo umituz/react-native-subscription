@@ -5,8 +5,9 @@
 
 import { useMemo } from "react";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
-  getDaysUntilExpiration,
-  isSubscriptionExpired,
+import {
+    getDaysUntilExpiration,
+    isSubscriptionExpired,
 } from "../../utils/dateValidationUtils";
 
 export interface SubscriptionDetails {

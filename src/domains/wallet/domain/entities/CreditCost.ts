@@ -6,9 +6,9 @@
  */
 
 import type { AICreditCosts } from "../types/credit-cost.types";
-
-  DEFAULT_AI_CREDIT_COSTS,
-  createCreditCostConfig,
+import {
+    DEFAULT_AI_CREDIT_COSTS,
+    createCreditCostConfig,
 } from "../types/credit-cost.types";
 
 export interface CreditCostEntity {

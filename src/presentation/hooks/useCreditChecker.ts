@@ -7,8 +7,9 @@
 import { useMemo } from "react";
 import type { CreditType } from "../../domain/entities/Credits";
 import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
-  createCreditChecker,
-  type CreditCheckResult,
+import {
+    createCreditChecker,
+    type CreditCheckResult,
 } from "../../utils/creditChecker";
 
 export interface UseCreditCheckerParams {

@@ -7,9 +7,10 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
-  PremiumDetailsCard,
-  type CreditInfo,
-  type PremiumDetailsTranslations,
+import {
+    PremiumDetailsCard,
+    type CreditInfo,
+    type PremiumDetailsTranslations,
 } from "../details/PremiumDetailsCard";
 import type { SubscriptionStatusType } from "../details/PremiumStatusBadge";
 

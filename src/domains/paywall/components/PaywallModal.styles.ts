@@ -1,0 +1,49 @@
+/**
+ * PaywallModal Styles
+ */
+
+import { StyleSheet } from "react-native";
+
+export const paywallModalStyles = StyleSheet.create({
+    modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
+    container: { flex: 1 },
+    closeBtn: {
+        position: "absolute",
+        top: 12,
+        right: 12,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 10,
+    },
+    scroll: { flexGrow: 1, padding: 16, paddingTop: 16, paddingBottom: 32 },
+    heroContainer: { alignItems: "center", marginBottom: 20, marginTop: 32 },
+    heroImage: { width: 180, height: 180, borderRadius: 90 },
+    header: { alignItems: "center", marginBottom: 12 },
+    title: { fontWeight: "700", textAlign: "center", marginBottom: 4 },
+    subtitle: { textAlign: "center" },
+    features: { borderRadius: 12, padding: 12, marginBottom: 12, gap: 8 },
+    featureRow: { flexDirection: "row", alignItems: "center" },
+    featureIcon: {
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 8,
+    },
+    featureText: { flex: 1, fontWeight: "500" },
+    loading: { alignItems: "center", paddingVertical: 24 },
+    loadingText: { marginTop: 8 },
+    plans: { marginBottom: 12 },
+    cta: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
+    ctaDisabled: { opacity: 0.5 },
+    ctaText: { fontWeight: "700" },
+    footer: { flexDirection: "column", alignItems: "center", gap: 8 },
+    restoreButton: { marginBottom: 8 },
+    restoreButtonDisabled: { opacity: 0.5 },
+    legalRow: { flexDirection: "row", justifyContent: "center", gap: 16 },
+    footerLink: {},
+});
