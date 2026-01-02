@@ -33,16 +33,16 @@ export interface TransactionItemProps {
 
 const getReasonIcon = (reason: TransactionReason): string => {
   const iconMap: Record<TransactionReason, string> = {
-    purchase: "ShoppingCart",
-    usage: "Zap",
-    refund: "RotateCcw",
-    bonus: "Gift",
-    subscription: "Star",
-    admin: "Shield",
-    reward: "Award",
-    expired: "Clock",
+    purchase: "shopping-cart",
+    usage: "zap",
+    refund: "rotate-ccw",
+    bonus: "gift",
+    subscription: "star",
+    admin: "shield",
+    reward: "award",
+    expired: "clock",
   };
-  return iconMap[reason] || "Circle";
+  return iconMap[reason] || "circle";
 };
 
 const defaultDateFormatter = (timestamp: number): string => {

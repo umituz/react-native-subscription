@@ -50,7 +50,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         >
           {translations.title}
         </AtomicText>
-        <AtomicIcon name="History" size="md" color="secondary" />
+        <AtomicIcon name="history" size="md" color="secondary" />
       </View>
 
       {loading ? (
@@ -65,7 +65,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         </View>
       ) : transactions.length === 0 ? (
         <View style={styles.stateContainer}>
-          <AtomicIcon name="Package" size="xl" color="secondary" />
+          <AtomicIcon name="inbox" size="xl" color="secondary" />
           <AtomicText
             type="bodyMedium"
             style={[styles.stateText, { color: tokens.colors.textSecondary }]}

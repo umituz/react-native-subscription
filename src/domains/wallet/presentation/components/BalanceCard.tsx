@@ -28,7 +28,7 @@ export interface BalanceCardProps {
 export const BalanceCard: React.FC<BalanceCardProps> = ({
   balance,
   translations,
-  iconName = "Wallet",
+  iconName = "wallet",
 }) => {
   const tokens = useAppDesignTokens();
   const gradientColors = [

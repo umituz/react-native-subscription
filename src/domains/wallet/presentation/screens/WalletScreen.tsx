@@ -8,8 +8,8 @@
 
 import React from "react";
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
+    useSafeAreaInsets,
     useAppDesignTokens,
     AtomicText,
     AtomicIcon,
@@ -61,7 +61,7 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ config }) => {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <AtomicIcon
-            name="ArrowLeft"
+            name="arrow-left"
             size="lg"
             customColor={tokens.colors.textPrimary}
           />
