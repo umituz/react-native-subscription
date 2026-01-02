@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, ActivityIndicator, Linking, type ImageSourcePropType } from "react-native";
-import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
+import { View, ScrollView, TouchableOpacity, Linking, type ImageSourcePropType } from "react-native";
+import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system";
 import { Image } from "expo-image";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
@@ -149,10 +149,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
                     {isLoading ? (
                         <View style={styles.loading}>
-                            <ActivityIndicator color={tokens.colors.primary} />
-                            <AtomicText type="bodyMedium" style={[styles.loadingText, { color: tokens.colors.textSecondary }]}>
-                                {translations.loadingText}
-                            </AtomicText>
+                            <AtomicSpinner
+                                size="lg"
+                                color="primary"
+                                text={translations.loadingText}
+                            />
                         </View>
                     ) : (
                         <View style={styles.plans}>
