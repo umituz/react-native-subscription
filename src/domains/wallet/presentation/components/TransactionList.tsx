@@ -6,11 +6,12 @@
  */
 
 import React from "react";
-import { View, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ScrollView } from "react-native";
 import {
     useAppDesignTokens,
     AtomicText,
     AtomicIcon,
+    AtomicSpinner,
 } from "@umituz/react-native-design-system";
 import type { CreditLog } from "../../domain/types/transaction.types";
 import {
@@ -54,15 +55,12 @@ export const TransactionList: React.FC<TransactionListProps> = ({
       </View>
 
       {loading ? (
-        <View style={styles.stateContainer}>
-          <ActivityIndicator size="large" color={tokens.colors.primary} />
-          <AtomicText
-            type="bodyMedium"
-            style={[styles.stateText, { color: tokens.colors.textSecondary }]}
-          >
-            {translations.loading}
-          </AtomicText>
-        </View>
+        <AtomicSpinner
+          size="lg"
+          color="primary"
+          text={translations.loading}
+          style={styles.stateContainer}
+        />
       ) : transactions.length === 0 ? (
         <View style={styles.stateContainer}>
           <AtomicIcon name="inbox" size="xl" color="secondary" />

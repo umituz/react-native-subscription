@@ -7,12 +7,13 @@
  */
 
 import React from "react";
-import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import {
     useSafeAreaInsets,
     useAppDesignTokens,
     AtomicText,
     AtomicIcon,
+    AtomicSpinner,
     ScreenLayout,
 } from "@umituz/react-native-design-system";
 import {
@@ -79,15 +80,13 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ config }) => {
   const renderBalance = () => {
     if (config.balanceLoading) {
       return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={tokens.colors.primary} />
-          <AtomicText
-            type="bodyMedium"
-            style={[styles.loadingText, { color: tokens.colors.textSecondary }]}
-          >
-            {config.translations.loading}
-          </AtomicText>
-        </View>
+        <AtomicSpinner
+          size="xl"
+          color="primary"
+          text={config.translations.loading}
+          fullContainer
+          style={styles.loadingContainer}
+        />
       );
     }
 
@@ -135,13 +134,6 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   loadingContainer: {
-    padding: 40,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-  },
-  loadingText: {
-    fontSize: 14,
-    fontWeight: "500",
+    minHeight: 200,
   },
 });
