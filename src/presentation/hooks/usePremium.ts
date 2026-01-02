@@ -54,10 +54,6 @@ export interface UsePremiumResult {
  * ```
  */
 export const usePremium = (userId?: string): UsePremiumResult => {
-  if (__DEV__) {
-    console.log('[DEBUG usePremium] Hook called', { userId: userId || 'ANONYMOUS' });
-  }
-
   // Fetch real subscription status from RevenueCat
   const { isPremium: subscriptionActive, isLoading: statusLoading } =
     useSubscriptionStatus({
@@ -74,17 +70,6 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   // Fetch subscription packages (works for anonymous too)
   const { data: packages = [], isLoading: packagesLoading } =
     useSubscriptionPackages(userId);
-
-  if (__DEV__) {
-    console.log('[DEBUG usePremium] State', {
-      userId: userId || 'ANONYMOUS',
-      packagesCount: packages?.length || 0,
-      packagesLoading,
-      creditsLoading,
-      statusLoading,
-      isPremium: subscriptionActive,
-    });
-  }
 
   // Purchase and restore mutations
   const purchaseMutation = usePurchasePackage(userId);

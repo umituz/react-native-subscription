@@ -18,73 +18,25 @@ import {
 export const useSubscriptionPackages = (userId: string | undefined) => {
   const isConfigured = SubscriptionManager.isConfigured();
 
-  if (__DEV__) {
-    console.log('[DEBUG useSubscriptionPackages] Hook called', {
-      userId: userId || 'ANONYMOUS',
-      isConfigured,
-    });
-  }
-
   return useQuery({
     queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, userId ?? "anonymous"] as const,
     queryFn: async () => {
-      if (__DEV__) {
-        console.log('[DEBUG useSubscriptionPackages] QueryFn executing...', { userId: userId || 'ANONYMOUS' });
-      }
-
       // Initialize if needed (works for both authenticated and anonymous users)
-      try {
-        if (userId) {
-          if (!SubscriptionManager.isInitializedForUser(userId)) {
-            if (__DEV__) {
-              console.log('[DEBUG useSubscriptionPackages] Initializing for user:', userId);
-            }
-            await SubscriptionManager.initialize(userId);
-          } else {
-            if (__DEV__) {
-              console.log('[DEBUG useSubscriptionPackages] Already initialized for user:', userId);
-            }
-          }
-        } else {
-          if (!SubscriptionManager.isInitialized()) {
-            if (__DEV__) {
-              console.log('[DEBUG useSubscriptionPackages] Initializing for ANONYMOUS user');
-            }
-            await SubscriptionManager.initialize(undefined);
-          } else {
-            if (__DEV__) {
-              console.log('[DEBUG useSubscriptionPackages] Already initialized for ANONYMOUS');
-            }
-          }
+      if (userId) {
+        if (!SubscriptionManager.isInitializedForUser(userId)) {
+          await SubscriptionManager.initialize(userId);
         }
-      } catch (error) {
-        if (__DEV__) {
-          console.error('[DEBUG useSubscriptionPackages] Initialization failed:', error);
+      } else {
+        if (!SubscriptionManager.isInitialized()) {
+          await SubscriptionManager.initialize(undefined);
         }
-        throw error;
       }
 
-      if (__DEV__) {
-        console.log('[DEBUG useSubscriptionPackages] Calling getPackages...');
-      }
-
-      const packages = await SubscriptionManager.getPackages();
-
-      if (__DEV__) {
-        console.log('[DEBUG useSubscriptionPackages] Got packages', {
-          count: packages.length,
-          packages: packages.map(p => ({
-            id: p.identifier,
-            type: p.packageType,
-          })),
-        });
-      }
-
-      return packages;
+      return SubscriptionManager.getPackages();
     },
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
-    enabled: isConfigured, // Only enabled when SubscriptionManager is configured
-    refetchOnMount: true, // Respects staleTime - refetches only if data is stale
+    enabled: isConfigured,
+    refetchOnMount: true,
   });
 };

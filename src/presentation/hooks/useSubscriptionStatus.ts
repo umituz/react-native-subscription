@@ -46,17 +46,7 @@ export const useSubscriptionStatus = ({
         return { isPremium: false, expirationDate: null };
       }
 
-      const status = await SubscriptionManager.checkPremiumStatus();
-
-      if (__DEV__) {
-        console.log("[useSubscriptionStatus] Status from RevenueCat", {
-          userId,
-          isPremium: status.isPremium,
-          expirationDate: status.expirationDate,
-        });
-      }
-
-      return status;
+      return SubscriptionManager.checkPremiumStatus();
     },
     enabled: enabled && !!userId && SubscriptionManager.isInitializedForUser(userId),
     staleTime: 30 * 1000,

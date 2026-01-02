@@ -22,9 +22,6 @@ let globalAuthProvider: PurchaseAuthProvider | null = null;
  */
 export const configureAuthProvider = (provider: PurchaseAuthProvider): void => {
     globalAuthProvider = provider;
-    if (__DEV__) {
-        console.log("[useAuthAwarePurchase] Auth provider configured");
-    }
 };
 
 export interface UseAuthAwarePurchaseResult {

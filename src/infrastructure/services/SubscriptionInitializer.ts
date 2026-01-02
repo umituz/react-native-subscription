@@ -41,9 +41,6 @@ const waitForAuthState = async (
 
   // If user already available, return immediately
   if (auth.currentUser) {
-    if (__DEV__) {
-      console.log("[Subscription] User already available:", auth.currentUser.uid);
-    }
     return auth.currentUser.uid;
   }
 
@@ -51,22 +48,12 @@ const waitForAuthState = async (
   return new Promise<string | undefined>((resolve) => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       unsubscribe();
-      if (__DEV__) {
-        console.log("[Subscription] Auth state ready:", {
-          hasUser: !!user,
-          userId: user?.uid ?? "anonymous",
-          isAnonymous: user?.isAnonymous ?? true,
-        });
-      }
       resolve(user?.uid || undefined);
     });
 
     // Timeout fallback - don't wait forever
     setTimeout(() => {
       unsubscribe();
-      if (__DEV__) {
-        console.log("[Subscription] Auth state timeout, proceeding with anonymous");
-      }
       resolve(undefined);
     }, timeoutMs);
   });
@@ -110,12 +97,6 @@ export const initializeSubscription = async (
   // Wait for auth state to get correct user ID
   const initialUserId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);
 
-  if (__DEV__) {
-    console.log("[Subscription] Initializing with user:", {
-      userId: initialUserId ?? "will use anonymous",
-    });
-  }
-
   const initPromise = SubscriptionManager.initialize(initialUserId);
   const timeoutPromise = new Promise<boolean>((_, reject) =>
     setTimeout(
@@ -134,8 +115,4 @@ export const initializeSubscription = async (
     },
     showAuthModal,
   });
-
-  if (__DEV__) {
-    console.log("[Subscription] Initialized successfully");
-  }
 };

@@ -33,52 +33,28 @@ class SubscriptionManagerImpl {
     if (config.getAnonymousUserId) {
       this.userIdProvider.configure(config.getAnonymousUserId);
     }
-
-    if (__DEV__) {
-      console.log('[DEBUG SubscriptionManager] Configured:', {
-        entitlementId: config.config.entitlementIdentifier,
-      });
-    }
   }
 
   private ensureConfigured(): void {
     if (!this.managerConfig || !this.packageHandler) {
-      const error = new Error("SubscriptionManager not configured");
-      if (__DEV__) {
-        console.error('[DEBUG SubscriptionManager] Not configured:', {
-          hasConfig: !!this.managerConfig,
-          hasHandler: !!this.packageHandler,
-        });
-      }
-      throw error;
+      throw new Error("SubscriptionManager not configured");
     }
   }
 
   private async performInitialization(userId: string): Promise<boolean> {
     this.ensureConfigured();
 
-    try {
-      await initializeRevenueCatService(this.managerConfig!.config);
-      this.serviceInstance = getRevenueCatService();
+    await initializeRevenueCatService(this.managerConfig!.config);
+    this.serviceInstance = getRevenueCatService();
 
-      if (!this.serviceInstance) {
-        return false;
-      }
-
-      this.packageHandler!.setService(this.serviceInstance);
-
-      // Don't pass apiKey - let resolveApiKey decide based on environment (Expo Go = test store key)
-      const result = await this.serviceInstance.initialize(userId);
-      return result.success;
-    } catch (error) {
-      if (__DEV__) {
-        console.error('[DEBUG SubscriptionManager] Initialization failed:', {
-          error,
-          userId,
-        });
-      }
-      throw error;
+    if (!this.serviceInstance) {
+      return false;
     }
+
+    this.packageHandler!.setService(this.serviceInstance);
+
+    const result = await this.serviceInstance.initialize(userId);
+    return result.success;
   }
 
   async initialize(userId?: string): Promise<boolean> {
@@ -116,27 +92,11 @@ class SubscriptionManagerImpl {
 
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
-    if (__DEV__) {
-      console.log('[DEBUG SubscriptionManager] getPackages called', {
-        hasServiceInstance: !!this.serviceInstance,
-        hasPackageHandler: !!this.packageHandler,
-      });
-    }
     if (!this.serviceInstance) {
-      if (__DEV__) {
-        console.log('[DEBUG SubscriptionManager] Creating service instance...');
-      }
       this.serviceInstance = getRevenueCatService();
       this.packageHandler!.setService(this.serviceInstance);
     }
-    const packages = await this.packageHandler!.fetchPackages();
-    if (__DEV__) {
-      console.log('[DEBUG SubscriptionManager] fetchPackages returned', {
-        count: packages.length,
-        packages: packages.map(p => ({ id: p.identifier, type: p.packageType })),
-      });
-    }
-    return packages;
+    return this.packageHandler!.fetchPackages();
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
@@ -178,5 +138,4 @@ class SubscriptionManagerImpl {
 
 export const SubscriptionManager = new SubscriptionManagerImpl();
 
-// Re-export types
 export type { PremiumStatus };
