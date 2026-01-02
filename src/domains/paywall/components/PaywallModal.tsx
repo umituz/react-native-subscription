@@ -28,9 +28,9 @@ export interface PaywallModalProps {
     creditsLabel?: string;
     /** Hero image source (require or uri) */
     heroImage?: ImageSourcePropType;
-    onSubscriptionPurchase?: (pkg: PurchasesPackage) => Promise<void>;
-    onCreditsPurchase?: (packageId: string) => Promise<void>;
-    onRestore?: () => Promise<void>;
+    onSubscriptionPurchase?: (pkg: PurchasesPackage) => Promise<void | boolean>;
+    onCreditsPurchase?: (packageId: string) => Promise<void | boolean>;
+    onRestore?: () => Promise<void | boolean>;
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
