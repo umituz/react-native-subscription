@@ -80,6 +80,8 @@ export {
 // =============================================================================
 
 export {
+  PaywallContainer,
+  type PaywallContainerProps,
   PaywallModal,
   type PaywallModalProps,
   PaywallHeader,
@@ -373,6 +375,14 @@ export {
   detectPackageType,
   type SubscriptionPackageType,
 } from "./utils/packageTypeDetector";
+
+export {
+  filterPackagesByMode,
+  separatePackages,
+  getPackageCategory,
+  type PackageCategory,
+  type PackageFilterConfig,
+} from "./utils/packageFilter";
 
 export {
   getCreditAllocation,

@@ -8,8 +8,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 
-declare const __DEV__: boolean;
-
 export const subscriptionStatusQueryKeys = {
   all: ["subscriptionStatus"] as const,
   user: (userId: string) => ["subscriptionStatus", userId] as const,

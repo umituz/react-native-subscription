@@ -51,6 +51,6 @@ module.exports = [
         },
     },
     {
-        ignores: ["node_modules/**", "lib/**", "dist/**"],
+        ignores: ["node_modules/**", "lib/**", "dist/**", "**/*.test.ts", "**/__tests__/**"],
     },
 ];

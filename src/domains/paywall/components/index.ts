@@ -2,6 +2,9 @@
  * Paywall Components Index
  */
 
+export { PaywallContainer } from "./PaywallContainer";
+export type { PaywallContainerProps } from "./PaywallContainer.types";
+
 export { PaywallModal } from "./PaywallModal";
 export type { PaywallModalProps } from "./PaywallModal";
 

@@ -60,29 +60,25 @@ export class RevenueCatService implements IRevenueCatService {
             };
         }
 
-        try {
-            const result = await initializeSDK(
-                {
-                    config: this.stateManager.getConfig(),
-                    isUsingTestStore: () => this.isUsingTestStore(),
-                    isInitialized: () => this.isInitialized(),
-                    getCurrentUserId: () => this.stateManager.getCurrentUserId(),
-                    setInitialized: (value) => this.stateManager.setInitialized(value),
-                    setCurrentUserId: (id) => this.stateManager.setCurrentUserId(id),
-                },
-                userId,
-                apiKey
-            );
+        const result = await initializeSDK(
+            {
+                config: this.stateManager.getConfig(),
+                isUsingTestStore: () => this.isUsingTestStore(),
+                isInitialized: () => this.isInitialized(),
+                getCurrentUserId: () => this.stateManager.getCurrentUserId(),
+                setInitialized: (value) => this.stateManager.setInitialized(value),
+                setCurrentUserId: (id) => this.stateManager.setCurrentUserId(id),
+            },
+            userId,
+            apiKey
+        );
 
-            if (result.success) {
-                this.listenerManager.setUserId(userId);
-                this.listenerManager.setupListener(this.stateManager.getConfig());
-            }
-
-            return result;
-        } catch (error) {
-            throw error;
+        if (result.success) {
+            this.listenerManager.setUserId(userId);
+            this.listenerManager.setupListener(this.stateManager.getConfig());
         }
+
+        return result;
     }
 
     async fetchOfferings(): Promise<PurchasesOffering | null> {
