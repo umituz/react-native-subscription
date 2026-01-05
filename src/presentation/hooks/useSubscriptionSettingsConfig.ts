@@ -57,12 +57,13 @@ export const useSubscriptionSettingsConfig = (
   const { customerInfo } = useCustomerInfo();
   const { openPaywall } = usePaywallVisibility();
 
-  // Premium status from actual RevenueCat subscription
-  const isPremium = subscriptionActive;
-
   // RevenueCat entitlement info - dynamically using configured entitlementId
   const entitlementId = SubscriptionManager.getEntitlementId() || "premium";
   const premiumEntitlement = customerInfo?.entitlements.active[entitlementId];
+
+  // Premium status: use customerInfo directly as it updates in real-time via listener
+  // This is the source of truth, subscriptionActive is just a backup
+  const isPremium = !!premiumEntitlement || subscriptionActive;
 
   // Prefer expiration date from useSubscriptionStatus (checkPremiumStatus)
   // as it is already processed and typed. Fallback to CustomerInfo ISO string.
