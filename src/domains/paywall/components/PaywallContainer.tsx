@@ -82,6 +82,16 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
     const wasAnonymous = wasAnonymousRef.current;
     wasAnonymousRef.current = isAnonymous;
 
+    if (__DEV__) {
+      console.log("[PaywallContainer] Auth state check:", {
+        wasAnonymous,
+        isAnonymous,
+        hasPendingPackage: !!pendingPackage,
+        userId,
+        pendingPkgId: pendingPackage?.identifier,
+      });
+    }
+
     // If user was anonymous, now authenticated, and has pending package
     if (wasAnonymous && !isAnonymous && pendingPackage && userId) {
       if (__DEV__) {
