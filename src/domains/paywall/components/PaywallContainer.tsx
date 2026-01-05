@@ -4,7 +4,7 @@
  * Mode: credits | subscription | hybrid
  */
 
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePaywallVisibility } from "../../../presentation/hooks/usePaywallVisibility";
 import { useSubscriptionPackages } from "../../../revenuecat/presentation/hooks/useSubscriptionPackages";
@@ -38,6 +38,10 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   const { data: allPackages = [], isLoading, isFetching, status, error } = useSubscriptionPackages(userId ?? undefined);
   const { mutateAsync: purchasePackage } = usePurchasePackage(userId ?? undefined);
   const { mutateAsync: restorePurchases } = useRestorePurchase(userId ?? undefined);
+  
+  // Store pending package for post-auth purchase
+  const [pendingPackage, setPendingPackage] = useState<PurchasesPackage | null>(null);
+  const wasAnonymousRef = useRef(isAnonymous);
 
   const { filteredPackages, computedCreditAmounts } = useMemo(() => {
     const filtered = filterPackagesByMode(allPackages, mode, packageFilterConfig);
@@ -67,13 +71,50 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
     }
   }, [showPaywall, userId, isAnonymous, mode, allPackages.length, filteredPackages.length, isLoading, isFetching, status, error]);
 
+  // Auto-purchase when user authenticates after selecting a package
+  useEffect(() => {
+    const wasAnonymous = wasAnonymousRef.current;
+    wasAnonymousRef.current = isAnonymous;
+
+    // If user was anonymous, now authenticated, and has pending package
+    if (wasAnonymous && !isAnonymous && pendingPackage && userId) {
+      if (__DEV__) {
+        console.log("[PaywallContainer] User authenticated, auto-purchasing pending package:", pendingPackage.identifier);
+      }
+
+      // Execute the purchase
+      (async () => {
+        try {
+          const result = await purchasePackage(pendingPackage);
+          if (result.success) {
+            if (__DEV__) {
+              console.log("[PaywallContainer] Auto-purchase successful");
+            }
+            onPurchaseSuccess?.();
+            closePaywall();
+          }
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          if (__DEV__) {
+            console.error("[PaywallContainer] Auto-purchase failed:", message);
+          }
+          onPurchaseError?.(message);
+        } finally {
+          setPendingPackage(null);
+        }
+      })();
+    }
+  }, [isAnonymous, userId, pendingPackage, purchasePackage, onPurchaseSuccess, onPurchaseError, closePaywall]);
+
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage) => {
       // Auth gating: require authentication for anonymous users
       if (isAnonymous) {
         if (__DEV__) {
-          console.log("[PaywallContainer] Anonymous user, requiring auth before purchase");
+          console.log("[PaywallContainer] Anonymous user, storing package and requiring auth:", pkg.identifier);
         }
+        // Store package for auto-purchase after auth
+        setPendingPackage(pkg);
         // Don't close paywall - keep it open so user can purchase after auth
         onAuthRequired?.();
         return;
@@ -99,7 +140,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         onPurchaseError?.(message);
       }
     },
-    [isAnonymous, purchasePackage, closePaywall, onPurchaseSuccess, onPurchaseError, onAuthRequired]
+    [isAnonymous, purchasePackage, closePaywall, onPurchaseSuccess, onPurchaseError, onAuthRequired, setPendingPackage]
   );
 
   const handleRestore = useCallback(async () => {
