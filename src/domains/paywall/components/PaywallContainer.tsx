@@ -112,6 +112,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
       if (isAnonymous) {
         if (__DEV__) {
           console.log("[PaywallContainer] Anonymous user, storing package and requiring auth:", pkg.identifier);
+          console.log("[PaywallContainer] onAuthRequired is defined:", !!onAuthRequired);
         }
         // Store package for auto-purchase after auth
         setPendingPackage(pkg);
