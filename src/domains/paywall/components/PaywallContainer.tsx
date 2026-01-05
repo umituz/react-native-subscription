@@ -12,6 +12,7 @@ import { usePurchasePackage } from "../../../revenuecat/presentation/hooks/usePu
 import { useRestorePurchase } from "../../../revenuecat/presentation/hooks/useRestorePurchase";
 import { SubscriptionManager } from "../../../revenuecat/infrastructure/managers/SubscriptionManager";
 import { filterPackagesByMode } from "../../../utils/packageFilter";
+import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal } from "./PaywallModal";
 import type { PaywallContainerProps } from "./PaywallContainer.types";
 
@@ -38,9 +39,14 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   const { mutateAsync: purchasePackage } = usePurchasePackage(userId ?? undefined);
   const { mutateAsync: restorePurchases } = useRestorePurchase(userId ?? undefined);
 
-  const filteredPackages = useMemo(() => {
-    return filterPackagesByMode(allPackages, mode, packageFilterConfig);
-  }, [allPackages, mode, packageFilterConfig]);
+  const { filteredPackages, computedCreditAmounts } = useMemo(() => {
+    const filtered = filterPackagesByMode(allPackages, mode, packageFilterConfig);
+    const computed = mode !== "subscription" && !creditAmounts
+      ? createCreditAmountsFromPackages(allPackages)
+      : creditAmounts;
+    
+    return { filteredPackages: filtered, computedCreditAmounts: computed };
+  }, [allPackages, mode, packageFilterConfig, creditAmounts]);
 
   useEffect(() => {
     if (__DEV__ && showPaywall) {
@@ -52,6 +58,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         isInitialized: SubscriptionManager.isInitialized(),
         allPackagesCount: allPackages.length,
         filteredPackagesCount: filteredPackages.length,
+        computedCreditAmounts,
         isLoading,
         isFetching,
         status,
@@ -133,7 +140,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
       heroImage={heroImage}
       bestValueIdentifier={bestValueIdentifier}
       creditsLabel={creditsLabel}
-      creditAmounts={creditAmounts}
+      creditAmounts={computedCreditAmounts}
       onPurchase={handlePurchase}
       onRestore={handleRestore}
     />
