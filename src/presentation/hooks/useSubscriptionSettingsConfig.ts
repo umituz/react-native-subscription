@@ -65,11 +65,23 @@ export const useSubscriptionSettingsConfig = (
   // This is the source of truth, subscriptionActive is just a backup
   const isPremium = !!premiumEntitlement || subscriptionActive;
 
-  // Prefer expiration date from useSubscriptionStatus (checkPremiumStatus)
-  // as it is already processed and typed. Fallback to CustomerInfo ISO string.
-  const expiresAtIso = statusExpirationDate
+  // Get expiration date from RevenueCat entitlement (source of truth)
+  // premiumEntitlement.expirationDate is an ISO string from RevenueCat
+  const entitlementExpirationDate = premiumEntitlement?.expirationDate || null;
+  
+  // Prefer CustomerInfo expiration (real-time) over cached status
+  const expiresAtIso = entitlementExpirationDate || (statusExpirationDate
     ? statusExpirationDate.toISOString()
-    : premiumEntitlement?.expirationDate || null;
+    : null);
+
+  if (__DEV__) {
+    console.log("[useSubscriptionSettingsConfig] Date sources:", {
+      entitlementExpirationDate,
+      statusExpirationDate: statusExpirationDate?.toISOString() || null,
+      finalExpiresAtIso: expiresAtIso,
+      premiumEntitlementKeys: premiumEntitlement ? Object.keys(premiumEntitlement) : null,
+    });
+  }
 
   const willRenew = premiumEntitlement?.willRenew || false;
   const purchasedAtIso = convertPurchasedAt(credits?.purchasedAt);
