@@ -4,6 +4,7 @@
  * Apps just call initializeSubscription with config
  */
 
+import { Platform } from "react-native";
 import type { CustomerInfo } from "react-native-purchases";
 import type { CreditsConfig } from "../../domain/entities/Credits";
 import { configureCreditsRepository, getCreditsRepository } from "../repositories/CreditsRepositoryProvider";
@@ -23,7 +24,12 @@ export interface CreditPackageConfig {
 }
 
 export interface SubscriptionInitConfig {
-  apiKey: string;
+  /** API key for RevenueCat (can provide single key or platform-specific keys) */
+  apiKey?: string;
+  /** iOS-specific API key (overrides apiKey if provided on iOS) */
+  apiKeyIos?: string;
+  /** Android-specific API key (overrides apiKey if provided on Android) */
+  apiKeyAndroid?: string;
   testStoreKey?: string;
   entitlementId: string;
   credits: CreditsConfig;
@@ -83,6 +89,8 @@ export const initializeSubscription = async (
 ): Promise<void> => {
   const {
     apiKey,
+    apiKeyIos,
+    apiKeyAndroid,
     testStoreKey,
     entitlementId,
     credits,
@@ -95,7 +103,12 @@ export const initializeSubscription = async (
     authStateTimeoutMs = 2000,
   } = config;
 
-  if (!apiKey) {
+  // Resolve API key based on platform
+  const resolvedApiKey = Platform.OS === "ios"
+    ? (apiKeyIos || apiKey || "")
+    : (apiKeyAndroid || apiKey || "");
+
+  if (!resolvedApiKey) {
     throw new Error("RevenueCat API key is required");
   }
 
@@ -180,7 +193,7 @@ export const initializeSubscription = async (
 
   SubscriptionManager.configure({
     config: {
-      apiKey,
+      apiKey: resolvedApiKey,
       testStoreKey,
       entitlementIdentifier: entitlementId,
       consumableProductIdentifiers: consumableIdentifiers,
@@ -188,7 +201,7 @@ export const initializeSubscription = async (
       onCreditsUpdated,
       onPurchaseCompleted: handlePurchaseCompleted,
     },
-    apiKey,
+    apiKey: resolvedApiKey,
     getAnonymousUserId,
   });
 
