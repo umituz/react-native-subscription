@@ -36,5 +36,9 @@ export interface PaywallContainerProps {
   readonly onPurchaseError?: (error: string) => void;
   /** Callback when auth is required (for anonymous users) */
   readonly onAuthRequired?: () => void;
+  /** Visibility override */
+  readonly visible?: boolean;
+  /** Callback when paywall is closed */
+  readonly onClose?: () => void;
 }
 

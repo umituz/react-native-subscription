@@ -33,8 +33,14 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   onPurchaseSuccess,
   onPurchaseError,
   onAuthRequired,
+  visible,
+  onClose,
 }) => {
-  const { showPaywall, closePaywall } = usePaywallVisibility();
+  const { showPaywall: globalShowPaywall, closePaywall: globalClosePaywall } = usePaywallVisibility();
+  
+  const isVisible = visible !== undefined ? visible : globalShowPaywall;
+  const handleClose = onClose !== undefined ? onClose : globalClosePaywall;
+
   const { data: allPackages = [], isLoading, isFetching, status, error } = useSubscriptionPackages(userId ?? undefined);
   const { mutateAsync: purchasePackage } = usePurchasePackage(userId ?? undefined);
   const { mutateAsync: restorePurchases } = useRestorePurchase(userId ?? undefined);
@@ -53,7 +59,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   }, [allPackages, mode, packageFilterConfig, creditAmounts]);
 
   useEffect(() => {
-    if (__DEV__ && showPaywall) {
+    if (__DEV__ && isVisible) {
       console.log("[PaywallContainer] Paywall opened:", {
         userId,
         isAnonymous,
@@ -69,7 +75,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         error: error?.message ?? null,
       });
     }
-  }, [showPaywall, userId, isAnonymous, mode, allPackages.length, filteredPackages.length, isLoading, isFetching, status, error]);
+  }, [isVisible, userId, isAnonymous, mode, allPackages.length, filteredPackages.length, isLoading, isFetching, status, error]);
 
   // Auto-purchase when user authenticates after selecting a package
   useEffect(() => {
@@ -91,7 +97,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
               console.log("[PaywallContainer] Auto-purchase successful");
             }
             onPurchaseSuccess?.();
-            closePaywall();
+            handleClose();
           }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
@@ -104,7 +110,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         }
       })();
     }
-  }, [isAnonymous, userId, pendingPackage, purchasePackage, onPurchaseSuccess, onPurchaseError, closePaywall]);
+  }, [isAnonymous, userId, pendingPackage, purchasePackage, onPurchaseSuccess, onPurchaseError, handleClose]);
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage) => {
@@ -131,7 +137,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
             console.log("[PaywallContainer] Purchase successful");
           }
           onPurchaseSuccess?.();
-          closePaywall();
+          handleClose();
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -141,7 +147,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         onPurchaseError?.(message);
       }
     },
-    [isAnonymous, purchasePackage, closePaywall, onPurchaseSuccess, onPurchaseError, onAuthRequired, setPendingPackage]
+    [isAnonymous, purchasePackage, handleClose, onPurchaseSuccess, onPurchaseError, onAuthRequired, setPendingPackage]
   );
 
   const handleRestore = useCallback(async () => {
@@ -155,7 +161,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
           console.log("[PaywallContainer] Restore successful");
         }
         onPurchaseSuccess?.();
-        closePaywall();
+        handleClose();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -164,16 +170,16 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
       }
       onPurchaseError?.(message);
     }
-  }, [restorePurchases, closePaywall, onPurchaseSuccess, onPurchaseError]);
+  }, [restorePurchases, handleClose, onPurchaseSuccess, onPurchaseError]);
 
-  if (!showPaywall) {
+  if (!isVisible) {
     return null;
   }
 
   return (
     <PaywallModal
-      visible={showPaywall}
-      onClose={closePaywall}
+      visible={isVisible}
+      onClose={handleClose}
       translations={translations}
       packages={filteredPackages}
       isLoading={isLoading}
