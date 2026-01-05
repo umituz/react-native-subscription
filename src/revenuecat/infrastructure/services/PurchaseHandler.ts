@@ -54,6 +54,12 @@ export async function handlePurchase(
         const customerInfo = purchaseResult.customerInfo;
 
         if (isConsumable) {
+            await notifyPurchaseCompleted(
+                deps.config,
+                userId,
+                pkg.product.identifier,
+                customerInfo
+            );
             return {
                 success: true,
                 isPremium: false,

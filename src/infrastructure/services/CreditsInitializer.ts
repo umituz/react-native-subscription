@@ -53,14 +53,17 @@ export async function initializeCreditsTransaction(
             processedPurchases = [...processedPurchases, purchaseId].slice(-10);
         }
 
-        transaction.set(creditsRef, {
+        const creditsData = {
             textCredits: newTextCredits,
             imageCredits: newImageCredits,
             purchasedAt,
             lastUpdatedAt: now,
             lastPurchaseAt: now,
             processedPurchases,
-        });
+        };
+
+        // Use merge:true to avoid overwriting other user fields
+        transaction.set(creditsRef, creditsData, { merge: true });
 
         return { textCredits: newTextCredits, imageCredits: newImageCredits };
     });

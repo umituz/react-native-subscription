@@ -33,6 +33,7 @@ export {
 export {
   initializeSubscription,
   type SubscriptionInitConfig,
+  type CreditPackageConfig,
 } from "./infrastructure/services/SubscriptionInitializer";
 
 export { useSubscription } from "./presentation/hooks/useSubscription";
@@ -323,6 +324,7 @@ export {
 
 export {
   usePaywallVisibility,
+  paywallControl,
   type UsePaywallVisibilityResult,
 } from "./presentation/hooks/usePaywallVisibility";
 

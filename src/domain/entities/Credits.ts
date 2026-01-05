@@ -20,6 +20,8 @@ export interface CreditsConfig {
   imageCreditLimit: number;
   /** When true, stores credits at users/{userId}/credits instead of {collectionName}/{userId} */
   useUserSubcollection?: boolean;
+  /** Credit amounts per product ID for consumable credit packages */
+  creditPackageAmounts?: Record<string, number>;
 }
 
 export interface CreditsResult<T = UserCredits> {

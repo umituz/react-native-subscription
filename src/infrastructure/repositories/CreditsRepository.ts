@@ -25,6 +25,8 @@ import { initializeCreditsTransaction } from "../services/CreditsInitializer";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
 
+declare const __DEV__: boolean;
+
 export class CreditsRepository extends BaseRepository {
   private config: CreditsConfig;
 
@@ -35,7 +37,8 @@ export class CreditsRepository extends BaseRepository {
 
   private getCreditsDocRef(db: Firestore, userId: string) {
     if (this.config.useUserSubcollection) {
-      return doc(db, "users", userId, "credits", "data");
+      // Path: users/{userId} - credits stored directly on user document
+      return doc(db, "users", userId);
     }
     return doc(db, this.config.collectionName, userId);
   }
@@ -98,15 +101,31 @@ export class CreditsRepository extends BaseRepository {
       let configToUse = this.config;
 
       if (productId) {
-        const packageType = detectPackageType(productId);
-        const allocation = getCreditAllocation(packageType);
+        // First check credit package amounts (for consumable credit packages)
+        const creditPackageAmount = this.config.creditPackageAmounts?.[productId];
 
-        if (allocation) {
+        if (creditPackageAmount) {
+          // Credit package: use the configured amount
+          if (__DEV__) {
+            console.log("[CreditsRepository] Credit package detected:", { productId, amount: creditPackageAmount });
+          }
           configToUse = {
             ...this.config,
-            imageCreditLimit: allocation.imageCredits,
-            textCreditLimit: allocation.textCredits,
+            imageCreditLimit: creditPackageAmount,
+            textCreditLimit: creditPackageAmount,
           };
+        } else {
+          // Subscription package: use package type detection
+          const packageType = detectPackageType(productId);
+          const allocation = getCreditAllocation(packageType);
+
+          if (allocation) {
+            configToUse = {
+              ...this.config,
+              imageCreditLimit: allocation.imageCredits,
+              textCreditLimit: allocation.textCredits,
+            };
+          }
         }
       }
 

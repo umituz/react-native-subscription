@@ -23,6 +23,15 @@ const setPaywallVisible = (visible: boolean): void => {
   listeners.forEach((listener) => listener());
 };
 
+/**
+ * Direct paywall control for non-React contexts (e.g., appInitializer)
+ */
+export const paywallControl = {
+  open: () => setPaywallVisible(true),
+  close: () => setPaywallVisible(false),
+  isOpen: () => paywallVisible,
+};
+
 export interface UsePaywallVisibilityResult {
   showPaywall: boolean;
   setShowPaywall: (visible: boolean) => void;
