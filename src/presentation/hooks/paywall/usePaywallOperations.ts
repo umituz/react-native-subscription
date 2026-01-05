@@ -47,7 +47,6 @@ export function usePaywallOperations({
         setPendingPackage(pkg);
         setPendingSource("postOnboarding");
         onAuthRequired?.();
-        onPaywallClose?.();
         return false;
       }
       const success = await purchasePackage(pkg);
