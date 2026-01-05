@@ -17,7 +17,10 @@ export interface UseDeductCreditParams {
 }
 
 export interface UseDeductCreditResult {
+  /** Deduct a single credit */
   deductCredit: (creditType: CreditType) => Promise<boolean>;
+  /** Deduct multiple credits (loops internally) */
+  deductCredits: (cost: number, creditType?: CreditType) => Promise<boolean>;
   isDeducting: boolean;
 }
 
@@ -96,8 +99,24 @@ export const useDeductCredit = ({
     }
   }, [mutation, onCreditsExhausted]);
 
+  /**
+   * Deduct multiple credits at once
+   * Loops internally to deduct `cost` credits of the specified type
+   */
+  const deductCredits = useCallback(
+    async (cost: number, creditType: CreditType = "image"): Promise<boolean> => {
+      for (let i = 0; i < cost; i++) {
+        const success = await deductCredit(creditType);
+        if (!success) return false;
+      }
+      return true;
+    },
+    [deductCredit],
+  );
+
   return {
     deductCredit,
+    deductCredits,
     isDeducting: mutation.isPending,
   };
 };

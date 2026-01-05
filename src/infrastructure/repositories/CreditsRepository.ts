@@ -37,8 +37,8 @@ export class CreditsRepository extends BaseRepository {
 
   private getCreditsDocRef(db: Firestore, userId: string) {
     if (this.config.useUserSubcollection) {
-      // Path: users/{userId} - credits stored directly on user document
-      return doc(db, "users", userId);
+      // Path: users/{userId}/credits/balance - credits stored in user subcollection
+      return doc(db, "users", userId, "credits", "balance");
     }
     return doc(db, this.config.collectionName, userId);
   }

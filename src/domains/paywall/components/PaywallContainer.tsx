@@ -19,6 +19,7 @@ declare const __DEV__: boolean;
 
 export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   userId,
+  isAnonymous = false,
   translations,
   mode = "subscription",
   legalUrls,
@@ -30,6 +31,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
   packageFilterConfig,
   onPurchaseSuccess,
   onPurchaseError,
+  onAuthRequired,
 }) => {
   const { showPaywall, closePaywall } = usePaywallVisibility();
   const { data: allPackages = [], isLoading, isFetching, status, error } = useSubscriptionPackages(userId ?? undefined);
@@ -44,6 +46,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
     if (__DEV__ && showPaywall) {
       console.log("[PaywallContainer] Paywall opened:", {
         userId,
+        isAnonymous,
         mode,
         isConfigured: SubscriptionManager.isConfigured(),
         isInitialized: SubscriptionManager.isInitialized(),
@@ -55,10 +58,20 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         error: error?.message ?? null,
       });
     }
-  }, [showPaywall, userId, mode, allPackages.length, filteredPackages.length, isLoading, isFetching, status, error]);
+  }, [showPaywall, userId, isAnonymous, mode, allPackages.length, filteredPackages.length, isLoading, isFetching, status, error]);
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage) => {
+      // Auth gating: require authentication for anonymous users
+      if (isAnonymous) {
+        if (__DEV__) {
+          console.log("[PaywallContainer] Anonymous user, requiring auth before purchase");
+        }
+        closePaywall();
+        onAuthRequired?.();
+        return;
+      }
+
       try {
         if (__DEV__) {
           console.log("[PaywallContainer] Purchase started:", pkg.identifier);
@@ -79,7 +92,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         onPurchaseError?.(message);
       }
     },
-    [purchasePackage, closePaywall, onPurchaseSuccess, onPurchaseError]
+    [isAnonymous, purchasePackage, closePaywall, onPurchaseSuccess, onPurchaseError, onAuthRequired]
   );
 
   const handleRestore = useCallback(async () => {

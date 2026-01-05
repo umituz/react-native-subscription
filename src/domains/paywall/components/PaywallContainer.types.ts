@@ -10,6 +10,8 @@ import type { PackageFilterConfig } from "../../../utils/packageFilter";
 export interface PaywallContainerProps {
   /** User ID for subscription management */
   readonly userId: string | null;
+  /** Whether user is anonymous (requires auth before purchase) */
+  readonly isAnonymous?: boolean;
   /** Paywall translations - no defaults, must be provided */
   readonly translations: PaywallTranslations;
   /** Paywall mode - subscription, credits, or hybrid */
@@ -32,4 +34,7 @@ export interface PaywallContainerProps {
   readonly onPurchaseSuccess?: () => void;
   /** Callback when purchase fails */
   readonly onPurchaseError?: (error: string) => void;
+  /** Callback when auth is required (for anonymous users) */
+  readonly onAuthRequired?: () => void;
 }
+
