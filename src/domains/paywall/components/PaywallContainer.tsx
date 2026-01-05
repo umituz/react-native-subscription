@@ -74,7 +74,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = ({
         if (__DEV__) {
           console.log("[PaywallContainer] Anonymous user, requiring auth before purchase");
         }
-        closePaywall();
+        // Don't close paywall - keep it open so user can purchase after auth
         onAuthRequired?.();
         return;
       }
