@@ -42,7 +42,7 @@ export const CreditItem: React.FC<CreditItemProps> = ({
         badge: {
           paddingHorizontal: tokens.spacing.md,
           paddingVertical: tokens.spacing.xs,
-          borderRadius: tokens.borderRadius.md,
+          borderRadius: tokens.radius.md,
           backgroundColor: tokens.colors.surfaceSecondary,
         },
         count: {
@@ -50,13 +50,13 @@ export const CreditItem: React.FC<CreditItemProps> = ({
         },
         progressBar: {
           height: 8,
-          borderRadius: tokens.borderRadius.xs,
+          borderRadius: tokens.radius.xs,
           overflow: "hidden",
           backgroundColor: tokens.colors.surfaceSecondary,
         },
         progressFill: {
           height: "100%",
-          borderRadius: tokens.borderRadius.xs,
+          borderRadius: tokens.radius.xs,
           width: `${percentage}%`,
           backgroundColor: progressColor,
         },

@@ -23,7 +23,7 @@ export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
         },
         primaryButton: {
           paddingVertical: tokens.spacing.md,
-          borderRadius: tokens.borderRadius.lg,
+          borderRadius: tokens.radius.lg,
           alignItems: "center",
           backgroundColor: tokens.colors.primary,
         },

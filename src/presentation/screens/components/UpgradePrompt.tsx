@@ -49,7 +49,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
           lineHeight: 22,
         },
         benefitsCard: {
-          borderRadius: tokens.borderRadius.lg,
+          borderRadius: tokens.radius.lg,
           padding: tokens.spacing.lg,
           gap: tokens.spacing.md,
           backgroundColor: tokens.colors.surface,
@@ -72,7 +72,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
         },
         upgradeButton: {
           paddingVertical: tokens.spacing.lg,
-          borderRadius: tokens.borderRadius.lg,
+          borderRadius: tokens.radius.lg,
           alignItems: "center",
           backgroundColor: tokens.colors.primary,
         },

@@ -26,7 +26,7 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
     () =>
       StyleSheet.create({
         container: {
-          borderRadius: tokens.borderRadius.lg,
+          borderRadius: tokens.radius.lg,
           padding: tokens.spacing.lg,
           gap: tokens.spacing.lg,
           backgroundColor: tokens.colors.surface,

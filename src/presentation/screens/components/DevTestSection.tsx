@@ -47,7 +47,7 @@ export const DevTestSection: React.FC<DevTestSectionWithTranslationsProps> = ({
         button: {
           paddingVertical: tokens.spacing.md,
           paddingHorizontal: tokens.spacing.lg,
-          borderRadius: tokens.borderRadius.md,
+          borderRadius: tokens.radius.md,
           alignItems: "center",
         },
         primaryButton: {

@@ -50,7 +50,7 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
         badge: {
           paddingHorizontal: tokens.spacing.sm,
           paddingVertical: tokens.spacing.xs,
-          borderRadius: tokens.borderRadius.xs,
+          borderRadius: tokens.radius.xs,
           backgroundColor,
         },
         badgeText: {
