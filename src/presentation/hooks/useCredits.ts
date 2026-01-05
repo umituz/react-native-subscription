@@ -77,6 +77,9 @@ export const useCredits = ({
     enabled: enabled && !!userId && isConfigured,
     staleTime,
     gcTime,
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when app becomes active
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 
   const credits = data ?? null;

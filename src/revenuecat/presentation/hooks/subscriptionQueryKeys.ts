@@ -12,5 +12,7 @@ export const SUBSCRIPTION_QUERY_KEYS = {
     ["subscription", "initialized", userId] as const,
 } as const;
 
-export const STALE_TIME = 5 * 60 * 1000; // 5 minutes
-export const GC_TIME = 30 * 60 * 1000; // 30 minutes
+// No cache - always fetch fresh data for subscription packages
+// This ensures users always see real-time subscription status
+export const STALE_TIME = 0; // Always stale - refetch immediately
+export const GC_TIME = 0; // Don't cache - garbage collect immediately

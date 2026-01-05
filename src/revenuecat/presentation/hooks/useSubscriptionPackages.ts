@@ -38,5 +38,7 @@ export const useSubscriptionPackages = (userId: string | undefined) => {
     gcTime: GC_TIME,
     enabled: isConfigured,
     refetchOnMount: true,
+    refetchOnWindowFocus: true, // Refetch when app becomes active
+    refetchOnReconnect: true, // Refetch when network reconnects
   });
 };
