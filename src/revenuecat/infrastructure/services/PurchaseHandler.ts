@@ -83,6 +83,18 @@ export async function handlePurchase(
             return { success: true, isPremium: true, customerInfo };
         }
 
+        // In Preview API mode (Expo Go), purchases complete but entitlements aren't active
+        // Treat the purchase as successful for testing purposes
+        if (deps.isUsingTestStore()) {
+            await notifyPurchaseCompleted(
+                deps.config,
+                userId,
+                pkg.product.identifier,
+                customerInfo
+            );
+            return { success: true, isPremium: false, customerInfo };
+        }
+
         throw new RevenueCatPurchaseError(
             "Purchase completed but premium entitlement not active",
             pkg.product.identifier

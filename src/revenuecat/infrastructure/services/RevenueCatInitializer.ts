@@ -104,6 +104,7 @@ export async function initializeSDK(
         await Purchases.configure({
             apiKey: key,
             appUserID: userId,
+            usesStoreKit2IfAvailable: true,
         });
         isPurchasesConfigured = true;
         deps.setInitialized(true);

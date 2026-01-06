@@ -11,6 +11,7 @@ export type SubscriptionPackageType = "weekly" | "monthly" | "yearly" | "unknown
  * - premium_weekly, weekly_premium, premium-weekly
  * - premium_monthly, monthly_premium, premium-monthly
  * - premium_yearly, yearly_premium, premium-yearly, premium_annual, annual_premium
+ * - preview-product-id (Preview API mode in Expo Go)
  */
 export function detectPackageType(productIdentifier: string): SubscriptionPackageType {
   if (!productIdentifier) {
@@ -24,6 +25,14 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
 
   if (__DEV__) {
     console.log("[PackageTypeDetector] Detecting package type for:", normalized);
+  }
+
+  // Preview API mode (Expo Go testing)
+  if (normalized.includes("preview")) {
+    if (__DEV__) {
+      console.log("[PackageTypeDetector] Detected: PREVIEW (monthly)");
+    }
+    return "monthly";
   }
 
   // Weekly detection
