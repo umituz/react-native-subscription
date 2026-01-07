@@ -105,8 +105,8 @@ export interface CreditsListProps {
   remainingLabel?: string;
 }
 
-/** Props for credit item component */
-export interface CreditItemProps {
+/** Props for credit row component */
+export interface CreditRowProps {
   label: string;
   current: number;
   total: number;

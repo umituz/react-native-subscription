@@ -6,7 +6,7 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import { CreditItem } from "./CreditItem";
+import { CreditRow } from "../../components/details/CreditRow";
 import type { CreditsListProps } from "../../types/SubscriptionDetailTypes";
 
 export const CreditsList: React.FC<CreditsListProps> = ({
@@ -59,7 +59,7 @@ export const CreditsList: React.FC<CreditsListProps> = ({
       )}
       <View style={styles.list}>
         {credits.map((credit) => (
-          <CreditItem
+          <CreditRow
             key={credit.id}
             label={credit.label}
             current={credit.current}

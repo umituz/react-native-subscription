@@ -10,6 +10,8 @@ import { initializeCreditsTransaction } from "../services/CreditsInitializer";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
 
+import { CreditsMapper } from "../mappers/CreditsMapper";
+
 export class CreditsRepository extends BaseRepository {
   constructor(private config: CreditsConfig) { super(); }
 
@@ -26,7 +28,7 @@ export class CreditsRepository extends BaseRepository {
       const snap = await getDoc(this.getRef(db, userId));
       if (!snap.exists()) return { success: true, data: undefined };
       const d = snap.data() as UserCreditsDocumentRead;
-      return { success: true, data: { textCredits: d.textCredits, imageCredits: d.imageCredits, purchasedAt: d.purchasedAt?.toDate?.() || new Date(), lastUpdatedAt: d.lastUpdatedAt?.toDate?.() || new Date() } };
+      return { success: true, data: CreditsMapper.toEntity(d) };
     } catch (e: any) { return { success: false, error: { message: e.message, code: "FETCH_ERR" } }; }
   }
 
@@ -44,7 +46,14 @@ export class CreditsRepository extends BaseRepository {
         }
       }
       const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId);
-      return { success: true, data: { textCredits: res.textCredits, imageCredits: res.imageCredits, purchasedAt: new Date(), lastUpdatedAt: new Date() } };
+      return { 
+        success: true, 
+        data: CreditsMapper.toEntity({
+            ...res,
+            purchasedAt: { toDate: () => new Date() } as any,
+            lastUpdatedAt: { toDate: () => new Date() } as any,
+        }) 
+      };
     } catch (e: any) { return { success: false, error: { message: e.message, code: "INIT_ERR" } }; }
   }
 

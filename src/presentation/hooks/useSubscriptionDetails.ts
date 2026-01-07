@@ -1,14 +1,7 @@
-/**
- * useSubscriptionDetails Hook
- * Provides formatted subscription details for display
- */
-
 import { useMemo } from "react";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
-import {
-    getDaysUntilExpiration,
-    isSubscriptionExpired,
-} from "../../utils/dateValidationUtils";
+import { isSubscriptionExpired } from "../../utils/dateValidationUtils";
+import { formatDateForLocale, calculateDaysRemaining } from "../utils/subscriptionDateUtils";
 
 export interface SubscriptionDetails {
   /** Raw subscription status */
@@ -35,24 +28,6 @@ interface UseSubscriptionDetailsParams {
 }
 
 /**
- * Format date to localized string
- */
-function formatDate(dateString: string | null, locale: string): string | null {
-  if (!dateString) return null;
-
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(locale, {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Hook for formatted subscription details
  */
 export function useSubscriptionDetails(
@@ -76,7 +51,7 @@ export function useSubscriptionDetails(
 
     const isExpired = isSubscriptionExpired(status);
     const isLifetime = status.isPremium && !status.expiresAt;
-    const daysRemaining = getDaysUntilExpiration(status);
+    const daysRemainingValue = calculateDaysRemaining(status.expiresAt ?? null);
     const isPremium = status.isPremium && !isExpired;
 
     let statusKey: "active" | "expired" | "none" = "none";
@@ -89,10 +64,11 @@ export function useSubscriptionDetails(
       isPremium,
       isExpired,
       isLifetime,
-      daysRemaining,
-      formattedExpirationDate: formatDate(status.expiresAt ?? null, locale),
-      formattedPurchaseDate: formatDate(status.purchasedAt ?? null, locale),
+      daysRemaining: daysRemainingValue,
+      formattedExpirationDate: formatDateForLocale(status.expiresAt ?? null, locale),
+      formattedPurchaseDate: formatDateForLocale(status.purchasedAt ?? null, locale),
       statusKey,
     };
   }, [status, locale]);
 }
+

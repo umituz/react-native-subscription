@@ -45,6 +45,16 @@ function configureLogHandler(): void {
     isLogHandlerConfigured = true;
 }
 
+function buildSuccessResult(
+    deps: InitializerDeps,
+    customerInfo: any,
+    offerings: any
+): InitializeResult {
+    const entitlementId = deps.config.entitlementIdentifier;
+    const hasPremium = !!customerInfo.entitlements.active[entitlementId];
+    return { success: true, offering: offerings.current, hasPremium };
+}
+
 export async function initializeSDK(
     deps: InitializerDeps,
     userId: string,
@@ -57,9 +67,7 @@ export async function initializeSDK(
                 Purchases.getCustomerInfo(),
                 Purchases.getOfferings(),
             ]);
-            const entitlementId = deps.config.entitlementIdentifier;
-            const hasPremium = !!customerInfo.entitlements.active[entitlementId];
-            return { success: true, offering: offerings.current, hasPremium };
+            return buildSuccessResult(deps, customerInfo, offerings);
         } catch {
             return { success: false, offering: null, hasPremium: false };
         }
@@ -82,10 +90,7 @@ export async function initializeSDK(
             deps.setCurrentUserId(userId);
 
             const offerings = await Purchases.getOfferings();
-            const entitlementId = deps.config.entitlementIdentifier;
-            const hasPremium = !!customerInfo.entitlements.active[entitlementId];
-
-            return { success: true, offering: offerings.current, hasPremium };
+            return buildSuccessResult(deps, customerInfo, offerings);
         } catch {
             return { success: false, offering: null, hasPremium: false };
         }
@@ -114,10 +119,7 @@ export async function initializeSDK(
             Purchases.getOfferings(),
         ]);
 
-        const entitlementId = deps.config.entitlementIdentifier;
-        const hasPremium = !!customerInfo.entitlements.active[entitlementId];
-
-        return { success: true, offering: offerings.current, hasPremium };
+        return buildSuccessResult(deps, customerInfo, offerings);
     } catch (error) {
         getErrorMessage(error, "RevenueCat init failed");
         return { success: false, offering: null, hasPremium: false };
