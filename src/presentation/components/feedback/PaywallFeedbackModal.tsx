@@ -166,4 +166,4 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
     );
 });
 
-PaywallFeedbackModal.displayName = "PaywallFeedbackModal";
+

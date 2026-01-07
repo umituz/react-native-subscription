@@ -1,26 +1,6 @@
 /**
  * useUserTierWithRepository Hook
- *
- * Complete hook that automatically fetches premium status from repository
- * and provides user tier information. This eliminates the need for app-specific
- * useUserTier wrappers.
- *
- * This hook combines:
- * - Auth state (from AuthProvider)
- * - Premium status fetching (from ISubscriptionRepository)
- * - Tier logic (from useUserTier)
- *
- * @example
- * ```typescript
- * import { useUserTierWithRepository } from '@umituz/react-native-premium';
- * import { useAuth } from '../../domains/auth';
- * import { premiumRepository } from '@/infrastructure/repositories/PremiumRepository';
- *
- * const { tier, isPremium, isGuest, isLoading, refresh } = useUserTierWithRepository({
- *   auth: useAuth(),
- *   repository: premiumRepository,
- * });
- * ```
+ * Automatically fetches premium status and provides user tier information.
  */
 
 import { useEffect, useState, useCallback } from 'react';

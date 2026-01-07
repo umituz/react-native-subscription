@@ -44,22 +44,8 @@ export const CREDIT_ALLOCATIONS: Record<
 export function getCreditAllocation(
   packageType: SubscriptionPackageType
 ): CreditAllocation | null {
-  if (packageType === "unknown") {
-    if (__DEV__) {
-      console.warn(
-        "[CreditMapper] Cannot allocate credits for unknown package type"
-      );
-    }
-    return null;
-  }
-
-  const allocation = CREDIT_ALLOCATIONS[packageType];
-
-  if (__DEV__) {
-    console.log("[CreditMapper] Credit allocation for", packageType, ":", allocation);
-  }
-
-  return allocation;
+  if (packageType === "unknown") return null;
+  return CREDIT_ALLOCATIONS[packageType];
 }
 
 /**
@@ -97,52 +83,17 @@ export function createCreditAmountsFromPackages(
 ): Record<string, number> {
   const result: Record<string, number> = {};
 
-  if (__DEV__) {
-    console.log("[CreditMapper] Input packages count:", packages?.length || 0);
-  }
-
-  if (!packages || packages.length === 0) {
-    if (__DEV__) {
-      console.log("[CreditMapper] No packages provided, returning empty object");
-    }
-    return result;
-  }
-
   for (const pkg of packages) {
     const identifier = pkg?.product?.identifier;
 
-    if (__DEV__) {
-      console.log("[CreditMapper] Processing package:", {
-        hasProduct: !!pkg?.product,
-        identifier,
-      });
-    }
-
-    if (!identifier) {
-      if (__DEV__) {
-        console.warn("[CreditMapper] Package missing product.identifier:", pkg);
-      }
-      continue;
-    }
+    if (!identifier) continue;
 
     const packageType = detectPackageType(identifier);
     const credits = getImageCreditsForPackage(packageType);
 
-    if (__DEV__) {
-      console.log("[CreditMapper] Package mapping:", {
-        identifier,
-        packageType,
-        credits,
-      });
-    }
-
     if (credits !== null) {
       result[identifier] = credits;
     }
-  }
-
-  if (__DEV__) {
-    console.log("[CreditMapper] Final credit amounts:", result);
   }
 
   return result;

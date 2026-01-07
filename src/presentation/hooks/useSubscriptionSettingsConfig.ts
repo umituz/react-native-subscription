@@ -39,7 +39,6 @@ export const useSubscriptionSettingsConfig = (
 ): SubscriptionSettingsConfig => {
   const {
     userId,
-    isAnonymous = false,
     currentLanguage = "en",
     translations,
     getCreditLimit,
@@ -75,14 +74,7 @@ export const useSubscriptionSettingsConfig = (
     ? statusExpirationDate.toISOString()
     : null);
 
-  if (__DEV__) {
-    console.log("[useSubscriptionSettingsConfig] Date sources:", {
-      entitlementExpirationDate,
-      statusExpirationDate: statusExpirationDate?.toISOString() || null,
-      finalExpiresAtIso: expiresAtIso,
-      premiumEntitlementKeys: premiumEntitlement ? Object.keys(premiumEntitlement) : null,
-    });
-  }
+
 
   const willRenew = premiumEntitlement?.willRenew || false;
   const purchasedAtIso = convertPurchasedAt(credits?.purchasedAt);
@@ -167,15 +159,7 @@ export const useSubscriptionSettingsConfig = (
     ]
   );
 
-  if (__DEV__) {
-    console.log("[useSubscriptionSettingsConfig]", {
-      enabled: config.enabled,
-      isPremium,
-      isAnonymous,
-      hasCredits: !!credits,
-      userId: userId || "ANONYMOUS",
-    });
-  }
+
 
   return config;
 };

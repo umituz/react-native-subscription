@@ -62,40 +62,24 @@ export class DuplicatePaymentError extends WalletError {
   readonly code = "DUPLICATE_PAYMENT";
   readonly category = "PAYMENT" as const;
   readonly userMessage = WALLET_ERROR_MESSAGES.DUPLICATE_PAYMENT;
-
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 export class UserValidationError extends WalletError {
   readonly code = "USER_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
   readonly userMessage = WALLET_ERROR_MESSAGES.USER_VALIDATION_FAILED;
-
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 export class PackageValidationError extends WalletError {
   readonly code = "PACKAGE_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
   readonly userMessage = WALLET_ERROR_MESSAGES.PACKAGE_VALIDATION_FAILED;
-
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 export class ReceiptValidationError extends WalletError {
   readonly code = "RECEIPT_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
   readonly userMessage = WALLET_ERROR_MESSAGES.RECEIPT_VALIDATION_FAILED;
-
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 export class TransactionError extends WalletError {
@@ -122,10 +106,6 @@ export class CreditLimitError extends WalletError {
   readonly code = "CREDIT_LIMIT_ERROR";
   readonly category = "BUSINESS" as const;
   readonly userMessage = WALLET_ERROR_MESSAGES.CREDIT_LIMIT_EXCEEDED;
-
-  constructor(message: string) {
-    super(message);
-  }
 }
 
 export class RefundError extends WalletError {
