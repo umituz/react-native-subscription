@@ -11,7 +11,7 @@ import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomer
 import { usePaywallVisibility } from "./usePaywallVisibility";
 import { calculateDaysRemaining } from "../../domain/entities/SubscriptionStatus";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
-import { formatDateForLocale, convertPurchasedAt } from "../utils/subscriptionDateUtils";
+import { formatDate, convertPurchasedAt } from "../utils/subscriptionDateUtils";
 import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
 import type {
   SubscriptionSettingsConfig,
@@ -36,7 +36,6 @@ export const useSubscriptionSettingsConfig = (
 ): SubscriptionSettingsConfig => {
   const {
     userId,
-    currentLanguage = "en",
     translations,
     getCreditLimit,
     upgradePrompt,
@@ -78,13 +77,13 @@ export const useSubscriptionSettingsConfig = (
 
   // Formatted dates
   const formattedExpirationDate = useMemo(
-    () => formatDateForLocale(expiresAtIso, currentLanguage),
-    [expiresAtIso, currentLanguage]
+    () => formatDate(expiresAtIso),
+    [expiresAtIso]
   );
 
   const formattedPurchaseDate = useMemo(
-    () => formatDateForLocale(purchasedAtIso, currentLanguage),
-    [purchasedAtIso, currentLanguage]
+    () => formatDate(purchasedAtIso),
+    [purchasedAtIso]
   );
 
   // Days remaining calculation

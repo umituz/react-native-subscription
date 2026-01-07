@@ -35,8 +35,7 @@
     "@umituz/react-native-design-system": "latest",
     "@umituz/react-native-firebase": "latest",
     "@umituz/react-native-localization": "latest",
-    "@umituz/react-native-storage": "latest",
-    "@umituz/react-native-timezone": "^1.3.5"
+    "@umituz/react-native-storage": "latest"
   },
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",

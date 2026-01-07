@@ -61,8 +61,6 @@ export interface UseSubscriptionSettingsConfigParams {
   userId?: string;
   /** Whether user is anonymous */
   isAnonymous?: boolean;
-  /** Current language for date formatting */
-  currentLanguage?: string;
   /** Translation strings */
   translations: SubscriptionSettingsTranslations;
   /** Credit limit calculator */

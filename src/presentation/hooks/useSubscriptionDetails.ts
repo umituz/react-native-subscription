@@ -6,7 +6,7 @@ import {
   isSubscriptionValid,
   calculateDaysRemaining
 } from "../../domain/entities/SubscriptionStatus";
-import { formatDateForLocale } from "../utils/subscriptionDateUtils";
+import { formatDate } from "../utils/subscriptionDateUtils";
 
 export interface SubscriptionDetails {
   /** Raw subscription status */
@@ -29,7 +29,6 @@ export interface SubscriptionDetails {
 
 interface UseSubscriptionDetailsParams {
   status: SubscriptionStatus | null;
-  locale?: string;
 }
 
 /**
@@ -38,7 +37,7 @@ interface UseSubscriptionDetailsParams {
 export function useSubscriptionDetails(
   params: UseSubscriptionDetailsParams,
 ): SubscriptionDetails {
-  const { status, locale = "en-US" } = params;
+  const { status } = params;
 
   return useMemo(() => {
     if (!status) {
@@ -77,10 +76,10 @@ export function useSubscriptionDetails(
       isExpired,
       isLifetime,
       daysRemaining: daysRemainingValue,
-      formattedExpirationDate: formatDateForLocale(status.expiresAt ?? null, locale),
-      formattedPurchaseDate: formatDateForLocale(status.purchasedAt ?? null, locale),
+      formattedExpirationDate: formatDate(status.expiresAt ?? null),
+      formattedPurchaseDate: formatDate(status.purchasedAt ?? null),
       statusKey,
     };
-  }, [status, locale]);
+  }, [status]);
 }
 
