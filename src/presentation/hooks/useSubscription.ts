@@ -4,9 +4,13 @@
  */
 
 import { useState, useCallback } from 'react';
-import { getSubscriptionService } from '../../infrastructure/services/SubscriptionService';
 import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatus';
 import { isSubscriptionValid } from '../../domain/entities/SubscriptionStatus';
+import {
+  checkSubscriptionService,
+  validateUserId,
+  executeSubscriptionOperation,
+} from './useSubscription.utils';
 
 export interface UseSubscriptionResult {
   /** Current subscription status */
@@ -45,120 +49,96 @@ export function useSubscription(): UseSubscriptionResult {
   const [error, setError] = useState<string | null>(null);
 
   const loadStatus = useCallback(async (userId: string) => {
-    if (!userId) {
-      setError('User ID is required');
+    const validationError = validateUserId(userId);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    const service = getSubscriptionService();
-    if (!service) {
-      setError('Subscription service is not initialized');
+    const serviceCheck = checkSubscriptionService();
+    if (!serviceCheck.success) {
+      setError(serviceCheck.error || "Service error");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const subscriptionStatus = await service.getSubscriptionStatus(userId);
-      setStatus(subscriptionStatus);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load subscription status';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    await executeSubscriptionOperation(
+      () => serviceCheck.service!.getSubscriptionStatus(userId),
+      setLoading,
+      setError,
+      (result) => setStatus(result)
+    );
   }, []);
 
   const refreshStatus = useCallback(async (userId: string) => {
-    if (!userId) {
-      setError('User ID is required');
+    const validationError = validateUserId(userId);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    const service = getSubscriptionService();
-    if (!service) {
-      setError('Subscription service is not initialized');
+    const serviceCheck = checkSubscriptionService();
+    if (!serviceCheck.success) {
+      setError(serviceCheck.error || "Service error");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const subscriptionStatus = await service.getSubscriptionStatus(userId);
-      setStatus(subscriptionStatus);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to refresh subscription status';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    await executeSubscriptionOperation(
+      () => serviceCheck.service!.getSubscriptionStatus(userId),
+      setLoading,
+      setError,
+      (result) => setStatus(result)
+    );
   }, []);
 
   const activateSubscription = useCallback(
     async (userId: string, productId: string, expiresAt: string | null) => {
-      if (!userId || !productId) {
-        setError('User ID and Product ID are required');
+      const validationError = validateUserId(userId);
+      if (validationError) {
+        setError(validationError);
         return;
       }
 
-      const service = getSubscriptionService();
-      if (!service) {
-        setError('Subscription service is not initialized');
+      if (!productId) {
+        setError("Product ID is required");
         return;
       }
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        const updatedStatus = await service.activateSubscription(
-          userId,
-          productId,
-          expiresAt,
-        );
-        setStatus(updatedStatus);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to activate subscription';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
+      const serviceCheck = checkSubscriptionService();
+      if (!serviceCheck.success) {
+        setError(serviceCheck.error || "Service error");
+        return;
       }
+
+      await executeSubscriptionOperation(
+        () =>
+          serviceCheck.service!.activateSubscription(userId, productId, expiresAt),
+        setLoading,
+        setError,
+        (result) => setStatus(result)
+      );
     },
-    [],
+    []
   );
 
   const deactivateSubscription = useCallback(async (userId: string) => {
-    if (!userId) {
-      setError('User ID is required');
+    const validationError = validateUserId(userId);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    const service = getSubscriptionService();
-    if (!service) {
-      setError('Subscription service is not initialized');
+    const serviceCheck = checkSubscriptionService();
+    if (!serviceCheck.success) {
+      setError(serviceCheck.error || "Service error");
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
-    try {
-      const updatedStatus = await service.deactivateSubscription(userId);
-      setStatus(updatedStatus);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to deactivate subscription';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
+    await executeSubscriptionOperation(
+      () => serviceCheck.service!.deactivateSubscription(userId),
+      setLoading,
+      setError,
+      (result) => setStatus(result)
+    );
   }, []);
 
   const isPremium = isSubscriptionValid(status);

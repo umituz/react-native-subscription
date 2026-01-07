@@ -5,6 +5,8 @@
  * Follows the same pattern as SubscriptionError.
  */
 
+import { WALLET_ERROR_MESSAGES } from "./WalletErrorMessages";
+
 export type WalletErrorCategory =
   | "PAYMENT"
   | "VALIDATION"
@@ -39,110 +41,100 @@ export abstract class WalletError extends Error {
 export class PaymentValidationError extends WalletError {
   readonly code = "PAYMENT_VALIDATION_ERROR";
   readonly category = "PAYMENT" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.PAYMENT_VALIDATION_FAILED;
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
-    this.userMessage = "Payment validation failed. Please try again.";
   }
 }
 
 export class PaymentProviderError extends WalletError {
   readonly code = "PAYMENT_PROVIDER_ERROR";
   readonly category = "PAYMENT" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.PAYMENT_PROVIDER_ERROR;
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
-    this.userMessage = "Payment provider error. Please try again.";
   }
 }
 
 export class DuplicatePaymentError extends WalletError {
   readonly code = "DUPLICATE_PAYMENT";
   readonly category = "PAYMENT" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.DUPLICATE_PAYMENT;
 
   constructor(message: string) {
     super(message);
-    this.userMessage = "This payment has already been processed.";
   }
 }
 
 export class UserValidationError extends WalletError {
   readonly code = "USER_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.USER_VALIDATION_FAILED;
 
   constructor(message: string) {
     super(message);
-    this.userMessage = "Invalid user information. Please log in again.";
   }
 }
 
 export class PackageValidationError extends WalletError {
   readonly code = "PACKAGE_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.PACKAGE_VALIDATION_FAILED;
 
   constructor(message: string) {
     super(message);
-    this.userMessage = "Invalid credit package. Please select a valid package.";
   }
 }
 
 export class ReceiptValidationError extends WalletError {
   readonly code = "RECEIPT_VALIDATION_ERROR";
   readonly category = "VALIDATION" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.RECEIPT_VALIDATION_FAILED;
 
   constructor(message: string) {
     super(message);
-    this.userMessage = "Invalid payment receipt. Please contact support.";
   }
 }
 
 export class TransactionError extends WalletError {
   readonly code = "TRANSACTION_ERROR";
   readonly category = "INFRASTRUCTURE" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.TRANSACTION_FAILED;
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
-    this.userMessage = "Transaction failed. Please try again.";
   }
 }
 
 export class NetworkError extends WalletError {
   readonly code = "NETWORK_ERROR";
   readonly category = "INFRASTRUCTURE" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.NETWORK_ERROR;
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
-    this.userMessage = "Network error. Please check your connection.";
   }
 }
 
 export class CreditLimitError extends WalletError {
   readonly code = "CREDIT_LIMIT_ERROR";
   readonly category = "BUSINESS" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.CREDIT_LIMIT_EXCEEDED;
 
   constructor(message: string) {
     super(message);
-    this.userMessage = "Credit limit exceeded. Please contact support.";
   }
 }
 
 export class RefundError extends WalletError {
   readonly code = "REFUND_ERROR";
   readonly category = "BUSINESS" as const;
-  readonly userMessage: string;
+  readonly userMessage = WALLET_ERROR_MESSAGES.REFUND_FAILED;
 
   constructor(message: string, cause?: Error) {
     super(message, cause);
-    this.userMessage = "Refund failed. Please contact support.";
   }
 }
 

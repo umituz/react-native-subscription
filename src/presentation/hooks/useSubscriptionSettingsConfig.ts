@@ -15,6 +15,7 @@ import {
     formatDateForLocale,
     calculateDaysRemaining,
 } from "../utils/subscriptionDateUtils";
+import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
 import type {
   SubscriptionSettingsConfig,
   SubscriptionStatusType,
@@ -104,23 +105,10 @@ export const useSubscriptionSettingsConfig = (
   );
 
   // Status type
-  const statusType: SubscriptionStatusType = isPremium ? "active" : "none";
+  const statusType: SubscriptionStatusType = getSubscriptionStatusType(isPremium);
 
   // Credits array
-  const creditsArray = useMemo(() => {
-    if (!credits) return [];
-    const total = getCreditLimit
-      ? getCreditLimit(credits.imageCredits)
-      : credits.imageCredits;
-    return [
-      {
-        id: "image",
-        label: translations.imageCreditsLabel || "Image Credits",
-        current: credits.imageCredits,
-        total,
-      },
-    ];
-  }, [credits, getCreditLimit, translations.imageCreditsLabel]);
+  const creditsArray = useCreditsArray(credits, getCreditLimit, translations);
 
   // Build config
   const config = useMemo(

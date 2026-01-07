@@ -15,7 +15,7 @@ const RERENDER_DELAY_MS = 100;
 export function usePaywallOperations({
   userId,
   isAnonymous,
-  onPaywallClose,
+  onPaywallClose: _onPaywallClose,
   onPurchaseSuccess,
   onAuthRequired,
 }: PaywallOperationsProps): PaywallOperationsResult {
@@ -54,7 +54,7 @@ export function usePaywallOperations({
       else showError();
       return success;
     },
-    [isAuthenticated, purchasePackage, onPurchaseSuccess, onPaywallClose, onAuthRequired, showError]
+    [isAuthenticated, purchasePackage, onPurchaseSuccess, onAuthRequired, showError]
   );
 
   const handleRestore = useCallback(async (): Promise<boolean> => {
