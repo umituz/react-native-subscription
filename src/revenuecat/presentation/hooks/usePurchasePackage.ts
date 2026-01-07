@@ -10,7 +10,7 @@ import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionM
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
-interface PurchaseResult {
+export interface PurchaseResult {
   success: boolean;
   productId: string;
 }
