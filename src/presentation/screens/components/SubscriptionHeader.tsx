@@ -7,6 +7,7 @@ import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { PremiumStatusBadge } from "../../components/details/PremiumStatusBadge";
+import { DetailRow } from "../../components/details/DetailRow";
 import type { SubscriptionHeaderProps } from "../../types/SubscriptionDetailTypes";
 
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
@@ -90,8 +91,9 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
             <DetailRow
               label={translations.statusLabel}
               value={translations.lifetimeLabel}
-              tokens={tokens}
-              styles={styles}
+              style={styles.row}
+              labelStyle={styles.label}
+              valueStyle={styles.value}
             />
           ) : (
             <>
@@ -100,16 +102,18 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
                   label={translations.expiresLabel}
                   value={expirationDate}
                   highlight={showExpiring}
-                  tokens={tokens}
-                  styles={styles}
+                  style={styles.row}
+                  labelStyle={styles.label}
+                  valueStyle={styles.value}
                 />
               )}
               {purchaseDate && (
                 <DetailRow
                   label={translations.purchasedLabel}
                   value={purchaseDate}
-                  tokens={tokens}
-                  styles={styles}
+                  style={styles.row}
+                  labelStyle={styles.label}
+                  valueStyle={styles.value}
                 />
               )}
             </>
@@ -119,41 +123,3 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
     </View>
   );
 };
-
-interface DetailRowProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  tokens: ReturnType<typeof useAppDesignTokens>;
-  styles: {
-    row: object;
-    label: object;
-    value: object;
-  };
-}
-
-const DetailRow: React.FC<DetailRowProps> = ({
-  label,
-  value,
-  highlight,
-  tokens,
-  styles,
-}) => (
-  <View style={styles.row}>
-    <AtomicText
-      type="bodyMedium"
-      style={[styles.label, { color: tokens.colors.textSecondary }]}
-    >
-      {label}
-    </AtomicText>
-    <AtomicText
-      type="bodyMedium"
-      style={[
-        styles.value,
-        { color: highlight ? tokens.colors.warning : tokens.colors.textPrimary },
-      ]}
-    >
-      {value}
-    </AtomicText>
-  </View>
-);

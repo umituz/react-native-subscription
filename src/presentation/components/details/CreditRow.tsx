@@ -18,7 +18,7 @@ export const CreditRow: React.FC<CreditRowProps> = ({
   label,
   current,
   total,
-  remainingLabel = "remaining",
+  remainingLabel,
 }) => {
   const tokens = useAppDesignTokens();
   const percentage = total > 0 ? (current / total) * 100 : 0;
@@ -27,7 +27,7 @@ export const CreditRow: React.FC<CreditRowProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AtomicText type="bodySmall" style={{ color: tokens.colors.text }}>
+        <AtomicText type="bodySmall" style={{ color: tokens.colors.textPrimary }}>
           {label}
         </AtomicText>
         <AtomicText

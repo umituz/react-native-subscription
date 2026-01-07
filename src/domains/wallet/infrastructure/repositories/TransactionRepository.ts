@@ -25,6 +25,7 @@ import type {
   TransactionResult,
   TransactionReason,
 } from "../../domain/types/transaction.types";
+import { TransactionMapper } from "../../domain/mappers/TransactionMapper";
 
 export class TransactionRepository extends BaseRepository {
   private config: TransactionRepositoryConfig;
@@ -66,21 +67,9 @@ export class TransactionRepository extends BaseRepository {
       const q = query(colRef, ...constraints);
       const snapshot = await getDocs(q);
 
-      const transactions: CreditLog[] = snapshot.docs.map((docSnap) => {
-        const data = docSnap.data();
-        return {
-          id: docSnap.id,
-          userId: data.userId || options.userId,
-          change: data.change,
-          reason: data.reason,
-          feature: data.feature,
-          jobId: data.jobId,
-          packageId: data.packageId,
-          subscriptionPlan: data.subscriptionPlan,
-          description: data.description,
-          createdAt: data.createdAt?.toMillis?.() || Date.now(),
-        };
-      });
+      const transactions: CreditLog[] = snapshot.docs.map((docSnap) => 
+        TransactionMapper.toEntity(docSnap, options.userId)
+      );
 
       return { success: true, data: transactions };
     } catch (error) {
@@ -112,14 +101,7 @@ export class TransactionRepository extends BaseRepository {
     try {
       const colRef = this.getCollectionRef(db, userId);
       const docData = {
-        userId,
-        change,
-        reason,
-        feature: metadata?.feature,
-        jobId: metadata?.jobId,
-        packageId: metadata?.packageId,
-        subscriptionPlan: metadata?.subscriptionPlan,
-        description: metadata?.description,
+        ...TransactionMapper.toFirestore(userId, change, reason, metadata),
         createdAt: serverTimestamp(),
       };
 

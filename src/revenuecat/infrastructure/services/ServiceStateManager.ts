@@ -33,7 +33,7 @@ export class ServiceStateManager {
     return this.isInitializedFlag;
   }
 
-  setCurrentUserId(userId: string): void {
+  setCurrentUserId(userId: string | null): void {
     this.currentUserId = userId;
   }
 

@@ -51,6 +51,17 @@ export class RevenueCatService implements IRevenueCatService {
         return this.stateManager.getCurrentUserId();
     }
 
+    private getSDKParams() {
+        return {
+            config: this.stateManager.getConfig(),
+            isUsingTestStore: () => this.isUsingTestStore(),
+            isInitialized: () => this.isInitialized(),
+            getCurrentUserId: () => this.stateManager.getCurrentUserId(),
+            setInitialized: (value: boolean) => this.stateManager.setInitialized(value),
+            setCurrentUserId: (id: string | null) => this.stateManager.setCurrentUserId(id),
+        };
+    }
+
     async initialize(userId: string, apiKey?: string): Promise<InitializeResult> {
         if (this.isInitialized() && this.getCurrentUserId() === userId) {
             return {
@@ -60,18 +71,7 @@ export class RevenueCatService implements IRevenueCatService {
             };
         }
 
-        const result = await initializeSDK(
-            {
-                config: this.stateManager.getConfig(),
-                isUsingTestStore: () => this.isUsingTestStore(),
-                isInitialized: () => this.isInitialized(),
-                getCurrentUserId: () => this.stateManager.getCurrentUserId(),
-                setInitialized: (value) => this.stateManager.setInitialized(value),
-                setCurrentUserId: (id) => this.stateManager.setCurrentUserId(id),
-            },
-            userId,
-            apiKey
-        );
+        const result = await initializeSDK(this.getSDKParams(), userId, apiKey);
 
         if (result.success) {
             this.listenerManager.setUserId(userId);
@@ -82,36 +82,18 @@ export class RevenueCatService implements IRevenueCatService {
     }
 
     async fetchOfferings(): Promise<PurchasesOffering | null> {
-        return fetchOfferings({
-            isInitialized: () => this.isInitialized(),
-            isUsingTestStore: () => this.isUsingTestStore(),
-        });
+        return fetchOfferings(this.getSDKParams());
     }
 
     async purchasePackage(
         pkg: PurchasesPackage,
         userId: string
     ): Promise<PurchaseResult> {
-        return handlePurchase(
-            {
-                config: this.stateManager.getConfig(),
-                isInitialized: () => this.isInitialized(),
-                isUsingTestStore: () => this.isUsingTestStore(),
-            },
-            pkg,
-            userId
-        );
+        return handlePurchase(this.getSDKParams(), pkg, userId);
     }
 
     async restorePurchases(userId: string): Promise<RestoreResult> {
-        return handleRestore(
-            {
-                config: this.stateManager.getConfig(),
-                isInitialized: () => this.isInitialized(),
-                isUsingTestStore: () => this.isUsingTestStore(),
-            },
-            userId
-        );
+        return handleRestore(this.getSDKParams(), userId);
     }
 
     async getCustomerInfo(): Promise<CustomerInfo | null> {

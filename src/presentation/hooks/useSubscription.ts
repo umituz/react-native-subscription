@@ -48,98 +48,60 @@ export function useSubscription(): UseSubscriptionResult {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadStatus = useCallback(async (userId: string) => {
-    const validationError = validateUserId(userId);
-    if (validationError) {
-      setError(validationError);
+  const performOperation = useCallback(async (
+    userId: string,
+    operation: () => Promise<SubscriptionStatus | null | void>
+  ) => {
+    const errorMsg = validateUserId(userId);
+    if (errorMsg) {
+      setError(errorMsg);
       return;
     }
 
-    const serviceCheck = checkSubscriptionService();
-    if (!serviceCheck.success) {
-      setError(serviceCheck.error || "Service error");
-      return;
-    }
-
-    await executeSubscriptionOperation(
-      () => serviceCheck.service!.getSubscriptionStatus(userId),
-      setLoading,
-      setError,
-      (result) => setStatus(result)
-    );
-  }, []);
-
-  const refreshStatus = useCallback(async (userId: string) => {
-    const validationError = validateUserId(userId);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    const serviceCheck = checkSubscriptionService();
-    if (!serviceCheck.success) {
-      setError(serviceCheck.error || "Service error");
+    const check = checkSubscriptionService();
+    if (!check.success) {
+      setError(check.error || "Service error");
       return;
     }
 
     await executeSubscriptionOperation(
-      () => serviceCheck.service!.getSubscriptionStatus(userId),
+      operation,
       setLoading,
       setError,
-      (result) => setStatus(result)
+      (result) => { if (result) setStatus(result as SubscriptionStatus); }
     );
   }, []);
+
+  const loadStatus = useCallback((userId: string) => 
+    performOperation(userId, () => {
+      const { service } = checkSubscriptionService();
+       
+      return service!.getSubscriptionStatus(userId);
+    }), [performOperation]);
+
+  const refreshStatus = loadStatus;
 
   const activateSubscription = useCallback(
-    async (userId: string, productId: string, expiresAt: string | null) => {
-      const validationError = validateUserId(userId);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
-
+    (userId: string, productId: string, expiresAt: string | null) => {
       if (!productId) {
         setError("Product ID is required");
-        return;
+        return Promise.resolve();
       }
-
-      const serviceCheck = checkSubscriptionService();
-      if (!serviceCheck.success) {
-        setError(serviceCheck.error || "Service error");
-        return;
-      }
-
-      await executeSubscriptionOperation(
-        () =>
-          serviceCheck.service!.activateSubscription(userId, productId, expiresAt),
-        setLoading,
-        setError,
-        (result) => setStatus(result)
-      );
+      return performOperation(userId, () => {
+        const { service } = checkSubscriptionService();
+         
+        return service!.activateSubscription(userId, productId, expiresAt).then(res => res ?? undefined);
+      });
     },
-    []
+    [performOperation]
   );
 
-  const deactivateSubscription = useCallback(async (userId: string) => {
-    const validationError = validateUserId(userId);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    const serviceCheck = checkSubscriptionService();
-    if (!serviceCheck.success) {
-      setError(serviceCheck.error || "Service error");
-      return;
-    }
-
-    await executeSubscriptionOperation(
-      () => serviceCheck.service!.deactivateSubscription(userId),
-      setLoading,
-      setError,
-      (result) => setStatus(result)
-    );
-  }, []);
+  const deactivateSubscription = useCallback((userId: string) => 
+    performOperation(userId, () => {
+        const { service } = checkSubscriptionService();
+         
+        return service!.deactivateSubscription(userId).then(res => res ?? undefined);
+    }), [performOperation]);
 
   const isPremium = isSubscriptionValid(status);
 
