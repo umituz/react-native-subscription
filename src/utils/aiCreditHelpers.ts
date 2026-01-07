@@ -14,7 +14,6 @@
  *   });
  */
 
-import type { CreditType } from "../domain/entities/Credits";
 import type { CreditsRepository } from "../infrastructure/repositories/CreditsRepository";
 import { createCreditChecker } from "./creditChecker";
 
@@ -25,24 +24,24 @@ export interface AICreditHelpersConfig {
   repository: CreditsRepository;
 
   /**
-   * List of operation types that should use "image" credits.
-   * All other types will use "text" credits.
-   * @example ['future_image', 'santa_transform', 'photo_generation']
+   * Optional map of operation types to credit costs.
+   * If an operation isn't in this map, cost defaults to 1.
+   * @example { 'high_res_image': 5, 'text_summary': 1 }
    */
-  imageGenerationTypes: string[];
+  operationCosts?: Record<string, number>;
 
   /**
    * Optional callback called after successful credit deduction.
    * Use this to invalidate TanStack Query cache or trigger UI updates.
    */
-  onCreditDeducted?: (userId: string, creditType: CreditType) => void;
+  onCreditDeducted?: (userId: string, cost: number) => void;
 }
 
 export interface AICreditHelpers {
   /**
    * Check if user has credits for a specific generation type
    * @param userId - User ID
-   * @param generationType - Type of generation (e.g., 'future_image', 'text_summary')
+   * @param generationType - Type of generation
    * @returns boolean indicating if credits are available
    */
   checkCreditsForGeneration: (
@@ -61,11 +60,11 @@ export interface AICreditHelpers {
   ) => Promise<void>;
 
   /**
-   * Get credit type for a generation type (useful for UI display)
+   * Get cost for a generation type
    * @param generationType - Type of generation
-   * @returns "image" or "text"
+   * @returns number of credits
    */
-  getCreditType: (generationType: string) => CreditType;
+  getCost: (generationType: string) => number;
 }
 
 /**
@@ -74,17 +73,16 @@ export interface AICreditHelpers {
 export function createAICreditHelpers(
   config: AICreditHelpersConfig
 ): AICreditHelpers {
-  const { repository, imageGenerationTypes, onCreditDeducted } = config;
+  const { repository, operationCosts = {}, onCreditDeducted } = config;
 
-  // Map generation type to credit type
-  const getCreditType = (generationType: string): CreditType => {
-    return imageGenerationTypes.includes(generationType) ? "image" : "text";
+  // Map generation type to cost
+  const getCost = (generationType: string): number => {
+    return operationCosts[generationType] ?? 1;
   };
 
-  // Create credit checker with the mapping
+  // Create credit checker
   const checker = createCreditChecker({
     repository,
-    getCreditType,
     onCreditDeducted,
   });
 
@@ -93,7 +91,8 @@ export function createAICreditHelpers(
     userId: string | undefined,
     generationType: string
   ): Promise<boolean> => {
-    const result = await checker.checkCreditsAvailable(userId, generationType);
+    const cost = getCost(generationType);
+    const result = await checker.checkCreditsAvailable(userId, cost);
     return result.success;
   };
 
@@ -102,13 +101,13 @@ export function createAICreditHelpers(
     userId: string | undefined,
     generationType: string
   ): Promise<void> => {
-    const creditType = getCreditType(generationType);
-    await checker.deductCreditsAfterSuccess(userId, creditType);
+    const cost = getCost(generationType);
+    await checker.deductCreditsAfterSuccess(userId, cost);
   };
 
   return {
     checkCreditsForGeneration,
     deductCreditsForGeneration,
-    getCreditType,
+    getCost,
   };
 }

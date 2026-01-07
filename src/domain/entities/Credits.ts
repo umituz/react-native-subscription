@@ -5,23 +5,34 @@
  * Designed to be used across hundreds of apps with configurable limits.
  */
 
+import type { SubscriptionPackageType } from "../../utils/packageTypeDetector";
+
 export type CreditType = "text" | "image";
 
 export interface UserCredits {
-  textCredits: number;
-  imageCredits: number;
-  purchasedAt: Date;
-  lastUpdatedAt: Date;
+  credits: number;
+  purchasedAt: Date | null;
+  lastUpdatedAt: Date | null;
 }
+
+export interface CreditAllocation {
+  credits: number;
+}
+
+export type PackageAllocationMap = Record<
+  Exclude<SubscriptionPackageType, "unknown">,
+  CreditAllocation
+>;
 
 export interface CreditsConfig {
   collectionName: string;
-  textCreditLimit: number;
-  imageCreditLimit: number;
+  creditLimit: number;
   /** When true, stores credits at users/{userId}/credits instead of {collectionName}/{userId} */
   useUserSubcollection?: boolean;
   /** Credit amounts per product ID for consumable credit packages */
   creditPackageAmounts?: Record<string, number>;
+  /** Credit allocations for different subscription types (weekly, monthly, yearly) */
+  packageAllocations?: PackageAllocationMap;
 }
 
 export interface CreditsResult<T = UserCredits> {
@@ -44,6 +55,5 @@ export interface DeductCreditsResult {
 
 export const DEFAULT_CREDITS_CONFIG: CreditsConfig = {
   collectionName: "user_credits",
-  textCreditLimit: 1000,
-  imageCreditLimit: 100,
+  creditLimit: 100,
 };

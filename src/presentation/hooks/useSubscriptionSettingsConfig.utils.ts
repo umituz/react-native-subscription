@@ -19,23 +19,20 @@ export interface CreditsInfo {
  */
 export function useCreditsArray(
   credits: UserCredits | null | undefined,
-  getCreditLimit: ((credits: number) => number) | undefined,
+  creditLimit: number | undefined,
   translations: SubscriptionSettingsTranslations
 ): CreditsInfo[] {
   return useMemo(() => {
     if (!credits) return [];
-    const total = getCreditLimit
-      ? getCreditLimit(credits.imageCredits)
-      : credits.imageCredits;
     return [
       {
-        id: "image",
-        label: translations.imageCreditsLabel || "Image Credits",
-        current: credits.imageCredits,
-        total,
+        id: "credits",
+        label: translations.creditsLabel || "Credits",
+        current: credits.credits,
+        total: creditLimit ?? credits.credits,
       },
     ];
-  }, [credits, getCreditLimit, translations.imageCreditsLabel]);
+  }, [credits, creditLimit, translations.creditsLabel]);
 }
 
 /**

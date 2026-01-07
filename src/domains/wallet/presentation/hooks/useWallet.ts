@@ -25,8 +25,6 @@ export interface UseWalletParams {
 
 export interface UseWalletResult {
   balance: number;
-  textCredits: number;
-  imageCredits: number;
   balanceLoading: boolean;
   transactions: CreditLog[];
   transactionsLoading: boolean;
@@ -58,8 +56,7 @@ export function useWallet({
     credits,
     isLoading: balanceLoading,
     refetch: refetchBalance,
-    hasTextCredits,
-    hasImageCredits,
+    hasCredits,
   } = useCredits(creditsParams);
 
   const {
@@ -69,8 +66,7 @@ export function useWallet({
   } = useTransactionHistory(transactionParams);
 
   const balance = useMemo(() => {
-    if (!credits) return 0;
-    return credits.textCredits + credits.imageCredits;
+    return credits?.credits ?? 0;
   }, [credits]);
 
   const refetchAll = useCallback(() => {
@@ -80,12 +76,10 @@ export function useWallet({
 
   return {
     balance,
-    textCredits: credits?.textCredits ?? 0,
-    imageCredits: credits?.imageCredits ?? 0,
     balanceLoading,
     transactions,
     transactionsLoading,
-    hasCredits: hasTextCredits || hasImageCredits,
+    hasCredits,
     refetchBalance,
     refetchTransactions,
     refetchAll,

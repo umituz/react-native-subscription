@@ -10,8 +10,7 @@ import type { CreditsConfig } from "../../domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
 interface InitializationResult {
-    textCredits: number;
-    imageCredits: number;
+    credits: number;
 }
 
 export async function initializeCreditsTransaction(
@@ -24,8 +23,7 @@ export async function initializeCreditsTransaction(
         const creditsDoc = await transaction.get(creditsRef);
         const now = serverTimestamp();
 
-        let newTextCredits = config.textCreditLimit;
-        let newImageCredits = config.imageCreditLimit;
+        let newCredits = config.creditLimit;
         let purchasedAt = now;
         let processedPurchases: string[] = [];
 
@@ -35,14 +33,12 @@ export async function initializeCreditsTransaction(
 
             if (purchaseId && processedPurchases.includes(purchaseId)) {
                 return {
-                    textCredits: existing.textCredits,
-                    imageCredits: existing.imageCredits,
+                    credits: existing.credits,
                     alreadyProcessed: true,
-                };
+                } as any;
             }
 
-            newTextCredits = (existing.textCredits || 0) + config.textCreditLimit;
-            newImageCredits = (existing.imageCredits || 0) + config.imageCreditLimit;
+            newCredits = (existing.credits || 0) + config.creditLimit;
 
             if (existing.purchasedAt) {
                 purchasedAt = existing.purchasedAt as unknown as FieldValue;
@@ -54,8 +50,7 @@ export async function initializeCreditsTransaction(
         }
 
         const creditsData = {
-            textCredits: newTextCredits,
-            imageCredits: newImageCredits,
+            credits: newCredits,
             purchasedAt,
             lastUpdatedAt: now,
             lastPurchaseAt: now,
@@ -65,6 +60,6 @@ export async function initializeCreditsTransaction(
         // Use merge:true to avoid overwriting other user fields
         transaction.set(creditsRef, creditsData, { merge: true });
 
-        return { textCredits: newTextCredits, imageCredits: newImageCredits };
+        return { credits: newCredits };
     });
 }

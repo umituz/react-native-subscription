@@ -5,58 +5,50 @@
  * Generic - works with any generation type mapping.
  */
 
-import type { CreditType } from "../domain/entities/Credits";
 import type { CreditsRepository } from "../infrastructure/repositories/CreditsRepository";
 
 export interface CreditCheckResult {
   success: boolean;
   error?: string;
-  creditType?: CreditType;
 }
 
 export interface CreditCheckerConfig {
   repository: CreditsRepository;
-  getCreditType: (operationType: string) => CreditType;
   /**
    * Optional callback called after successful credit deduction.
    * Use this to invalidate TanStack Query cache or trigger UI updates.
    * @param userId - The user whose credits were deducted
-   * @param creditType - The type of credit that was deducted
+   * @param cost - The amount of credits deducted
    */
-  onCreditDeducted?: (userId: string, creditType: CreditType) => void;
+  onCreditDeducted?: (userId: string, cost: number) => void;
 }
 
 export const createCreditChecker = (config: CreditCheckerConfig) => {
-  const { repository, getCreditType, onCreditDeducted } = config;
+  const { repository, onCreditDeducted } = config;
 
   const checkCreditsAvailable = async (
     userId: string | undefined,
-    operationType: string
+    cost: number = 1
   ): Promise<CreditCheckResult> => {
     if (!userId) {
       return { success: false, error: "anonymous_user_blocked" };
     }
 
-    const creditType = getCreditType(operationType);
-    const hasCreditsAvailable = await repository.hasCredits(userId, creditType);
+    const hasCreditsAvailable = await repository.hasCredits(userId, cost);
 
     if (!hasCreditsAvailable) {
       return {
         success: false,
-        error:
-          creditType === "image"
-            ? "credits_exhausted_image"
-            : "credits_exhausted_text",
-        creditType,
+        error: "credits_exhausted",
       };
     }
 
-    return { success: true, creditType };
+    return { success: true };
   };
 
   const deductCreditsAfterSuccess = async (
     userId: string | undefined,
-    creditType: CreditType
+    cost: number = 1
   ): Promise<void> => {
     if (!userId) return;
 
@@ -64,10 +56,10 @@ export const createCreditChecker = (config: CreditCheckerConfig) => {
     let lastError: Error | null = null;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
-      const result = await repository.deductCredit(userId, creditType);
+      const result = await repository.deductCredit(userId, cost);
       if (result.success) {
         // Notify subscribers that credits were deducted
-        onCreditDeducted?.(userId, creditType);
+        onCreditDeducted?.(userId, cost);
         return;
       }
       lastError = new Error(result.error?.message || "Deduction failed");
@@ -78,6 +70,7 @@ export const createCreditChecker = (config: CreditCheckerConfig) => {
       throw lastError;
     }
   };
+
 
   return {
     checkCreditsAvailable,

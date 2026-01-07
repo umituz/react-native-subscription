@@ -37,7 +37,7 @@ export const useSubscriptionSettingsConfig = (
   const {
     userId,
     translations,
-    getCreditLimit,
+    creditLimit,
     upgradePrompt,
   } = params;
 
@@ -96,7 +96,7 @@ export const useSubscriptionSettingsConfig = (
   const statusType: SubscriptionStatusType = getSubscriptionStatusType(isPremium);
 
   // Credits array
-  const creditsArray = useCreditsArray(credits, getCreditLimit, translations);
+  const creditsArray = useCreditsArray(credits, creditLimit, translations);
 
   // Build config
   const config = useMemo(

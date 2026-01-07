@@ -1,8 +1,4 @@
-/**
- * Activation Handler
- * Handles subscription activation and deactivation
- */
-
+import { timezoneService } from "@umituz/react-native-timezone";
 import type { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
 import { SubscriptionRepositoryError } from "../../domain/errors/SubscriptionError";
@@ -32,10 +28,11 @@ export async function activateSubscription(
         isPremium: true,
         productId,
         expiresAt,
-        purchasedAt: new Date().toISOString(),
-        syncedAt: new Date().toISOString(),
+        purchasedAt: timezoneService.getCurrentISOString(),
+        syncedAt: timezoneService.getCurrentISOString(),
       }
     );
+
 
     await notifyStatusChange(config, userId, updatedStatus);
     return updatedStatus;

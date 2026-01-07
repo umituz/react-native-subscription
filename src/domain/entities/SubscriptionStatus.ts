@@ -1,6 +1,4 @@
-/**
- * Subscription Status Entity
- */
+import { timezoneService } from "@umituz/react-native-timezone";
 
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',
@@ -34,12 +32,12 @@ export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
 export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean => {
     if (!status || !status.isPremium) return false;
     if (!status.expiresAt) return true; // Lifetime
-    return new Date(status.expiresAt).getTime() > Date.now();
+    
+    return timezoneService.isFuture(new Date(status.expiresAt));
 };
 
 export const calculateDaysRemaining = (expiresAt: string | null): number | null => {
     if (!expiresAt) return null;
-    const diff = new Date(expiresAt).getTime() - Date.now();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    return timezoneService.getDaysUntil(new Date(expiresAt));
 };
 

@@ -7,7 +7,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import type { UserCredits, CreditType } from "../../domain/entities/Credits";
+import type { UserCredits } from "../../domain/entities/Credits";
 import {
     getCreditsRepository,
     getCreditsConfig,
@@ -42,13 +42,11 @@ export interface UseCreditsResult {
   credits: UserCredits | null;
   isLoading: boolean;
   error: Error | null;
-  hasTextCredits: boolean;
-  hasImageCredits: boolean;
-  textCreditsPercent: number;
-  imageCreditsPercent: number;
+  hasCredits: boolean;
+  creditsPercent: number;
   refetch: () => void;
   /** Check if user can afford a specific credit cost */
-  canAfford: (cost: number, type?: CreditType) => boolean;
+  canAfford: (cost: number) => boolean;
 }
 
 export const useCredits = ({
@@ -86,30 +84,22 @@ export const useCredits = ({
 
   // Memoize derived values to prevent unnecessary re-renders
   const derivedValues = useMemo(() => {
-    const hasText = (credits?.textCredits ?? 0) > 0;
-    const hasImage = (credits?.imageCredits ?? 0) > 0;
-    const textPercent = credits
-      ? Math.round((credits.textCredits / config.textCreditLimit) * 100)
-      : 0;
-    const imagePercent = credits
-      ? Math.round((credits.imageCredits / config.imageCreditLimit) * 100)
+    const has = (credits?.credits ?? 0) > 0;
+    const percent = credits
+      ? Math.round((credits.credits / config.creditLimit) * 100)
       : 0;
 
     return {
-      hasTextCredits: hasText,
-      hasImageCredits: hasImage,
-      textCreditsPercent: textPercent,
-      imageCreditsPercent: imagePercent,
+      hasCredits: has,
+      creditsPercent: percent,
     };
-  }, [credits, config.textCreditLimit, config.imageCreditLimit]);
+  }, [credits, config.creditLimit]);
 
   // Memoize canAfford to prevent recreation on every render
   const canAfford = useCallback(
-    (cost: number, type: CreditType = "text"): boolean => {
+    (cost: number): boolean => {
       if (!credits) return false;
-      return type === "text"
-        ? credits.textCredits >= cost
-        : credits.imageCredits >= cost;
+      return credits.credits >= cost;
     },
     [credits]
   );
@@ -118,23 +108,17 @@ export const useCredits = ({
     credits,
     isLoading,
     error: error as Error | null,
-    hasTextCredits: derivedValues.hasTextCredits,
-    hasImageCredits: derivedValues.hasImageCredits,
-    textCreditsPercent: derivedValues.textCreditsPercent,
-    imageCreditsPercent: derivedValues.imageCreditsPercent,
+    hasCredits: derivedValues.hasCredits,
+    creditsPercent: derivedValues.creditsPercent,
     refetch,
     canAfford,
   };
 };
 
 export const useHasCredits = (
-  userId: string | undefined,
-  creditType: CreditType
+  userId: string | undefined
 ): boolean => {
   const { credits } = useCredits({ userId });
   if (!credits) return false;
-
-  return creditType === "text"
-    ? credits.textCredits > 0
-    : credits.imageCredits > 0;
+  return credits.credits > 0;
 };

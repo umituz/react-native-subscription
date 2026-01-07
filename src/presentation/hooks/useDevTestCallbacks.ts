@@ -42,8 +42,7 @@ export const useDevTestCallbacks = (): DevTestActions | undefined => {
       if (__DEV__) {
         console.log("✅ [Dev Test] Renewal completed:", {
           success: result.success,
-          textCredits: result.data?.textCredits,
-          imageCredits: result.data?.imageCredits,
+          credits: result.data?.credits,
         });
       }
 
@@ -51,7 +50,7 @@ export const useDevTestCallbacks = (): DevTestActions | undefined => {
 
       Alert.alert(
         "✅ Test Renewal Success",
-        `Credits Updated!\n\nText: ${result.data?.textCredits || 0}\nImage: ${result.data?.imageCredits || 0}\n\n(ACCUMULATE mode - credits added to existing)`,
+        `Credits Updated!\n\nNew Balance: ${result.data?.credits || 0}\n\n(ACCUMULATE mode - credits added to existing)`,
         [{ text: "OK" }],
       );
     } catch (error) {
@@ -73,7 +72,7 @@ export const useDevTestCallbacks = (): DevTestActions | undefined => {
 
     Alert.alert(
       "📊 Current Credits",
-      `Text Generation: ${credits.textCredits}\nImage Generation: ${credits.imageCredits}\n\nPurchased: ${credits.purchasedAt?.toLocaleDateString() || "N/A"}`,
+      `Credits: ${credits.credits}\n\nPurchased: ${credits.purchasedAt?.toLocaleDateString() || "N/A"}`,
       [{ text: "OK" }],
     );
   }, [credits]);
@@ -113,7 +112,7 @@ export const useDevTestCallbacks = (): DevTestActions | undefined => {
       await refetch();
 
       const duplicateProtectionWorks =
-        result2.data?.textCredits === result1.data?.textCredits;
+        result2.data?.credits === result1.data?.credits;
 
       Alert.alert(
         "Duplicate Test",

@@ -5,8 +5,7 @@ export interface FirestoreTimestamp {
 
 // Document structure when READING from Firestore
 export interface UserCreditsDocumentRead {
-    textCredits: number;
-    imageCredits: number;
+    credits: number;
     purchasedAt?: FirestoreTimestamp;
     lastUpdatedAt?: FirestoreTimestamp;
     lastPurchaseAt?: FirestoreTimestamp;

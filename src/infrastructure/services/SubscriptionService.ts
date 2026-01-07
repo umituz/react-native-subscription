@@ -3,6 +3,7 @@
  * Database-first subscription management
  */
 
+import { timezoneService } from "@umituz/react-native-timezone";
 import type { ISubscriptionService } from "../../application/ports/ISubscriptionService";
 import type { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
@@ -89,7 +90,7 @@ export class SubscriptionService implements ISubscriptionService {
     try {
       const updatesWithSync = {
         ...updates,
-        syncedAt: new Date().toISOString(),
+        syncedAt: timezoneService.getCurrentISOString(),
       };
 
       const updatedStatus = await this.repository.updateSubscriptionStatus(

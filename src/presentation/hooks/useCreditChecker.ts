@@ -5,7 +5,6 @@
  */
 
 import { useMemo } from "react";
-import type { CreditType } from "../../domain/entities/Credits";
 import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import {
     createCreditChecker,
@@ -13,28 +12,29 @@ import {
 } from "../../utils/creditChecker";
 
 export interface UseCreditCheckerParams {
-  getCreditType: (operationType: string) => CreditType;
+  onCreditDeducted?: (userId: string, cost: number) => void;
 }
 
 export interface UseCreditCheckerResult {
   checkCreditsAvailable: (
     userId: string | undefined,
-    operationType: string
+    cost?: number
   ) => Promise<CreditCheckResult>;
   deductCreditsAfterSuccess: (
     userId: string | undefined,
-    creditType: CreditType
+    cost?: number
   ) => Promise<void>;
 }
 
-export const useCreditChecker = ({
-  getCreditType,
-}: UseCreditCheckerParams): UseCreditCheckerResult => {
+export const useCreditChecker = (
+  params?: UseCreditCheckerParams
+): UseCreditCheckerResult => {
   const repository = getCreditsRepository();
+  const onCreditDeducted = params?.onCreditDeducted;
 
   const checker = useMemo(
-    () => createCreditChecker({ repository, getCreditType }),
-    [getCreditType, repository]
+    () => createCreditChecker({ repository, onCreditDeducted }),
+    [repository, onCreditDeducted]
   );
 
   return checker;

@@ -4,7 +4,7 @@
 
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore, type Transaction } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
-import type { CreditType, CreditsConfig, CreditsResult, DeductCreditsResult } from "../../domain/entities/Credits";
+import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../../domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../services/CreditsInitializer";
 import { detectPackageType } from "../../utils/packageTypeDetector";
@@ -39,10 +39,11 @@ export class CreditsRepository extends BaseRepository {
       let cfg = { ...this.config };
       if (productId) {
         const amt = this.config.creditPackageAmounts?.[productId];
-        if (amt) cfg = { ...cfg, imageCreditLimit: amt, textCreditLimit: amt };
+        if (amt) cfg = { ...cfg, creditLimit: amt };
         else {
-          const alloc = getCreditAllocation(detectPackageType(productId));
-          if (alloc) cfg = { ...cfg, imageCreditLimit: alloc.imageCredits, textCreditLimit: alloc.textCredits };
+          const packageType = detectPackageType(productId);
+          const dynamicLimit = getCreditAllocation(packageType, this.config.packageAllocations);
+          if (dynamicLimit !== null) cfg = { ...cfg, creditLimit: dynamicLimit };
         }
       }
       const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId);
@@ -50,25 +51,24 @@ export class CreditsRepository extends BaseRepository {
         success: true, 
         data: CreditsMapper.toEntity({
             ...res,
-            purchasedAt: { toDate: () => new Date() } as any,
-            lastUpdatedAt: { toDate: () => new Date() } as any,
+            purchasedAt: undefined,
+            lastUpdatedAt: undefined,
         }) 
       };
     } catch (e: any) { return { success: false, error: { message: e.message, code: "INIT_ERR" } }; }
   }
 
-  async deductCredit(userId: string, type: CreditType): Promise<DeductCreditsResult> {
+  async deductCredit(userId: string, cost: number = 1): Promise<DeductCreditsResult> {
     const db = getFirestore();
     if (!db) return { success: false, error: { message: "No DB", code: "ERR" } };
-    const field = type === "text" ? "textCredits" : "imageCredits";
     try {
       const remaining = await runTransaction(db, async (tx: Transaction) => {
         const docSnap = await tx.get(this.getRef(db, userId));
         if (!docSnap.exists()) throw new Error("NO_CREDITS");
-        const current = docSnap.data()[field] as number;
-        if (current <= 0) throw new Error("CREDITS_EXHAUSTED");
-        const updated = current - 1;
-        tx.update(this.getRef(db, userId), { [field]: updated, lastUpdatedAt: serverTimestamp() });
+        const current = docSnap.data().credits as number;
+        if (current < cost) throw new Error("CREDITS_EXHAUSTED");
+        const updated = current - cost;
+        tx.update(this.getRef(db, userId), { credits: updated, lastUpdatedAt: serverTimestamp() });
         return updated;
       });
       return { success: true, remainingCredits: remaining };
@@ -78,9 +78,9 @@ export class CreditsRepository extends BaseRepository {
     }
   }
 
-  async hasCredits(userId: string, type: CreditType): Promise<boolean> {
+  async hasCredits(userId: string, cost: number = 1): Promise<boolean> {
     const res = await this.getCredits(userId);
-    return !!(res.success && res.data && (type === "text" ? res.data.textCredits : res.data.imageCredits) > 0);
+    return !!(res.success && res.data && res.data.credits >= cost);
   }
 }
 

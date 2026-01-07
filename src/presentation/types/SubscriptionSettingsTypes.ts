@@ -51,8 +51,8 @@ export interface SubscriptionSettingsTranslations {
   remainingLabel: string;
   manageButton: string;
   upgradeButton: string;
-  /** Credit label (e.g., "Image Credits") */
-  imageCreditsLabel?: string;
+  /** Credit label (e.g., "Credits") */
+  creditsLabel?: string;
 }
 
 /** Parameters for useSubscriptionSettingsConfig hook */
@@ -63,8 +63,8 @@ export interface UseSubscriptionSettingsConfigParams {
   isAnonymous?: boolean;
   /** Translation strings */
   translations: SubscriptionSettingsTranslations;
-  /** Credit limit calculator */
-  getCreditLimit?: (currentCredits: number) => number;
+  /** Fixed credit limit (if not available in UserCredits) */
+  creditLimit?: number;
   /** Upgrade prompt configuration for free users */
   upgradePrompt?: UpgradePromptConfig;
 }
