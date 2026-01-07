@@ -12,6 +12,7 @@ import {
     AtomicText,
     AtomicIcon,
 } from "@umituz/react-native-design-system";
+import { timezoneService } from "@umituz/react-native-timezone";
 import type { CreditLog, TransactionReason } from "../../domain/types/transaction.types";
 
 export interface TransactionItemTranslations {
@@ -47,7 +48,7 @@ const getReasonIcon = (reason: TransactionReason): string => {
 
 const defaultDateFormatter = (timestamp: number): string => {
   const date = new Date(timestamp);
-  return date.toLocaleDateString(undefined, {
+  return timezoneService.formatDateTime(date, "en-US", {
     month: "short",
     day: "numeric",
     hour: "2-digit",

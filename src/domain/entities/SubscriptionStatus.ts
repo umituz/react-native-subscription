@@ -2,7 +2,14 @@
  * Subscription Status Entity
  */
 
-export type SubscriptionStatusType = 'active' | 'expired' | 'canceled' | 'none';
+export const SUBSCRIPTION_STATUS = {
+  ACTIVE: 'active',
+  EXPIRED: 'expired',
+  CANCELED: 'canceled',
+  NONE: 'none',
+} as const;
+
+export type SubscriptionStatusType = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
 
 export interface SubscriptionStatus {
     isPremium: boolean;

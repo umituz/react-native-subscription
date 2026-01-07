@@ -1,5 +1,9 @@
 import { useMemo } from "react";
-import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
+import { 
+  type SubscriptionStatus, 
+  SUBSCRIPTION_STATUS, 
+  type SubscriptionStatusType 
+} from "../../domain/entities/SubscriptionStatus";
 import { isSubscriptionExpired } from "../../utils/dateValidationUtils";
 import { formatDateForLocale, calculateDaysRemaining } from "../utils/subscriptionDateUtils";
 
@@ -19,7 +23,7 @@ export interface SubscriptionDetails {
   /** Formatted purchase date */
   formattedPurchaseDate: string | null;
   /** Status text key for localization */
-  statusKey: "active" | "expired" | "none";
+  statusKey: SubscriptionStatusType;
 }
 
 interface UseSubscriptionDetailsParams {
@@ -45,7 +49,7 @@ export function useSubscriptionDetails(
         daysRemaining: null,
         formattedExpirationDate: null,
         formattedPurchaseDate: null,
-        statusKey: "none",
+        statusKey: SUBSCRIPTION_STATUS.NONE,
       };
     }
 
@@ -54,9 +58,15 @@ export function useSubscriptionDetails(
     const daysRemainingValue = calculateDaysRemaining(status.expiresAt ?? null);
     const isPremium = status.isPremium && !isExpired;
 
-    let statusKey: "active" | "expired" | "none" = "none";
+    let statusKey: SubscriptionStatusType = status.status || SUBSCRIPTION_STATUS.NONE;
+    
+    // Override status key based on current calculation for active/expired
     if (status.isPremium) {
-      statusKey = isExpired ? "expired" : "active";
+      statusKey = isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.ACTIVE;
+    } else if (status.status === SUBSCRIPTION_STATUS.CANCELED) {
+      statusKey = SUBSCRIPTION_STATUS.CANCELED;
+    } else {
+      statusKey = SUBSCRIPTION_STATUS.NONE;
     }
 
     return {

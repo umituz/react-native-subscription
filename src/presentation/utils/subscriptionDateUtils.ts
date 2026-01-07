@@ -1,7 +1,4 @@
-/**
- * Subscription Date Utilities
- * Date formatting and calculation utilities for subscription
- */
+import { timezoneService } from "@umituz/react-native-timezone";
 
 /**
  * Converts Firestore timestamp or Date to ISO string
@@ -14,11 +11,13 @@ export const convertPurchasedAt = (purchasedAt: unknown): string | null => {
     purchasedAt !== null &&
     "toDate" in purchasedAt
   ) {
-    return (purchasedAt as { toDate: () => Date }).toDate().toISOString();
+    return timezoneService.formatToISOString(
+      (purchasedAt as { toDate: () => Date }).toDate()
+    );
   }
 
   if (purchasedAt instanceof Date) {
-    return purchasedAt.toISOString();
+    return timezoneService.formatToISOString(purchasedAt);
   }
 
   return null;
@@ -34,11 +33,11 @@ export const formatDateForLocale = (
   if (!dateStr) return null;
 
   try {
-    return new Intl.DateTimeFormat(locale, {
+    return timezoneService.formatDate(new Date(dateStr), locale, {
       year: "numeric",
       month: "long",
       day: "numeric",
-    }).format(new Date(dateStr));
+    });
   } catch {
     return null;
   }
@@ -52,9 +51,11 @@ export const calculateDaysRemaining = (
 ): number | null => {
   if (!expiresAtIso) return null;
 
-  const end = new Date(expiresAtIso);
+  const expiresDate = new Date(expiresAtIso);
   const now = new Date();
-  const diff = end.getTime() - now.getTime();
-
+  
+  // Use timezoneService's mathematical approach if possible, or keep existing log
+  const diff = expiresDate.getTime() - now.getTime();
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
+
