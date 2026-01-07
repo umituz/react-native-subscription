@@ -1,3 +1,5 @@
+import { timezoneService } from "@umituz/react-native-timezone";
+
 /**
  * Converts Firestore timestamp or Date to ISO string
  */
@@ -17,22 +19,18 @@ export const convertPurchasedAt = (purchasedAt: unknown): string | null => {
     return null;
   }
 
-  return date.toISOString();
+  return timezoneService.formatToISOString(date);
 };
 
 /**
- * Formats a date string to a simple DD.MM.YYYY format
+ * Formats a date string to a simple DD.MM.YYYY format using timezoneService
  */
 export const formatDate = (dateStr: string | null): string | null => {
   if (!dateStr) return null;
   const date = new Date(dateStr);
   if (isNaN(date.getTime())) return null;
   
-  const d = String(date.getDate()).padStart(2, '0');
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const y = date.getFullYear();
-  
-  return `${d}.${m}.${y}`;
+  return timezoneService.formatToDisplayDate(date);
 };
 
 
