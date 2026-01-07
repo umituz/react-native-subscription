@@ -55,7 +55,7 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                                 ]}
                             >
                                 {isSelected && (
-                                    <AtomicIcon name="checkmark" customSize={12} customColor={tokens.colors.onPrimary} />
+                                    <AtomicIcon name="checkmark-circle-outline" customSize={12} customColor={tokens.colors.onPrimary} />
                                 )}
                             </View>
 

@@ -1,98 +1,51 @@
-/**
- * Paywall Footer
- * Action button and legal links
- */
-
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Linking } from "react-native";
-import { AtomicText, AtomicButton, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { View, TouchableOpacity } from "react-native";
+import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+import type { PaywallTranslations, PaywallLegalUrls } from "../entities";
+import { paywallModalStyles as styles } from "./PaywallModal.styles";
 
 interface PaywallFooterProps {
-    isProcessing: boolean;
-    isDisabled: boolean;
-    purchaseButtonText: string;
-    processingText: string;
-    restoreButtonText: string;
-    privacyText?: string;
-    termsText?: string;
-    privacyUrl?: string;
-    termsUrl?: string;
-    onPurchase: () => void;
-    onRestore: () => void;
+  translations: PaywallTranslations;
+  legalUrls: PaywallLegalUrls;
+  isProcessing: boolean;
+  onRestore?: () => Promise<void | boolean>;
+  onLegalClick: (url: string | undefined) => void;
 }
 
-export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(
-    ({
-        isProcessing,
-        isDisabled,
-        purchaseButtonText,
-        processingText,
-        restoreButtonText,
-        privacyText,
-        termsText,
-        privacyUrl,
-        termsUrl,
-        onPurchase,
-        onRestore,
-    }) => {
-        const tokens = useAppDesignTokens();
-
-        const handleOpenUrl = (url?: string) => {
-            if (url) Linking.openURL(url);
-        };
-
-        return (
-            <View style={styles.container}>
-                <AtomicButton
-                    title={isProcessing ? processingText : purchaseButtonText}
-                    onPress={onPurchase}
-                    disabled={isDisabled || isProcessing}
-                    variant="primary"
-                    size="lg"
-                    style={styles.purchaseButton}
-                />
-
-                <View style={styles.linksRow}>
-                    {termsText && termsUrl && (
-                        <TouchableOpacity onPress={() => handleOpenUrl(termsUrl)}>
-                            <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
-                                {termsText}
-                            </AtomicText>
-                        </TouchableOpacity>
-                    )}
-
-                    <TouchableOpacity onPress={onRestore}>
-                        <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
-                            {restoreButtonText}
-                        </AtomicText>
-                    </TouchableOpacity>
-
-                    {privacyText && privacyUrl && (
-                        <TouchableOpacity onPress={() => handleOpenUrl(privacyUrl)}>
-                            <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
-                                {privacyText}
-                            </AtomicText>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
-        );
-    }
-);
-
-PaywallFooter.displayName = "PaywallFooter";
-
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: 24,
-        paddingBottom: 32,
-    },
-    purchaseButton: {
-        marginBottom: 16,
-    },
-    linksRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        paddingHorizontal: 8,
-    },
-});
+export const PaywallFooter: React.FC<PaywallFooterProps> = ({
+  translations,
+  legalUrls,
+  isProcessing,
+  onRestore,
+  onLegalClick,
+}) => {
+  const tokens = useAppDesignTokens();
+  
+  return (
+    <View style={styles.footer}>
+      {onRestore && (
+        <TouchableOpacity onPress={onRestore} disabled={isProcessing} style={[styles.restoreButton, isProcessing && styles.restoreButtonDisabled]}>
+          <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
+            {isProcessing ? translations.processingText : translations.restoreButtonText}
+          </AtomicText>
+        </TouchableOpacity>
+      )}
+      <View style={styles.legalRow}>
+        {legalUrls.termsUrl && (
+          <TouchableOpacity onPress={() => onLegalClick(legalUrls.termsUrl)}>
+            <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
+              {translations.termsOfServiceText}
+            </AtomicText>
+          </TouchableOpacity>
+        )}
+        {legalUrls.privacyUrl && (
+          <TouchableOpacity onPress={() => onLegalClick(legalUrls.privacyUrl)}>
+            <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
+              {translations.privacyText}
+            </AtomicText>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+};

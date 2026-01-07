@@ -1,11 +1,8 @@
 /**
  * Subscription Initializer
- * Single entry point for subscription system initialization
- * Apps just call initializeSubscription with config
  */
 
 import { Platform } from "react-native";
-import type { CustomerInfo } from "react-native-purchases";
 import type { CreditsConfig } from "../../domain/entities/Credits";
 import { configureCreditsRepository, getCreditsRepository } from "../repositories/CreditsRepositoryProvider";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
@@ -16,213 +13,62 @@ export interface FirebaseAuthLike {
   onAuthStateChanged: (callback: (user: { uid: string; isAnonymous: boolean } | null) => void) => () => void;
 }
 
-export interface CreditPackageConfig {
-  /** Identifier pattern to match credit packages (e.g., "credit") */
-  identifierPattern?: string;
-  /** Map of productId to credit amounts */
-  amounts?: Record<string, number>;
-}
+export interface CreditPackageConfig { identifierPattern?: string; amounts?: Record<string, number>; }
 
 export interface SubscriptionInitConfig {
-  /** API key for RevenueCat (can provide single key or platform-specific keys) */
-  apiKey?: string;
-  /** iOS-specific API key (overrides apiKey if provided on iOS) */
-  apiKeyIos?: string;
-  /** Android-specific API key (overrides apiKey if provided on Android) */
-  apiKeyAndroid?: string;
-  testStoreKey?: string;
-  entitlementId: string;
-  credits: CreditsConfig;
-  getAnonymousUserId: () => Promise<string>;
-  getFirebaseAuth: () => FirebaseAuthLike | null;
-  showAuthModal: () => void;
-  /** Callback after credits are updated (for cache invalidation) */
-  onCreditsUpdated?: (userId: string) => void;
-  /** Credit package configuration for consumable purchases */
-  creditPackages?: CreditPackageConfig;
-  timeoutMs?: number;
-  authStateTimeoutMs?: number;
+  apiKey?: string; apiKeyIos?: string; apiKeyAndroid?: string; testStoreKey?: string; entitlementId: string; credits: CreditsConfig;
+  getAnonymousUserId: () => Promise<string>; getFirebaseAuth: () => FirebaseAuthLike | null; showAuthModal: () => void;
+  onCreditsUpdated?: (userId: string) => void; creditPackages?: CreditPackageConfig; timeoutMs?: number; authStateTimeoutMs?: number;
 }
 
-/**
- * Wait for Firebase Auth state to be ready
- * This prevents unnecessary logIn calls that trigger Apple Sign In dialog
- */
-const waitForAuthState = async (
-  getFirebaseAuth: () => FirebaseAuthLike | null,
-  timeoutMs: number
-): Promise<string | undefined> => {
-  const auth = getFirebaseAuth();
+const waitForAuthState = async (getAuth: () => FirebaseAuthLike | null, timeoutMs: number): Promise<string | undefined> => {
+  const auth = getAuth();
   if (!auth) return undefined;
-
-  // If user already available, return immediately
-  if (auth.currentUser) {
-    return auth.currentUser.uid;
-  }
-
-  // Wait for auth state to settle
-  return new Promise<string | undefined>((resolve) => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      unsubscribe();
-      resolve(user?.uid || undefined);
-    });
-
-    // Timeout fallback - don't wait forever
-    setTimeout(() => {
-      unsubscribe();
-      resolve(undefined);
-    }, timeoutMs);
+  if (auth.currentUser) return auth.currentUser.uid;
+  return new Promise((resolve) => {
+    const unsub = auth.onAuthStateChanged((u) => { unsub(); resolve(u?.uid); });
+    setTimeout(() => { unsub(); resolve(undefined); }, timeoutMs);
   });
 };
 
-/**
- * Check if a product is a credit package
- */
-const isCreditPackage = (productId: string, pattern?: string): boolean => {
-  const patternToUse = pattern || "credit";
-  return productId.toLowerCase().includes(patternToUse.toLowerCase());
-};
+const isCreditPkg = (id: string, pat?: string) => id.toLowerCase().includes((pat || "credit").toLowerCase());
 
+export const initializeSubscription = async (config: SubscriptionInitConfig): Promise<void> => {
+  const { apiKey, apiKeyIos, apiKeyAndroid, testStoreKey, entitlementId, credits, getAnonymousUserId, getFirebaseAuth, showAuthModal, onCreditsUpdated, creditPackages, timeoutMs = 10000, authStateTimeoutMs = 2000 } = config;
 
-export const initializeSubscription = async (
-  config: SubscriptionInitConfig,
-): Promise<void> => {
-  const {
-    apiKey,
-    apiKeyIos,
-    apiKeyAndroid,
-    testStoreKey,
-    entitlementId,
-    credits,
-    getAnonymousUserId,
-    getFirebaseAuth,
-    showAuthModal,
-    onCreditsUpdated,
-    creditPackages,
-    timeoutMs = 10000,
-    authStateTimeoutMs = 2000,
-  } = config;
+  const key = Platform.OS === "ios" ? (apiKeyIos || apiKey || "") : (apiKeyAndroid || apiKey || "");
+  if (!key) throw new Error("API key required");
 
-  // Resolve API key based on platform
-  const resolvedApiKey = Platform.OS === "ios"
-    ? (apiKeyIos || apiKey || "")
-    : (apiKeyAndroid || apiKey || "");
+  configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
-  if (!resolvedApiKey) {
-    throw new Error("RevenueCat API key is required");
-  }
-
-  // Merge credit package amounts into credits config
-  const creditsConfigWithPackages = {
-    ...credits,
-    creditPackageAmounts: creditPackages?.amounts,
-  };
-  configureCreditsRepository(creditsConfigWithPackages);
-
-  // Build consumable product identifiers from credit package pattern
-  const consumableIdentifiers: string[] = [];
-  if (creditPackages?.identifierPattern) {
-    consumableIdentifiers.push(creditPackages.identifierPattern);
-  } else {
-    consumableIdentifiers.push("credit");
-  }
-
-  // Create onPurchaseCompleted handler for credit packages
-  const handlePurchaseCompleted = async (
-    userId: string,
-    productId: string,
-    _customerInfo: CustomerInfo
-  ): Promise<void> => {
-    const isCredit = isCreditPackage(productId, creditPackages?.identifierPattern);
-
-    if (!isCredit) {
-      return;
-    }
-
+  const onPurchase = async (userId: string, productId: string) => {
+    if (!isCreditPkg(productId, creditPackages?.identifierPattern)) return;
     try {
-      const repository = getCreditsRepository();
-      const purchaseId = `purchase_${productId}_${Date.now()}`;
-
-      await repository.initializeCredits(userId, purchaseId, productId);
-
-      if (__DEV__) {
-        console.log("[SubscriptionInitializer] Credits added for purchase:", {
-          userId,
-          productId,
-          purchaseId,
-        });
-      }
-
-      if (onCreditsUpdated) {
-        onCreditsUpdated(userId);
-      }
-    } catch (error) {
-      if (__DEV__) {
-        console.error("[SubscriptionInitializer] Failed to add credits:", error);
-      }
-    }
+      await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId);
+      onCreditsUpdated?.(userId);
+    } catch { /* Silent */ }
   };
 
-  // Create onCreditRenewal handler for subscription renewals
-  const handleCreditRenewal = async (
-    userId: string,
-    productId: string,
-    renewalId: string
-  ): Promise<void> => {
+  const onRenewal = async (userId: string, productId: string, renewalId: string) => {
     try {
-      const repository = getCreditsRepository();
-      await repository.initializeCredits(userId, renewalId, productId);
-
-      if (__DEV__) {
-        console.log("[SubscriptionInitializer] Credits renewed:", {
-          userId,
-          productId,
-          renewalId,
-        });
-      }
-
-      if (onCreditsUpdated) {
-        onCreditsUpdated(userId);
-      }
-    } catch (error) {
-      if (__DEV__) {
-        console.error("[SubscriptionInitializer] Failed to renew credits:", error);
-      }
-    }
+      await getCreditsRepository().initializeCredits(userId, renewalId, productId);
+      onCreditsUpdated?.(userId);
+    } catch { /* Silent */ }
   };
 
   SubscriptionManager.configure({
-    config: {
-      apiKey: resolvedApiKey,
-      testStoreKey,
-      entitlementIdentifier: entitlementId,
-      consumableProductIdentifiers: consumableIdentifiers,
-      onCreditRenewal: handleCreditRenewal,
-      onCreditsUpdated,
-      onPurchaseCompleted: handlePurchaseCompleted,
-    },
-    apiKey: resolvedApiKey,
-    getAnonymousUserId,
+    config: { apiKey: key, testStoreKey, entitlementIdentifier: entitlementId, consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"], onCreditRenewal: onRenewal, onPurchaseCompleted: onPurchase, onCreditsUpdated },
+    apiKey: key, getAnonymousUserId
   });
 
-  // Wait for auth state to get correct user ID
-  const initialUserId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);
-
-  const initPromise = SubscriptionManager.initialize(initialUserId);
-  const timeoutPromise = new Promise<boolean>((_, reject) =>
-    setTimeout(
-      () => reject(new Error("Subscription initialization timeout")),
-      timeoutMs,
-    ),
-  );
-
-  await Promise.race([initPromise, timeoutPromise]);
+  const userId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);
+  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeoutMs));
+  await Promise.race([SubscriptionManager.initialize(userId), timeout]);
 
   configureAuthProvider({
     isAuthenticated: () => {
-      const auth = getFirebaseAuth();
-      const user = auth?.currentUser;
-      return !!(user && !user.isAnonymous);
+      const u = getFirebaseAuth()?.currentUser;
+      return !!(u && !u.isAnonymous);
     },
     showAuthModal,
   });

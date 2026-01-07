@@ -7,7 +7,7 @@
 
 import { useEffect, useCallback } from "react";
 import { useCredits, type UseCreditsResult } from "./useCredits";
-import { useInitializeCredits } from "./useDeductCredit";
+import { useInitializeCredits } from "./useInitializeCredits";
 
 export interface UsePremiumWithCreditsParams {
   userId: string | undefined;

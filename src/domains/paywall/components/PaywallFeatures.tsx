@@ -1,0 +1,25 @@
+import React from "react";
+import { View } from "react-native";
+import { AtomicText, AtomicIcon, useAppDesignTokens } from "@umituz/react-native-design-system";
+import type { SubscriptionFeature } from "../entities";
+import { paywallModalStyles as styles } from "./PaywallModal.styles";
+
+export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({ features }) => {
+  const tokens = useAppDesignTokens();
+  if (!features.length) return null;
+
+  return (
+    <View style={[styles.features, { backgroundColor: tokens.colors.surfaceSecondary }]}>
+      {features.map((feature, idx) => (
+        <View key={idx} style={styles.featureRow}>
+          <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primaryLight }]}>
+            <AtomicIcon name={feature.icon} customSize={16} customColor={tokens.colors.primary} />
+          </View>
+          <AtomicText type="bodyMedium" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
+            {feature.text}
+          </AtomicText>
+        </View>
+      ))}
+    </View>
+  );
+};

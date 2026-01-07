@@ -112,7 +112,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
             <View key={index} style={styles.benefitItem}>
               <View style={styles.benefitIconWrapper}>
                 <AtomicIcon
-                  name={benefit.icon || "checkmark"}
+                  name={benefit.icon || "checkmark-circle-outline"}
                   customSize={16}
                   color="primary"
                 />
