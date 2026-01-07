@@ -9,12 +9,9 @@ import { useCredits } from "./useCredits";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomerInfo";
 import { usePaywallVisibility } from "./usePaywallVisibility";
+import { calculateDaysRemaining } from "../../domain/entities/SubscriptionStatus";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
-import {
-    convertPurchasedAt,
-    formatDateForLocale,
-    calculateDaysRemaining,
-} from "../utils/subscriptionDateUtils";
+import { formatDateForLocale, convertPurchasedAt } from "../utils/subscriptionDateUtils";
 import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
 import type {
   SubscriptionSettingsConfig,
@@ -68,7 +65,7 @@ export const useSubscriptionSettingsConfig = (
   // Get expiration date from RevenueCat entitlement (source of truth)
   // premiumEntitlement.expirationDate is an ISO string from RevenueCat
   const entitlementExpirationDate = premiumEntitlement?.expirationDate || null;
-  
+
   // Prefer CustomerInfo expiration (real-time) over cached status
   const expiresAtIso = entitlementExpirationDate || (statusExpirationDate
     ? statusExpirationDate.toISOString()

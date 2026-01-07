@@ -33,13 +33,13 @@ export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
 
 export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean => {
     if (!status || !status.isPremium) return false;
-
     if (!status.expiresAt) return true; // Lifetime
-
-    const expirationDate = new Date(status.expiresAt);
-    const now = new Date();
-
-    // Add 24-hour grace period buffer
-    const buffer = 24 * 60 * 60 * 1000;
-    return expirationDate.getTime() + buffer > now.getTime();
+    return new Date(status.expiresAt).getTime() > Date.now();
 };
+
+export const calculateDaysRemaining = (expiresAt: string | null): number | null => {
+    if (!expiresAt) return null;
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+};
+

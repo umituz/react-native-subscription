@@ -2,10 +2,11 @@ import { useMemo } from "react";
 import { 
   type SubscriptionStatus, 
   SUBSCRIPTION_STATUS, 
-  type SubscriptionStatusType 
+  type SubscriptionStatusType,
+  isSubscriptionValid,
+  calculateDaysRemaining
 } from "../../domain/entities/SubscriptionStatus";
-import { isSubscriptionExpired } from "../../utils/dateValidationUtils";
-import { formatDateForLocale, calculateDaysRemaining } from "../utils/subscriptionDateUtils";
+import { formatDateForLocale } from "../utils/subscriptionDateUtils";
 
 export interface SubscriptionDetails {
   /** Raw subscription status */
@@ -53,10 +54,11 @@ export function useSubscriptionDetails(
       };
     }
 
-    const isExpired = isSubscriptionExpired(status);
+    const isValid = isSubscriptionValid(status);
+    const isExpired = status.isPremium && !isValid;
     const isLifetime = status.isPremium && !status.expiresAt;
     const daysRemainingValue = calculateDaysRemaining(status.expiresAt ?? null);
-    const isPremium = status.isPremium && !isExpired;
+    const isPremium = status.isPremium && isValid;
 
     let statusKey: SubscriptionStatusType = status.status || SUBSCRIPTION_STATUS.NONE;
     

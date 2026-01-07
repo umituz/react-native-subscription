@@ -43,19 +43,4 @@ export const formatDateForLocale = (
   }
 };
 
-/**
- * Calculates days remaining until expiration
- */
-export const calculateDaysRemaining = (
-  expiresAtIso: string | null
-): number | null => {
-  if (!expiresAtIso) return null;
-
-  const expiresDate = new Date(expiresAtIso);
-  const now = new Date();
-  
-  // Use timezoneService's mathematical approach if possible, or keep existing log
-  const diff = expiresDate.getTime() - now.getTime();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-};
 
