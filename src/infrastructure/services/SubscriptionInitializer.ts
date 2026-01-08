@@ -31,8 +31,6 @@ const waitForAuthState = async (getAuth: () => FirebaseAuthLike | null, timeoutM
   });
 };
 
-const isCreditPkg = (id: string, pat?: string) => id.toLowerCase().includes((pat || "credit").toLowerCase());
-
 export const initializeSubscription = async (config: SubscriptionInitConfig): Promise<void> => {
   const { apiKey, apiKeyIos, apiKeyAndroid, testStoreKey, entitlementId, credits, getAnonymousUserId, getFirebaseAuth, showAuthModal, onCreditsUpdated, creditPackages, timeoutMs = 10000, authStateTimeoutMs = 2000 } = config;
 
@@ -42,7 +40,6 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
   const onPurchase = async (userId: string, productId: string) => {
-    if (!isCreditPkg(productId, creditPackages?.identifierPattern)) return;
     try {
       await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId);
       onCreditsUpdated?.(userId);
