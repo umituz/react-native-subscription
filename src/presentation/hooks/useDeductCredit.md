@@ -2,159 +2,175 @@
 
 Hook for deducting credits from user balance with optimistic updates.
 
-## Import
+## Location
+
+**Import Path**: `@umituz/react-native-subscription`
+
+**File**: `src/presentation/hooks/useDeductCredit.ts`
+
+## Strategy
+
+### Credit Deduction Flow
+
+1. **Pre-deduction Validation**
+   - Verify user is authenticated (userId must be defined)
+   - Check if sufficient credits exist
+   - Validate deduction amount is positive
+
+2. **Optimistic Update**
+   - Immediately update UI with new balance
+   - Store previous state for potential rollback
+   - Update TanStack Query cache
+
+3. **Server Synchronization**
+   - Send deduction request to backend
+   - Handle success/failure responses
+   - Rollback on failure
+
+4. **Post-deduction Handling**
+   - Trigger `onCreditsExhausted` callback if balance reaches zero
+   - Return success/failure boolean
+   - Reset loading state
+
+### Integration Points
+
+- **Credits Repository**: `src/domains/wallet/infrastructure/repositories/CreditsRepository.ts`
+- **Credits Entity**: `src/domains/wallet/domain/entities/UserCredits.ts`
+- **TanStack Query**: For cache management and optimistic updates
+
+## Restrictions
+
+### REQUIRED
+
+- **User Authentication**: `userId` parameter MUST be provided and cannot be undefined
+- **Positive Amount**: Credit cost MUST be greater than zero
+- **Callback Implementation**: `onCreditsExhausted` callback SHOULD be implemented to handle zero balance scenarios
+
+### PROHIBITED
+
+- **NEVER** call `deductCredit` or `deductCredits` without checking `isDeducting` state first
+- **NEVER** allow multiple simultaneous deduction calls for the same user
+- **NEVER** deduce credits when balance is insufficient (should check with `useCreditChecker` first)
+- **DO NOT** use this hook for guest users (userId undefined)
+
+### CRITICAL SAFETY
+
+- **ALWAYS** check return value before proceeding with feature execution
+- **ALWAYS** handle the case where deduction returns `false`
+- **NEVER** assume deduction succeeded without checking return value
+- **MUST** implement error boundaries when using this hook
+
+## Rules
+
+### Initialization
 
 ```typescript
-import { useDeductCredit } from '@umituz/react-native-subscription';
+// CORRECT
+const { deductCredit, isDeducting } = useDeductCredit({
+  userId: user?.uid,
+  onCreditsExhausted: () => showPaywall(),
+});
+
+// INCORRECT - Missing callback
+const { deductCredit } = useDeductCredit({
+  userId: user?.uid,
+});
+
+// INCORRECT - userId undefined
+const { deductCredit } = useDeductCredit({
+  userId: undefined,
+});
 ```
 
-## Signature
+### Deduction Execution
 
 ```typescript
-function useDeductCredit(params: {
-  userId: string | undefined;
-  onCreditsExhausted?: () => void;
-}): {
-  deductCredit: (cost?: number) => Promise<boolean>;
-  deductCredits: (cost: number) => Promise<boolean>;
-  isDeducting: boolean;
+// CORRECT - Check return value
+const success = await deductCredit(5);
+if (success) {
+  executeFeature();
 }
+
+// INCORRECT - No return value check
+await deductCredit(5);
+executeFeature(); // May execute even if deduction failed
+
+// INCORRECT - Multiple simultaneous calls
+Promise.all([
+  deductCredit(5),
+  deductCredit(3), // Race condition!
+]);
 ```
 
-## Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `userId` | `string \| undefined` | **Required** | User ID for credit deduction |
-| `onCreditsExhausted` | `() => void` | `undefined` | Callback when credits are exhausted |
-
-## Returns
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `deductCredit` | `(cost?: number) => Promise<boolean>` | Deduct credits (defaults to 1) |
-| `deductCredits` | `(cost: number) => Promise<boolean>` | Deduct specific amount |
-| `isDeducting` | `boolean` | Mutation is in progress |
-
-## Basic Usage
+### Loading States
 
 ```typescript
-function CreditButton() {
-  const { user } = useAuth();
-  const { deductCredit, isDeducting } = useDeductCredit({
-    userId: user?.uid,
-    onCreditsExhausted: () => {
-      Alert.alert('Low Credits', 'Please purchase more credits');
-    },
-  });
+// CORRECT - Respect loading state
+<Button onPress={handleDeduct} disabled={isDeducting}>
+  {isDeducting ? 'Deducting...' : 'Use Feature'}
+</Button>
 
-  const handleUseFeature = async () => {
-    const success = await deductCredit(1);
-    if (success) {
-      executePremiumFeature();
-    }
-  };
-
-  return (
-    <Button onPress={handleUseFeature} disabled={isDeducting}>
-      Use Feature (1 Credit)
-    </Button>
-  );
-}
+// INCORRECT - Ignore loading state
+<Button onPress={handleDeduct}>
+  Use Feature
+</Button>
 ```
 
-## Advanced Usage
-
-### With Custom Cost
+### Credit Exhaustion Handling
 
 ```typescript
-function FeatureWithCost() {
-  const { deductCredit } = useDeductCredit({
-    userId: user?.uid,
-  });
+// CORRECT - Implement callback
+const { deductCredit } = useDeductCredit({
+  userId: user?.uid,
+  onCreditsExhausted: () => {
+    navigation.navigate('CreditPackages');
+  },
+});
 
-  const features = {
-    basic: { cost: 1, name: 'Basic Generation' },
-    advanced: { cost: 5, name: 'Advanced Generation' },
-    premium: { cost: 10, name: 'Premium Generation' },
-  };
-
-  const handleFeature = async (cost: number) => {
-    const success = await deductCredit(cost);
-    if (success) {
-      console.log('Feature used');
-    }
-  };
-
-  return (
-    <View>
-      {Object.entries(features).map(([key, { cost, name }]) => (
-        <Button
-          key={key}
-          onPress={() => handleFeature(cost)}
-          title={`${name} (${cost} credits)`}
-        />
-      ))}
-    </View>
-  );
-}
+// MINIMUM - Show alert
+const { deductCredit } = useDeductCredit({
+  userId: user?.uid,
+  onCreditsExhausted: () => {
+    Alert.alert('No Credits', 'Please purchase more credits');
+  },
+});
 ```
 
-### With Confirmation
+## AI Agent Guidelines
 
-```typescript
-function CreditDeductionWithConfirmation() {
-  const { deductCredit } = useDeductCredit({
-    userId: user?.uid,
-  });
+### When Implementing Features
 
-  const handleActionWithConfirmation = async (cost: number, action: string) => {
-    Alert.alert(
-      'Confirm Action',
-      `This will cost ${cost} credit${cost > 1 ? 's' : ''}. Continue?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: async () => {
-            const success = await deductCredit(cost);
-            if (success) {
-              await performAction(action);
-            }
-          },
-        },
-      ]
-    );
-  };
+1. **Always** check if user has sufficient credits BEFORE allowing action
+2. **Always** show the credit cost to user before deducting
+3. **Always** disable buttons while `isDeducting` is true
+4. **Always** handle the case where deduction returns false
+5. **Never** allow zero or negative credit costs
 
-  return (
-    <Button
-      onPress={() => handleActionWithConfirmation(5, 'export')}
-      title="Export Data (5 Credits)"
-    />
-  );
-}
-```
+### Integration Checklist
 
-## Best Practices
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid `userId` from authentication context
+- [ ] Implement `onCreditsExhausted` callback
+- [ ] Check `isDeducting` before calling deduct functions
+- [ ] Validate return value before proceeding
+- [ ] Show credit cost to user before action
+- [ ] Handle error cases gracefully
+- [ ] Test with insufficient credits
+- [ ] Test with zero balance
 
-1. **Check balance first** - Show user if they have enough credits
-2. **Handle exhausted credits** - Provide purchase option
-3. **Show loading state** - Disable button during deduction
-4. **Optimistic updates** - UI updates automatically
-5. **Error handling** - Handle deduction failures gracefully
-6. **Confirm expensive actions** - Ask before large deductions
-7. **Clear messaging** - Tell users cost before deducting
+### Common Patterns to Implement
 
-## Related Hooks
+1. **Pre-check**: Use `useCreditChecker` before showing feature button
+2. **Confirmation Dialog**: Ask user before expensive operations (>5 credits)
+3. **Success Feedback**: Show success message after deduction
+4. **Failure Handling**: Show appropriate error message on failure
+5. **Purchase Flow**: Navigate to purchase screen on exhaustion
 
-- **useCredits** - For accessing credits balance
-- **useCreditsGate** - For gating features with credits
-- **useInitializeCredits** - For initializing credits after purchase
-- **useCreditChecker** - For checking credit availability
+## Related Documentation
 
-## See Also
-
-- [Credits README](../../../domains/wallet/README.md)
-- [Credits Entity](../../../domains/wallet/domain/entities/Credits.md)
-- [Credits Repository](../../../infrastructure/repositories/CreditsRepository.md)
+- **useCredits**: Access current credit balance
+- **useCreditChecker**: Check credit availability before operations
+- **useInitializeCredits**: Initialize credits after purchase
+- **useFeatureGate**: Unified feature gating with credits
+- **Credits Repository**: `src/domains/wallet/infrastructure/repositories/README.md`
+- **Wallet Domain**: `src/domains/wallet/README.md`

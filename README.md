@@ -28,7 +28,6 @@ yarn add @umituz/react-native-subscription
   "@tanstack/react-query": ">=5.0.0",
   "expo-constants": ">=16.0.0",
   "expo-image": ">=2.0.0",
-  "expo-linear-gradient": ">=14.0.0",
   "firebase": ">=10.0.0",
   "react": ">=18.2.0",
   "react-native": ">=0.74.0",

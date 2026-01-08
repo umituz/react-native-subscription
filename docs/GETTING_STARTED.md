@@ -31,7 +31,7 @@ npm install react-native-purchases@^7.0.0
 npm install @tanstack/react-query@^5.0.0
 
 # Expo dependencies (if using Expo)
-npm install expo-constants expo-image expo-linear-gradient
+npm install expo-constants expo-image
 ```
 
 ### Step 3: RevenueCat Setup
