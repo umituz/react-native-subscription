@@ -1,11 +1,11 @@
 /**
  * Paywall Header
- * Header with gradient, close button, title and subtitle
+ * Header with background, close button, title and subtitle
  */
 
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+
 import {
     AtomicText,
     AtomicIcon,
@@ -25,16 +25,13 @@ export const PaywallHeader: React.FC<PaywallHeaderProps> = React.memo(
         const { themeMode } = useDesignSystemTheme();
         const isDark = themeMode === "dark";
 
-        const gradientColors: readonly [string, string] = isDark
-            ? [tokens.colors.surface, tokens.colors.surfaceSecondary]
-            : [tokens.colors.primary, tokens.colors.primaryDark];
+        const backgroundColor = isDark
+            ? tokens.colors.surface
+            : tokens.colors.primary;
 
         return (
-            <LinearGradient
-                colors={gradientColors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.container}
+            <View
+                style={[styles.container, { backgroundColor }]}
             >
                 <TouchableOpacity
                     onPress={onClose}
@@ -66,7 +63,7 @@ export const PaywallHeader: React.FC<PaywallHeaderProps> = React.memo(
                 </View>
 
                 <View style={[styles.wave, { backgroundColor: tokens.colors.background }]} />
-            </LinearGradient>
+            </View>
         );
     }
 );

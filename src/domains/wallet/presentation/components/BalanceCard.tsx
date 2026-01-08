@@ -1,13 +1,13 @@
 /**
  * Balance Card Component
  *
- * Displays user's credit balance with gradient background.
+ * Displays user's credit balance with solid background.
  * Props-driven for full customization.
  */
 
 import React from "react";
 import { View, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+
 import {
     useAppDesignTokens,
     AtomicText,
@@ -31,17 +31,11 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
   iconName = "wallet",
 }) => {
   const tokens = useAppDesignTokens();
-  const gradientColors = [
-    tokens.colors.primary,
-    tokens.colors.primaryDark || tokens.colors.primary,
-  ] as const;
+
 
   return (
-    <LinearGradient
-      colors={gradientColors}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
+    <View
+      style={[styles.container, { backgroundColor: tokens.colors.primary }]}
     >
       <View style={styles.content}>
         <View style={styles.textContainer}>
@@ -73,7 +67,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
           <AtomicIcon name={iconName} size="xl" color="onPrimary" />
         </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
