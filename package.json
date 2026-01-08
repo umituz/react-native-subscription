@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-subscription",
-  "version": "2.14.97",
+  "version": "2.14.98",
   "description": "Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -40,7 +40,6 @@
     "@tanstack/react-query": ">=5.0.0",
     "expo-constants": ">=16.0.0",
     "expo-image": ">=2.0.0",
-
     "firebase": ">=10.0.0",
     "react": ">=18.2.0",
     "react-native": ">=0.74.0",
@@ -80,7 +79,6 @@
     "expo-file-system": "^19.0.21",
     "expo-haptics": "^15.0.8",
     "expo-image": "~3.0.0",
-
     "expo-localization": "^17.0.8",
     "expo-sharing": "^14.0.8",
     "expo-web-browser": "^12.0.0",
