@@ -1,157 +1,40 @@
 # Wallet Domain Errors
 
+## Location
 Domain-specific errors for wallet and credit operations.
 
-## Overview
+## Strategy
+This directory contains custom error classes representing wallet-related error conditions with specific error types and recovery strategies.
 
-This directory contains custom error classes representing wallet-related error conditions.
+## Restrictions
 
-## Error Types
+### REQUIRED
+- Must use specific error types for different scenarios
+- Must include relevant context in error properties
+- Must handle errors gracefully at boundaries
+- Must log errors for debugging
 
-### CreditsExhaustedError
-Thrown when user doesn't have enough credits for an operation.
+### PROHIBITED
+- DO NOT use generic error types
+- DO NOT throw errors without context
+- DO NOT ignore error conditions
+- DO NOT expose technical errors to users
 
-```typescript
-class CreditsExhaustedError extends Error {
-  constructor(
-    public currentBalance: number,
-    public required: number
-  ) {
-    super(
-      `Insufficient credits: ${currentBalance}/${required} required`,
-      'CREDITS_EXHAUSTED'
-    );
-    this.name = 'CreditsExhaustedError';
-  }
-}
-```
+### CRITICAL SAFETY
+- All errors MUST be handled appropriately
+- Error context MUST be sufficient for recovery
+- Technical errors MUST be converted to user-friendly messages
+- Error codes MUST be actionable
 
-**Usage:**
-```typescript
-import { CreditsExhaustedError } from './errors/CreditsExhaustedError';
+## AI Agent Guidelines
+1. Use specific error types for different scenarios (CreditsExhaustedError, DuplicatePurchaseError, etc.)
+2. Include relevant data in error properties for recovery
+3. Handle errors gracefully at layer boundaries
+4. Log all errors with sufficient context for debugging
+5. Convert technical errors to user-friendly messages
+6. Follow error code reference for recovery strategies
+7. Test error handling paths thoroughly
 
-function deductCredits(credits: UserCredits, amount: number) {
-  if (credits.credits < amount) {
-    throw new CreditsExhaustedError(credits.credits, amount);
-  }
-  // Proceed with deduction
-}
-```
-
-### DuplicatePurchaseError
-Thrown when attempting to add credits for a duplicate purchase ID.
-
-```typescript
-class DuplicatePurchaseError extends Error {
-  constructor(
-    public purchaseId: string,
-    public existingCredits: UserCredits
-  ) {
-    super(
-      `Duplicate purchase ID: ${purchaseId}`,
-      'DUPLICATE_PURCHASE'
-    );
-    this.name = 'DuplicatePurchaseError';
-  }
-}
-```
-
-**Usage:**
-```typescript
-try {
-  await repository.initializeCredits(userId, purchaseId);
-} catch (error) {
-  if (error instanceof DuplicatePurchaseError) {
-    console.log('Credits already added for this purchase');
-  }
-}
-```
-
-### CreditsValidationError
-Thrown when credit validation fails.
-
-```typescript
-class CreditsValidationError extends Error {
-  constructor(
-    message: string,
-    public code: string
-  ) {
-    super(message, code);
-    this.name = 'CreditsValidationError';
-  }
-}
-```
-
-**Usage:**
-```typescript
-function validateCreditAmount(amount: number) {
-  if (amount < 0) {
-    throw new CreditsValidationError(
-      'Credit amount cannot be negative',
-      'INVALID_AMOUNT'
-    );
-  }
-  if (amount > 10000) {
-    throw new CreditsValidationError(
-      'Credit amount exceeds maximum',
-      'EXCEEDS_MAXIMUM'
-    );
-  }
-}
-```
-
-## Error Handling Pattern
-
-```typescript
-import {
-  CreditsExhaustedError,
-  DuplicatePurchaseError,
-  CreditsValidationError
-} from './errors';
-
-async function handleCreditOperation(userId: string, cost: number) {
-  try {
-    const result = await repository.deductCredit(userId, cost);
-    return result;
-  } catch (error) {
-    if (error instanceof CreditsExhaustedError) {
-      // Show paywall or upgrade prompt
-      showPaywall({ required: cost, current: error.currentBalance });
-    } else if (error instanceof DuplicatePurchaseError) {
-      // Log and continue (not a critical error)
-      console.warn('Duplicate purchase detected');
-    } else if (error instanceof CreditsValidationError) {
-      // Log validation error
-      console.error('Validation failed:', error.message);
-    } else {
-      // Unexpected error
-      console.error('Unexpected error:', error);
-    }
-    throw error;
-  }
-}
-```
-
-## Error Codes Reference
-
-| Code | Description | Recovery |
-|------|-------------|----------|
-| `CREDITS_EXHAUSTED` | Not enough credits | Show paywall/upgrade |
-| `DUPLICATE_PURCHASE` | Duplicate purchase ID | Ignore (idempotent) |
-| `INVALID_AMOUNT` | Invalid credit amount | Validate input |
-| `EXCEEDS_MAXIMUM` | Amount too large | Cap at maximum |
-| `USER_NOT_FOUND` | User doesn't exist | Create user record |
-| `INITIALIZATION_FAILED` | Credit init failed | Retry operation |
-
-## Best Practices
-
-1. **Specific Errors**: Use specific error types for different scenarios
-2. **Error Context**: Include relevant data in error properties
-3. **Graceful Handling**: Handle errors appropriately at boundaries
-4. **Logging**: Log errors for debugging
-5. **User Feedback**: Convert errors to user-friendly messages
-
-## Related
-
+## Related Documentation
 - [Wallet Entities](../entities/README.md)
 - [Credits Repository](../../infrastructure/repositories/README.md)

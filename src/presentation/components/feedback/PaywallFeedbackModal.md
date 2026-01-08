@@ -1,314 +1,90 @@
 # PaywallFeedbackModal Component
 
-Modal for collecting user feedback when declining paywall/subscription.
+Modal component for collecting user feedback after paywall dismissal.
 
-## Import
+## Location
 
-```typescript
-import { PaywallFeedbackModal } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/components/feedback/PaywallFeedbackModal.tsx`
 
-```typescript
-interface PaywallFeedbackModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onSubmit: (reason: string) => void;
-  title?: string;
-  subtitle?: string;
-  submitText?: string;
-  otherPlaceholder?: string;
-}
-```
+**Type**: Component
 
-## Props
+## Strategy
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `visible` | `boolean` | **Required** | Modal visibility |
-| `onClose` | `() => void` | **Required** | Close handler |
-| `onSubmit` | `(reason: string) => void` | **Required** | Submit feedback handler |
-| `title` | `string` | `t('paywall.feedback.title')` | Modal title |
-| `subtitle` | `string` | `t('paywall.feedback.subtitle')` | Modal subtitle |
-| `submitText` | `string` | `t('paywall.feedback.submit')` | Submit button text |
-| `otherPlaceholder` | `string` | `t('paywall.feedback.otherPlaceholder')` | Other text input placeholder |
+### Feedback Collection Flow
 
-## Basic Usage
+1. **Trigger Display**: Show modal after paywall dismissal
+2. **Feedback Options**: Provide multiple feedback options
+3. **Reason Capture**: Allow users to select reason for not upgrading
+4. **Comment Input**: Optional text input for detailed feedback
+5. **Submission**: Handle feedback submission
+6. **Analytics**: Track feedback for optimization
 
-```typescript
-function PaywallScreen() {
-  const [showFeedback, setShowFeedback] = useState(false);
+### Integration Points
 
-  const handleClose = () => {
-    setShowFeedback(true);
-  };
+- **PaywallModal**: Trigger after paywall close
+- **Analytics Service**: Track feedback responses
+- **Backend API**: Submit feedback to server
+- **usePaywall**: For paywall state management
 
-  const handleSubmitFeedback = (reason: string) => {
-    analytics.track('paywall_feedback', { reason });
-    setShowFeedback(false);
-    navigation.goBack();
-  };
+## Restrictions
 
-  return (
-    <View>
-      <PaywallContent onClose={handleClose} />
+### REQUIRED
 
-      <PaywallFeedbackModal
-        visible={showFeedback}
-        onClose={() => setShowFeedback(false)}
-        onSubmit={handleSubmitFeedback}
-      />
-    </View>
-  );
-}
-```
+- **Visible Control**: MUST control visibility via prop
+- **Callback Handling**: MUST implement onFeedbackSubmit callback
+- **Close Handler**: MUST provide close mechanism
+- **Feedback Options**: MUST provide clear feedback options
 
-## Advanced Usage
+### PROHIBITED
 
-### With Custom Content
+- **NEVER** show modal automatically (user-triggered only)
+- **NEVER** make feedback mandatory
+- **DO NOT** show too frequently (respect user experience)
+- **DO NOT** require personal information
 
-```typescript
-function CustomFeedbackModal() {
-  const [visible, setVisible] = useState(false);
+### CRITICAL SAFETY
 
-  return (
-    <PaywallFeedbackModal
-      visible={visible}
-      onClose={() => setVisible(false)}
-      onSubmit={(reason) => {
-        console.log('Feedback:', reason);
-        setVisible(false);
-      }}
-      title="Help Us Improve"
-      subtitle="Why are you not upgrading today?"
-      submitText="Send Feedback"
-      otherPlaceholder="Please tell us more..."
-    />
-  );
-}
-```
+- **ALWAYS** make feedback optional
+- **MUST** provide clear close option
+- **ALWAYS** keep feedback anonymous by default
+- **NEVER** collect sensitive information
 
-### With Analytics Tracking
+## AI Agent Guidelines
 
-```typescript
-function TrackedFeedbackModal() {
-  const [visible, setVisible] = useState(false);
-  const [paywallTrigger] = useState('premium_feature');
+### When Implementing Feedback Modals
 
-  const handleSubmit = (reason: string) => {
-    analytics.track('paywall_decline_feedback', {
-      reason,
-      trigger: paywallTrigger,
-      timestamp: Date.now(),
-    });
+1. **Always** make feedback optional
+2. **Always** provide clear close button
+3. **Always** keep feedback options concise
+4. **Always** handle feedback submission gracefully
+5. **Never** show modal too frequently
 
-    // Send to backend
-    api.trackFeedback({
-      type: 'paywall_decline',
-      reason,
-      context: { trigger: paywallTrigger },
-    });
+### Integration Checklist
 
-    setVisible(false);
-  };
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Control visibility via isVisible prop
+- [ ] Implement onFeedbackSubmit callback
+- [ ] Provide onClose callback
+- [ ] Keep feedback options concise (3-5 options)
+- [ ] Make feedback optional
+- [ ] Handle submission errors
+- [ ] Test with various feedback selections
+- [ ] Test close behavior
+- [ ] Verify analytics tracking
 
-  return (
-    <PaywallFeedbackModal
-      visible={visible}
-      onClose={() => setVisible(false)}
-      onSubmit={handleSubmit}
-    />
-  );
-}
-```
+### Common Patterns
 
-### With Conditional Display
+1. **Post-Paywall**: Show after paywall dismissal
+2. **Anonymous Feedback**: Keep feedback anonymous
+3. **Simple Options**: Provide 3-5 quick options
+4. **Optional Comment**: Allow optional detailed feedback
+5. **Analytics Integration**: Track feedback for insights
 
-```typescript
-function ConditionalFeedback() {
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [hasSeenFeedback, setHasSeenFeedback] = useState(false);
+## Related Documentation
 
-  const handleClose = () => {
-    // Only show feedback if user hasn't seen it recently
-    const lastSeen = await AsyncStorage.getItem('last_feedback_date');
-    const daysSinceLastSeen = lastSeen
-      ? (Date.now() - parseInt(lastSeen)) / (1000 * 60 * 60 * 24)
-      : Infinity;
-
-    if (daysSinceLastSeen > 30) {
-      setShowFeedback(true);
-    } else {
-      navigation.goBack();
-    }
-  };
-
-  const handleSubmit = async (reason: string) => {
-    await AsyncStorage.setItem('last_feedback_date', Date.now().toString());
-    setShowFeedback(false);
-    navigation.goBack();
-  };
-
-  return (
-    <PaywallFeedbackModal
-      visible={showFeedback}
-      onClose={() => setShowFeedback(false)}
-      onSubmit={handleSubmit}
-    />
-  );
-}
-```
-
-## Feedback Options
-
-The modal includes these predefined options:
-
-1. **too_expensive** - "Too expensive"
-2. **no_need** - "Don't need it right now"
-3. **trying_out** - "Just trying out the app"
-4. **technical_issues** - "Technical issues"
-5. **other** - "Other" (with text input)
-
-## Examples
-
-### Complete Paywall with Feedback
-
-```typescript
-function CompletePaywallFlow() {
-  const [showFeedback, setShowFeedback] = useState(false);
-
-  const handlePaywallClose = () => {
-    setShowFeedback(true);
-  };
-
-  const handleFeedbackSubmit = (reason: string) => {
-    // Track feedback
-    analytics.track('paywall_feedback_submitted', { reason });
-
-    // Send to backend
-    fetch('/api/feedback', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'paywall_decline',
-        reason,
-        userId: user?.uid,
-        timestamp: Date.now(),
-      }),
-    });
-
-    setShowFeedback(false);
-    navigation.goBack();
-  };
-
-  const handleFeedbackSkip = () => {
-    analytics.track('paywall_feedback_skipped');
-    setShowFeedback(false);
-    navigation.goBack();
-  };
-
-  return (
-    <View>
-      <PaywallScreen onClose={handlePaywallClose} />
-
-      <PaywallFeedbackModal
-        visible={showFeedback}
-        onClose={handleFeedbackSkip}
-        onSubmit={handleFeedbackSubmit}
-        title="Help Us Improve"
-        subtitle="Why are you not upgrading today?"
-        submitText="Send Feedback"
-        otherPlaceholder="Tell us more (optional)"
-      />
-    </View>
-  );
-}
-```
-
-### With A/B Testing
-
-```typescript
-function ABTestedFeedback() {
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [variant, setVariant] = useState<'short' | 'long'>('short');
-
-  useEffect(() => {
-    // Determine A/B test variant
-    const testVariant = await getABTestVariant('paywall_feedback');
-    setVariant(testVariant);
-  }, []);
-
-  return (
-    <PaywallFeedbackModal
-      visible={showFeedback}
-      onClose={() => setShowFeedback(false)}
-      onSubmit={(reason) => {
-        analytics.track('paywall_feedback', {
-          reason,
-          variant,
-          abTest: 'paywall_feedback_v1',
-        });
-        setShowFeedback(false);
-      }}
-      title={
-        variant === 'short'
-          ? 'Quick Feedback'
-          : 'Help Us Improve Our Premium'
-      }
-      subtitle={
-        variant === 'short'
-          ? 'Why not today?'
-          : 'We\'d love to know why you\'re not upgrading'
-      }
-      submitText={
-        variant === 'short'
-          ? 'Send'
-          : 'Submit Feedback'
-      }
-    />
-  );
-}
-```
-
-## Modal Layout
-
-```
-┌─────────────────────────────────┐
-│                                 │
-│     Help Us Improve             │
-│  Why are you not upgrading?     │
-│                                 │
-├─────────────────────────────────┤
-│ ○ Too expensive                │
-│ ○ Don't need it right now      │
-│ ○ Just trying out the app      │
-│ ○ Technical issues             │
-│ ○ Other                        │
-│                                 │
-│   [Text input for Other]        │
-│                                 │
-├─────────────────────────────────┤
-│        [Send Feedback]          │
-└─────────────────────────────────┘
-```
-
-## Best Practices
-
-1. **Track feedback** - Send analytics with feedback data
-2. **Show sparingly** - Don't overwhelm users with feedback requests
-3. **Keep optional** - Allow users to skip feedback
-4. **Use data wisely** - Analyze feedback to improve paywall
-5. **Test timing** - Find optimal moment to show feedback
-6. **Localize content** - Translate all strings for i18n
-7. **Keep simple** - Don't ask for too much information
-
-## Related Hooks
-
-- **usePaywallFeedback** - Hook for feedback logic
-- **usePaywall** - For paywall state management
-- **usePaywallVisibility** - For paywall visibility
-
-## See Also
-
-- [Paywall Screen](../../screens/README.md)
-- [Feedback Utilities](../../hooks/feedback/usePaywallFeedback.md)
+- **PaywallModal**: Paywall modal component
+- **usePaywall**: Paywall state management
+- **Feedback README**: `./README.md`
+- **Paywall README**: `../paywall/README.md`

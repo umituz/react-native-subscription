@@ -58,6 +58,134 @@ Hook for accessing and managing credits balance with real-time updates.
 - **NEVER** use `credits` value for security decisions (validate on backend)
 - **MUST** implement error boundaries when displaying balance
 
+## Rules
+
+### Basic Usage
+
+```typescript
+// CORRECT - Handle all states
+function CreditsDisplay() {
+  const { credits, isLoading, error } = useCredits();
+
+  if (isLoading) return <ActivityIndicator />;
+  if (error) return <ErrorDisplay error={error} />;
+
+  return <Text>Credits: {credits}</Text>;
+}
+
+// INCORRECT - No loading check
+function CreditsDisplay() {
+  const { credits } = useCredits();
+  return <Text>Credits: {credits}</Text>; // May show undefined
+}
+
+// INCORRECT - No error handling
+function CreditsDisplay() {
+  const { credits, isLoading, error } = useCredits();
+
+  if (isLoading) return <ActivityIndicator />;
+  return <Text>Credits: {credits}</Text>; // Crashes if error
+}
+```
+
+### Manual Refresh
+
+```typescript
+// CORRECT - Manual refetch with loading state
+function CreditsWithRefresh() {
+  const { credits, refetch, isLoading } = useCredits();
+
+  const handleRefresh = async () => {
+    await refetch();
+  };
+
+  return (
+    <Button onPress={handleRefresh} disabled={isLoading}>
+      Refresh
+    </Button>
+  );
+}
+
+// INCORRECT - Ignore loading state during refresh
+const handleRefresh = () => {
+  refetch(); // No loading indication
+};
+```
+
+### Transaction History
+
+```typescript
+// CORRECT - Display transactions with safety checks
+function CreditsWithHistory() {
+  const { credits, transactions, isLoading } = useCredits();
+
+  if (isLoading) return <ActivityIndicator />;
+
+  return (
+    <View>
+      <Text>Credits: {credits}</Text>
+      <FlatList
+        data={transactions || []}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <TransactionItem {...item} />}
+      />
+    </View>
+  );
+}
+
+// INCORRECT - Assume transactions exist
+<FlatList
+  data={transactions} // Crashes if undefined
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <TransactionItem {...item} />}
+/>
+```
+
+### Auto-Refresh Patterns
+
+```typescript
+// CORRECT - Refresh on focus with effect cleanup
+function AutoRefreshCredits() {
+  const { credits, refetch } = useCredits();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
+
+  return <Text>Credits: {credits}</Text>;
+}
+
+// INCORRECT - Missing dependency
+useFocusEffect(
+  useCallback(() => {
+    refetch();
+  }, []) // Missing refetch dependency
+);
+```
+
+### Balance Display
+
+```typescript
+// CORRECT - Safe balance display with formatting
+function BalanceDisplay() {
+  const { credits, balance, isLoading } = useCredits();
+
+  if (isLoading) return <Skeleton />;
+
+  return (
+    <View>
+      <Text>{credits} Credits</Text>
+      <Text>Value: ${(balance || 0).toFixed(2)}</Text>
+    </View>
+  );
+}
+
+// INCORRECT - Unsafe balance access
+<Text>Value: ${balance.toFixed(2)}</Text> // Crashes if undefined
+```
+
 ## AI Agent Guidelines
 
 ### When Implementing Credit Displays

@@ -1,390 +1,100 @@
 # Config Domain
 
-Abonelik planları, ürün konfigürasyonları ve paket yönetimi için merkezi konfigürasyon sistemi.
-
-## Özellikler
+Central configuration system for subscription plans, product configurations, and package management.
 
-- **Plan Yönetimi**: Aylık, yıllık ve_lifetime plan konfigürasyonları
-- **Ürün Metadata**: RevenueCat ürünleri için metadata yönetimi
-- **Validasyon**: Konfigürasyon validasyonu ve tip güvenliği
-- **Helper Fonksiyonlar**: Plan karşılaştırma ve filtreleme araçları
-
-## Temel Kavramlar
-
-### Plan (Plan Entity)
-
-Abonelik planını temsil eden temel entity:
-
-```typescript
-import { Plan } from '@umituz/react-native-subscription';
-
-interface Plan {
-  id: string;              // 'premium_monthly'
-  productId: string;       // RevenueCat product ID
-  period: 'monthly' | 'annual' | 'lifetime';
-  price: number;           // Fiyat (kusur Sayı)
-  currency: string;        // 'USD', 'EUR', 'TRY'
-  credits?: number;        // İlk kredi miktarı
-  features: string[];      // ['feature1', 'feature2']
-  metadata?: Record<string, any>;
-}
-```
-
-## Kullanım
-
-### Plan Oluşturma
-
-```typescript
-import { Plan } from '@umituz/react-native-subscription';
-
-const monthlyPlan = Plan.create({
-  id: 'premium_monthly',
-  productId: 'com.app.premium.monthly',
-  period: 'monthly',
-  price: 9.99,
-  currency: 'USD',
-  credits: 100,
-  features: ['unlimited_access', 'ai_tools', 'no_ads'],
-  metadata: {
-    popular: false,
-    discount: 0,
-  },
-});
-
-const annualPlan = Plan.create({
-  id: 'premium_annual',
-  productId: 'com.app.premium.annual',
-  period: 'annual',
-  price: 79.99,
-  currency: 'USD',
-  credits: 1200,
-  features: ['unlimited_access', 'ai_tools', 'no_ads', 'priority_support'],
-  metadata: {
-    popular: true,
-    discount: 33, // 33% indirim
-    savings: 39.89,
-  },
-});
-```
-
-### Plan Karşılaştırma
-
-```typescript
-import { Plan } from '@umituz/react-native-subscription';
-
-// Planları karşılaştır
-const isAnnualBetter = annualPlan.isBetterValueThan(monthlyPlan); // true
-
-// Aylık eşdeğer fiyatı hesapla
-const monthlyEquivalent = annualPlan.getMonthlyEquivalent(); // 6.67
-
-// Tasarruf hesapla
-const savings = annualPlan.calculateSavings(monthlyPlan); // 39.89
-```
-
-### Plan Filtreleme
-
-```typescript
-import { filterPlans, sortByPrice, sortByPeriod } from '@umituz/react-native-subscription';
-
-const plans = [monthlyPlan, annualPlan, lifetimePlan];
-
-// Periyoda göre filtrele
-const subscriptionPlans = filterPlans(plans, { period: ['monthly', 'annual'] });
-
-// Fiyata göre sırala
-const sortedByPrice = sortByPrice(plans, 'asc');
-
-// Özelliklere göre filtrele
-const plansWithAI = filterPlans(plans, { features: ['ai_tools'] });
-```
-
-## Helper Fonksiyonlar
-
-### Plan Helpers
-
-```typescript
-import {
-  getPlanPeriod,
-  isSubscriptionPlan,
-  isLifetimePlan,
-  formatPrice,
-  calculateDiscount,
-} from '@umituz/react-native-subscription';
-
-// Plan periyodunu al
-const period = getPlanPeriod(plan); // 'monthly'
-
-// Plan tipi kontrolü
-const isSubscription = isSubscriptionPlan(plan); // true
-const isLifetime = isLifetimePlan(plan); // false
-
-// Fiyat formatlama
-const formatted = formatPrice(9.99, 'USD'); // '$9.99'
-const formattedTRY = formatPrice(99.99, 'TRY'); // '99,99 ₺'
-
-// İndirim hesaplama
-const discount = calculateDiscount(originalPrice, discountedPrice); // 20
-```
-
-### Package Helpers
-
-```typescript
-import {
-  getPackageType,
-  isSubscriptionPackage,
-  isInAppPurchase,
-  extractPackagePeriod,
-  filterPackagesByType,
-} from '@umituz/react-native-subscription';
-
-// Paket tipi belirleme
-const type = getPackageType(revenueCatPackage); // 'MONTHLY'
-
-// Paket filtreleme
-const subscriptions = filterPackagesByType(packages, 'subscription');
-const inAppPurchases = filterPackagesByType(packages, 'inapp');
-
-// Periyot çıkarma
-const period = extractPackagePeriod('com.app.premium.monthly'); // 'monthly'
-```
-
-## Validasyon
-
-### Plan Validasyonu
-
-```typescript
-import { Plan } from '@umituz/react-native-subscription';
-
-try {
-  const plan = Plan.create({
-    id: 'premium_monthly',
-    productId: 'com.app.premium.monthly',
-    period: 'monthly',
-    price: -9.99, // Invalid: negatif fiyat
-    currency: 'USD',
-  });
-} catch (error) {
-  console.error('Validation error:', error.message);
-}
-```
-
-### Config Validasyonu
-
-```typescript
-import {
-  validatePlanConfig,
-  validatePackageConfig,
-  type ValidationError,
-} from '@umituz/react-native-subscription';
-
-const validation = validatePlanConfig({
-  plans: [monthlyPlan, annualPlan],
-  defaultPlanId: 'premium_monthly',
-});
-
-if (!validation.isValid) {
-  validation.errors.forEach((error: ValidationError) => {
-    console.error(`Field: ${error.field}, Message: ${error.message}`);
-  });
-}
-```
-
-## Konfigürasyon Nesneleri
-
-### SubscriptionConfig
-
-```typescript
-import { SubscriptionConfig } from '@umituz/react-native-subscription';
-
-const config: SubscriptionConfig = {
-  revenueCatApiKey: 'your_api_key',
-  revenueCatEntitlementId: 'premium',
-
-  plans: {
-    monthly: monthlyPlan,
-    annual: annualPlan,
-    lifetime: lifetimePlan,
-  },
-
-  defaultPlan: 'monthly',
-
-  features: {
-    requireAuth: true,
-    allowRestore: true,
-    syncWithFirebase: true,
-  },
-
-  ui: {
-    showAnnualDiscount: true,
-    highlightPopularPlan: true,
-    showPerks: true,
-  },
-};
-```
-
-### WalletConfig
-
-```typescript
-import { WalletConfig } from '@umituz/react-native-subscription';
-
-const walletConfig: WalletConfig = {
-  initialCredits: 100,
-
-  creditPackages: [
-    {
-      id: 'credits_small',
-      productId: 'com.app.credits.small',
-      amount: 100,
-      price: 0.99,
-    },
-    {
-      id: 'credits_medium',
-      productId: 'com.app.credits.medium',
-      amount: 500,
-      price: 3.99,
-    },
-  ],
-
-  creditCosts: {
-    ai_generation: 1,
-    ai_analysis: 2,
-    premium_feature: 5,
-  },
-
-  expiration: {
-    enabled: true,
-    daysUntilExpiration: 365,
-  },
-};
-```
-
-## Best Practices
-
-1. **Tip Güvenliği**: Her zaman tip tanımlamalarını kullanın
-2. **Validasyon**: Konfigürasyonları çalıştırmadan önce doğrulayın
-3. **Default Değerler**: Anlamlı default değerler sağlayın
-4. **Immutable**: Plan objelerini değiştirmek yerine yeni kopyalar oluşturun
-5. **Environment**: Farklı ortamlar için farklı konfigürasyonlar kullanın
-
-## Örnek Uygulama
-
-```typescript
-import {
-  Plan,
-  SubscriptionConfig,
-  validatePlanConfig,
-  formatPrice,
-  calculateDiscount,
-} from '@umituz/react-native-subscription';
-
-// 1. Planları tanımlayın
-const plans = {
-  monthly: Plan.create({
-    id: 'premium_monthly',
-    productId: 'com.app.premium.monthly',
-    period: 'monthly',
-    price: 9.99,
-    currency: 'USD',
-    credits: 100,
-    features: ['unlimited_access', 'ai_tools'],
-  }),
-
-  annual: Plan.create({
-    id: 'premium_annual',
-    productId: 'com.app.premium.annual',
-    period: 'annual',
-    price: 79.99,
-    currency: 'USD',
-    credits: 1200,
-    features: ['unlimited_access', 'ai_tools', 'priority_support'],
-    metadata: { discount: 33, popular: true },
-  }),
-};
-
-// 2. Konfigürasyonu oluşturun
-const config: SubscriptionConfig = {
-  revenueCatApiKey: process.env.REVENUECAT_API_KEY,
-  revenueCatEntitlementId: 'premium',
-  plans,
-  defaultPlan: 'monthly',
-};
-
-// 3. Doğrulayın
-const validation = validatePlanConfig(config);
-if (!validation.isValid) {
-  throw new Error('Invalid config');
-}
-
-// 4. Kullanın
-function PricingCard() {
-  const monthlyPrice = formatPrice(plans.monthly.price, 'USD');
-  const annualPrice = formatPrice(plans.annual.price, 'USD');
-  const discount = calculateDiscount(
-    plans.monthly.price * 12,
-    plans.annual.price
-  );
-
-  return (
-    <View>
-      <Text>Monthly: {monthlyPrice}</Text>
-      <Text>Annual: {annualPrice} (Save {discount}%)</Text>
-    </View>
-  );
-}
-```
-
-## API Referansı
-
-### Plan Entity
-
-```typescript
-class Plan {
-  readonly id: string;
-  readonly productId: string;
-  readonly period: PlanPeriod;
-  readonly price: number;
-  readonly currency: string;
-  readonly credits?: number;
-  readonly features: string[];
-  readonly metadata?: Record<string, any>;
-
-  // Metodlar
-  isBetterValueThan(other: Plan): boolean;
-  getMonthlyEquivalent(): number;
-  calculateSavings(other: Plan): number;
-  hasFeature(feature: string): boolean;
-
-  // Static metodlar
-  static create(config: PlanConfig): Plan;
-  static fromRevenueCat(package: Package): Plan;
-}
-```
-
-### Tip Tanımlamaları
-
-```typescript
-type PlanPeriod = 'monthly' | 'annual' | 'lifetime';
-
-interface PlanConfig {
-  id: string;
-  productId: string;
-  period: PlanPeriod;
-  price: number;
-  currency: string;
-  credits?: number;
-  features: string[];
-  metadata?: Record<string, any>;
-}
-
-interface ValidationError {
-  field: string;
-  message: string;
-  value?: any;
-}
-
-interface ValidationResult {
-  isValid: boolean;
-  errors: ValidationError[];
-}
-```
+## Location
+
+- **Base Path**: `/Users/umituz/Desktop/github/umituz/apps/artificial_intelligence/npm-packages/react-native-subscription/src/domains/config/`
+- **Domain**: `src/domains/config/domain/`
+- **Entities**: `src/domains/config/domain/entities/`
+
+## Strategy
+
+### Plan Management
+
+Comprehensive subscription plan configuration system.
+
+- **Plan Types**: Monthly, annual, and lifetime plan configurations
+- **Product Metadata**: RevenueCat product metadata management
+- **Validation**: Configuration validation and type safety
+- **Helper Functions**: Plan comparison and filtering utilities
+
+### Configuration Objects
+
+Structured configuration for different aspects of the system.
+
+- **SubscriptionConfig**: Main subscription configuration
+- **WalletConfig**: Credit system configuration
+- **Plan Entities**: Individual plan definitions
+- **Validation Rules**: Configuration validation schemas
+
+### Helper Utilities
+
+Plan comparison and manipulation functions.
+
+- **Plan Comparison**: Value comparison between plans
+- **Price Formatting**: Currency-aware price formatting
+- **Discount Calculation**: Savings and discount calculations
+- **Package Filtering**: Type-based package filtering
+
+### Validation System
+
+Comprehensive configuration validation.
+
+- **Plan Validation**: Plan entity validation rules
+- **Config Validation**: Complete configuration validation
+- **Type Safety**: TypeScript type definitions
+- **Error Messages**: Detailed validation error reporting
+
+## Restrictions
+
+### REQUIRED
+
+- **Type Safety**: Always use TypeScript type definitions
+- **Validation**: Validate configurations before runtime use
+- **Default Values**: Provide meaningful default values
+- **Immutable Updates**: Create new copies instead of modifying
+
+### PROHIBITED
+
+- **Invalid Prices**: Negative or zero prices not allowed
+- **Missing IDs**: All plans must have valid IDs
+- **Duplicate Plans**: No duplicate plan IDs allowed
+- **Hardcoded Values**: Use configuration system
+
+### CRITICAL
+
+- **Configuration Integrity**: All configurations must be valid
+- **Plan Consistency**: Related plans must be consistent
+- **Currency Handling**: Proper currency code usage
+- **Feature Lists**: Accurate feature mapping
+
+## AI Agent Guidelines
+
+### When Modifying Configuration System
+
+1. **Type Definitions**: Update TypeScript types for new config
+2. **Validation Rules**: Add validation for new fields
+3. **Default Values**: Provide sensible defaults
+4. **Documentation**: Document configuration options
+
+### When Adding New Plan Types
+
+1. **Entity Pattern**: Follow existing entity patterns
+2. **Validation**: Add validation rules
+3. **Helper Functions**: Create helper functions
+4. **Testing**: Test with various configurations
+
+### When Fixing Configuration Bugs
+
+1. **Validation Logic**: Check validation rules
+2. **Type Definitions**: Verify type correctness
+3. **Default Values**: Ensure proper defaults
+4. **Edge Cases**: Test boundary conditions
+
+## Related Documentation
+
+- [Paywall Domain](/Users/umituz/Desktop/github/umituz/apps/artificial_intelligence/npm-packages/react-native-subscription/src/domains/paywall/README.md)
+- [Wallet Domain](/Users/umituz/Desktop/github/umituz/apps/artificial_intelligence/npm-packages/react-native-subscription/src/domains/wallet/README.md)
+- [RevenueCat Integration](/Users/umituz/Desktop/github/umituz/apps/artificial_intelligence/npm-packages/react-native-subscription/src/revenuecat/README.md)
+- [Domain Layer](/Users/umituz/Desktop/github/umituz/apps/artificial_intelligence/npm-packages/react-native-subscription/src/domain/README.md)

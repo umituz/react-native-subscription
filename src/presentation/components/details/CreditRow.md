@@ -1,337 +1,92 @@
 # CreditRow Component
 
-Displays credit information with label, count badge, and progress bar.
+Row component displaying credit information with amount and label.
 
-## Import
+## Location
 
-```typescript
-import { CreditRow } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/components/details/CreditRow.tsx`
 
-```typescript
-interface CreditRowProps {
-  label: string;
-  current: number;
-  total: number;
-  remainingLabel?: string;
-}
-```
+**Type**: Component
 
-## Props
+## Strategy
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | **Required** | Credit type label |
-| `current` | `number` | **Required** | Current credit amount |
-| `total` | `number` | **Required** | Maximum credit amount |
-| `remainingLabel` | `string` | `undefined` | Label for remaining text |
+### Credit Information Display
 
-## Basic Usage
+1. **Amount Display**: Show credit amount with icon
+2. **Label Display**: Show credit type or source label
+3. **Visual Hierarchy**: Clear separation between amount and label
+4. **Icon Integration**: Display appropriate icon for credit type
+5. **Styling Options**: Support custom styling override
+6. **Compact Layout**: Efficient use of space for list items
 
-```typescript
-function CreditsDisplay() {
-  const { credits } = useCredits();
+### Integration Points
 
-  return (
-    <CreditRow
-      label="Monthly Credits"
-      current={credits}
-      total={100}
-      remainingLabel="credits remaining"
-    />
-  );
-}
-```
+- **useCredits**: For credit balance and transaction data
+- **Icon System**: For credit type icons
+- **List Components**: For credit transaction lists
+- **Settings UI**: For credits section in settings
 
-## Advanced Usage
+## Restrictions
 
-### With Multiple Credit Types
+### REQUIRED
 
-```typescript
-function MultipleCredits() {
-  const { credits: monthlyCredits } = useCredits();
-  const bonusCredits = 50;
+- **Amount Prop**: MUST provide valid credit amount
+- **Label Prop**: MUST provide descriptive label
+- **Icon Display**: SHOULD display appropriate icon
+- **Null Handling**: MUST handle null or zero values
 
-  return (
-    <View>
-      <CreditRow
-        label="Monthly Credits"
-        current={monthlyCredits}
-        total={100}
-        remainingLabel="credits left"
-      />
+### PROHIBITED
 
-      <CreditRow
-        label="Bonus Credits"
-        current={bonusCredits}
-        total={50}
-        remainingLabel="bonus credits"
-      />
+- **NEVER** display without amount
+- **NEVER** hardcode icon types
+- **DO NOT** use for non-credit data
+- **DO NOT** display negative amounts without clear indication
 
-      <CreditRow
-        label="Reward Credits"
-        current={25}
-        total={100}
-        remainingLabel="rewards"
-      />
-    </View>
-  );
-}
-```
+### CRITICAL SAFETY
 
-### With Dynamic Updates
+- **ALWAYS** validate amount prop
+- **MUST** handle zero or null amounts
+- **ALWAYS** provide clear labels
+- **NEVER** expose raw transaction data
 
-```typescript
-function LiveCredits() {
-  const { credits, refetch } = useCredits();
+## AI Agent Guidelines
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 30000); // Update every 30 seconds
+### When Implementing Credit Rows
 
-    return () => clearInterval(interval);
-  }, [refetch]);
+1. **Always** provide valid amount
+2. **Always** provide clear label
+3. **Always** display appropriate icon
+4. **Always** handle zero amounts
+5. **Never** use for non-credit display
 
-  return (
-    <CreditRow
-      label="Credits"
-      current={credits}
-      total={100}
-      remainingLabel="remaining"
-    />
-  );
-}
-```
+### Integration Checklist
 
-### With Warning Thresholds
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid amount prop
+- [ ] Provide clear label prop
+- [ ] Display appropriate icon
+- [ ] Handle zero amounts
+- [ ] Handle null amounts
+- [ ] Apply custom styling if needed
+- [ ] Test with positive amount
+- [ ] Test with zero amount
+- [ ] Test in list context
+- [ ] Test standalone display
 
-```typescript
-function CreditWarning() {
-  const { credits } = useCredits();
+### Common Patterns
 
-  return (
-    <CreditRow
-      label="Monthly Credits"
-      current={credits}
-      total={100}
-      remainingLabel={credits < 20 ? '⚠️ Low balance!' : 'credits remaining'}
-    />
-  );
-}
-```
+1. **Transaction List**: Show credit transactions
+2. **Balance Display**: Show current balance
+3. **Allocation Breakdown**: Show credit sources
+4. **History View**: Display transaction history
+5. **Settings Section**: Credits section in settings
 
-### Complete Credit Dashboard
+## Related Documentation
 
-```typescript
-function CreditDashboard() {
-  const { credits: monthlyCredits, transactions } = useCredits();
-  const { purchasedAt } = useCredits();
-
-  // Calculate bonus credits from transactions
-  const bonusCredits = transactions
-    .filter(tx => tx.type === 'bonus')
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  // Calculate total usage
-  const totalUsed = 100 - monthlyCredits + bonusCredits;
-
-  return (
-    <Card>
-      <Text style={styles.title}>Your Credits</Text>
-
-      <CreditRow
-        label="Monthly Credits"
-        current={monthlyCredits}
-        total={100}
-        remainingLabel="credits this month"
-      />
-
-      <CreditRow
-        label="Bonus Credits"
-        current={bonusCredits}
-        total={50}
-        remainingLabel="bonus credits"
-      />
-
-      <View style={styles.footer}>
-        <Text style={styles.info}>
-          Resets on {getNextMonthDate(purchasedAt).toLocaleDateString()}
-        </Text>
-      </View>
-    </Card>
-  );
-}
-```
-
-## Progress Bar Colors
-
-The progress bar color changes based on percentage:
-
-| Percentage | Color | Visual |
-|------------|-------|--------|
-| 0-20% | Error (red) | ██████░░░░░░░░░░░░░ |
-| 21-50% | Warning (orange) | ████████████░░░░░░ |
-| 51-100% | Success (green) | ████████████████████ |
-
-## Examples
-
-### In Subscription Settings
-
-```typescript
-function SubscriptionCredits() {
-  const { credits, isLoading } = useCredits();
-
-  if (isLoading) return <LoadingSkeleton />;
-
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Credits</Text>
-
-      <CreditRow
-        label="Monthly Allowance"
-        current={credits}
-        total={100}
-        remainingLabel="credits"
-      />
-    </View>
-  );
-}
-```
-
-### With Purchase Link
-
-```typescript
-function CreditWithPurchase() {
-  const { credits } = useCredits();
-
-  const isLow = credits < 20;
-
-  return (
-    <View>
-      <CreditRow
-        label="Credits"
-        current={credits}
-        total={100}
-        remainingLabel="remaining"
-      />
-
-      {isLow && (
-        <Button
-          onPress={() => navigation.navigate('CreditPackages')}
-          title="Get More Credits"
-          style={styles.purchaseButton}
-        />
-      )}
-    </View>
-  );
-}
-```
-
-### With Feature Costs
-
-```typescript
-function FeatureCostDisplay() {
-  const { credits } = useCredits();
-
-  const features = [
-    { name: 'AI Generation', cost: 5 },
-    { name: 'Advanced Export', cost: 3 },
-    { name: 'Cloud Sync', cost: 1 },
-  ];
-
-  return (
-    <View>
-      <CreditRow
-        label="Available Credits"
-        current={credits}
-        total={100}
-        remainingLabel="credits"
-      />
-
-      <View style={styles.divider} />
-
-      {features.map((feature) => (
-        <DetailRow
-          key={feature.name}
-          label={feature.name}
-          value={`${feature.cost} credits`}
-        />
-      ))}
-    </View>
-  );
-}
-```
-
-## Component Layout
-
-```
-┌─────────────────────────────────────┐
-│ Monthly Credits        [50/100]     │
-│ ████████████░░░░░░░░░░░░░░░░        │
-│ 50 credits remaining               │
-└─────────────────────────────────────┘
-```
-
-## Styling
-
-```typescript
-const styles = StyleSheet.create({
-  container: {
-    gap: 8,
-    marginVertical: 4,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  label: {
-    fontWeight: '500',
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    backgroundColor: tokens.colors.surfaceSecondary,
-  },
-  count: {
-    fontWeight: '600',
-  },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    backgroundColor: tokens.colors.surfaceSecondary,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-    backgroundColor: progressColor, // Dynamic based on percentage
-  },
-});
-```
-
-## Best Practices
-
-1. **Show total always** - Display max credits for context
-2. **Update regularly** - Keep credits current
-3. **Color code thresholds** - Use colors for low/high amounts
-4. **Provide context** - Explain credit reset周期
-5. **Link to purchase** - Add purchase option when low
-6. **Test edge cases** - Zero credits, max credits, negative values
-7. **Format numbers** - Use appropriate number formatting
-
-## Related Components
-
-- **PremiumDetailsCard** - Contains credit rows
-- **DetailRow** - Simple label-value row
-- **SubscriptionSection** - Section with credits
-
-## See Also
-
-- [useCredits](../../hooks/useCredits.md)
-- [Credits Entity](../../../domains/wallet/domain/entities/Credits.md)
-- [Credits README](../../../../domains/wallet/README.md)
+- **DetailRow**: Generic detail row component
+- **PremiumDetailsCard**: Premium details card
+- **useCredits**: Credits hook
+- **Credits README**: `../../../../domains/wallet/README.md`
+- **Details README**: `./README.md`

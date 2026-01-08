@@ -2,229 +2,87 @@
 
 Hook for checking and managing premium subscription status.
 
-## Import
+## Location
 
-```typescript
-import { usePremium } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/hooks/usePremium.ts`
 
-```typescript
-function usePremium(): {
-  isPremium: boolean;
-  isLoading: boolean;
-  error: Error | null;
-  subscription: SubscriptionStatus | null;
-  refetch: () => Promise<void>;
-}
-```
+**Type**: Hook
 
-## Returns
+## Strategy
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `isPremium` | `boolean` | Whether user has active premium subscription |
-| `isLoading` | `boolean` | Whether hook is loading data |
-| `error` | `Error \| null` | Error if fetching failed |
-| `subscription` | `SubscriptionStatus \| null` | Full subscription status object |
-| `refetch` | `() => Promise<void>` | Function to manually refetch data |
+### Premium Status Flow
 
-## Basic Usage
+1. **Initial Check**: Fetch current subscription status from repository
+2. **Status Evaluation**: Determine if user has active premium subscription
+3. **Real-time Updates**: Automatically update when user logs in/out or subscription changes
+4. **Caching**: Cache status for 5 minutes (configurable) to reduce API calls
+5. **Loading States**: Provide loading indicators during data fetch
+6. **Error Handling**: Handle fetch errors gracefully
 
-```typescript
-function MyComponent() {
-  const { isPremium, isLoading } = usePremium();
+### Integration Points
 
-  if (isLoading) {
-    return <ActivityIndicator />;
-  }
+- **Subscription Repository**: `src/infrastructure/repositories/SubscriptionRepository.ts`
+- **TanStack Query**: For caching and real-time updates
+- **Auth Context**: Sync with user authentication state
+- **RevenueCat**: For subscription data source
 
-  return (
-    <View>
-      <Text>
-        {isPremium ? 'Premium User' : 'Free User'}
-      </Text>
-    </View>
-  );
-}
-```
+## Restrictions
 
-## Advanced Usage
+### REQUIRED
 
-### With Error Handling
+- **Loading State**: MUST handle loading state in UI
+- **Error Handling**: MUST handle error state
+- **Check Before Access**: MUST verify isPremium before showing premium features
 
-```typescript
-function PremiumContent() {
-  const { isPremium, isLoading, error } = usePremium();
+### PROHIBITED
 
-  useEffect(() => {
-    if (error) {
-      console.error('Failed to load premium status:', error);
-      analytics.track('premium_check_failed', {
-        error: error.message,
-      });
-    }
-  }, [error]);
+- **NEVER** use for security decisions (server-side validation required)
+- **NEVER** assume instant data availability (always check loading state)
+- **DO NOT** use for guest users without proper handling
 
-  if (isLoading) return <Skeleton />;
-  if (error) return <ErrorState error={error} />;
+### CRITICAL SAFETY
 
-  return <PremiumFeatures />;
-}
-```
+- **ALWAYS** handle loading state before rendering premium content
+- **NEVER** trust client-side state for security enforcement
+- **MUST** implement error boundaries when using this hook
 
-### With Refetch
+## AI Agent Guidelines
 
-```typescript
-function SettingsScreen() {
-  const { isPremium, refetch, isLoading } = usePremium();
+### When Implementing Premium Features
 
-  const handleRefresh = async () => {
-    await refetch();
-    Alert.alert('Success', 'Status refreshed');
-  };
+1. **Always** check loading state first
+2. **Always** handle error state
+3. **Always** verify isPremium before showing premium content
+4. **Never** use for security decisions without server validation
+5. **Always** provide upgrade path for non-premium users
 
-  return (
-    <View>
-      <Text>Status: {isPremium ? 'Premium' : 'Free'}</Text>
+### Integration Checklist
 
-      <Button
-        onPress={handleRefresh}
-        disabled={isLoading}
-        title="Refresh Status"
-      />
-    </View>
-  );
-}
-```
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Handle loading state (show ActivityIndicator or skeleton)
+- [ ] Handle error state (show error message)
+- [ ] Check isPremium before rendering premium content
+- [ ] Provide upgrade path for free users
+- [ ] Test with premium user
+- [ ] Test with free user
+- [ ] Test with guest user
+- [ ] Test offline scenario
 
-### With Full Subscription Details
+### Common Patterns
 
-```typescript
-function SubscriptionInfo() {
-  const { isPremium, subscription } = usePremium();
+1. **Conditional Rendering**: Show/hide features based on isPremium
+2. **Premium Badge**: Display premium status badge
+3. **Feature Gating**: Use usePremiumGate instead of manual checks
+4. **Status Display**: Show subscription details with useSubscriptionDetails
+5. **Upgrade Prompts**: Guide free users to paywall
 
-  if (!subscription) return null;
+## Related Documentation
 
-  return (
-    <View>
-      <Text>Type: {subscription.type}</Text>
-      <Text>Active: {subscription.isActive ? 'Yes' : 'No'}</Text>
-
-      {subscription.expirationDate && (
-        <Text>
-          Expires: {new Date(subscription.expirationDate).toLocaleDateString()}
-        </Text>
-      )}
-
-      {subscription.willRenew && (
-        <Text>Auto-renew: On</Text>
-      )}
-    </View>
-  );
-}
-```
-
-## Examples
-
-### Conditional Rendering
-
-```typescript
-function FeatureList() {
-  const { isPremium, isLoading } = usePremium();
-
-  if (isLoading) return <LoadingSpinner />;
-
-  return (
-    <View>
-      <Feature name="Basic Feature" available={true} />
-      <Feature name="Premium Feature 1" available={isPremium} />
-      <Feature name="Premium Feature 2" available={isPremium} />
-      <Feature name="Premium Feature 3" available={isPremium} />
-    </View>
-  );
-}
-```
-
-### Premium Badge
-
-```typescript
-function PremiumBadge() {
-  const { isPremium } = usePremium();
-
-  return (
-    <View style={[
-      styles.badge,
-      isPremium && styles.badgePremium,
-    ]}>
-      <Text style={styles.badgeText}>
-        {isPremium ? '⭐ PREMIUM' : 'FREE'}
-      </Text>
-    </View>
-  );
-}
-```
-
-### Premium Gate
-
-```typescript
-function PremiumOnlyComponent() {
-  const { isPremium, isLoading } = usePremium();
-
-  if (isLoading) {
-    return <ActivityIndicator />;
-  }
-
-  if (!isPremium) {
-    return (
-      <View>
-        <Text>This feature requires Premium</Text>
-        <Button
-          onPress={() => navigation.navigate('Paywall')}
-          title="Upgrade to Premium"
-        />
-      </View>
-    );
-  }
-
-  return <PremiumContent />;
-}
-```
-
-## Behavior
-
-### Loading States
-
-The hook goes through these states:
-
-1. **Initial**: `isLoading = true`, `isPremium = false`
-2. **Loading**: Fetches subscription status
-3. **Loaded**: `isLoading = false`, `isPremium` set to actual value
-4. **Error**: `isLoading = false`, `error` set
-
-### Automatic Updates
-
-The hook automatically updates when:
-- User logs in/logs out
-- Subscription status changes
-- App comes to foreground
-
-### Caching
-
-The hook caches subscription status for:
-- Default: 5 minutes
-- Configurable via `staleTime` option
-
-## Related Hooks
-
-- **usePremiumGate** - For gating premium features
-- **useSubscription** - For more subscription details
-- **useSubscriptionStatus** - For detailed status info
-- **usePremiumWithCredits** - For premium OR credits features
-
-## See Also
-
-- [usePremiumGate](./usePremiumGate.md)
-- [useSubscription](./useSubscription.md)
-- [usePremiumWithCredits](./usePremiumWithCredits.md)
+- **usePremiumGate**: Gating premium features
+- **useSubscription**: Detailed subscription status
+- **useSubscriptionStatus**: Subscription status details
+- **usePremiumWithCredits**: Hybrid premium/credits access
+- **Subscription Repository**: `src/infrastructure/repositories/README.md`
+- **Domain Layer**: `src/domain/README.md`

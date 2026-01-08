@@ -2,54 +2,48 @@
 
 React hooks for accessing RevenueCat data and operations.
 
-## Overview
+## Location
 
-This directory contains React hooks that expose RevenueCat functionality to the presentation layer.
+`src/revenuecat/presentation/hooks/`
 
-## Contents
+## Strategy
 
-- **useCustomerInfo.ts** - Hook for accessing RevenueCat customer info
-- **useSubscriptionPackages.ts** - Hook for accessing subscription packages/offering
+React hooks that expose RevenueCat functionality to the presentation layer, providing access to customer info, subscription packages, and offerings.
 
-## Key Hooks
+## Restrictions
 
-### useCustomerInfo
+### REQUIRED
 
-Access RevenueCat customer information including entitlements.
+- MUST handle loading states appropriately
+- MUST handle error states gracefully
+- MUST cache responses when appropriate
+- MUST subscribe to real-time updates when needed
+- MUST validate all data before use
 
-```typescript
-function useCustomerInfo() {
-  const { customerInfo, isLoading } = useCustomerInfo();
+### PROHIBITED
 
-  return (
-    <View>
-      <Text>Entitlements: {Object.keys(customerInfo.entitlements.active).join(', ')}</Text>
-    </View>
-  );
-}
-```
+- MUST NOT expose RevenueCat implementation details to components
+- MUST NOT bypass error handling
+- MUST NOT create infinite loops with subscriptions
+- MUST NOT assume data is always available
 
-### useSubscriptionPackages
+### CRITICAL
 
-Access available subscription packages from current offering.
+- Always handle loading and error states
+- Unsubscribe from all listeners on unmount
+- Validate all data before using it in components
+- Handle null/undefined states properly
 
-```typescript
-function PackageList() {
-  const { packages, isLoading } = useSubscriptionPackages();
+## AI Agent Guidelines
 
-  if (isLoading) return <Loading />;
+When working with RevenueCat hooks:
+1. Always handle loading and error states
+2. Unsubscribe from listeners on unmount
+3. Validate all data before use
+4. Cache responses appropriately
+5. Handle null/undefined states gracefully
 
-  return (
-    <View>
-      {packages.map(pkg => (
-        <PackageCard key={pkg.identifier} package={pkg} />
-      ))}
-    </View>
-  );
-}
-```
-
-## Related
+## Related Documentation
 
 - [Main Hooks](../../../presentation/hooks/README.md)
 - [Domain](../../domain/README.md)

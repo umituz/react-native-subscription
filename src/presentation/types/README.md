@@ -16,22 +16,6 @@ This directory contains all type definitions used by presentation components and
 
 ## Key Exports
 
-```typescript
-// Subscription Settings
-export type {
-  SubscriptionSettingsConfig,
-  SubscriptionSettingsItemConfig,
-  SubscriptionSettingsTranslations,
-} from './SubscriptionSettingsTypes';
-
-// Paywall
-export type {
-  PaywallConfig,
-  PaywallTrigger,
-  PaywallPackage,
-} from './PaywallTypes';
-```
-
 ## Related
 
 - [Hooks](../hooks/README.md)

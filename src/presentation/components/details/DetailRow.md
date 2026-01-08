@@ -2,282 +2,90 @@
 
 Simple row component displaying a label-value pair for subscription details.
 
-## Import
+## Location
 
-```typescript
-import { DetailRow } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/components/details/DetailRow.tsx`
 
-```typescript
-interface DetailRowProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  style?: ViewStyle;
-  labelStyle?: TextStyle;
-  valueStyle?: TextStyle;
-}
-```
+**Type**: Component
 
-## Props
+## Strategy
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | **Required** | Row label (left side) |
-| `value` | `string` | **Required** | Row value (right side) |
-| `highlight` | `boolean` | `false` | Highlight value in warning color |
-| `style` | `ViewStyle` | `undefined` | Container style override |
-| `labelStyle` | `TextStyle` | `undefined` | Label text style override |
-| `valueStyle` | `TextStyle` | `undefined` | Value text style override |
+### Label-Value Display
 
-## Basic Usage
+1. **Label Positioning**: Display label on left side
+2. **Value Positioning**: Display value on right side
+3. **Space Distribution**: Even spacing between label and value
+4. **Highlight Option**: Support highlighting values (e.g., expiration warnings)
+5. **Custom Styling**: Allow style overrides for flexibility
+6. **Consistent Layout**: Maintain consistent vertical spacing
 
-```typescript
-function SubscriptionDetails() {
-  return (
-    <View>
-      <DetailRow
-        label="Status"
-        value="Active"
-      />
-      <DetailRow
-        label="Expires"
-        value="January 15, 2025"
-      />
-      <DetailRow
-        label="Purchased"
-        value="January 15, 2024"
-      />
-    </View>
-  );
-}
-```
+### Integration Points
 
-## Advanced Usage
+- **PremiumDetailsCard**: Uses this component internally
+- **SubscriptionSection**: For subscription detail display
+- **Settings Screens**: For settings detail items
+- **List Components**: For detail lists
 
-### With Highlight
+## Restrictions
 
-```typescript
-function ExpiringSoonRow() {
-  const daysRemaining = 3;
+### REQUIRED
 
-  return (
-    <DetailRow
-      label="Expires"
-      value={expirationDate.toLocaleDateString()}
-      highlight={daysRemaining <= 7} // Highlight if expiring soon
-    />
-  );
-}
-```
+- **Label Prop**: MUST provide valid label string
+- **Value Prop**: MUST provide valid value string
+- **Spacing**: MUST maintain consistent spacing
+- **Null Handling**: MUST handle null or undefined values
 
-### With Custom Styling
+### PROHIBITED
 
-```typescript
-function CustomDetailRow() {
-  return (
-    <DetailRow
-      label="Subscription Type"
-      value="Premium Yearly"
-      style={{
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        backgroundColor: '#F5F5F5',
-      }}
-      labelStyle={{
-        fontWeight: '600',
-        color: '#333',
-      }}
-      valueStyle={{
-        fontWeight: '700',
-        color: '#4CAF50',
-      }}
-    />
-  );
-}
-```
+- **NEVER** display without label and value
+- **NEVER** use highlight for non-warning cases
+- **DO NOT** use excessively long labels (affects layout)
+- **DO NOT** mix different data types in same list
 
-### In Subscription Card
+### CRITICAL SAFETY
 
-```typescript
-function SubscriptionCard() {
-  const { status, expirationDate, willRenew } = useSubscriptionStatus();
+- **ALWAYS** validate label and value props
+- **MUST** handle empty strings
+- **ALWAYS** use highlight sparingly (for warnings only)
+- **NEVER** expose sensitive raw data
 
-  return (
-    <Card>
-      <DetailRow
-        label="Status"
-        value={status.isActive ? 'Active' : 'Inactive'}
-      />
+## AI Agent Guidelines
 
-      {expirationDate && (
-        <DetailRow
-          label="Expires"
-          value={expirationDate.toLocaleDateString()}
-          highlight={!willRenew}
-        />
-      )}
+### When Implementing Detail Rows
 
-      <DetailRow
-        label="Auto-renew"
-        value={willRenew ? 'Enabled' : 'Disabled'}
-      />
-    </Card>
-  );
-}
-```
+1. **Always** provide clear, concise labels
+2. **Always** format values appropriately
+3. **Always** use highlight only for warnings
+4. **Always** keep labels short and consistent
+5. **Never** display implementation details
 
-## Color Options
+### Integration Checklist
 
-### Default Colors
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid label prop
+- [ ] Provide valid value prop
+- [ ] Format values appropriately
+- [ ] Use highlight for warnings only
+- [ ] Apply custom styling if needed
+- [ ] Test with short values
+- [ ] Test with long values
+- [ ] Test with highlight enabled
+- [ ] Test in list context
+- [ ] Test standalone display
 
-```typescript
-// Label color (left side)
-labelStyle = {
-  color: tokens.colors.textSecondary, // Gray
-}
+### Common Patterns
 
-// Value color (right side)
-valueStyle = {
-  color: tokens.colors.textPrimary, // Black
-  fontWeight: '500',
-}
-```
+1. **Subscription Details**: Show subscription info
+2. **Settings Items**: Display settings values
+3. **Status Information**: Show various status types
+4. **Date Display**: Format and show dates
+5. **Compact Lists**: Display multiple details
 
-### Highlight Colors
+## Related Documentation
 
-```typescript
-// When highlight={true}
-valueStyle = {
-  color: tokens.colors.warning, // Orange/Yellow
-  fontWeight: '500',
-}
-```
-
-## Examples
-
-### Subscription Info List
-
-```typescript
-function SubscriptionInfo() {
-  const { status, expirationDate, purchaseDate, isLifetime } = useSubscriptionDetails();
-
-  return (
-    <View style={styles.section}>
-      <Text style={styles.title}>Subscription Details</Text>
-
-      <DetailRow
-        label="Plan"
-        value={status.productId || 'Free'}
-      />
-
-      {status.isActive && !isLifetime && (
-        <>
-          {expirationDate && (
-            <DetailRow
-              label="Expires"
-              value={expirationDate.toLocaleDateString()}
-              highlight={true}
-            />
-          )}
-
-          {purchaseDate && (
-            <DetailRow
-              label="Purchased"
-              value={purchaseDate.toLocaleDateString()}
-            />
-          )}
-        </>
-      )}
-
-      {isLifetime && (
-        <DetailRow
-          label="Type"
-          value="Lifetime Access"
-        />
-      )}
-    </View>
-  );
-}
-```
-
-### With Icons
-
-```typescript
-function IconDetailRow() {
-  return (
-    <View style={styles.row}>
-      <Icon name="calendar" size={20} color="#666" />
-
-      <DetailRow
-        label="Expiration"
-        value="December 31, 2025"
-        style={{ flex: 1, marginLeft: 8 }}
-      />
-    </View>
-  );
-}
-```
-
-### Compact Layout
-
-```typescript
-function CompactDetails() {
-  return (
-    <View>
-      <DetailRow
-        label="Price"
-        value="$9.99/month"
-        style={{ paddingVertical: 4 }}
-      />
-      <DetailRow
-        label="Duration"
-        value="Monthly"
-        style={{ paddingVertical: 4 }}
-      />
-      <DetailRow
-        label="Features"
-        value="Unlimited access"
-        style={{ paddingVertical: 4 }}
-      />
-    </View>
-  );
-}
-```
-
-## Best Practices
-
-1. **Use consistent labels** - Keep labels similar across screens
-2. **Format values** - Ensure proper date/currency formatting
-3. **Highlight wisely** - Only highlight important warnings
-4. **Keep concise** - Don't make values too long
-5. **Test layouts** - Verify display with different content lengths
-6. **Localize labels** - Translate labels for i18n
-7. **Match design system** - Use consistent spacing and colors
-
-## Styling
-
-```typescript
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    // Add vertical padding for spacing between rows
-    paddingVertical: 8,
-  },
-});
-```
-
-## Related Components
-
-- **PremiumDetailsCard** - Uses this component internally
-- **CreditRow** - Similar component for credit display
-- **SubscriptionSection** - Section containing detail rows
-
-## See Also
-
-- [Subscription Details](../../hooks/useSubscriptionDetails.md)
-- [Status Display](../../hooks/useSubscriptionStatus.md)
+- **PremiumDetailsCard**: Uses this component
+- **CreditRow**: Similar component for credits
+- **SubscriptionSection**: Section containing detail rows
+- **Details README**: `./README.md`

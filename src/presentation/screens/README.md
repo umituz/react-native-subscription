@@ -2,193 +2,51 @@
 
 Tam ekran UI bileşenleri ve ekranlar.
 
-## Bileşenler
+## Location
 
-- [SubscriptionDetailScreen](#subscriptiondetailscreen)
+`src/presentation/screens/`
 
-## SubscriptionDetailScreen
+## Strategy
 
-Abonelik detaylarını gösteren tam ekran bileşeni.
+Tam ekran kullanıcı arayüzü bileşenleri ve navigasyon akışlarını içerir. Abonelik detaylarını gösterir ve yönetim işlevleri sağlar.
 
-### Kullanım
+## Restrictions
 
-```typescript
-import { SubscriptionDetailScreen } from '@umituz/react-native-subscription';
+### REQUIRED
 
-function App() {
-  return (
-    <Stack.Screen
-      name="SubscriptionDetail"
-      component={SubscriptionDetailScreen}
-      options={{
-        title: 'Subscription',
-      }}
-    />
-  );
-}
-```
+- MUST integrate properly with React Navigation
+- MUST provide appropriate headers and navigation
+- MUST handle loading states gracefully
+- MUST handle error states gracefully
+- MUST support back navigation
+- MUST be responsive across different screen sizes
 
-### Props
+### PROHIBITED
 
-```typescript
-interface SubscriptionDetailScreenProps {
-  route: {
-    key: string;
-    name: string;
-    params?: {
-      userId?: string;
-      showUpgradeButton?: boolean;
-    };
-  };
-  navigation: any;
-}
-```
+- MUST NOT bypass navigation stack
+- MUST NOT create navigation dead-ends
+- MUST NOT block user from navigating away
+- MUST NOT hardcode navigation routes
 
-### Özellikler
+### CRITICAL
 
-- Abonelik durumunu gösterir
-- Paket detaylarını görüntüler
-- Yönetim butonları sağlar
-- Refresh desteği
-- Yönetilebilir stil
+- Always provide clear navigation paths
+- Handle all loading and error states
+- Ensure proper back button functionality
+- Support deep linking when applicable
+- Maintain consistent styling with rest of app
 
-## Ekran Akışları
+## AI Agent Guidelines
 
-### 1. Settings → Subscription Detail
+When working with screens:
+1. Navigation - screen'i doğru navigation stack'e ekleyin
+2. Header - uygun başlık ve stiller kullanın
+3. Back Button - kullanıcının geri dönmesini sağlayın
+4. Loading - yükleme durumlarını gösterin
+5. Error - hata durumlarını graceful handle edin
 
-```typescript
-function SettingsScreen({ navigation }) {
-  return (
-    <View>
-      <Button
-        onPress={() => navigation.navigate('SubscriptionDetail')}
-        title="Manage Subscription"
-      />
-    </View>
-  );
-}
-```
+## Related Documentation
 
-### 2. Paywall → Subscription Detail
-
-```typescript
-function PaywallFlow() {
-  const navigation = useNavigation();
-
-  const handlePurchaseSuccess = () => {
-    navigation.navigate('SubscriptionDetail');
-  };
-
-  return (
-    <PaywallModal onPurchase={handlePurchaseSuccess} />
-  );
-}
-```
-
-## Özelleştirme
-
-### Custom Header
-
-```typescript
-<Stack.Screen
-  name="SubscriptionDetail"
-  component={SubscriptionDetailScreen}
-  options={{
-    title: 'My Subscription',
-    headerStyle: {
-      backgroundColor: '#FF6B6B',
-    },
-    headerTintColor: '#fff',
-    headerTitleStyle: {
-      fontWeight: 'bold',
-    },
-  }}
-/>
-```
-
-### Navigation Integrasyonu
-
-```typescript
-import { createStackNavigator } from '@react-navigation/stack';
-
-const Stack = createStackNavigator();
-
-function SubscriptionStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="SubscriptionDetail"
-        component={SubscriptionDetailScreen}
-        options={{
-          title: 'Subscription',
-          headerRight: () => (
-            <Button onPress={handleRefresh} title="Refresh" />
-          ),
-        }}
-      />
-    </Stack.Navigator>
-  );
-}
-```
-
-## Örnek Implementasyon
-
-```typescript
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { SubscriptionDetailScreen } from '@umituz/react-native-subscription';
-
-const Stack = createStackNavigator();
-
-function App() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: true,
-          cardStyle: { backgroundColor: '#f5f5f5' },
-        }}
-      >
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: 'Home' }}
-        />
-        <Stack.Screen
-          name="SubscriptionDetail"
-          component={SubscriptionDetailScreen}
-          options={{
-            title: 'My Subscription',
-            headerStyle: {
-              backgroundColor: '#FF6B6B',
-            },
-            headerTintColor: '#fff',
-          }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
-
-function HomeScreen({ navigation }) {
-  const { isPremium } = usePremium();
-
-  return (
-    <View>
-      <Text>Welcome!</Text>
-      <Button
-        onPress={() => navigation.navigate('SubscriptionDetail')}
-        title="View Subscription"
-      />
-    </View>
-  );
-}
-```
-
-## Best Practices
-
-1. **Navigation**: Screen'i doğru navigation stack'e ekleyin
-2. **Header**: Uygun başlık ve stiller kullanın
-3. **Back Button**: Kullanıcının geri dönmesini sağlayın
-4. **Loading**: Yükleme durumlarını gösterin
-5. **Error**: Hata durumlarını graceful handle edin
+- [Presentation Layer](../README.md)
+- [Components](../components/README.md)
+- [Hooks](../hooks/README.md)

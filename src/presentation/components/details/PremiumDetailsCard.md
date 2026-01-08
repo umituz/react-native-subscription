@@ -2,265 +2,92 @@
 
 Premium subscription details card component.
 
-## Import
+## Location
 
-```typescript
-import { PremiumDetailsCard } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Props
+**File**: `src/presentation/components/details/PremiumDetailsCard.tsx`
 
-```typescript
-interface PremiumDetailsCardProps {
-  status: SubscriptionStatus;
-  onUpgradePress?: () => void;
-  onManagePress?: () => void;
-  style?: ViewStyle;
-  translations?: PremiumDetailsCardTranslations;
-}
-```
+**Type**: Component
 
-## Props Reference
+## Strategy
 
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `status` | `SubscriptionStatus` | Yes | Subscription status object |
-| `onUpgradePress` | `() => void` | No | Callback when upgrade button pressed |
-| `onManagePress` | `() => void` | No | Callback when manage button pressed |
-| `style` | `ViewStyle` | No | Custom container style |
-| `translations` | `PremiumDetailsCardTranslations` | No | Custom translations |
+### Premium Status Card Display
 
-## Basic Usage
+1. **Status Display**: Show premium status with badge
+2. **Detail Rendering**: Display subscription details (expiration, renewal, etc.)
+3. **Action Buttons**: Show manage or upgrade button based on status
+4. **Translation Support**: Support custom translations
+5. **Visual Hierarchy**: Clear structure with header, details, and actions
+6. **Responsive Design**: Adapt to different screen sizes
 
-```typescript
-function MyScreen() {
-  const { subscription } = usePremium();
+### Integration Points
 
-  return (
-    <PremiumDetailsCard
-      status={subscription}
-      onUpgradePress={() => console.log('Upgrade')}
-      onManagePress={() => console.log('Manage')}
-    />
-  );
-}
-```
+- **useSubscriptionStatus**: For subscription status data
+- **DetailRow**: For displaying individual details
+- **PremiumStatusBadge**: For status badge
+- **usePremium**: For premium status check
+- **Navigation**: For button actions
 
-## Examples
+## Restrictions
 
-### With Custom Translations
+### REQUIRED
 
-```typescript
-<PremiumDetailsCard
-  status={subscription}
-  translations={{
-    title: 'Premium',
-    active: 'Aktif',
-    inactive: 'Aktif Değil',
-    expires: 'Son Kullanma',
-    renews: 'Yenileniyor',
-    manage: 'Yönet',
-    upgrade: 'Yükselt',
-    lifetime: 'Ömür Boyu',
-  }}
-/>
-```
+- **Status Prop**: MUST provide valid subscription status object
+- **Callback Handling**: MUST implement button callbacks
+- **Loading State**: MUST handle loading state
+- **Null Handling**: MUST handle null status values
 
-### With Custom Styling
+### PROHIBITED
 
-```typescript
-const customStyles = StyleSheet.create({
-  card: {
-    backgroundColor: '#FF6B6B',
-    borderRadius: 16,
-    padding: 20,
-  },
-  title: {
-    color: '#fff',
-    fontSize: 24,
-  },
-});
+- **NEVER** display without status data
+- **NEVER** hardcode status text (use translations)
+- **DO NOT** show both manage and upgrade buttons
+- **DO NOT** expose sensitive implementation details
 
-<PremiumDetailsCard
-  status={subscription}
-  style={customStyles.card}
-  titleStyle={customStyles.title}
-/>
-```
+### CRITICAL SAFETY
 
-### Without Buttons
+- **ALWAYS** validate status object
+- **MUST** handle loading state
+- **ALWAYS** provide clear button labels
+- **NEVER** trust client-side status for security
 
-```typescript
-<PremiumDetailsCard
-  status={subscription}
-  showManageButton={false}
-  showUpgradeButton={false}
-/>
-```
+## AI Agent Guidelines
 
-## Translations Interface
+### When Implementing Premium Cards
 
-```typescript
-interface PremiumDetailsCardTranslations {
-  title?: string;           // 'Premium'
-  status?: string;          // 'Active' or 'Inactive'
-  expires?: string;         // 'Expires on'
-  renews?: string;          // 'Renews on'
-  manage?: string;          // 'Manage Subscription'
-  upgrade?: string;         // 'Upgrade to Premium'
-  lifetime?: string;        // 'Lifetime Access'
-}
-```
+1. **Always** provide valid subscription status
+2. **Always** handle loading state
+3. **Always** implement button callbacks
+4. **Always** use translations for localization
+5. **Never** hardcode status strings
 
-## Component Structure
+### Integration Checklist
 
-```
-PremiumDetailsCard
-├── Container
-│   ├── Header
-│   │   ├── Title (Premium Badge)
-│   │   └── Status (Active/Inactive)
-│   ├── Details
-│   │   ├── Expiration Date
-│   │   ├── Renewal Status
-│   │   └── Product Info
-│   └── Footer
-│       ├── Manage Button (if premium)
-│       └── Upgrade Button (if free)
-```
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid subscription status
+- [ ] Implement onManagePress callback
+- [ ] Implement onUpgradePress callback
+- [ ] Handle loading state
+- [ ] Handle null dates
+- [ ] Provide translations
+- [ ] Test with active premium
+- [ ] Test with expired subscription
+- [ ] Test with free user
+- [ ] Test with lifetime subscription
 
-## Styling
+### Common Patterns
 
-### Default Styles
+1. **Profile Display**: Show in user profile
+2. **Settings Card**: Display in settings screen
+3. **Status Overview**: Show premium status overview
+4. **With Navigation**: Navigate to management
+5. **Localized Display**: Use with i18n
 
-```typescript
-const defaultStyles = StyleSheet.create({
-  container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    margin: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-  },
-  badge: {
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-});
-```
+## Related Documentation
 
-### Theme Customization
-
-```typescript
-const darkTheme = {
-  container: {
-    backgroundColor: '#1a1a1a',
-  },
-  title: {
-    color: '#fff',
-  },
-  text: {
-    color: '#ccc',
-  },
-};
-
-<PremiumDetailsCard
-  status={subscription}
-  theme={darkTheme}
-/>
-```
-
-## Accessibility
-
-The component includes:
-
-- ✅ Accessibility label
-- ✅ Accessibility hint
-- ✅ Screen reader support
-- ✅ Minimum touch target size (44x44)
-
-```typescript
-<PremiumDetailsCard
-  status={subscription}
-  accessibilityLabel="Premium subscription details"
-  accessibilityHint="Shows your premium subscription status and options"
-/>
-```
-
-## Best Practices
-
-1. **Provide callbacks** - Always handle upgrade/manage presses
-2. **Show for premium users** - Display current subscription info
-3. **Show for free users** - Encourage upgrade
-4. **Update on purchase** - Refetch after subscription change
-5. **Handle loading** - Show skeleton while loading
-
-## Complete Example
-
-```typescript
-function SubscriptionScreen() {
-  const { subscription, isLoading, refetch } = usePremium();
-
-  useFocusEffect(
-    useCallback(() => {
-      refetch();
-    }, [refetch])
-  );
-
-  if (isLoading) {
-    return <PremiumDetailsCardSkeleton />;
-  }
-
-  if (!subscription?.isPremium) {
-    return (
-      <PremiumDetailsCard
-        status={{
-          type: 'free',
-          isActive: false,
-          isPremium: false,
-        }}
-        onUpgradePress={() => navigation.navigate('Paywall')}
-      />
-    );
-  }
-
-  return (
-    <ScrollView>
-      <PremiumDetailsCard
-        status={subscription}
-        onManagePress={handleManageSubscription}
-      />
-
-      {/* Additional premium features */}
-      <PremiumFeaturesList />
-    </ScrollView>
-  );
-}
-```
-
-## Related Components
-
-- **PremiumStatusBadge** - Compact premium badge
-- **SubscriptionSection** - Full subscription section
-- **PaywallModal** - Upgrade paywall
-
-## See Also
-
-- [Details Components README](../details/README.md)
-- [PremiumStatusBadge](./PremiumStatusBadge.md)
+- **PremiumStatusBadge**: Status badge component
+- **DetailRow**: Detail item component
+- **SubscriptionSection**: Subscription section
+- **usePremium**: Premium status hook
+- **Details README**: `./README.md`

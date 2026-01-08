@@ -2,189 +2,53 @@
 
 UI components specifically designed for paywall and subscription upgrade screens.
 
-## Overview
+## Location
 
-This directory contains specialized components for displaying paywalls, package selection, and subscription upgrade prompts.
+`src/presentation/components/paywall/`
 
-## Components
+## Strategy
 
-### PaywallModal
-Modal overlay for paywall display.
+Specialized components for displaying paywalls, package selection, and subscription upgrade prompts. These components handle the visual presentation of subscription offers and user purchase flows.
 
-```typescript
-interface PaywallModalProps {
-  visible: boolean;
-  onClose: () => void;
-  onPurchase: (pkg: Package) => void;
-  configuration: PaywallConfig;
-  restorePurchases?: () => void;
-}
-```
+## Restrictions
 
-**Features:**
-- Modal overlay with backdrop dismissal
-- Animated entry and exit
-- Close button
-- Responsive layout
-- Loading states
+### REQUIRED
 
-### PackageCard
-Individual subscription package display.
+- Must use design tokens for consistent styling
+- Must support multiple display modes (card, list, minimal)
+- Must include loading states
+- Must handle accessibility requirements
+- Must support screen readers
+- Must provide proper touch targets
 
-```typescript
-interface PackageCardProps {
-  package: Package;
-  selected?: boolean;
-  onSelect: () => void;
-  displayMode?: 'card' | 'list' | 'minimal';
-}
-```
+### PROHIBITED
 
-**Display Modes:**
-- **card**: Full featured card with all details
-- **list**: Compact list item
-- **minimal**: Minimal version for tight spaces
+- MUST NOT hardcode pricing or product information
+- MUST NOT bypass payment validation
+- MUST NOT expose RevenueCat implementation details
+- MUST NOT create custom payment flows outside approved patterns
 
-### FeatureComparison
-Comparison table showing features across packages.
+### CRITICAL
 
-```typescript
-interface FeatureComparisonProps {
-  packages: Package[];
-  features: string[];
-  highlightPackage?: string;
-}
-```
+- All purchase flows MUST go through RevenueCat
+- Never log or transmit sensitive payment information
+- Always handle errors gracefully with user-friendly messages
+- Must support cancellation and refund flows
 
-### SocialProofBar
-Social proof element showing user count and ratings.
+## AI Agent Guidelines
 
-```typescript
-interface SocialProofBarProps {
-  userCount?: number;
-  rating?: number;
-  style?: 'compact' | 'expanded';
-}
-```
+When modifying paywall components:
+1. Maintain visual hierarchy for recommended packages
+2. Ensure clear pricing display (price, period, per-month equivalent)
+3. Keep features easy to understand
+4. Include social proof elements (ratings, reviews, user counts)
+5. Add trust signals (guarantees, badges, certifications)
+6. Optimize for mobile screens
+7. Lazy load images and avoid expensive animations
+8. Always support accessibility standards
 
-### CTAButton
-Call-to-action button for purchase.
+## Related Documentation
 
-```typescript
-interface CTAButtonProps {
-  package: Package;
-  onPress: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-}
-```
-
-## Usage Examples
-
-### Basic Paywall
-
-```typescript
-import { PaywallModal } from './components/PaywallModal';
-
-function PaywallFlow() {
-  const [visible, setVisible] = useState(false);
-
-  return (
-    <>
-      <Button onPress={() => setVisible(true)}>Show Paywall</Button>
-
-      <PaywallModal
-        visible={visible}
-        onClose={() => setVisible(false)}
-        onPurchase={handlePurchase}
-        configuration={paywallConfig}
-      />
-    </>
-  );
-}
-```
-
-### Package Selection
-
-```typescript
-import { PackageCard } from './components/PackageCard';
-
-function PackageSelection() {
-  const [selected, setSelected] = useState('premium_annual');
-
-  return (
-    <ScrollView horizontal>
-      {packages.map(pkg => (
-        <PackageCard
-          key={pkg.identifier}
-          package={pkg}
-          selected={selected === pkg.identifier}
-          onSelect={() => setSelected(pkg.identifier)}
-        />
-      ))}
-    </ScrollView>
-  );
-}
-```
-
-### Feature Comparison
-
-```typescript
-import { FeatureComparison } from './components/FeatureComparison';
-
-function PaywallComparison() {
-  const features = [
-    'Unlimited Access',
-    'Ad-Free',
-    'Priority Support',
-    'AI Features',
-  ];
-
-  return (
-    <FeatureComparison
-      packages={packages}
-      features={features}
-      highlightPackage="premium_annual"
-    />
-  );
-}
-```
-
-## Component Styling
-
-Components use design tokens for consistent styling:
-
-```typescript
-import { useAppDesignTokens } from '@umituz/react-native-design-system';
-
-const tokens = useAppDesignTokens();
-
-const cardStyles = StyleSheet.create({
-  card: {
-    backgroundColor: tokens.colors.surface,
-    borderRadius: tokens.radius.xl,
-    padding: tokens.spacing.xl,
-    shadowColor: tokens.colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-});
-```
-
-## Best Practices
-
-1. **Visual Hierarchy**: Highlight recommended packages clearly
-2. **Clear Pricing**: Show price, period, and per-month equivalent
-3. **Feature Clarity**: Make features easy to understand
-4. **Social Proof**: Include ratings, reviews, user counts
-5. **Trust Signals**: Show guarantees, badges, certifications
-6. **Mobile First**: Optimize for mobile screens
-7. **Performance**: Lazy load images, avoid expensive animations
-8. **Accessibility**: Support screen readers, proper touch targets
-
-## Related
-
-- [Paywall README](../../../domains/paywall/README.md)
-- [usePaywallVisibility](../../hooks/usePaywallVisibility.md)
-- [PaywallOperations](../../hooks/usePaywallOperations.md)
+- [Paywall Domain](../../../domains/paywall/README.md)
+- [Paywall Hooks](../../hooks/README.md)
+- [RevenueCat Integration](../../../revenuecat/README.md)

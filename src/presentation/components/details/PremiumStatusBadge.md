@@ -1,266 +1,91 @@
 # PremiumStatusBadge Component
 
-Displays subscription status as a colored badge component.
+Compact badge component displaying premium status.
 
-## Import
+## Location
 
-```typescript
-import { PremiumStatusBadge } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/components/details/PremiumStatusBadge.tsx`
 
-```typescript
-interface PremiumStatusBadgeProps {
-  status: SubscriptionStatusType;
-  activeLabel: string;
-  expiredLabel: string;
-  noneLabel: string;
-  canceledLabel: string;
-}
+**Type**: Component
 
-type SubscriptionStatusType = 'active' | 'expired' | 'none' | 'canceled';
-```
+## Strategy
 
-## Props
+### Status Badge Display
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `status` | `SubscriptionStatusType` | **Required** | Current subscription status |
-| `activeLabel` | `string` | **Required** | Label for active status |
-| `expiredLabel` | `string` | **Required** | Label for expired status |
-| `noneLabel` | `string` | **Required** | Label for no subscription |
-| `canceledLabel` | `string` | **Required** | Label for canceled status |
+1. **Status Detection**: Display appropriate status (premium/free)
+2. **Visual Indication**: Use color and icon to indicate status
+3. **Compact Design**: Small footprint for various use cases
+4. **Styling Options**: Support different sizes and styles
+5. **Accessibility**: Include accessibility labels
+6. **Color Coding**: Use consistent colors for status types
 
-## Basic Usage
+### Integration Points
 
-```typescript
-function SubscriptionStatus() {
-  const { isPremium } = usePremium();
+- **usePremium**: For premium status check
+- **Headers**: Display in screen headers
+- **Cards**: Add to cards as status indicator
+- **Lists**: Use in list items as badge
+- **Buttons**: Add to buttons for premium features
 
-  return (
-    <PremiumStatusBadge
-      status={isPremium ? 'active' : 'none'}
-      activeLabel="Active"
-      expiredLabel="Expired"
-      noneLabel="Free"
-      canceledLabel="Canceled"
-    />
-  );
-}
-```
+## Restrictions
 
-## Advanced Usage
+### REQUIRED
 
-### With Dynamic Status
+- **Status Prop**: MUST provide valid status boolean
+- **Accessibility**: MUST include accessibility label
+- **Color Consistency**: MUST use consistent colors
+- **Size Constraint**: SHOULD maintain compact size
 
-```typescript
-function DynamicStatusBadge() {
-  const { status, isActive, isExpired } = useSubscriptionStatus();
+### PROHIBITED
 
-  const getStatusType = (): SubscriptionStatusType => {
-    if (!status) return 'none';
-    if (isExpired) return 'expired';
-    if (isActive) return 'active';
-    return 'canceled';
-  };
+- **NEVER** display without status prop
+- **NEVER** use inconsistent colors
+- **DO NOT** make badge too large
+- **DO NOT** use for non-premium status
 
-  return (
-    <PremiumStatusBadge
-      status={getStatusType()}
-      activeLabel="Active"
-      expiredLabel="Expired"
-      noneLabel="Free"
-      canceledLabel="Canceled"
-    />
-  );
-}
-```
+### CRITICAL SAFETY
 
-### With Custom Labels
+- **ALWAYS** validate status prop
+- **MUST** include accessibility support
+- **ALWAYS** use approved color schemes
+- **NEVER** expose implementation logic
 
-```typescript
-function CustomStatusBadge() {
-  const { isActive } = usePremium();
+## AI Agent Guidelines
 
-  return (
-    <PremiumStatusBadge
-      status={isActive ? 'active' : 'none'}
-      activeLabel="✨ Premium"
-      expiredLabel="⚠️ Expired"
-      noneLabel="Free Tier"
-      canceledLabel="❌ Canceled"
-    />
-  );
-}
-```
+### When Implementing Status Badges
 
-### With Localization
+1. **Always** provide valid status boolean
+2. **Always** include accessibility label
+3. **Always** use consistent colors
+4. **Always** maintain compact size
+5. **Never** use for non-status indicators
 
-```typescript
-function LocalizedStatusBadge() {
-  const { t } = useTranslation();
-  const { status } = useSubscriptionStatus();
+### Integration Checklist
 
-  return (
-    <PremiumStatusBadge
-      status={status.type}
-      activeLabel={t('subscription.status.active')}
-      expiredLabel={t('subscription.status.expired')}
-      noneLabel={t('subscription.status.free')}
-      canceledLabel={t('subscription.status.canceled')}
-    />
-  );
-}
-```
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid status prop
+- [ ] Include accessibility label
+- [ ] Apply appropriate styling
+- [ ] Test with premium status
+- [ ] Test with free status
+- [ ] Test in different contexts
+- [ ] Verify color consistency
+- [ ] Check accessibility support
+- [ ] Test size constraints
 
-## Badge Colors
+### Common Patterns
 
-The component automatically applies appropriate colors based on status:
+1. **Header Badge**: Display in screen headers
+2. **Card Badge**: Add to premium cards
+3. **List Indicator**: Use in list items
+4. **Button Badge**: Add to premium feature buttons
+5. **Profile Badge**: Show in user profile
 
-| Status | Background Color | Text Color |
-|--------|-----------------|------------|
-| `active` | Success (green) | On-primary |
-| `expired` | Error (red) | On-primary |
-| `none` | Tertiary text | On-primary |
-| `canceled` | Warning (orange) | On-primary |
+## Related Documentation
 
-## Examples
-
-### In Header
-
-```typescript
-function SubscriptionHeader() {
-  const { status } = useSubscriptionStatus();
-
-  return (
-    <View style={styles.header}>
-      <Text style={styles.title}>My Subscription</Text>
-
-      <PremiumStatusBadge
-        status={status.type}
-        activeLabel="Active"
-        expiredLabel="Expired"
-        noneLabel="Free"
-        canceledLabel="Canceled"
-      />
-    </View>
-  );
-}
-```
-
-### With Icon
-
-```typescript
-function StatusWithIcon() {
-  const { isActive } = usePremium();
-
-  return (
-    <View style={styles.container}>
-      <Icon
-        name={isActive ? 'check-circle' : 'circle'}
-        size={20}
-        color={isActive ? 'green' : 'gray'}
-      />
-
-      <PremiumStatusBadge
-        status={isActive ? 'active' : 'none'}
-        activeLabel="Active"
-        expiredLabel="Expired"
-        noneLabel="Free"
-        canceledLabel="Canceled"
-      />
-    </View>
-  );
-}
-```
-
-### Status List
-
-```typescript
-function StatusList() {
-  const statuses: SubscriptionStatusType[] = ['active', 'expired', 'none', 'canceled'];
-
-  return (
-    <View>
-      {statuses.map((status) => (
-        <View key={status} style={styles.row}>
-          <Text>{status}</Text>
-
-          <PremiumStatusBadge
-            status={status}
-            activeLabel="Active"
-            expiredLabel="Expired"
-            noneLabel="Free"
-            canceledLabel="Canceled"
-          />
-        </View>
-      ))}
-    </View>
-  );
-}
-```
-
-### Compact Badge
-
-```typescript
-function CompactBadge() {
-  const { isActive } = usePremium();
-
-  return (
-    <View style={styles.compactContainer}>
-      <PremiumStatusBadge
-        status={isActive ? 'active' : 'none'}
-        activeLabel="Premium"
-        expiredLabel="Expired"
-        noneLabel="Free"
-        canceledLabel="Canceled"
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  compactContainer: {
-    transform: [{ scale: 0.85 }], // Smaller size
-  },
-});
-```
-
-## Styling
-
-The badge uses design tokens for consistent styling:
-
-```typescript
-// Internal styles (simplified)
-badge: {
-  paddingHorizontal: tokens.spacing.sm,
-  paddingVertical: tokens.spacing.xs,
-  borderRadius: tokens.radius.xs,
-  backgroundColor: statusColor, // Dynamic based on status
-},
-badgeText: {
-  fontWeight: '600',
-  color: tokens.colors.onPrimary,
-}
-```
-
-## Best Practices
-
-1. **Provide all labels** - Ensure all four status labels are provided
-2. **Use consistent labels** - Keep labels consistent across app
-3. **Localize labels** - Translate labels for i18n
-4. **Check status first** - Determine correct status type
-5. **Handle all states** - Cover active, expired, none, canceled
-6. **Test colors** - Verify colors work with your theme
-
-## Related Components
-
-- **PremiumDetailsCard** - Uses this badge component
-- **SubscriptionSection** - Displays badge in settings
-- **DetailRow** - Displays status as detail row
-
-## See Also
-
-- [SubscriptionStatus Entity](../../../domain/entities/SubscriptionStatus.md)
-- [Status Utilities](../../../utils/subscriptionUtils.md)
+- **PremiumDetailsCard**: Premium status card
+- **DetailRow**: Detail row component
+- **usePremium**: Premium status hook
+- **Details README**: `./README.md`

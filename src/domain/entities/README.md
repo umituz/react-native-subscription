@@ -2,175 +2,49 @@
 
 Core domain entities for subscription management.
 
-## Purpose
+## Location
 
-Domain entities represent the core business concepts and rules of the subscription system. They are framework-agnostic and contain only business logic.
+`src/domain/entities/`
 
-## Entities
+## Strategy
 
-### SubscriptionStatus
+Domain entities represent the core business concepts and rules of the subscription system. They are framework-agnostic and contain only business logic, ensuring pure domain modeling.
 
-Represents the subscription state of a user.
+## Restrictions
 
-```typescript
-interface SubscriptionStatus {
-  type: SubscriptionStatusType;
-  isActive: boolean;
-  isPremium: boolean;
-  expirationDate: string | null;
-  willRenew: boolean;
-  productId?: string;
-}
+### REQUIRED
 
-type SubscriptionStatusType =
-  | 'unknown'
-  | 'guest'
-  | 'free'
-  | 'premium';
-```
+- MUST validate themselves on creation
+- MUST remain immutable after creation
+- MUST encapsulate business logic internally
+- MUST use value objects for complex attributes
+- MUST be framework-agnostic
 
-**Usage:**
-```typescript
-import { SubscriptionStatus } from '@umituz/react-native-subscription/domain';
+### PROHIBITED
 
-const status = SubscriptionStatus.create({
-  type: 'premium',
-  isActive: true,
-  isPremium: true,
-  expirationDate: '2025-12-31',
-  willRenew: true,
-});
-```
+- MUST NOT have framework dependencies
+- MUST NOT expose internal state directly
+- MUST NOT allow direct state modification
+- MUST NOT contain infrastructure concerns
 
-## Design Principles
+### CRITICAL
 
-### 1. Self-Validation
+- Always validate invariants to ensure valid state
+- Prevent direct state modification through immutability
+- Keep business rules encapsulated within entities
+- Maintain purity - no external dependencies
 
-Entities validate themselves on creation:
+## AI Agent Guidelines
 
-```typescript
-class SubscriptionStatus {
-  private constructor(data: SubscriptionStatusData) {
-    this.validate(data);
-    // ...
-  }
+When working with domain entities:
+1. Keep entities pure - no framework dependencies
+2. Validate invariants - ensure valid state
+3. Use value objects - for complex attributes
+4. Encapsulate logic - keep business rules inside entities
+5. Make immutable - prevent direct state modification
 
-  private validate(data: SubscriptionStatusData): void {
-    if (data.isPremium && !data.isActive) {
-      throw new ValidationError('Premium users must be active');
-    }
-  }
-}
-```
-
-### 2. Immutable State
-
-Entities cannot be modified after creation:
-
-```typescript
-const status = SubscriptionStatus.create({...});
-// status.isActive = false; // Error: Cannot assign to read-only property
-```
-
-### 3. Business Rules
-
-Business logic is encapsulated in entities:
-
-```typescript
-class SubscriptionStatus {
-  isExpired(): boolean {
-    if (!this.expirationDate) return false;
-    return new Date(this.expirationDate) < new Date();
-  }
-
-  requiresRenewal(): boolean {
-    return this.isPremium && this.expirationDate && this.willRenew;
-  }
-}
-```
-
-## Creating Entities
-
-### Factory Method
-
-```typescript
-const status = SubscriptionStatus.create({
-  type: 'premium',
-  isActive: true,
-  isPremium: true,
-  expirationDate: null,
-  willRenew: false,
-});
-```
-
-### Validation
-
-```typescript
-try {
-  const status = SubscriptionStatus.create({
-    type: 'premium',
-    isActive: false, // Invalid!
-    isPremium: true,
-  });
-} catch (error) {
-  console.error('Validation failed:', error.message);
-}
-```
-
-## Domain Services
-
-Business operations that don't naturally fit in entities:
-
-```typescript
-class SubscriptionDomainService {
-  canUpgrade(currentStatus: SubscriptionStatus): boolean {
-    return !currentStatus.isPremium;
-  }
-
-  calculateDaysUntilExpiry(status: SubscriptionStatus): number | null {
-    if (!status.expirationDate) return null;
-    const diff = new Date(status.expirationDate).getTime() - Date.now();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }
-}
-```
-
-## Best Practices
-
-1. **Keep entities pure** - No framework dependencies
-2. **Validate invariants** - Ensure valid state
-3. **Use value objects** - For complex attributes
-4. **Encapsulate logic** - Keep business rules inside entities
-5. **Make immutable** - Prevent direct state modification
-
-## Testing
-
-```typescript
-describe('SubscriptionStatus', () => {
-  it('should create valid premium status', () => {
-    const status = SubscriptionStatus.create({
-      type: 'premium',
-      isActive: true,
-      isPremium: true,
-    });
-
-    expect(status.isPremium).toBe(true);
-  });
-
-  it('should reject invalid premium status', () => {
-    expect(() => {
-      SubscriptionStatus.create({
-        type: 'premium',
-        isActive: false,
-        isPremium: true,
-      });
-    }).toThrow();
-  });
-});
-```
-
-## Related
+## Related Documentation
 
 - [Value Objects](../value-objects/README.md)
 - [Domain Errors](../errors/README.md)
-- [Domain Layer](../../README.md)
+- [Domain Layer](../README.md)

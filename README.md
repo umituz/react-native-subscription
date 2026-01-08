@@ -2,460 +2,277 @@
 
 Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps.
 
-## Features
+## Package Overview
 
-- 🚀 **RevenueCat Integration** - Full RevenueCat SDK integration with auto-initialization
-- 💳 **Subscription Management** - Handle monthly, annual, and lifetime subscriptions
-- 💰 **Credits System** - Built-in credits system with transaction tracking
-- 🎨 **Paywall Components** - Beautiful, customizable paywall UI components
-- 🔐 **Gate System** - Premium, auth, and credit gates for feature access control
-- 🌍 **Multi-language Support** - Built-in i18n support
-- 📊 **Analytics Ready** - Track subscription events and user behavior
-- 🏗️ **DDD Architecture** - Domain-driven design with clean architecture
+**Import Path**: `@umituz/react-native-subscription`
 
-## Installation
+**Version**: Latest
 
-```bash
-npm install @umituz/react-native-subscription
-# or
-yarn add @umituz/react-native-subscription
+**Type**: React Native Package
+
+This package provides comprehensive subscription and credit management with:
+- RevenueCat integration for subscriptions
+- Credits system with transaction tracking
+- Paywall UI components
+- Feature gating (premium, auth, credits)
+- DDD architecture with clean layers
+
+## Strategy
+
+### Architecture Principles
+
+1. **Domain-Driven Design (DDD)**
+   - Separate domains: Wallet, Paywall, Config
+   - Each domain has its own entities, rules, and boundaries
+   - Business logic stays in domain layer
+
+2. **Clean Architecture**
+   - Presentation: React hooks and components
+   - Application: Use cases and orchestration
+   - Domain: Entities and business rules
+   - Infrastructure: External integrations
+
+3. **Separation of Concerns**
+   - UI components are pure and reusable
+   - Business logic is in hooks and services
+   - Data persistence is abstracted behind repositories
+
+### Integration Flow
+
+1. **Initialization**
+   - Configure RevenueCat with API key
+   - Set up Firebase for credits storage
+   - Initialize providers at app root
+
+2. **Subscription Management**
+   - Check user tier and subscription status
+   - Gate premium features
+   - Handle purchase flows
+
+3. **Credits System**
+   - Initialize credits on purchase
+   - Deduct credits for feature usage
+   - Track all transactions
+   - Handle credit exhaustion
+
+4. **Paywall Display**
+   - Show paywall on feature gates
+   - Handle purchase operations
+   - Manage paywall visibility state
+
+### Key Dependencies
+
+- **RevenueCat**: `react-native-purchases` >= 7.0.0
+- **Firebase**: `firebase` >= 10.0.0
+- **State Management**: `@tanstack/react-query` >= 5.0.0
+- **React Native**: `react-native` >= 0.74.0
+
+## Restrictions
+
+### REQUIRED
+
+- **RevenueCat Configuration**: MUST provide valid API key and entitlement ID
+- **Firebase Setup**: MUST initialize Firebase for credits system
+- **Provider Setup**: MUST wrap app with `SubscriptionProvider`
+- **Authentication**: MUST have authenticated user for credits operations
+- **Error Handling**: MUST handle all error states appropriately
+
+### PROHIBITED
+
+- **NEVER** use subscription hooks outside provider
+- **NEVER** deduce credits without checking balance first
+- **NEVER** gate features without proper user feedback
+- **DO NOT** bypass gate hooks for premium features
+- **DO NOT** initialize RevenueCat multiple times
+
+### CRITICAL SAFETY
+
+- **ALWAYS** check loading states before rendering
+- **ALWAYS** handle edge cases (no subscription, expired, etc)
+- **ALWAYS** validate return values from credit operations
+- **NEVER** assume user has premium or credits
+- **MUST** implement proper error boundaries
+
+## Rules
+
+### Provider Setup
+
+```typescript
+// CORRECT - Wrap app with provider
+<SubscriptionProvider config={{ revenueCatApiKey: 'xxx' }}>
+  <App />
+</SubscriptionProvider>
+
+// INCORRECT - No provider
+<App /> // Hooks will fail
+
+// INCORRECT - Multiple providers
+<SubscriptionProvider>
+  <SubscriptionProvider> // Duplicate
+    <App />
+  </SubscriptionProvider>
+</SubscriptionProvider>
 ```
 
-## Peer Dependencies
+### Feature Gating
 
-```json
-{
-  "@tanstack/react-query": ">=5.0.0",
-  "expo-constants": ">=16.0.0",
-  "expo-image": ">=2.0.0",
-  "firebase": ">=10.0.0",
-  "react": ">=18.2.0",
-  "react-native": ">=0.74.0",
-  "react-native-purchases": ">=7.0.0",
-  "react-native-safe-area-context": ">=5.0.0"
+```typescript
+// CORRECT - Use gate hooks
+const { canAccess, showPaywall } = usePremiumGate();
+if (!canAccess) {
+  showPaywall();
+  return;
+}
+
+// INCORRECT - Manual check
+if (!user.isPremium) { // No feedback, no paywall
+  return;
 }
 ```
 
-## Quick Start
-
-### 1. Initialize Subscription
+### Credit Operations
 
 ```typescript
-import { initializeSubscription, SubscriptionProvider } from '@umituz/react-native-subscription';
-
-// Wrap your app with provider
-function App() {
-  return (
-    <SubscriptionProvider
-      config={{
-        revenueCatApiKey: 'your_api_key',
-        revenueCatEntitlementId: 'premium',
-      }}
-    >
-      <YourApp />
-    </SubscriptionProvider>
-  );
+// CORRECT - Check return value
+const success = await deductCredit(5);
+if (success) {
+  executeFeature();
 }
 
-// Or initialize manually
-await initializeSubscription({
-  revenueCatApiKey: process.env.REVENUECAT_API_KEY,
-  revenueCatEntitlementId: 'premium',
-});
+// INCORRECT - Assume success
+await deductCredit(5);
+executeFeature(); // May execute if deduction failed
 ```
 
-### 2. Check Subscription Status
+### Loading States
 
 ```typescript
-import { usePremium } from '@umituz/react-native-subscription';
+// CORRECT - Respect loading
+if (isLoading) return <Spinner />;
+if (!isPremium) return <UpgradePrompt />;
+return <Content />;
 
-function PremiumFeature() {
-  const { isPremium, isLoading } = usePremium();
-
-  if (isLoading) return <ActivityIndicator />;
-
-  if (!isPremium) {
-    return <UpgradePrompt />;
-  }
-
-  return <PremiumContent />;
-}
+// INCORRECT - Ignore loading
+{!isPremium && <UpgradePrompt />} // Flickers during load
 ```
 
-### 3. Show Paywall
-
-```typescript
-import { PaywallModal } from '@umituz/react-native-subscription';
-
-function MyComponent() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  return (
-    <>
-      <Button onPress={() => setIsVisible(true)} title="Upgrade" />
-
-      <PaywallModal
-        isVisible={isVisible}
-        onClose={() => setIsVisible(false)}
-        config={{
-          title: 'Unlock Premium',
-          description: 'Get unlimited access',
-          features: [
-            { icon: 'star', text: 'Unlimited credits' },
-            { icon: 'zap', text: 'AI-powered tools' },
-          ],
-        }}
-      />
-    </>
-  );
-}
-```
-
-### 4. Use Credits
-
-```typescript
-import { useCreditsGate } from '@umituz/react-native-subscription';
-
-function FeatureWithCredits() {
-  const { hasCredits, consumeCredit } = useCreditsGate({
-    creditCost: 5,
-    featureId: 'ai_generation',
-  });
-
-  const handleAction = async () => {
-    if (!hasCredits) {
-      showPaywall();
-      return;
-    }
-
-    const result = await consumeCredit();
-    if (result.success) {
-      await performAction();
-    }
-  };
-
-  return <Button onPress={handleAction} title="Use Feature (5 credits)" />;
-}
-```
-
-## Documentation
-
-### Domain Architecture
-
-The package follows Domain-Driven Design (DDD) principles:
-
-- **[Wallet Domain](./src/domains/wallet/README.md)** - Credits, transactions, and wallet management
-- **[Paywall Domain](./src/domains/paywall/README.md)** - Paywall components and flows
-- **[Config Domain](./src/domains/config/README.md)** - Plan configuration and metadata
-
-### Layer Architecture
-
-- **[Application Layer](./src/application/README.md)** - Service contracts and ports
-- **[Domain Layer](./src/domain/README.md)** - Entities, value objects, and domain logic
-- **[Infrastructure Layer](./src/infrastructure/README.md)** - Repository implementations
-- **[Presentation Layer](./src/presentation/README.md)** - React hooks and UI components
-
-### Key Features
-
-- **[RevenueCat Integration](./src/revenuecat/README.md)** - RevenueCat SDK wrapper
-- **[Subscription Hooks](./src/presentation/hooks/README.md)** - React hooks for subscription management
-- **[Premium Components](./src/presentation/components/details/README.md)** - Premium UI components
-- **[Utils](./src/utils/README.md)** - Helper functions for subscriptions and credits
-
-## API Reference
-
-### Hooks
-
-```typescript
-// Subscription
-import {
-  useSubscription,
-  useSubscriptionStatus,
-  usePremium,
-  usePremiumGate,
-} from '@umituz/react-native-subscription';
-
-// Credits
-import {
-  useCredits,
-  useCreditsGate,
-  useDeductCredit,
-} from '@umituz/react-native-subscription';
-
-// Paywall
-import {
-  usePaywall,
-  usePaywallActions,
-  usePaywallVisibility,
-} from '@umituz/react-native-subscription';
-
-// User Tier
-import {
-  useUserTier,
-  useAuthGate,
-  useFeatureGate,
-} from '@umituz/react-native-subscription';
-```
-
-### Components
-
-```typescript
-import {
-  // Premium components
-  PremiumDetailsCard,
-  PremiumStatusBadge,
-  DetailRow,
-  CreditRow,
-
-  // Paywall components
-  PaywallModal,
-  PaywallScreen,
-  SubscriptionSection,
-
-  // Feedback
-  PaywallFeedbackModal,
-} from '@umituz/react-native-subscription';
-```
-
-### Services
-
-```typescript
-import {
-  // Initialization
-  initializeSubscription,
-  SubscriptionService,
-
-  // Credits
-  configureCreditsRepository,
-  getCreditsRepository,
-
-  // RevenueCat
-  useRevenueCat,
-  useCustomerInfo,
-  useRestorePurchase,
-} from '@umituz/react-native-subscription';
-```
-
-## Examples
-
-### Complete Premium Feature Example
-
-```typescript
-import React from 'react';
-import { View, Text, Button, ActivityIndicator } from 'react-native';
-import {
-  usePremiumGate,
-  useCreditsGate,
-  useUserTier,
-  PaywallModal,
-} from '@umituz/react-native-subscription';
-
-function PremiumFeature() {
-  const { tier, isPremium } = useUserTier();
-  const { canAccess, showPaywall } = usePremiumGate({
-    featureId: 'ai_tools',
-  });
-
-  const { hasCredits, credits, consumeCredit } = useCreditsGate({
-    creditCost: 5,
-    featureId: 'ai_generation',
-  });
-
-  const handleGenerate = async () => {
-    if (!canAccess) {
-      showPaywall();
-      return;
-    }
-
-    if (isPremium) {
-      // Premium: unlimited access
-      await generateContent();
-    } else if (hasCredits) {
-      // Free: use credits
-      const result = await consumeCredit();
-      if (result.success) {
-        await generateContent();
-      }
-    } else {
-      // No access: show upgrade
-      showPaywall();
-    }
-  };
-
-  return (
-    <View>
-      <Text>Tier: {tier}</Text>
-      {!isPremium && <Text>Credits: {credits}</Text>}
-
-      <Button
-        onPress={handleGenerate}
-        title={
-          isPremium
-            ? 'Generate (Unlimited)'
-            : 'Generate (5 credits)'
-        }
-      />
-    </View>
-  );
-}
-```
-
-### Complete Settings Screen Example
-
-```typescript
-import React from 'react';
-import { ScrollView, RefreshControl } from 'react-native';
-import {
-  PremiumDetailsCard,
-  SubscriptionSection,
-  useSubscription,
-} from '@umituz/react-native-subscription';
-
-function SettingsScreen() {
-  const { subscription, isLoading, refetch } = useSubscription();
-  const [refreshing, setRefreshing] = React.useState(false);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  };
-
-  return (
-    <ScrollView
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-      }
-    >
-      <SubscriptionSection
-        subscription={subscription}
-        onPress={() => navigation.navigate('SubscriptionDetail')}
-      />
-
-      {subscription?.isPremium && (
-        <PremiumDetailsCard
-          status={subscription}
-          onManagePress={handleManageSubscription}
-        />
-      )}
-    </ScrollView>
-  );
-}
-```
-
-## Configuration
-
-### Subscription Config
-
-```typescript
-import type { SubscriptionConfig } from '@umituz/react-native-subscription';
-
-const config: SubscriptionConfig = {
-  revenueCatApiKey: 'your_api_key',
-  revenueCatEntitlementId: 'premium',
-
-  plans: {
-    monthly: monthlyPlan,
-    annual: annualPlan,
-    lifetime: lifetimePlan,
-  },
-
-  defaultPlan: 'monthly',
-
-  features: {
-    requireAuth: true,
-    allowRestore: true,
-    syncWithFirebase: true,
-  },
-
-  ui: {
-    showAnnualDiscount: true,
-    highlightPopularPlan: true,
-    showPerks: true,
-  },
-};
-```
-
-### Credits Config
-
-```typescript
-import type { CreditsConfig } from '@umituz/react-native-subscription';
-
-const creditsConfig: CreditsConfig = {
-  initialCredits: 100,
-
-  creditPackages: [
-    {
-      id: 'credits_small',
-      productId: 'com.app.credits.small',
-      amount: 100,
-      price: 0.99,
-      currency: 'USD',
-    },
-    {
-      id: 'credits_medium',
-      productId: 'com.app.credits.medium',
-      amount: 500,
-      price: 3.99,
-      currency: 'USD',
-    },
-  ],
-
-  creditCosts: {
-    ai_generation: 1,
-    ai_analysis: 2,
-    premium_feature: 5,
-  },
-};
-```
-
-## Architecture
-
-The package follows Clean Architecture and Domain-Driven Design principles:
-
-```
-┌─────────────────────────────────────────┐
-│         Presentation Layer              │
-│  (React Hooks & Components)             │
-├─────────────────────────────────────────┤
-│         Application Layer               │
-│  (Use Cases & Service Contracts)        │
-├─────────────────────────────────────────┤
-│           Domain Layer                  │
-│  (Entities & Business Logic)            │
-├─────────────────────────────────────────┤
-│       Infrastructure Layer              │
-│  (External Services & Repositories)     │
-└─────────────────────────────────────────┘
-```
-
-## Best Practices
-
-1. **Always check loading states** before rendering subscription-dependent UI
-2. **Use gate hooks** (`usePremiumGate`, `useCreditsGate`) for feature access control
-3. **Handle errors gracefully** and show user-friendly messages
-4. **Provide restore purchase** option for iOS and Android
-5. **Track subscription events** with analytics
-6. **Use translations** for multi-language support
-7. **Test different subscription states** (guest, free, premium, expired)
+## AI Agent Guidelines
+
+### When Implementing Features
+
+1. **Always** use appropriate gate hooks for feature access
+2. **Always** handle loading, error, and empty states
+3. **Always** provide user feedback for blocked features
+4. **Always** check return values from operations
+5. **Never** bypass gate system or checks
+6. **Must** test with different user tiers
+7. **Must** handle network errors gracefully
+
+### Implementation Checklist
+
+- [ ] Import from correct path
+- [ ] Wrap with necessary providers
+- [ ] Use gate hooks for features
+- [ ] Handle loading states
+- [ ] Handle error states
+- [ ] Provide user feedback
+- [ ] Test with guest user
+- [ ] Test with free user
+- [ ] Test with premium user
+- [ ] Test with no credits
+- [ ] Test with insufficient credits
+
+### Common Patterns
+
+1. **Premium Feature**: Use `usePremiumGate`
+2. **Credit Feature**: Use `useCreditsGate` or `useDeductCredit`
+3. **Auth Feature**: Use `useAuthGate`
+4. **Combined Gates**: Use `useFeatureGate` for complex scenarios
+5. **Paywall Trigger**: Use `usePaywallVisibility` for global state
+
+### Error Scenarios to Handle
+
+- **No Subscription**: Show upgrade prompt
+- **Expired Subscription**: Show renewal prompt
+- **No Credits**: Show credit purchase prompt
+- **Insufficient Credits**: Show credit cost and purchase option
+- **Network Error**: Show retry option
+- **Purchase Failed**: Show error message and retry
+
+## Documentation Structure
+
+### Domain Documentation
+
+- **[Wallet Domain](./src/domains/wallet/README.md)**: Credits and transactions
+- **[Paywall Domain](./src/domains/paywall/README.md)**: Paywall components
+- **[Config Domain](./src/domains/config/README.md)**: Configuration management
+
+### Layer Documentation
+
+- **[Presentation Layer](./src/presentation/README.md)**: Hooks and components
+- **[Application Layer](./src/application/README.md)**: Use cases and ports
+- **[Domain Layer](./src/domain/README.md)**: Entities and logic
+- **[Infrastructure Layer](./src/infrastructure/README.md)**: Repositories and services
+
+### Feature Documentation
+
+- **[RevenueCat Integration](./src/revenuecat/README.md)**: RevenueCat setup
+- **[Subscription Hooks](./src/presentation/hooks/README.md)**: Available hooks
+- **[Premium Components](./src/presentation/components/README.md)**: UI components
+
+### Quick Reference
+
+#### Subscription Hooks
+
+Location: `src/presentation/hooks/`
+
+- `useSubscription` - Core subscription management
+- `usePremium` - Check premium status
+- `usePremiumGate` - Gate premium features
+- `useUserTier` - Get user tier (guest/free/premium)
+
+#### Credit Hooks
+
+Location: `src/presentation/hooks/`
+
+- `useCredits` - Access credit balance
+- `useDeductCredit` - Deduct credits with optimistic updates
+- `useCreditChecker` - Check credit availability
+- `useCreditsGate` - Gate features by credits
+
+#### Paywall Hooks
+
+Location: `src/presentation/hooks/`
+
+- `usePaywallVisibility` - Manage paywall state
+- `usePaywallOperations` - Handle purchase operations
+
+#### Components
+
+Location: `src/presentation/components/`
+
+- `PremiumDetailsCard` - Display subscription details
+- `PremiumStatusBadge` - Show subscription badge
+- `PaywallModal` - Full paywall modal
+- `CreditRow` - Display credit balance with progress
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+When contributing to this package:
+
+1. **Follow Documentation Template**: Use `README_TEMPLATE.md`
+2. **Update Strategy Section**: Document architectural decisions
+3. **List Restrictions**: Clearly state what's required/prohibited
+4. **Provide Rules**: Show correct/incorrect usage
+5. **AI Guidelines**: Include agent instructions
+6. **No Code Examples**: Keep documentation code-agnostic
+7. **English Only**: All documentation in English
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/umituz/react-native-subscription/issues)
+- **Author**: Ümit UZ <umit@umituz.com>
 
 ## License
 
 MIT License - see LICENSE file for details
-
-## Author
-
-Ümit UZ <umit@umituz.com>
-
-## Links
-
-- [GitHub](https://github.com/umituz/react-native-subscription)
-- [NPM](https://www.npmjs.com/package/@umituz/react-native-subscription)
-
-## Support
-
-For issues and questions, please use the [GitHub Issues](https://github.com/umituz/react-native-subscription/issues).

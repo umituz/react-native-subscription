@@ -1,292 +1,51 @@
 # Wallet Domain
 
-Kredi bakiyesi yönetimi, işlem geçmişi takibi ve ürün metadata yönetimi için kapsamlı çözüm.
+Credit balance management, transaction history tracking, and product metadata management.
 
-## Özellikler
+## Location
 
-- **Kredi Bakiyesi Yönetimi**: Kullanıcıların kredi bakiyelerini takip edin ve yönetin
-- **İşlem Geçmişi**: Tüm kredi işlemlerini geçmişte takip edin
-- **Ürün Metadata**: Satın alınan ürünler için metadata yönetimi
-- **Tür Desteği**: Farklı kredi türlerini (AI, premium, vb.) destekleyin
+`src/domains/wallet/`
 
-## Kurulum
+## Strategy
 
-### 1. Service Konfigürasyonu
+Implements layered architecture for credit management with domain layer (entities, value objects, errors), infrastructure layer (repositories, Firebase services, mappers), and presentation layer (hooks, components). Handles initialization, operations, and transaction history with real-time updates.
 
-```typescript
-import { configureProductMetadataService } from '@umituz/react-native-subscription';
+## Restrictions
 
-// Service'i konfigüre edin
-configureProductMetadataService({
-  firebase: firebaseInstance,
-  storage: storageInstance,
-});
-```
+### REQUIRED
 
-### 2. Repository Oluşturma
+- All operations require authenticated user
+- Credit operations MUST be validated server-side
+- All credit changes MUST be recorded in transaction history
+- MUST handle insufficient credits gracefully
 
-```typescript
-import { createTransactionRepository } from '@umituz/react-native-subscription';
+### PROHIBITED
 
-const transactionRepository = createTransactionRepository({
-  firebase: firebaseInstance,
-  userId: 'user-123',
-});
-```
+- MUST NOT allow client-side credit modifications without server validation
+- MUST NOT deduct credits without sufficient balance
+- MUST NOT expose internal repository logic to UI
+- MUST NOT store credit balance in AsyncStorage (use secure backend)
 
-## Kullanım
+### CRITICAL
 
-### useWallet Hook
+- Always validate credit amounts (must be positive)
+- Always implement optimistic updates with rollback
+- Never trust client-side credit balance for security decisions
+- Must implement retry logic for failed operations
+- Always sanitize transaction reasons to prevent injection attacks
 
-Kredi bakiyesi ve temel cüzdan işlemleri için:
+## AI Agent Guidelines
 
-```typescript
-import { useWallet } from '@umituz/react-native-subscription';
+When implementing credit operations:
+1. Always check balance before deducting
+2. Always provide transaction reason and metadata
+3. Always handle insufficient credits gracefully
+4. Always implement optimistic updates with rollback
+5. Never trust client-side balance for security
 
-function MyComponent() {
-  const { balance, loading, error, refresh } = useWallet({
-    userId: 'user-123',
-  });
+## Related Documentation
 
-  if (loading) return <ActivityIndicator />;
-  if (error) return <Text>Error: {error.message}</Text>;
-
-  return (
-    <View>
-      <Text>Balance: {balance.credits}</Text>
-      <Button onPress={refresh} title="Refresh" />
-    </View>
-  );
-}
-```
-
-### useTransactionHistory Hook
-
-İşlem geçmişini görüntülemek için:
-
-```typescript
-import { useTransactionHistory } from '@umituz/react-native-subscription';
-
-function TransactionHistory() {
-  const { transactions, loading, hasMore, loadMore } = useTransactionHistory({
-    userId: 'user-123',
-    limit: 20,
-  });
-
-  return (
-    <FlatList
-      data={transactions}
-      keyExtractor={(item) => item.id}
-      onEndReached={hasMore ? loadMore : undefined}
-      renderItem={({ item }) => (
-        <View>
-          <Text>{item.reason}</Text>
-          <Text>{item.amount} credits</Text>
-          <Text>{new Date(item.timestamp).toLocaleString()}</Text>
-        </View>
-      )}
-    />
-  );
-}
-```
-
-### useProductMetadata Hook
-
-Ürün metadata yönetimi için:
-
-```typescript
-import { useProductMetadata } from '@umituz/react-native-subscription';
-
-function ProductInfo() {
-  const { metadata, loading, updateMetadata } = useProductMetadata({
-    userId: 'user-123',
-    productId: 'premium_monthly',
-  });
-
-  const handleUpdate = async () => {
-    await updateMetadata({
-      lastUsed: new Date().toISOString(),
-      usageCount: (metadata?.usageCount || 0) + 1,
-    });
-  };
-
-  return (
-    <View>
-      <Text>Product: {metadata?.productId}</Text>
-      <Text>Usage: {metadata?.usageCount} times</Text>
-      <Button onPress={handleUpdate} title="Update Usage" />
-    </View>
-  );
-}
-```
-
-## Bileşenler
-
-### BalanceCard
-
-Kredi bakiyesini gösteren kart bileşeni:
-
-```typescript
-import { BalanceCard } from '@umituz/react-native-subscription';
-
-<BalanceCard
-  balance={150}
-  currency="USD"
-  translations={{
-    title: "Your Balance",
-    subtitle: "Credits available",
-  }}
-/>
-```
-
-### TransactionItem
-
-Tek işlem öğesi:
-
-```typescript
-import { TransactionItem } from '@umituz/react-native-subscription';
-
-<TransactionItem
-  transaction={{
-    id: 'tx-123',
-    amount: -50,
-    reason: 'purchase',
-    timestamp: '2024-01-01T00:00:00Z',
-  }}
-  translations={{
-    purchase: 'Purchase',
-    refund: 'Refund',
-  }}
-/>
-```
-
-### TransactionList
-
-İşlem listesi bileşeni:
-
-```typescript
-import { TransactionList } from '@umituz/react-native-subscription';
-
-<TransactionList
-  transactions={transactions}
-  loading={loading}
-  onEndReached={loadMore}
-  translations={{
-    title: 'Transaction History',
-    empty: 'No transactions yet',
-  }}
-/>
-```
-
-### WalletScreen
-
-Tam cüzdan ekranı:
-
-```typescript
-import { WalletScreen } from '@umituz/react-native-subscription';
-
-<WalletScreen
-  userId="user-123"
-  config={{
-    showBalance: true,
-    showHistory: true,
-    enableRefresh: true,
-  }}
-  translations={{
-    title: 'My Wallet',
-    balance: 'Balance',
-    history: 'History',
-  }}
-/>
-```
-
-## API Referansı
-
-### Tip Tanımlamaları
-
-```typescript
-interface CreditBalance {
-  credits: number;
-  lastUpdated: string;
-}
-
-interface TransactionLog {
-  id: string;
-  amount: number;
-  reason: TransactionReason;
-  timestamp: string;
-  metadata?: Record<string, any>;
-}
-
-type TransactionReason =
-  | 'purchase'
-  | 'refund'
-  | 'usage'
-  | 'bonus'
-  | 'expiration';
-```
-
-### Yardımcı Fonksiyonlar
-
-```typescript
-// Kredi maliyeti hesaplama
-import { getCreditCost, creditsToDollars } from '@umituz/react-native-subscription';
-
-const cost = getCreditCost('ai_generation'); // AI işlem maliyeti
-const dollars = creditsToDollars(150, 0.01); // 150 kredi = $1.50
-```
-
-## Hata Yönetimi
-
-```typescript
-import {
-  WalletError,
-  CreditLimitError,
-  handleWalletError,
-} from '@umituz/react-native-subscription';
-
-try {
-  // İşlem
-} catch (error) {
-  if (error instanceof CreditLimitError) {
-    console.log('Yetersiz bakiye');
-  }
-  handleWalletError(error);
-}
-```
-
-## Örnek Uygulama
-
-```typescript
-import React from 'react';
-import { View, Text, Button } from 'react-native';
-import {
-  useWallet,
-  useTransactionHistory,
-  BalanceCard,
-  TransactionList,
-} from '@umituz/react-native-subscription';
-
-export default function WalletExample() {
-  const { balance, refresh } = useWallet({ userId: 'user-123' });
-  const { transactions, loading } = useTransactionHistory({
-    userId: 'user-123',
-  });
-
-  return (
-    <View>
-      <BalanceCard balance={balance} />
-      <Button title="Refresh" onPress={refresh} />
-      <TransactionList transactions={transactions} loading={loading} />
-    </View>
-  );
-}
-```
-
-## Best Practices
-
-1. **Kredi Türleri**: Farklı kredi türleri için farklı cost config'leri kullanın
-2. **Hata Yönetimi**: Tüm işlemleri try-catch blokları içinde sarın
-3. **Loading State**: Yüklenme durumlarını her zaman gösterin
-4. **Refresh**: Kullanıcıya manuel refresh imkanı verin
-5. **Transaction Log**: Tüm işlemleri loglayın ve audit trail tutun
+- [Credits Repository](infrastructure/README.md)
+- [useCredits Hook](../../presentation/hooks/README.md)
+- [UserCredits Entity](domain/entities/README.md)
+- [Transaction Errors](domain/errors/README.md)

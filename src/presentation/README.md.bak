@@ -70,6 +70,53 @@ The presentation layer follows a layered architecture where:
 - **MUST** implement proper error boundaries
 - **ALWAYS** sanitize user inputs before display
 
+## Rules
+
+### Component Structure
+
+**CORRECT**: Proper component structure includes:
+- Define TypeScript interface for props
+- Import and use appropriate hooks for data fetching
+- Return loading indicator when data is fetching
+- Return error display when there's an error
+- Render actual component only when data is available
+
+**INCORRECT**: No loading/error handling
+- Don't render component without checking if data is loading
+- Don't display component without handling potential errors
+- Never assume data is always available immediately
+
+**INCORRECT**: Business logic in component
+- Don't use useEffect to fetch data directly
+- Don't manage complex state with useState for business logic
+- Never include data transformation logic in components
+
+### Hook Usage
+
+**CORRECT**: Use hooks for data fetching
+- Call useCredits to get credit balance with loading and error states
+- Call usePremium to check premium status
+- Always check if loading is true before rendering
+- Always check if error exists before rendering
+
+**INCORRECT**: Direct API calls in component
+- Don't use useEffect with axios or fetch to call APIs
+- Don't manage async operations manually in components
+- Never handle API responses directly in UI components
+
+### Error Boundaries
+
+**CORRECT**: Wrap screens with error boundaries
+- Import ErrorBoundary component
+- Create fallback error screen component
+- Wrap screen content with ErrorBoundary component
+- Pass fallback component to ErrorBoundary
+
+**INCORRECT**: No error boundary
+- Don't export screens without error boundary wrapper
+- Never let errors crash entire application
+- Don't assume components will never throw errors
+
 ## AI Agent Guidelines
 
 ### When Building Presentation Layer

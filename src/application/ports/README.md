@@ -2,102 +2,47 @@
 
 Interfaces defining contracts between application layer and external dependencies.
 
-## Overview
+## Location
 
-This directory contains port interfaces that define how the application layer interacts with external services and repositories. This enables dependency inversion and testability.
+`src/application/ports/`
 
-## Ports
+## Strategy
 
-### ISubscriptionService
-Port for subscription management service.
+Port interfaces define how the application layer interacts with external services and repositories, enabling dependency inversion and testability through clear contracts.
 
-```typescript
-interface ISubscriptionService {
-  getSubscriptionStatus(userId: string): Promise<SubscriptionStatus | null>;
-  activateSubscription(
-    userId: string,
-    productId: string,
-    expiresAt: string | null
-  ): Promise<SubscriptionStatus | null>;
-  deactivateSubscription(userId: string): Promise<void>;
-}
-```
+## Restrictions
 
-**Implementation:** Infrastructure services implement this interface.
+### REQUIRED
 
-### ISubscriptionRepository
-Port for subscription data persistence.
+- MUST use interface segregation (keep interfaces focused)
+- MUST document behavior thoroughly
+- MUST use domain entities in return types
+- MUST make all I/O operations async
+- MUST define clear contracts between layers
 
-```typescript
-interface ISubscriptionRepository {
-  getSubscriptionStatus(userId: string): Promise<SubscriptionStatus | null>;
-  saveSubscriptionStatus(userId: string, status: SubscriptionStatus): Promise<void>;
-  deleteSubscriptionStatus(userId: string): Promise<void>;
-  isSubscriptionValid(status: SubscriptionStatus | null): boolean;
-}
-```
+### PROHIBITED
 
-**Implementation:** Infrastructure repositories implement this interface.
+- MUST NOT couple interfaces to specific implementations
+- MUST NOT include infrastructure concerns in port definitions
+- MUST NOT leak implementation details through interfaces
 
-### ICreditsRepository
-Port for credits data persistence.
+### CRITICAL
 
-```typescript
-interface ICreditsRepository {
-  getCredits(userId: string): Promise<UserCredits | null>;
-  initializeCredits(
-    userId: string,
-    purchaseId?: string,
-    productId?: string
-  ): Promise<CreditsResult>;
-  deductCredit(userId: string, amount: number): Promise<CreditsResult>;
-  addCredits(userId: string, amount: number): Promise<CreditsResult>;
-}
-```
+- Keep interfaces focused and segregated
+- Document all behavior thoroughly
+- Use domain entities in return types
+- Ensure all I/O operations are async
 
-## Usage in Application Layer
+## AI Agent Guidelines
 
-```typescript
-import type { ISubscriptionService } from '../application/ports/ISubscriptionService';
+When working with application ports:
+1. Interface Segregation - keep interfaces focused
+2. Clear Contracts - document behavior thoroughly
+3. Return Types - use domain entities in return types
+4. Async Operations - all I/O operations should be async
 
-class SubscriptionManager {
-  constructor(private service: ISubscriptionService) {}
+## Related Documentation
 
-  async manageSubscription(userId: string) {
-    // Port interface enables swapping implementations
-    const status = await this.service.getSubscriptionStatus(userId);
-    return status;
-  }
-}
-```
-
-## Testing with Mocks
-
-```typescript
-const mockService: ISubscriptionService = {
-  getSubscriptionStatus: async (userId) => ({
-    productId: 'premium',
-    isActive: true,
-    type: 'premium',
-    expirationDate: null,
-  }),
-  activateSubscription: async () => ({} as any),
-  deactivateSubscription: async () => {},
-};
-
-// Use mock in tests
-const manager = new SubscriptionManager(mockService);
-```
-
-## Best Practices
-
-1. **Interface Segregation** - Keep interfaces focused
-2. **Clear Contracts** - Document behavior thoroughly
-3. **Return Types** - Use domain entities in return types
-4. **Async Operations** - All I/O operations should be async
-
-## Related
-
-- [Application README](../README.md)
+- [Application Layer](../README.md)
 - [Infrastructure Services](../../infrastructure/services/README.md)
 - [Infrastructure Repositories](../../infrastructure/repositories/README.md)

@@ -1,49 +1,41 @@
 # RevenueCat Infrastructure Managers
 
+## Location
 Manager classes for coordinating RevenueCat operations.
 
-## Overview
+## Strategy
+This directory contains high-level manager classes that coordinate between different RevenueCat services and handle complex operations like SDK configuration and entitlement access.
 
-This directory contains high-level manager classes that coordinate between different RevenueCat services and handle complex operations.
+## Restrictions
 
-## Contents
+### REQUIRED
+- Must coordinate between services properly
+- Must manage SDK configuration correctly
+- Must provide access to entitlement IDs
+- Must handle complex operations safely
 
-- **SubscriptionManager.ts** - Manages RevenueCat configuration and entitlement access
+### PROHIBITED
+- DO NOT bypass service coordination
+- DO NOT misconfigure SDK
+- DO NOT expose invalid entitlement IDs
+- DO NOT oversimplify complex operations
 
-## SubscriptionManager
+### CRITICAL SAFETY
+- Service coordination MUST be correct
+- SDK configuration MUST be valid
+- Entitlement access MUST be safe
+- Complex operations MUST be handled properly
 
-Manages RevenueCat SDK configuration and provides access to entitlement IDs.
+## AI Agent Guidelines
+1. Coordinate properly between RevenueCat services
+2. Manage SDK configuration with correct parameters
+3. Provide safe access to entitlement IDs
+4. Handle complex operations with proper error handling
+5. Test coordination logic thoroughly
+6. Document manager responsibilities clearly
+7. Maintain separation of concerns
 
-### Key Methods
-
-```typescript
-class SubscriptionManager {
-  static configure(config: RevenueCatConfig): void;
-  static getEntitlementId(): string | null;
-  static getOfferings(): Promise<Offerings>;
-}
-```
-
-### Usage
-
-```typescript
-import { SubscriptionManager } from './managers/SubscriptionManager';
-
-// Configure at app startup
-SubscriptionManager.configure({
-  apiKey: 'your_api_key',
-  entitlementId: 'premium',
-});
-
-// Get entitlement ID
-const entitlementId = SubscriptionManager.getEntitlementId();
-
-// Get offerings
-const offerings = await SubscriptionManager.getOfferings();
-```
-
-## Related
-
+## Related Documentation
 - [Services](../services/README.md)
 - [Config](../config/README.md)
 - [Domain](../../domain/README.md)

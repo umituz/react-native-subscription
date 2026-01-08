@@ -1,246 +1,94 @@
 # SubscriptionSection Component
 
-Generic section component that renders subscription/premium details in settings screens.
+Section component displaying subscription status with details and actions.
 
-## Import
+## Location
 
-```typescript
-import { SubscriptionSection } from '@umituz/react-native-subscription';
-```
+**Import Path**: `@umituz/react-native-subscription`
 
-## Signature
+**File**: `src/presentation/components/sections/SubscriptionSection.tsx`
 
-```typescript
-interface SubscriptionSectionConfig {
-  statusType: 'active' | 'expired' | 'none' | 'canceled';
-  isPremium: boolean;
-  expirationDate?: string | null;
-  purchaseDate?: string | null;
-  isLifetime?: boolean;
-  daysRemaining?: number | null;
-  credits?: CreditInfo[];
-  translations: PremiumDetailsTranslations;
-  onManageSubscription?: () => void;
-  onUpgrade?: () => void;
-  onPress?: () => void;
-}
+**Type**: Component
 
-interface SubscriptionSectionProps {
-  config: SubscriptionSectionConfig;
-  containerStyle?: StyleProp<ViewStyle>;
-}
-```
+## Strategy
 
-## Props
+### Subscription Information Display
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `config` | `SubscriptionSectionConfig` | **Required** | Subscription configuration |
-| `containerStyle` | `StyleProp<ViewStyle>` | `undefined` | Optional container style |
+1. **Status Detection**: Display current subscription status (active/inactive/free)
+2. **Detail Rendering**: Show expiration date, renewal status, product info
+3. **Action Buttons**: Display manage or upgrade button based on status
+4. **Loading States**: Handle loading and error states gracefully
+5. **Translation Support**: Support custom translations for all text
+6. **Visual Hierarchy**: Clear structure with status badge, details, and actions
 
-## Basic Usage
+### Integration Points
 
-```typescript
-function SettingsScreen() {
-  const config = useSubscriptionSettingsConfig({
-    userId: user?.uid,
-    translations: englishTranslations,
-  });
+- **useSubscriptionStatus**: For subscription status data
+- **usePremium**: For premium status check
+- **DetailRow**: For displaying individual detail items
+- **PremiumStatusBadge**: For status badge display
+- **Navigation**: For manage/upgrade button actions
 
-  return (
-    <ScrollView>
-      <SubscriptionSection config={config.sectionConfig} />
-    </ScrollView>
-  );
-}
-```
+## Restrictions
 
-## Advanced Usage
+### REQUIRED
 
-### With Navigation
+- **Config Prop**: MUST provide valid subscription config object
+- **Callback Handling**: MUST implement button callbacks
+- **Loading State**: MUST handle loading state in UI
+- **Null Handling**: MUST handle null status values
 
-```typescript
-function SettingsScreen() {
-  const config = useSubscriptionSettingsConfig({
-    userId: user?.uid,
-    translations: englishTranslations,
-  });
+### PROHIBITED
 
-  return (
-    <SubscriptionSection
-      config={config.sectionConfig}
-      onPress={() => navigation.navigate('SubscriptionDetails')}
-    />
-  );
-}
-```
+- **NEVER** display without config data (show loading instead)
+- **NEVER** hardcode status text (use translations)
+- **DO NOT** show both manage and upgrade buttons simultaneously
+- **DO NOT** show buttons for loading state
 
-### With Custom Styling
+### CRITICAL SAFETY
 
-```typescript
-function StyledSettings() {
-  const config = useSubscriptionSettingsConfig({
-    userId: user?.uid,
-    translations: englishTranslations,
-  });
+- **ALWAYS** handle loading state before displaying data
+- **MUST** validate config object before rendering
+- **ALWAYS** provide clear button labels
+- **NEVER** expose sensitive implementation details
 
-  return (
-    <SubscriptionSection
-      config={config.sectionConfig}
-      containerStyle={{
-        marginHorizontal: 16,
-        marginVertical: 8,
-        borderRadius: 12,
-        overflow: 'hidden',
-      }}
-    />
-  );
-}
-```
+## AI Agent Guidelines
 
-### Complete Configuration
+### When Implementing Subscription Sections
 
-```typescript
-function CompleteSubscriptionSection() {
-  const { user } = useAuth();
-  const { isPremium } = usePremium();
-  const { credits } = useCredits();
+1. **Always** provide valid subscription config
+2. **Always** handle loading state
+3. **Always** implement both button callbacks
+4. **Always** use translations for localization
+5. **Never** hardcode status strings
 
-  const config = {
-    statusType: isPremium ? 'active' : 'none',
-    isPremium,
-    expirationDate: isPremium ? 'January 15, 2025' : null,
-    purchaseDate: isPremium ? 'January 15, 2024' : null,
-    isLifetime: false,
-    daysRemaining: isPremium ? 30 : null,
-    credits: [
-      {
-        id: 'monthly',
-        label: 'Monthly Credits',
-        current: credits,
-        total: 100,
-      },
-    ],
-    translations: {
-      title: 'Subscription',
-      statusLabel: 'Status',
-      statusActive: 'Active',
-      statusExpired: 'Expired',
-      statusFree: 'Free',
-      statusCanceled: 'Canceled',
-      expiresLabel: 'Expires on',
-      purchasedLabel: 'Purchased on',
-      lifetimeLabel: 'Lifetime Access',
-      creditsTitle: 'Credits',
-      remainingLabel: 'remaining',
-      manageButton: 'Manage Subscription',
-      upgradeButton: 'Upgrade to Premium',
-      freeDescription: 'Upgrade to access all features',
-    },
-    onManageSubscription: () => {
-      Linking.openURL('https://apps.apple.com/account/subscriptions');
-    },
-    onUpgrade: () => {
-      navigation.navigate('Paywall');
-    },
-    onPress: () => {
-      navigation.navigate('SubscriptionDetails');
-    },
-  };
+### Integration Checklist
 
-  return <SubscriptionSection config={config} />;
-}
-```
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid subscription config
+- [ ] Implement onUpgradePress callback
+- [ ] Implement onManagePress callback
+- [ ] Handle loading state
+- [ ] Handle null dates
+- [ ] Provide translations for localization
+- [ ] Test with active subscription
+- [ ] Test with expired subscription
+- [ ] Test with free user
+- [ ] Test with lifetime subscription
 
-## Examples
+### Common Patterns
 
-### Settings Integration
+1. **Settings Integration**: Add to settings screen
+2. **Profile Display**: Show in user profile
+3. **Status Card**: Display as standalone card
+4. **With Navigation**: Navigate to detailed management
+5. **Localized Display**: Use with i18n libraries
+6. **Conditional Rendering**: Show/hide based on auth state
 
-```typescript
-function AppSettings() {
-  const { user } = useAuth();
+## Related Documentation
 
-  const config = useSubscriptionSettingsConfig({
-    userId: user?.uid,
-    translations: {
-      title: 'Subscription',
-      description: 'Manage your subscription',
-      statusLabel: 'Status',
-      statusActive: 'Active',
-      statusExpired: 'Expired',
-      statusFree: 'Free',
-      statusCanceled: 'Canceled',
-      expiresLabel: 'Expires',
-      purchasedLabel: 'Purchased',
-      lifetimeLabel: 'Lifetime',
-      creditsTitle: 'Credits',
-      remainingLabel: 'remaining',
-      manageButton: 'Manage',
-      upgradeButton: 'Upgrade',
-      freeDescription: 'Upgrade for premium features',
-    },
-  });
-
-  return (
-    <ScrollView>
-      <Section title="Account">
-        <SettingsItem label="Email" value={user?.email} />
-        <SettingsItem label="Subscription" value={config.settingsItem.statusLabel} />
-      </Section>
-
-      <SubscriptionSection
-        config={config.sectionConfig}
-        onPress={() => navigation.navigate('SubscriptionDetails')}
-      />
-    </ScrollView>
-  );
-}
-```
-
-### With Conditional Display
-
-```typescript
-function ConditionalSubscriptionSection() {
-  const { user } = useAuth();
-  const { isPremium } = usePremium();
-
-  const config = useSubscriptionSettingsConfig({
-    userId: user?.uid,
-    translations: englishTranslations,
-  });
-
-  // Only show if user is authenticated
-  if (!user) return null;
-
-  return (
-    <SubscriptionSection
-      config={config.sectionConfig}
-      containerStyle={{
-        backgroundColor: isPremium ? '#FFF8E1' : '#F5F5F5',
-      }}
-    />
-  );
-}
-```
-
-## Best Practices
-
-1. **Use hook** - Get config from `useSubscriptionSettingsConfig`
-2. **Provide translations** - Ensure all strings are localized
-3. **Handle navigation** - Implement onPress for detail screen
-4. **Test states** - Active, expired, free, lifetime
-5. **Style consistently** - Match app design system
-6. **Handle actions** - Implement manage and upgrade handlers
-
-## Related Components
-
-- **PremiumDetailsCard** - The card component rendered inside
-- **PremiumStatusBadge** - Status badge component
-- **DetailRow** - Row component for details
-- **CreditRow** - Row component for credits
-
-## See Also
-
-- [useSubscriptionSettingsConfig](../../hooks/useSubscriptionSettingsConfig.md)
-- [Settings Screen](../../screens/README.md)
-- [Config Types](../../types/SubscriptionSettingsTypes.md)
+- **PremiumDetailsCard**: Detailed premium card
+- **DetailRow**: Individual detail item
+- **PremiumStatusBadge**: Status badge component
+- **Subscription Hooks**: `../../hooks/README.md`
+- **Sections README**: `./README.md`

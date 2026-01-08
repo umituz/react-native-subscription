@@ -15,19 +15,6 @@ This directory contains mapper functions that transform data between different l
 
 Mappers provide clean separation between layers:
 
-```
-External API → Mapper → Domain Entity
-Domain Entity → Mapper → DTO/Model
-```
-
-## Usage
-
-```typescript
-import { mapToSubscriptionStatus } from './mappers/subscriptionMapper';
-
-const entity = mapToSubscriptionStatus(apiResponse);
-```
-
 ## Related
 
 - [Models](../models/README.md)

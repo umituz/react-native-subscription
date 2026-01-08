@@ -2,451 +2,91 @@
 
 Automatically fetches premium status and provides tier information with repository integration.
 
-## Import
-
-```typescript
-import { useUserTierWithRepository } from '@umituz/react-native-subscription';
-```
-
-## Signature
-
-```typescript
-function useUserTierWithRepository(params: {
-  auth: AuthProvider;
-  repository: ISubscriptionRepository;
-}): {
-  tier: 'guest' | 'freemium' | 'premium';
-  isPremium: boolean;
-  isGuest: boolean;
-  isAuthenticated: boolean;
-  userId: string | null;
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => Promise<void>;
-}
-```
-
-## Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `auth` | `AuthProvider` | **Required** | Auth provider with user state |
-| `repository` | `ISubscriptionRepository` | **Required** | Subscription repository |
-
-## AuthProvider Interface
-
-```typescript
-interface AuthProvider {
-  user: { uid: string } | null;
-  isGuest: boolean;
-  isAuthenticated: boolean;
-}
-```
-
-## Returns
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `tier` | `'guest' \| 'freemium' \| 'premium'` | User tier |
-| `isPremium` | `boolean` | User has premium access |
-| `isGuest` | `boolean` | User is not authenticated |
-| `isAuthenticated` | `boolean` | User is authenticated |
-| `userId` | `string \| null` | User ID |
-| `isLoading` | `boolean` | Premium status is loading |
-| `error` | `string \| null` | Error message |
-| `refresh` | `() => Promise<void>` | Manually refresh premium status |
-
-## Basic Usage
-
-```typescript
-function UserTierDisplay() {
-  const auth = useAuth(); // Your auth hook
-  const subscriptionRepository = useSubscriptionRepository();
-
-  const {
-    tier,
-    isPremium,
-    isLoading,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  if (isLoading) return <ActivityIndicator />;
-
-  return (
-    <View>
-      <Text>Tier: {tier.toUpperCase()}</Text>
-      <Text>Status: {isPremium ? 'Premium' : 'Free'}</Text>
-    </View>
-  );
-}
-```
-
-## Advanced Usage
-
-### With Custom Auth Provider
-
-```typescript
-function WithCustomAuth() {
-  const authManager = useCustomAuthManager();
-
-  const authProvider = {
-    user: authManager.user ? { uid: authManager.user.id } : null,
-    isGuest: !authManager.user,
-    isAuthenticated: !!authManager.user,
-  };
-
-  const { tier, isPremium } = useUserTierWithRepository({
-    auth: authProvider,
-    repository: subscriptionRepository,
-  });
-
-  return (
-    <View>
-      <Badge text={tier} />
-      {isPremium && <PremiumBadge />}
-    </View>
-  );
-}
-```
-
-### With Firebase Auth
-
-```typescript
-function WithFirebaseAuth() {
-  const { user } = useFirebaseAuth();
-
-  const authProvider = useMemo(() => ({
-    user: user ? { uid: user.uid } : null,
-    isGuest: !user,
-    isAuthenticated: !!user,
-  }), [user]);
-
-  const { tier, isPremium, isLoading } = useUserTierWithRepository({
-    auth: authProvider,
-    repository: subscriptionRepository,
-  });
-
-  if (isLoading) return <LoadingScreen />;
-
-  return <TierBadge tier={tier} />;
-}
-```
-
-### With Error Handling
-
-```typescript
-function TierWithErrorHandling() {
-  const auth = useAuth();
-
-  const {
-    tier,
-    error,
-    isLoading,
-    refresh,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  useEffect(() => {
-    if (error) {
-      console.error('Failed to fetch tier:', error);
-      // Optionally show error to user
-    }
-  }, [error]);
-
-  if (isLoading) return <LoadingScreen />;
-
-  if (error) {
-    return (
-      <View>
-        <Text>Failed to load subscription status</Text>
-        <Button onPress={refresh} title="Retry" />
-      </View>
-    );
-  }
-
-  return <TierDisplay tier={tier} />;
-}
-```
-
-### With Manual Refresh
-
-```typescript
-function TierWithRefresh() {
-  const auth = useAuth();
-
-  const {
-    tier,
-    isLoading,
-    refresh,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  const handleRefresh = async () => {
-    await refresh();
-    Alert.alert('Success', 'Subscription status refreshed');
-  };
-
-  return (
-    <View>
-      <Text>Tier: {tier}</Text>
-
-      <Button
-        onPress={handleRefresh}
-        disabled={isLoading}
-        title="Refresh Status"
-      />
-    </View>
-  );
-}
-```
-
-### With Loading State
-
-```typescript
-function TierWithLoading() {
-  const auth = useAuth();
-
-  const {
-    tier,
-    isPremium,
-    isLoading,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  return (
-    <View>
-      <Text>Tier: {tier}</Text>
-      <Text>Premium: {isPremium ? 'Yes' : 'No'}</Text>
-
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" />
-          <Text>Checking subscription...</Text>
-        </View>
-      )}
-    </View>
-  );
-}
-```
-
-## Examples
-
-### Complete User Profile
-
-```typescript
-function UserProfile() {
-  const auth = useAuth();
-
-  const {
-    tier,
-    isPremium,
-    userId,
-    isLoading,
-    error,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  if (isLoading) return <LoadingScreen />;
-
-  return (
-    <ScrollView>
-      <UserHeader userId={userId} />
-
-      <View style={styles.section}>
-        <Text style={styles.label}>Account Status</Text>
-        <TierBadge tier={tier} />
-      </View>
-
-      {isPremium && (
-        <View style={styles.section}>
-          <Text style={styles.label}>Premium Benefits</Text>
-          <BenefitList />
-        </View>
-      )}
-
-      {!isPremium && tier !== 'guest' && (
-        <View style={styles.section}>
-          <Button
-            onPress={() => navigation.navigate('Paywall')}
-            title="Upgrade to Premium"
-          />
-        </View>
-      )}
-
-      {error && (
-        <ErrorBanner
-          message="Failed to load subscription status"
-          onRetry={() => refresh()}
-        />
-      )}
-    </ScrollView>
-  );
-}
-```
-
-### Navigation Guard
-
-```typescript
-function ProtectedScreen() {
-  const auth = useAuth();
-  const navigation = useNavigation();
-
-  const {
-    tier,
-    isLoading,
-  } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  useEffect(() => {
-    if (!isLoading && tier !== 'premium') {
-      navigation.replace('Paywall', {
-        returnTo: 'ProtectedScreen',
-      });
-    }
-  }, [tier, isLoading]);
-
-  if (isLoading) return <LoadingScreen />;
-  if (tier !== 'premium') return null;
-
-  return <ProtectedContent />;
-}
-```
-
-### Conditional Features
-
-```typescript
-function TierBasedFeatures() {
-  const auth = useAuth();
-
-  const { tier } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  return (
-    <View>
-      {/* Available to everyone */}
-      <BasicFeature />
-
-      {/* Available to freemium and premium */}
-      {(tier === 'freemium' || tier === 'premium') && (
-        <AuthenticatedFeature />
-      )}
-
-      {/* Premium only */}
-      {tier === 'premium' && (
-        <PremiumFeature />
-      )}
-    </View>
-  );
-}
-```
-
-### With Analytics
-
-```typescript
-function TierTracker() {
-  const auth = useAuth();
-
-  const { tier } = useUserTierWithRepository({
-    auth,
-    repository: subscriptionRepository,
-  });
-
-  const previousTier = useRef(tier);
-
-  useEffect(() => {
-    if (previousTier.current !== tier) {
-      analytics.track('tier_changed', {
-        from: previousTier.current,
-        to: tier,
-        timestamp: Date.now(),
-      });
-      previousTier.current = tier;
-    }
-  }, [tier]);
-
-  return <YourComponent />;
-}
-```
-
-## How It Works
-
-### Automatic Fetching
-
-```typescript
-// Mount with authenticated user
-auth.user = { uid: 'user-123' }
-auth.isAuthenticated = true
-→ Fetch premium status from repository ✅
-
-// Status returned
-tier = 'premium'
-isPremium = true
-isLoading = false ✅
-
-// User logs out
-auth.user = null
-auth.isAuthenticated = false
-→ No fetch (guest users can't be premium) ✅
-tier = 'guest'
-isPremium = false ✅
-```
-
-### Guest Users
-
-```typescript
-auth.user = null
-auth.isGuest = true
-auth.isAuthenticated = false
-
-// Hook doesn't fetch for guests
-tier = 'guest'
-isPremium = false
-isLoading = false (no fetch needed) ✅
-```
-
-### Abort Handling
-
-The hook uses AbortController for race condition prevention:
-
-```typescript
-// User changes quickly: A → B → A
-// Only the last user's status is set
-// Intermediate fetches are aborted ✅
-```
-
-## Best Practices
-
-1. **Provide valid auth** - Ensure auth provider has correct state
-2. **Handle loading** - Show loading during initial fetch
-3. **Handle errors** - Display error messages and retry option
-4. **Use refresh** - Call refresh when needed (e.g., after purchase)
-5. **Check tier** - Use tier for feature gating
-6. **Test transitions** - Verify guest → freemium → premium flows
-7. **Cache appropriately** - Repository should handle caching
-
-## Related Hooks
-
-- **useUserTier** - Tier logic without repository
-- **usePremium** - Premium status checking
-- **useAuthGate** - Authentication gating
-- **useSubscription** - Subscription details
-
-## See Also
-
-- [User Tier Guide](../../../docs/USER_TIER.md)
-- [Repository Pattern](../../infrastructure/repositories/README.md)
-- [Tier Utilities](../../utils/tierUtils.md)
+## Location
+
+**Import Path**: `@umituz/react-native-subscription`
+
+**File**: `src/presentation/hooks/useUserTierWithRepository.ts`
+
+**Type**: Hook
+
+## Strategy
+
+### Tier Determination with Repository
+
+1. **Auth State Check**: Use provided auth provider to check authentication
+2. **Premium Fetch**: Automatically fetch premium status from repository for authenticated users
+3. **Tier Assignment**: Assign tier based on auth + subscription (guest/freemium/premium)
+4. **Abort Control**: Use AbortController to prevent race conditions on rapid user changes
+5. **Guest Optimization**: Skip repository fetch for guest users (no fetch needed)
+6. **Real-time Updates**: React to auth state changes
+
+### Integration Points
+
+- **Auth Provider**: Custom auth provider with user state
+- **Subscription Repository**: `src/infrastructure/repositories/SubscriptionRepository.ts`
+- **Domain Layer**: `src/domain/entities/README.md`
+- **TanStack Query**: For caching and real-time updates
+
+## Restrictions
+
+### REQUIRED
+
+- **Auth Provider**: MUST provide valid auth provider object
+- **Repository**: MUST provide subscription repository
+- **Loading State**: MUST handle loading state
+- **Error Handling**: MUST handle error state
+
+### PROHIBITED
+
+- **NEVER** call without valid auth provider
+- **NEVER** call without valid repository
+- **DO NOT** hardcode tier values (use hook return values)
+- **DO NOT** assume instant data availability
+
+### CRITICAL SAFETY
+
+- **ALWAYS** check loading state before using tier values
+- **NEVER** trust client-side tier for security enforcement
+- **MUST** provide valid auth provider structure
+- **ALWAYS** handle tier transitions gracefully
+
+## AI Agent Guidelines
+
+### When Implementing Tier Determination
+
+1. **Always** provide valid auth provider with user, isGuest, isAuthenticated
+2. **Always** provide valid subscription repository
+3. **Always** handle loading state
+4. **Always** handle error state
+5. **Never** use for security decisions without server validation
+
+### Integration Checklist
+
+- [ ] Import from correct path: `@umituz/react-native-subscription`
+- [ ] Provide valid auth provider object
+- [ ] Provide valid subscription repository
+- [ ] Handle loading state
+- [ ] Handle error state
+- [ ] Use refresh() when needed
+- [ ] Test with guest user
+- [ ] Test with freemium user
+- [ ] Test with premium user
+- [ ] Test user switching scenarios
+
+### Common Patterns
+
+1. **Auth Provider Setup**: Use with Firebase, custom auth, or auth library
+2. **Tier-Based UI**: Show different features based on tier
+3. **Navigation Guards**: Redirect based on tier requirements
+4. **Tier Monitoring**: Track tier changes for analytics
+5. **Manual Refresh**: Call refresh() after subscription changes
+
+## Related Documentation
+
+- **useUserTier**: Tier logic without repository
+- **usePremium**: Premium status checking
+- **useAuthGate**: Authentication gating
+- **useSubscription**: Subscription details
+- **Repository Pattern**: `src/infrastructure/repositories/README.md`
+- **User Tier Utils**: `src/utils/README.md`

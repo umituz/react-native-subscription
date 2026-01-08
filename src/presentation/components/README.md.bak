@@ -72,6 +72,68 @@ All components follow these principles:
 - **MUST** implement proper error boundaries
 - **ALWAYS** sanitize user-provided content
 
+## Rules
+
+### Component Structure
+
+**CORRECT**: Proper component structure
+- Define TypeScript interface for component props
+- List all required props (amount, isLoading, onPress)
+- List optional props with question marks
+- Destructure props in function signature
+- Check loading state and return SkeletonLoader
+- Render TouchableOpacity with conditional disabled
+- Display text content
+
+**INCORRECT**: No props interface
+- Don't create components without TypeScript interfaces
+- Never omit type definitions for props
+- Don't use any type or skip type checking
+
+### Theme Usage
+
+**CORRECT**: Use theme for styling
+- Import and use useTheme hook
+- Access colors from theme object
+- Apply theme colors to styles
+- Use semantic color names (primary, onPrimary)
+
+**INCORRECT**: Hardcoded colors
+- Don't use hex color codes directly in styles
+- Never hardcode values like '#007AFF' or '#FFFFFF'
+- Don't skip theme integration
+- Avoid inline color values
+
+### Accessibility
+
+**CORRECT**: Accessibility support
+- Define accessibilityLabel prop for Button
+- Define accessibilityHint for additional context
+- Set accessibilityState with disabled condition
+- Provide clear, descriptive labels
+- Include hints for complex interactions
+
+**INCORRECT**: No accessibility
+- Don't create components without a11y labels
+- Never skip accessibilityHint for complex UI
+- Don't omit accessibilityState for interactive elements
+- Avoid non-descriptive labels
+
+### Conditional Rendering
+
+**CORRECT**: Handle all states
+- Check if loading and return SkeletonLoader
+- Check if error and return ErrorDisplay
+- Check if credits is undefined and return Placeholder
+- Render content only when all states are valid
+- Handle all possible state combinations
+
+**INCORRECT**: Incomplete state handling
+- Don't render content without checking error state
+- Never assume data is always defined
+- Don't skip placeholder for undefined data
+- Avoid incomplete conditional chains
+
 ## AI Agent Guidelines
 
 ### When Building Components
