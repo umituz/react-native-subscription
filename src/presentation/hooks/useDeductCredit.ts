@@ -9,7 +9,7 @@ import type { UserCredits } from "../../domain/entities/Credits";
 import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import { creditsQueryKeys } from "./useCredits";
 
-import { timezoneService } from "@umituz/react-native-timezone";
+import { timezoneService } from "@umituz/react-native-design-system";
 
 export interface UseDeductCreditParams {
   userId: string | undefined;

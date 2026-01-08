@@ -12,7 +12,7 @@ import {
     AtomicText,
     AtomicIcon,
 } from "@umituz/react-native-design-system";
-import { timezoneService } from "@umituz/react-native-timezone";
+import { timezoneService } from "@umituz/react-native-design-system";
 import type { CreditLog, TransactionReason } from "../../domain/types/transaction.types";
 
 export interface TransactionItemTranslations {

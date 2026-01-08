@@ -1,4 +1,4 @@
-import { timezoneService } from "@umituz/react-native-timezone";
+import { timezoneService } from "@umituz/react-native-design-system";
 
 /**
  * Converts Firestore timestamp or Date to ISO string

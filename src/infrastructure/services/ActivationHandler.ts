@@ -1,4 +1,4 @@
-import { timezoneService } from "@umituz/react-native-timezone";
+import { timezoneService } from "@umituz/react-native-design-system";
 import type { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
 import { SubscriptionRepositoryError } from "../../domain/errors/SubscriptionError";

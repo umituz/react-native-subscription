@@ -24,12 +24,13 @@ export function useCreditsArray(
 ): CreditsInfo[] {
   return useMemo(() => {
     if (!credits) return [];
+    const validCredits = isNaN(credits.credits) ? 0 : credits.credits;
     return [
       {
         id: "credits",
         label: translations.creditsLabel || "Credits",
-        current: credits.credits,
-        total: creditLimit ?? credits.credits,
+        current: validCredits,
+        total: creditLimit ?? validCredits,
       },
     ];
   }, [credits, creditLimit, translations.creditsLabel]);

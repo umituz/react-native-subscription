@@ -3,7 +3,7 @@
  * Database-first subscription management
  */
 
-import { timezoneService } from "@umituz/react-native-timezone";
+import { timezoneService } from "@umituz/react-native-design-system";
 import type { ISubscriptionService } from "../../application/ports/ISubscriptionService";
 import type { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
 import type { SubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
