@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useStorage } from '@umituz/react-native-storage';
+import { useStorage } from '@umituz/react-native-design-system';
 
 const PAYWALL_SHOWN_KEY = 'post_onboarding_paywall_shown';
 
