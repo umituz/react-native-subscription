@@ -30,6 +30,8 @@ export interface PaywallContainerProps {
   readonly creditAmounts?: Record<string, number>;
   /** Custom filter config for package categorization */
   readonly packageFilterConfig?: PackageFilterConfig;
+  /** Source of the paywall - affects pending purchase handling */
+  readonly source?: "postOnboarding" | "inApp";
   /** Callback when purchase succeeds */
   readonly onPurchaseSuccess?: () => void;
   /** Callback when purchase fails */
