@@ -3,6 +3,8 @@
  * Shared utilities for subscription hook operations
  */
 
+import { getSubscriptionService } from "../../infrastructure/services/SubscriptionService";
+
 export type AsyncSubscriptionOperation<T> = () => Promise<T>;
 
 /**
@@ -10,7 +12,7 @@ export type AsyncSubscriptionOperation<T> = () => Promise<T>;
  */
 export interface ServiceCheckResult {
   success: boolean;
-  service: ReturnType<typeof import("../../infrastructure/services/SubscriptionService").getSubscriptionService> | null;
+  service: ReturnType<typeof getSubscriptionService> | null;
   error?: string;
 }
 
@@ -19,7 +21,6 @@ export interface ServiceCheckResult {
  * Returns service instance or error
  */
 export function checkSubscriptionService(): ServiceCheckResult {
-  const { getSubscriptionService } = require("../../infrastructure/services/SubscriptionService");
   const service = getSubscriptionService();
 
   if (!service) {

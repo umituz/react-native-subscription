@@ -22,7 +22,6 @@ import type {
   UseSubscriptionSettingsConfigParams,
 } from "../types/SubscriptionSettingsTypes";
 
-// Re-export types for convenience
 export type {
   SubscriptionSettingsConfig,
   SubscriptionSettingsItemConfig,

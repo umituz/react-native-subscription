@@ -114,7 +114,6 @@ export function useFeatureGate(
   };
 }
 
-// Re-export individual gates for standalone use
 export { useAuthGate, useSubscriptionGate, useCreditsGate };
 export type {
   UseAuthGateParams,
