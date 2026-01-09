@@ -32,7 +32,6 @@
     "url": "git+https://github.com/umituz/react-native-subscription.git"
   },
   "dependencies": {
-    "@umituz/react-native-design-system": "latest",
     "@umituz/react-native-firebase": "latest",
     "@umituz/react-native-storage": "latest"
   },
@@ -58,14 +57,14 @@
     "@types/react": "~19.1.10",
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
-    "@umituz/react-native-auth": "^3.4.26",
-    "@umituz/react-native-design-system": "^2.8.5",
-    "@umituz/react-native-filesystem": "^2.1.21",
+    "@umituz/react-native-auth": "*",
+    "@umituz/react-native-design-system": "*",
+    "@umituz/react-native-filesystem": "*",
     "@umituz/react-native-firebase": "*",
-    "@umituz/react-native-haptics": "^1.0.5",
-    "@umituz/react-native-localization": "^3.5.52",
+    "@umituz/react-native-haptics": "*",
+    "@umituz/react-native-localization": "*",
     "@umituz/react-native-storage": "*",
-    "@umituz/react-native-uuid": "^1.2.6",
+    "@umituz/react-native-uuid": "*",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
