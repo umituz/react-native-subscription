@@ -6,7 +6,6 @@
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
-import { getExpirationDate } from "../utils/ExpirationDateCalculator";
 
 export interface PremiumStatus {
   isPremium: boolean;
@@ -115,53 +114,15 @@ export class PackageHandler {
   }
 
   checkPremiumStatusFromInfo(customerInfo: CustomerInfo): PremiumStatus {
-    // First, check active entitlements (standard case)
-    const activeEntitlement = getPremiumEntitlement(
-      customerInfo,
-      this.entitlementId
-    );
+    const entitlement = getPremiumEntitlement(customerInfo, this.entitlementId);
 
-    if (activeEntitlement) {
-      const adjustedExpiration = getExpirationDate(activeEntitlement);
+    if (entitlement) {
       return {
         isPremium: true,
-        expirationDate: adjustedExpiration ? new Date(adjustedExpiration) : null,
+        expirationDate: entitlement.expirationDate
+          ? new Date(entitlement.expirationDate)
+          : null,
       };
-    }
-
-    // Edge case: Check all entitlements (including expired ones)
-    // This handles the bug where RevenueCat hasn't updated the expiration date yet
-    const allEntitlements = customerInfo.entitlements.all[this.entitlementId];
-
-    if (allEntitlements) {
-      const entitlementData = {
-        identifier: allEntitlements.identifier,
-        productIdentifier: allEntitlements.productIdentifier,
-        isSandbox: allEntitlements.isSandbox,
-        willRenew: allEntitlements.willRenew,
-        periodType: allEntitlements.periodType,
-        latestPurchaseDate: allEntitlements.latestPurchaseDate,
-        originalPurchaseDate: allEntitlements.originalPurchaseDate,
-        expirationDate: allEntitlements.expirationDate,
-        unsubscribeDetectedAt: allEntitlements.unsubscribeDetectedAt,
-        billingIssueDetectedAt: allEntitlements.billingIssueDetectedAt,
-      };
-
-      // Get adjusted expiration date
-      const adjustedExpiration = getExpirationDate(entitlementData);
-
-      if (adjustedExpiration) {
-        const expirationDate = new Date(adjustedExpiration);
-        const now = new Date();
-
-        // If adjusted expiration is in the future, user is premium
-        if (expirationDate > now) {
-          return {
-            isPremium: true,
-            expirationDate,
-          };
-        }
-      }
     }
 
     return {

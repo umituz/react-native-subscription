@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-subscription",
-  "version": "2.15.3",
+  "version": "2.16.1",
   "description": "Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -59,7 +59,7 @@
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "@umituz/react-native-auth": "^3.4.26",
-    "@umituz/react-native-design-system": "^2.6.82",
+    "@umituz/react-native-design-system": "^2.8.5",
     "@umituz/react-native-filesystem": "^2.1.21",
     "@umituz/react-native-firebase": "*",
     "@umituz/react-native-haptics": "^1.0.5",

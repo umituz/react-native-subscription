@@ -67,6 +67,51 @@ This package provides comprehensive subscription and credit management with:
 - **State Management**: `@tanstack/react-query` >= 5.0.0
 - **React Native**: `react-native` >= 0.74.0
 
+## RevenueCat Best Practices
+
+This package follows RevenueCat's official best practices:
+
+### 1. Trust RevenueCat Data
+
+- **Expiration dates**: Use RevenueCat's `expirationDate` directly without modification
+- **Premium status**: Check `customerInfo.entitlements.active['premium']`
+- **Server-side validation**: RevenueCat handles receipt validation server-side
+
+### 2. CustomerInfo Listener
+
+```typescript
+// Real-time subscription updates via listener
+Purchases.addCustomerInfoUpdateListener((info) => {
+  const isPremium = !!info.entitlements.active['premium'];
+  const expirationDate = info.entitlements.active['premium']?.expirationDate;
+});
+```
+
+### 3. Entitlements-Based Access
+
+- Use entitlements (not product IDs) to gate features
+- Entitlements abstract away platform differences (iOS/Android)
+- Single source of truth for premium access
+
+### 4. Testing Guidelines
+
+- **Real devices only**: Simulators don't support in-app purchases
+- **TestFlight uses Sandbox**: Short expiration times (5 min for monthly)
+- **App Store Connect delays**: Changes can take hours to propagate
+
+### 5. Anonymous to Identified User Transfer
+
+When user converts from anonymous to identified:
+- `Purchases.logIn(userId)` handles user identity
+- Configure "Transfer if no purchases" in RevenueCat dashboard
+- Use `restorePurchases()` for explicit restore
+
+### Sources
+
+- [RevenueCat React Native SDK](https://github.com/RevenueCat/react-native-purchases)
+- [RevenueCat Documentation](https://www.revenuecat.com/docs/getting-started/installation/reactnative)
+- [Best Practices Guide](https://www.revenuecat.com/blog/engineering/ad-free-subscriptions-in-react-native/)
+
 ## Restrictions
 
 ### REQUIRED

@@ -6,7 +6,6 @@
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
-import { getExpirationDate } from "./ExpirationDateCalculator";
 
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
@@ -17,21 +16,18 @@ export async function syncPremiumStatus(
         return;
     }
 
-    const entitlementIdentifier = config.entitlementIdentifier;
     const premiumEntitlement = getPremiumEntitlement(
         customerInfo,
-        entitlementIdentifier
+        config.entitlementIdentifier
     );
 
     try {
         if (premiumEntitlement) {
-            const productId = premiumEntitlement.productIdentifier;
-            const expiresAt = getExpirationDate(premiumEntitlement);
             await config.onPremiumStatusChanged(
                 userId,
                 true,
-                productId,
-                expiresAt || undefined
+                premiumEntitlement.productIdentifier,
+                premiumEntitlement.expirationDate ?? undefined
             );
         } else {
             await config.onPremiumStatusChanged(userId, false);

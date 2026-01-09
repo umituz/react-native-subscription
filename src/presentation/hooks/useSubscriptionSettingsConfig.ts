@@ -74,9 +74,8 @@ export const useSubscriptionSettingsConfig = (
     return allocation ?? creditLimit ?? config.creditLimit;
   }, [premiumEntitlement?.productIdentifier, creditLimit]);
 
-  // Get expiration date from RevenueCat entitlement (source of truth)
-  // premiumEntitlement.expirationDate is an ISO string from RevenueCat
-  const entitlementExpirationDate = premiumEntitlement?.expirationDate || null;
+  // Get expiration date directly from RevenueCat (source of truth)
+  const entitlementExpirationDate = premiumEntitlement?.expirationDate ?? null;
 
   // Prefer CustomerInfo expiration (real-time) over cached status
   const expiresAtIso = entitlementExpirationDate || (statusExpirationDate
