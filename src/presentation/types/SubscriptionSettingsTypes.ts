@@ -52,7 +52,7 @@ export interface SubscriptionSettingsTranslations {
   manageButton: string;
   upgradeButton: string;
   /** Credit label (e.g., "Credits") */
-  creditsLabel?: string;
+  creditsLabel: string;
 }
 
 /** Parameters for useSubscriptionSettingsConfig hook */
