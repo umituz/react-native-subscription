@@ -13,6 +13,9 @@ import { calculateDaysRemaining } from "../../domain/entities/SubscriptionStatus
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 import { formatDate, convertPurchasedAt } from "../utils/subscriptionDateUtils";
 import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
+import { getCreditsConfig } from "../../infrastructure/repositories/CreditsRepositoryProvider";
+import { detectPackageType } from "../../utils/packageTypeDetector";
+import { getCreditAllocation } from "../../utils/creditMapper";
 import type {
   SubscriptionSettingsConfig,
   SubscriptionStatusType,
@@ -61,6 +64,16 @@ export const useSubscriptionSettingsConfig = (
   // This is the source of truth, subscriptionActive is just a backup
   const isPremium = !!premiumEntitlement || subscriptionActive;
 
+  const dynamicCreditLimit = useMemo(() => {
+    if (!premiumEntitlement?.productIdentifier) {
+      return creditLimit;
+    }
+    const config = getCreditsConfig();
+    const packageType = detectPackageType(premiumEntitlement.productIdentifier);
+    const allocation = getCreditAllocation(packageType, config.packageAllocations);
+    return allocation ?? creditLimit ?? config.creditLimit;
+  }, [premiumEntitlement?.productIdentifier, creditLimit]);
+
   // Get expiration date from RevenueCat entitlement (source of truth)
   // premiumEntitlement.expirationDate is an ISO string from RevenueCat
   const entitlementExpirationDate = premiumEntitlement?.expirationDate || null;
@@ -95,8 +108,7 @@ export const useSubscriptionSettingsConfig = (
   // Status type
   const statusType: SubscriptionStatusType = getSubscriptionStatusType(isPremium);
 
-  // Credits array
-  const creditsArray = useCreditsArray(credits, creditLimit, translations);
+  const creditsArray = useCreditsArray(credits, dynamicCreditLimit, translations);
 
   // Build config
   const config = useMemo(

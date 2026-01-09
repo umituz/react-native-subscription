@@ -28,7 +28,7 @@ export function useCreditsArray(
     return [
       {
         id: "credits",
-        label: translations.creditsLabel || "Credits",
+        label: translations.creditsLabel,
         current: validCredits,
         total: creditLimit ?? validCredits,
       },

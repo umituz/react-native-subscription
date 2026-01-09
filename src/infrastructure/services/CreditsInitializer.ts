@@ -38,7 +38,7 @@ export async function initializeCreditsTransaction(
                 } as any;
             }
 
-            newCredits = (existing.credits || 0) + config.creditLimit;
+            newCredits = config.creditLimit;
 
             if (existing.purchasedAt) {
                 purchasedAt = existing.purchasedAt as unknown as FieldValue;
