@@ -8,6 +8,7 @@ declare const __DEV__: boolean;
 interface UsePaywallActionsProps {
   userId?: string;
   isAnonymous: boolean;
+  source?: string;
   onPurchaseSuccess?: () => void;
   onPurchaseError?: (error: string) => void;
   onAuthRequired?: () => void;
