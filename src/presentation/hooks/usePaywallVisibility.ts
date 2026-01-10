@@ -5,10 +5,16 @@
  */
 
 import { useCallback, useSyncExternalStore } from "react";
+import type { PurchaseSource } from "../../domain/entities/Credits";
 
 type Listener = () => void;
 
-let paywallVisible = false;
+interface PaywallState {
+  visible: boolean;
+  source?: PurchaseSource;
+}
+
+let paywallState: PaywallState = { visible: false, source: undefined };
 const listeners = new Set<Listener>();
 
 const subscribe = (listener: Listener): (() => void) => {
@@ -16,10 +22,10 @@ const subscribe = (listener: Listener): (() => void) => {
   return () => listeners.delete(listener);
 };
 
-const getSnapshot = (): boolean => paywallVisible;
+const getSnapshot = (): PaywallState => paywallState;
 
-const setPaywallVisible = (visible: boolean): void => {
-  paywallVisible = visible;
+const setPaywallState = (visible: boolean, source?: PurchaseSource): void => {
+  paywallState = { visible, source };
   listeners.forEach((listener) => listener());
 };
 
@@ -27,35 +33,38 @@ const setPaywallVisible = (visible: boolean): void => {
  * Direct paywall control for non-React contexts (e.g., appInitializer)
  */
 export const paywallControl = {
-  open: () => setPaywallVisible(true),
-  close: () => setPaywallVisible(false),
-  isOpen: () => paywallVisible,
+  open: (source?: PurchaseSource) => setPaywallState(true, source),
+  close: () => setPaywallState(false, undefined),
+  isOpen: () => paywallState.visible,
+  getSource: () => paywallState.source,
 };
 
 export interface UsePaywallVisibilityResult {
   showPaywall: boolean;
-  setShowPaywall: (visible: boolean) => void;
-  openPaywall: () => void;
+  currentSource?: PurchaseSource;
+  setShowPaywall: (visible: boolean, source?: PurchaseSource) => void;
+  openPaywall: (source?: PurchaseSource) => void;
   closePaywall: () => void;
 }
 
 export function usePaywallVisibility(): UsePaywallVisibilityResult {
-  const showPaywall = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  const setShowPaywall = useCallback((visible: boolean) => {
-    setPaywallVisible(visible);
+  const setShowPaywall = useCallback((visible: boolean, source?: PurchaseSource) => {
+    setPaywallState(visible, source);
   }, []);
 
-  const openPaywall = useCallback(() => {
-    setPaywallVisible(true);
+  const openPaywall = useCallback((source?: PurchaseSource) => {
+    setPaywallState(true, source);
   }, []);
 
   const closePaywall = useCallback(() => {
-    setPaywallVisible(false);
+    setPaywallState(false, undefined);
   }, []);
 
   return {
-    showPaywall,
+    showPaywall: state.visible,
+    currentSource: state.source,
     setShowPaywall,
     openPaywall,
     closePaywall,

@@ -13,17 +13,19 @@ import { usePaywallActions } from "../hooks/usePaywallActions";
 import type { PaywallContainerProps } from "./PaywallContainer.types";
 
 export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
-  const { userId, isAnonymous = false, translations, mode = "subscription", legalUrls, features, heroImage, bestValueIdentifier, creditsLabel, creditAmounts, packageFilterConfig, source = "settings", onPurchaseSuccess, onPurchaseError, onAuthRequired, visible, onClose } = props;
+  const { userId, isAnonymous = false, translations, mode = "subscription", legalUrls, features, heroImage, bestValueIdentifier, creditsLabel, creditAmounts, packageFilterConfig, source, onPurchaseSuccess, onPurchaseError, onAuthRequired, visible, onClose } = props;
 
-  const { showPaywall, closePaywall } = usePaywallVisibility();
+  const { showPaywall, closePaywall, currentSource } = usePaywallVisibility();
   const isVisible = visible ?? showPaywall;
   const handleClose = onClose ?? closePaywall;
+
+  const purchaseSource = source ?? currentSource ?? "settings";
 
   const { data: allPackages = [], isLoading } = useSubscriptionPackages(userId ?? undefined);
   const { handlePurchase, handleRestore } = usePaywallActions({
     userId: userId ?? undefined,
     isAnonymous,
-    source,
+    source: purchaseSource,
     onPurchaseSuccess,
     onPurchaseError,
     onAuthRequired,
