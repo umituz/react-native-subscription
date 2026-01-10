@@ -67,8 +67,9 @@ export function useCompletePendingPurchase({
       });
     }
 
-    // Clear pending BEFORE purchase to prevent double processing
+    // Clear pending and close paywall BEFORE purchase to prevent double processing
     clearPendingPurchase();
+    closePaywall();
 
     try {
       const result = await purchasePackage(pkg);
@@ -76,7 +77,6 @@ export function useCompletePendingPurchase({
       if (result.success) {
         if (__DEV__) console.log("[CompletePendingPurchase] Purchase SUCCESS");
         onPurchaseSuccess?.();
-        closePaywall();
         return true;
       } else {
         if (__DEV__) console.log("[CompletePendingPurchase] Purchase FAILED");
