@@ -64,14 +64,23 @@ export const useSubscriptionSettingsConfig = (
   const isPremium = !!premiumEntitlement || subscriptionActive;
 
   const dynamicCreditLimit = useMemo(() => {
-    if (!premiumEntitlement?.productIdentifier) {
-      return creditLimit;
-    }
     const config = getCreditsConfig();
-    const packageType = detectPackageType(premiumEntitlement.productIdentifier);
-    const allocation = getCreditAllocation(packageType, config.packageAllocations);
-    return allocation ?? creditLimit ?? config.creditLimit;
-  }, [premiumEntitlement?.productIdentifier, creditLimit]);
+
+    if (premiumEntitlement?.productIdentifier) {
+      const packageType = detectPackageType(premiumEntitlement.productIdentifier);
+      const allocation = getCreditAllocation(packageType, config.packageAllocations);
+      if (allocation !== null) return allocation;
+    }
+
+    if (credits?.credits && config.packageAllocations) {
+      const currentCredits = credits.credits;
+      const allocations = Object.values(config.packageAllocations).map(a => a.credits);
+      const closest = allocations.find(a => a >= currentCredits) || Math.max(...allocations);
+      return closest;
+    }
+
+    return creditLimit ?? config.creditLimit;
+  }, [premiumEntitlement?.productIdentifier, credits?.credits, creditLimit]);
 
   // Get expiration date directly from RevenueCat (source of truth)
   const entitlementExpirationDate = premiumEntitlement?.expirationDate ?? null;

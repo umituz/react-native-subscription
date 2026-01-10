@@ -57,7 +57,6 @@ export async function initializeCreditsTransaction(
             processedPurchases,
         };
 
-        // Use merge:true to avoid overwriting other user fields
         transaction.set(creditsRef, creditsData, { merge: true });
 
         return { credits: newCredits };

@@ -47,13 +47,13 @@ export class CreditsRepository extends BaseRepository {
         }
       }
       const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId);
-      return { 
-        success: true, 
+      return {
+        success: true,
         data: CreditsMapper.toEntity({
             ...res,
             purchasedAt: undefined,
             lastUpdatedAt: undefined,
-        }) 
+        })
       };
     } catch (e: any) { return { success: false, error: { message: e.message, code: "INIT_ERR" } }; }
   }
