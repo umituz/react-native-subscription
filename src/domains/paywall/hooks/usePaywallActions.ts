@@ -1,14 +1,15 @@
 import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
-import { usePurchasePackage } from "../../../revenuecat/presentation/hooks/usePurchasePackage";
 import { useRestorePurchase } from "../../../revenuecat/presentation/hooks/useRestorePurchase";
+import { useAuthAwarePurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
+import type { PurchaseSource } from "../../../domain/entities/Credits";
 
 declare const __DEV__: boolean;
 
 interface UsePaywallActionsProps {
   userId?: string;
   isAnonymous: boolean;
-  source?: string;
+  source?: PurchaseSource;
   onPurchaseSuccess?: () => void;
   onPurchaseError?: (error: string) => void;
   onAuthRequired?: () => void;
@@ -18,12 +19,13 @@ interface UsePaywallActionsProps {
 export const usePaywallActions = ({
   userId,
   isAnonymous,
+  source,
   onPurchaseSuccess,
   onPurchaseError,
   onAuthRequired,
   onClose,
 }: UsePaywallActionsProps) => {
-  const { mutateAsync: purchasePackage } = usePurchasePackage(userId);
+  const { handlePurchase: authAwarePurchase } = useAuthAwarePurchase({ source });
   const { mutateAsync: restorePurchases } = useRestorePurchase(userId);
 
   const handlePurchase = useCallback(async (pkg: PurchasesPackage) => {
@@ -35,8 +37,8 @@ export const usePaywallActions = ({
 
     try {
       if (__DEV__) console.log("[PaywallActions] Purchase started:", pkg.product.identifier);
-      const res = await purchasePackage(pkg);
-      if (res.success) {
+      const res = await authAwarePurchase(pkg, source);
+      if (res) {
         onPurchaseSuccess?.();
         onClose();
       }
@@ -44,7 +46,7 @@ export const usePaywallActions = ({
       const message = err instanceof Error ? err.message : String(err);
       onPurchaseError?.(message);
     }
-  }, [isAnonymous, purchasePackage, onClose, onPurchaseSuccess, onPurchaseError, onAuthRequired]);
+  }, [isAnonymous, authAwarePurchase, source, onClose, onPurchaseSuccess, onPurchaseError, onAuthRequired]);
 
   const handleRestore = useCallback(async () => {
     try {
@@ -60,5 +62,5 @@ export const usePaywallActions = ({
     }
   }, [restorePurchases, onClose, onPurchaseSuccess, onPurchaseError]);
 
-  return { handlePurchase, handleRestore, purchasePackage };
+  return { handlePurchase, handleRestore };
 };

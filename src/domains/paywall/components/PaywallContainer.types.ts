@@ -6,6 +6,7 @@
 import type { ImageSourcePropType } from "react-native";
 import type { PaywallMode, PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities";
 import type { PackageFilterConfig } from "../../../utils/packageFilter";
+import type { PurchaseSource } from "../../../domain/entities/Credits";
 
 export interface PaywallContainerProps {
   /** User ID for subscription management */
@@ -31,7 +32,7 @@ export interface PaywallContainerProps {
   /** Custom filter config for package categorization */
   readonly packageFilterConfig?: PackageFilterConfig;
   /** Source of the paywall - affects pending purchase handling */
-  readonly source?: "postOnboarding" | "inApp";
+  readonly source?: PurchaseSource;
   /** Callback when purchase succeeds */
   readonly onPurchaseSuccess?: () => void;
   /** Callback when purchase fails */
