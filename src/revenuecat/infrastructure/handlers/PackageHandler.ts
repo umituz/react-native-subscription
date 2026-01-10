@@ -58,6 +58,15 @@ export class PackageHandler {
   }
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {
+    if (__DEV__) {
+      console.log('[DEBUG PackageHandler] purchase() called', {
+        productId: pkg.product.identifier,
+        userId,
+        serviceExists: !!this.service,
+        isInitialized: this.service?.isInitialized(),
+      });
+    }
+
     if (!this.service?.isInitialized()) {
       if (__DEV__) {
         console.log('[DEBUG PackageHandler] Service not initialized', {
@@ -68,7 +77,17 @@ export class PackageHandler {
     }
 
     try {
+      if (__DEV__) {
+        console.log('[DEBUG PackageHandler] Calling service.purchasePackage...');
+      }
       const result = await this.service.purchasePackage(pkg, userId);
+      if (__DEV__) {
+        console.log('[DEBUG PackageHandler] Purchase result:', {
+          success: result.success,
+          productId: pkg.product.identifier,
+          isPremium: result.isPremium,
+        });
+      }
       return result.success;
     } catch (error) {
       if (__DEV__) {

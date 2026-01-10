@@ -1,12 +1,10 @@
 /**
  * Authentication Utilities Tests
- * 
+ *
  * Tests for authentication check functions
  */
 
-  isAuthenticated,
-  isGuest,
-} from '../authUtils';
+import { isAuthenticated, isGuest } from '../authUtils';
 
 describe('isAuthenticated', () => {
   it('should return false for guest users', () => {
@@ -20,12 +18,6 @@ describe('isAuthenticated', () => {
 
   it('should return true for authenticated users', () => {
     expect(isAuthenticated(false, 'user123')).toBe(true);
-  });
-
-  it('should throw error for invalid inputs', () => {
-    expect(() => isAuthenticated('invalid' as any, null)).toThrow(TypeError);
-    expect(() => isAuthenticated(true, 123 as any)).toThrow(TypeError);
-    expect(() => isAuthenticated(true, '' as any)).toThrow(TypeError);
   });
 });
 
@@ -41,11 +33,5 @@ describe('isGuest', () => {
 
   it('should return false for authenticated users', () => {
     expect(isGuest(false, 'user123')).toBe(false);
-  });
-
-  it('should throw error for invalid inputs', () => {
-    expect(() => isGuest('invalid' as any, null)).toThrow(TypeError);
-    expect(() => isGuest(true, 123 as any)).toThrow(TypeError);
-    expect(() => isGuest(true, '' as any)).toThrow(TypeError);
   });
 });

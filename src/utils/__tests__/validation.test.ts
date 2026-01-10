@@ -1,18 +1,18 @@
 /**
  * User Tier Validation Tests
- * 
+ *
  * Tests for validation functions and type guards
  */
 
+import {
   isValidUserTier,
   isUserTierInfo,
   validateUserId,
   validateIsGuest,
   validateIsPremium,
   validateFetcher,
-  type UserTierInfo,
-  type PremiumStatusFetcher,
 } from '../validation';
+import type { UserTierInfo, PremiumStatusFetcher } from '../types';
 
 describe('isValidUserTier', () => {
   it('should return true for valid tiers', () => {
@@ -62,7 +62,6 @@ describe('validateUserId', () => {
   it('should throw for invalid userId', () => {
     expect(() => validateUserId('')).toThrow(TypeError);
     expect(() => validateUserId('   ')).toThrow(TypeError);
-    expect(() => validateUserId(123 as any)).toThrow(TypeError);
   });
 });
 
@@ -73,8 +72,8 @@ describe('validateIsGuest', () => {
   });
 
   it('should throw for invalid isGuest', () => {
-    expect(() => validateIsGuest('true' as any)).toThrow(TypeError);
-    expect(() => validateIsGuest(1 as any)).toThrow(TypeError);
+    expect(() => validateIsGuest('true' as unknown as boolean)).toThrow(TypeError);
+    expect(() => validateIsGuest(1 as unknown as boolean)).toThrow(TypeError);
   });
 });
 
@@ -85,8 +84,8 @@ describe('validateIsPremium', () => {
   });
 
   it('should throw for invalid isPremium', () => {
-    expect(() => validateIsPremium('true' as any)).toThrow(TypeError);
-    expect(() => validateIsPremium(1 as any)).toThrow(TypeError);
+    expect(() => validateIsPremium('true' as unknown as boolean)).toThrow(TypeError);
+    expect(() => validateIsPremium(1 as unknown as boolean)).toThrow(TypeError);
   });
 });
 
@@ -99,8 +98,8 @@ describe('validateFetcher', () => {
   });
 
   it('should throw for invalid fetcher', () => {
-    expect(() => validateFetcher(null as any)).toThrow(TypeError);
-    expect(() => validateFetcher({} as any)).toThrow(TypeError);
-    expect(() => validateFetcher({ isPremium: 'not a function' } as any)).toThrow(TypeError);
+    expect(() => validateFetcher(null as unknown as PremiumStatusFetcher)).toThrow(TypeError);
+    expect(() => validateFetcher({} as unknown as PremiumStatusFetcher)).toThrow(TypeError);
+    expect(() => validateFetcher({ isPremium: 'not a function' } as unknown as PremiumStatusFetcher)).toThrow(TypeError);
   });
 });

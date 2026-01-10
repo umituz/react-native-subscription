@@ -37,12 +37,25 @@ function isConsumableProduct(
 /**
  * Handle package purchase - supports both subscriptions and consumables
  */
+declare const __DEV__: boolean;
+
 export async function handlePurchase(
     deps: PurchaseHandlerDeps,
     pkg: PurchasesPackage,
     userId: string
 ): Promise<PurchaseResult> {
+    if (__DEV__) {
+        console.log('[DEBUG PurchaseHandler] handlePurchase called', {
+            productId: pkg.product.identifier,
+            userId,
+            isInitialized: deps.isInitialized(),
+        });
+    }
+
     if (!deps.isInitialized()) {
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Not initialized, throwing error');
+        }
         throw new RevenueCatInitializationError();
     }
 
@@ -50,10 +63,23 @@ export async function handlePurchase(
     const isConsumable = isConsumableProduct(pkg, consumableIds);
 
     try {
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Calling Purchases.purchasePackage...');
+        }
         const purchaseResult = await Purchases.purchasePackage(pkg);
         const customerInfo = purchaseResult.customerInfo;
 
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Purchase completed', {
+                productId: pkg.product.identifier,
+                activeEntitlements: Object.keys(customerInfo.entitlements.active),
+            });
+        }
+
         if (isConsumable) {
+            if (__DEV__) {
+                console.log('[DEBUG PurchaseHandler] Consumable purchase SUCCESS');
+            }
             await notifyPurchaseCompleted(
                 deps.config,
                 userId,
@@ -72,7 +98,18 @@ export async function handlePurchase(
         const entitlementIdentifier = deps.config.entitlementIdentifier;
         const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
 
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Checking premium status', {
+                entitlementIdentifier,
+                isPremium,
+                allEntitlements: customerInfo.entitlements.active,
+            });
+        }
+
         if (isPremium) {
+            if (__DEV__) {
+                console.log('[DEBUG PurchaseHandler] Premium purchase SUCCESS');
+            }
             await syncPremiumStatus(deps.config, userId, customerInfo);
             await notifyPurchaseCompleted(
                 deps.config,
@@ -86,6 +123,9 @@ export async function handlePurchase(
         // In Preview API mode (Expo Go), purchases complete but entitlements aren't active
         // Treat the purchase as successful for testing purposes
         if (deps.isUsingTestStore()) {
+            if (__DEV__) {
+                console.log('[DEBUG PurchaseHandler] Test store purchase SUCCESS');
+            }
             await notifyPurchaseCompleted(
                 deps.config,
                 userId,
@@ -95,15 +135,30 @@ export async function handlePurchase(
             return { success: true, isPremium: false, customerInfo };
         }
 
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Purchase FAILED - no entitlement');
+        }
         throw new RevenueCatPurchaseError(
             "Purchase completed but premium entitlement not active",
             pkg.product.identifier
         );
     } catch (error) {
+        if (__DEV__) {
+            console.error('[DEBUG PurchaseHandler] Purchase error caught', {
+                error,
+                isUserCancelled: isUserCancelledError(error),
+            });
+        }
         if (isUserCancelledError(error)) {
+            if (__DEV__) {
+                console.log('[DEBUG PurchaseHandler] User cancelled');
+            }
             return { success: false, isPremium: false };
         }
         const errorMessage = getErrorMessage(error, "Purchase failed");
+        if (__DEV__) {
+            console.error('[DEBUG PurchaseHandler] Throwing error:', errorMessage);
+        }
         throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
     }
 }

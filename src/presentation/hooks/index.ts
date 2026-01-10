@@ -8,8 +8,6 @@ export * from "./useDeductCredit";
 export * from "./useInitializeCredits";
 export * from "./useDevTestCallbacks";
 export * from "./useFeatureGate";
-export * from "./usePendingPurchase";
-export * from "./useCompletePendingPurchase";
 export * from "./usePaywallVisibility";
 export * from "./usePremium";
 export * from "./usePremiumGate";

@@ -4,6 +4,8 @@
  * Coordinates UserIdProvider, InitializationCache, and PackageHandler
  */
 
+declare const __DEV__: boolean;
+
 import type { PurchasesPackage } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
@@ -100,9 +102,24 @@ class SubscriptionManagerImpl {
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] purchasePackage called', {
+        productId: pkg.product.identifier,
+        isConfigured: this.isConfigured(),
+        isInitialized: this.isInitialized(),
+      });
+    }
     this.ensureConfigured();
     const userId = this.initCache.getCurrentUserId();
-    if (!userId) return false;
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] userId from cache:', userId);
+    }
+    if (!userId) {
+      if (__DEV__) {
+        console.log('[DEBUG SubscriptionManager] No userId, returning false');
+      }
+      return false;
+    }
     return this.packageHandler!.purchase(pkg, userId);
   }
 

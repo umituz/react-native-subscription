@@ -1,14 +1,11 @@
 /**
  * Edge Cases Tests
- * 
+ *
  * Tests for edge cases and special scenarios
  */
 
-  getUserTierInfo,
-} from '../tierUtils';
-  isAuthenticated,
-  isGuest,
-} from '../authUtils';
+import { getUserTierInfo } from '../tierUtils';
+import { isAuthenticated, isGuest } from '../authUtils';
 import { validateUserId } from '../validation';
 
 describe('Edge Cases', () => {
@@ -41,7 +38,7 @@ describe('Edge Cases', () => {
       // isGuest=true but userId provided - should prioritize guest logic
       expect(isAuthenticated(true, 'user123')).toBe(false);
       expect(isGuest(true, 'user123')).toBe(true);
-      
+
       const result = getUserTierInfo(true, 'user123', true);
       expect(result.tier).toBe('guest');
       expect(result.isPremium).toBe(false);
@@ -51,7 +48,7 @@ describe('Edge Cases', () => {
       // isGuest=false but userId=null - should treat as guest
       expect(isAuthenticated(false, null)).toBe(false);
       expect(isGuest(false, null)).toBe(true);
-      
+
       const result = getUserTierInfo(false, null, true);
       expect(result.tier).toBe('guest');
       expect(result.isPremium).toBe(false);
@@ -62,7 +59,7 @@ describe('Edge Cases', () => {
     it('should ignore isPremium for guest users regardless of value', () => {
       const guestTrue = getUserTierInfo(true, null, true);
       const guestFalse = getUserTierInfo(true, null, false);
-      
+
       expect(guestTrue.isPremium).toBe(false);
       expect(guestFalse.isPremium).toBe(false);
       expect(guestTrue.tier).toBe('guest');
@@ -72,7 +69,7 @@ describe('Edge Cases', () => {
     it('should handle authenticated users with various premium states', () => {
       const premium = getUserTierInfo(false, 'user123', true);
       const freemium = getUserTierInfo(false, 'user123', false);
-      
+
       expect(premium.tier).toBe('premium');
       expect(premium.isPremium).toBe(true);
       expect(freemium.tier).toBe('freemium');
