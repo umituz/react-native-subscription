@@ -18,6 +18,7 @@ import {
     syncPremiumStatus,
     notifyPurchaseCompleted,
 } from "../utils/PremiumStatusSyncer";
+import { usePendingPurchaseStore } from "../../../infrastructure/stores/PendingPurchaseStore";
 
 export interface PurchaseHandlerDeps {
     config: RevenueCatConfig;
@@ -76,16 +77,24 @@ export async function handlePurchase(
             });
         }
 
+        // Get purchase source from pending purchase store
+        const pendingPurchaseStore = usePendingPurchaseStore.getState();
+        const pending = pendingPurchaseStore.getPendingPurchase();
+        const source = pending?.source;
+
         if (isConsumable) {
             if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Consumable purchase SUCCESS');
+                console.log('[DEBUG PurchaseHandler] Consumable purchase SUCCESS', { source });
             }
             await notifyPurchaseCompleted(
                 deps.config,
                 userId,
                 pkg.product.identifier,
-                customerInfo
+                customerInfo,
+                source
             );
+            // Clear pending purchase after successful purchase
+            pendingPurchaseStore.clearPendingPurchase();
             return {
                 success: true,
                 isPremium: false,
@@ -103,20 +112,24 @@ export async function handlePurchase(
                 entitlementIdentifier,
                 isPremium,
                 allEntitlements: customerInfo.entitlements.active,
+                source,
             });
         }
 
         if (isPremium) {
             if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Premium purchase SUCCESS');
+                console.log('[DEBUG PurchaseHandler] Premium purchase SUCCESS', { source });
             }
             await syncPremiumStatus(deps.config, userId, customerInfo);
             await notifyPurchaseCompleted(
                 deps.config,
                 userId,
                 pkg.product.identifier,
-                customerInfo
+                customerInfo,
+                source
             );
+            // Clear pending purchase after successful purchase
+            pendingPurchaseStore.clearPendingPurchase();
             return { success: true, isPremium: true, customerInfo };
         }
 
@@ -124,14 +137,17 @@ export async function handlePurchase(
         // Treat the purchase as successful for testing purposes
         if (deps.isUsingTestStore()) {
             if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Test store purchase SUCCESS');
+                console.log('[DEBUG PurchaseHandler] Test store purchase SUCCESS', { source });
             }
             await notifyPurchaseCompleted(
                 deps.config,
                 userId,
                 pkg.product.identifier,
-                customerInfo
+                customerInfo,
+                source
             );
+            // Clear pending purchase after successful purchase
+            pendingPurchaseStore.clearPendingPurchase();
             return { success: true, isPremium: false, customerInfo };
         }
 

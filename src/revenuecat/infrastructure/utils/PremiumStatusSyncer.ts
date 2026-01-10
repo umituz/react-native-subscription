@@ -41,14 +41,15 @@ export async function notifyPurchaseCompleted(
     config: RevenueCatConfig,
     userId: string,
     productId: string,
-    customerInfo: CustomerInfo
+    customerInfo: CustomerInfo,
+    source?: string
 ): Promise<void> {
     if (!config.onPurchaseCompleted) {
         return;
     }
 
     try {
-        await config.onPurchaseCompleted(userId, productId, customerInfo);
+        await config.onPurchaseCompleted(userId, productId, customerInfo, source);
     } catch {
         // Silent error handling
     }

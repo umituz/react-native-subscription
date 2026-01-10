@@ -9,8 +9,25 @@ import type { SubscriptionPackageType } from "../../utils/packageTypeDetector";
 
 export type CreditType = "text" | "image";
 
+export type PurchaseSource =
+  | "onboarding"
+  | "settings"
+  | "upgrade_prompt"
+  | "home_screen"
+  | "feature_gate"
+  | "credits_exhausted";
+
+export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
+
 export interface UserCredits {
   credits: number;
+  packageType?: "weekly" | "monthly" | "yearly";
+  creditLimit?: number;
+  productId?: string;
+  purchaseSource?: PurchaseSource;
+  purchaseType?: PurchaseType;
+  platform?: "ios" | "android";
+  appVersion?: string;
   purchasedAt: Date | null;
   lastUpdatedAt: Date | null;
 }

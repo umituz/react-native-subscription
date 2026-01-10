@@ -66,12 +66,19 @@ export const useSubscriptionSettingsConfig = (
   const dynamicCreditLimit = useMemo(() => {
     const config = getCreditsConfig();
 
+    // 1. ÖNCE FIRESTORE'DAN OKU (Single Source of Truth)
+    if (credits?.creditLimit) {
+      return credits.creditLimit;
+    }
+
+    // 2. FALLBACK: RevenueCat'ten detect et
     if (premiumEntitlement?.productIdentifier) {
       const packageType = detectPackageType(premiumEntitlement.productIdentifier);
       const allocation = getCreditAllocation(packageType, config.packageAllocations);
       if (allocation !== null) return allocation;
     }
 
+    // 3. LAST RESORT: Credit miktarına bakarak tahmin et
     if (credits?.credits && config.packageAllocations) {
       const currentCredits = credits.credits;
       const allocations = Object.values(config.packageAllocations).map(a => a.credits);
@@ -79,8 +86,9 @@ export const useSubscriptionSettingsConfig = (
       return closest;
     }
 
+    // 4. FINAL FALLBACK: Config'den al
     return creditLimit ?? config.creditLimit;
-  }, [premiumEntitlement?.productIdentifier, credits?.credits, creditLimit]);
+  }, [credits?.creditLimit, credits?.credits, premiumEntitlement?.productIdentifier, creditLimit]);
 
   // Get expiration date directly from RevenueCat (source of truth)
   const entitlementExpirationDate = premiumEntitlement?.expirationDate ?? null;

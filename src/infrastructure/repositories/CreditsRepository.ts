@@ -5,8 +5,8 @@
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore, type Transaction } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../../domain/entities/Credits";
-import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
-import { initializeCreditsTransaction } from "../services/CreditsInitializer";
+import type { UserCreditsDocumentRead, PurchaseSource } from "../models/UserCreditsDocument";
+import { initializeCreditsTransaction, type InitializeCreditsMetadata } from "../services/CreditsInitializer";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
 
@@ -32,7 +32,12 @@ export class CreditsRepository extends BaseRepository {
     } catch (e: any) { return { success: false, error: { message: e.message, code: "FETCH_ERR" } }; }
   }
 
-  async initializeCredits(userId: string, purchaseId?: string, productId?: string): Promise<CreditsResult> {
+  async initializeCredits(
+    userId: string,
+    purchaseId?: string,
+    productId?: string,
+    source?: PurchaseSource
+  ): Promise<CreditsResult> {
     const db = getFirestore();
     if (!db) return { success: false, error: { message: "No DB", code: "INIT_ERR" } };
     try {
@@ -46,7 +51,20 @@ export class CreditsRepository extends BaseRepository {
           if (dynamicLimit !== null) cfg = { ...cfg, creditLimit: dynamicLimit };
         }
       }
-      const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId);
+
+      const metadata: InitializeCreditsMetadata = {
+        productId,
+        source,
+      };
+
+      const res = await initializeCreditsTransaction(
+        db,
+        this.getRef(db, userId),
+        cfg,
+        purchaseId,
+        metadata
+      );
+
       return {
         success: true,
         data: CreditsMapper.toEntity({

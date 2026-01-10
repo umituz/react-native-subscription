@@ -39,16 +39,26 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
-  const onPurchase = async (userId: string, productId: string) => {
+  const onPurchase = async (userId: string, productId: string, _customerInfo: unknown, source?: string) => {
     try {
-      await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId);
+      await getCreditsRepository().initializeCredits(
+        userId,
+        `purchase_${productId}_${Date.now()}`,
+        productId,
+        source as any
+      );
       onCreditsUpdated?.(userId);
     } catch { /* Silent */ }
   };
 
   const onRenewal = async (userId: string, productId: string, renewalId: string) => {
     try {
-      await getCreditsRepository().initializeCredits(userId, renewalId, productId);
+      await getCreditsRepository().initializeCredits(
+        userId,
+        renewalId,
+        productId,
+        undefined
+      );
       onCreditsUpdated?.(userId);
     } catch { /* Silent */ }
   };

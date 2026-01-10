@@ -17,6 +17,14 @@ export { SubscriptionService, initializeSubscriptionService } from "./infrastruc
 export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./infrastructure/services/SubscriptionInitializer";
 export { CreditsRepository, createCreditsRepository } from "./infrastructure/repositories/CreditsRepository";
 export { configureCreditsRepository, getCreditsRepository, getCreditsConfig, resetCreditsRepository, isCreditsRepositoryConfigured } from "./infrastructure/repositories/CreditsRepositoryProvider";
+export {
+  usePendingPurchaseStore,
+  type PendingPurchaseData,
+} from "./infrastructure/stores/PendingPurchaseStore";
+export {
+  usePendingPurchaseHandler,
+  type UsePendingPurchaseHandlerParams,
+} from "./presentation/hooks/usePendingPurchaseHandler";
 
 // Presentation Layer - Hooks
 export * from "./presentation/hooks";
@@ -30,7 +38,15 @@ export * from "./presentation/screens/SubscriptionDetailScreen";
 export * from "./presentation/types/SubscriptionDetailTypes";
 
 // Credits Domain
-export type { CreditType, UserCredits, CreditsConfig, CreditsResult, DeductCreditsResult } from "./domain/entities/Credits";
+export type {
+  CreditType,
+  UserCredits,
+  CreditsConfig,
+  CreditsResult,
+  DeductCreditsResult,
+  PurchaseSource,
+  PurchaseType,
+} from "./domain/entities/Credits";
 export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
 export { InsufficientCreditsError } from "./domain/errors/InsufficientCreditsError";
 

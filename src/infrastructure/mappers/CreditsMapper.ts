@@ -5,6 +5,13 @@ export class CreditsMapper {
   static toEntity(snapData: UserCreditsDocumentRead): UserCredits {
     return {
       credits: snapData.credits,
+      packageType: snapData.packageType,
+      creditLimit: snapData.creditLimit,
+      productId: snapData.productId,
+      purchaseSource: snapData.purchaseSource,
+      purchaseType: snapData.purchaseType,
+      platform: snapData.platform,
+      appVersion: snapData.appVersion,
       purchasedAt: snapData.purchasedAt?.toDate?.() || null,
       lastUpdatedAt: snapData.lastUpdatedAt?.toDate?.() || null,
     };

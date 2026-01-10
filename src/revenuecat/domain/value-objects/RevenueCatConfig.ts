@@ -25,7 +25,8 @@ export interface RevenueCatConfig {
   onPurchaseCompleted?: (
     userId: string,
     productId: string,
-    customerInfo: CustomerInfo
+    customerInfo: CustomerInfo,
+    source?: string
   ) => Promise<void> | void;
   /** Callback for restore completion */
   onRestoreCompleted?: (
