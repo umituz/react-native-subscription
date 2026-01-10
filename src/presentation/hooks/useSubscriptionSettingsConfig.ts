@@ -4,7 +4,7 @@
  * Package-driven: all logic handled internally
  */
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useCredits } from "./useCredits";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { useCustomerInfo } from "../../revenuecat/presentation/hooks/useCustomerInfo";
@@ -54,6 +54,10 @@ export const useSubscriptionSettingsConfig = (
   });
   const { customerInfo } = useCustomerInfo();
   const { openPaywall } = usePaywallVisibility();
+
+  const handleOpenPaywall = useCallback(() => {
+    openPaywall("settings");
+  }, [openPaywall]);
 
   // RevenueCat entitlement info - dynamically using configured entitlementId
   const entitlementId = SubscriptionManager.getEntitlementId() || "premium";
@@ -137,7 +141,7 @@ export const useSubscriptionSettingsConfig = (
           ? translations.statusActive
           : translations.statusFree,
         icon: "diamond",
-        onPress: openPaywall,
+        onPress: handleOpenPaywall,
       },
       sectionConfig: {
         statusType,
@@ -163,7 +167,7 @@ export const useSubscriptionSettingsConfig = (
           manageButton: translations.manageButton,
           upgradeButton: translations.upgradeButton,
         },
-        onUpgrade: openPaywall,
+        onUpgrade: handleOpenPaywall,
         upgradePrompt,
       },
     }),
@@ -177,7 +181,7 @@ export const useSubscriptionSettingsConfig = (
       daysRemaining,
       willRenew,
       creditsArray,
-      openPaywall,
+      handleOpenPaywall,
       upgradePrompt,
     ]
   );
