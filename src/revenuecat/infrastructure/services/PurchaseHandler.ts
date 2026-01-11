@@ -65,10 +65,25 @@ export async function handlePurchase(
 
     try {
         if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Calling Purchases.purchasePackage...');
+            console.log('[DEBUG PurchaseHandler] Calling Purchases.purchasePackage...', {
+                productId: pkg.product.identifier,
+                packageIdentifier: pkg.identifier,
+                offeringIdentifier: pkg.offeringIdentifier,
+                timestamp: new Date().toISOString()
+            });
         }
+
+        const startTime = Date.now();
         const purchaseResult = await Purchases.purchasePackage(pkg);
+        const duration = Date.now() - startTime;
         const customerInfo = purchaseResult.customerInfo;
+
+        if (__DEV__) {
+            console.log('[DEBUG PurchaseHandler] Purchases.purchasePackage returned', {
+                duration: `${duration}ms`,
+                productId: pkg.product.identifier
+            });
+        }
 
         if (__DEV__) {
             console.log('[DEBUG PurchaseHandler] Purchase completed', {

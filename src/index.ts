@@ -32,8 +32,12 @@ export * from "./presentation/components/details/PremiumDetailsCard";
 export * from "./presentation/components/details/PremiumStatusBadge";
 export * from "./presentation/components/sections/SubscriptionSection";
 export * from "./presentation/components/feedback/PaywallFeedbackModal";
+export * from "./presentation/components/overlay";
 export * from "./presentation/screens/SubscriptionDetailScreen";
 export * from "./presentation/types/SubscriptionDetailTypes";
+
+// Presentation Layer - Stores
+export * from "./presentation/stores";
 
 // Credits Domain
 export type {

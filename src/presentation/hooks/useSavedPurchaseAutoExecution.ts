@@ -7,6 +7,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { getSavedPurchase, clearSavedPurchase } from "./useAuthAwarePurchase";
 import { usePremium } from "./usePremium";
 import { SubscriptionManager } from "../../revenuecat";
+import { usePurchaseLoadingStore } from "../stores";
 
 declare const __DEV__: boolean;
 
@@ -26,6 +27,7 @@ export const useSavedPurchaseAutoExecution = (
 ): UseSavedPurchaseAutoExecutionResult => {
   const { userId, isAnonymous, onSuccess, onError } = params;
   const { purchasePackage } = usePremium(userId);
+  const { startPurchase, endPurchase } = usePurchaseLoadingStore();
 
   const prevIsAnonymousRef = useRef<boolean | undefined>(undefined);
   const isExecutingRef = useRef(false);
@@ -36,7 +38,8 @@ export const useSavedPurchaseAutoExecution = (
 
     if (__DEV__) {
       console.log(
-        "[SavedPurchaseAutoExecution] Waiting for RevenueCat initialization..."
+        "[SavedPurchaseAutoExecution] Waiting for RevenueCat initialization...",
+        { userId: userId.slice(0, 8), productId: savedPurchase.pkg.product.identifier }
       );
     }
 
@@ -60,16 +63,26 @@ export const useSavedPurchaseAutoExecution = (
 
         if (__DEV__) {
           console.log(
-            "[SavedPurchaseAutoExecution] RevenueCat ready, executing purchase:",
-            pkg.product.identifier
+            "[SavedPurchaseAutoExecution] RevenueCat ready, starting purchase...",
+            { productId: pkg.product.identifier, userId: userId.slice(0, 8) }
           );
         }
 
+        // Start global loading state
+        startPurchase(pkg.product.identifier, "auto-execution");
+
         try {
+          if (__DEV__) {
+            console.log("[SavedPurchaseAutoExecution] Calling purchasePackage...");
+          }
+
           const success = await purchasePackage(pkg);
 
           if (__DEV__) {
-            console.log("[SavedPurchaseAutoExecution] Purchase result:", success);
+            console.log("[SavedPurchaseAutoExecution] Purchase completed:", {
+              success,
+              productId: pkg.product.identifier
+            });
           }
 
           if (success && onSuccess) {
@@ -77,13 +90,22 @@ export const useSavedPurchaseAutoExecution = (
           }
         } catch (error) {
           if (__DEV__) {
-            console.error("[SavedPurchaseAutoExecution] Purchase failed:", error);
+            console.error("[SavedPurchaseAutoExecution] Purchase error:", {
+              error,
+              productId: pkg.product.identifier
+            });
           }
           if (onError && error instanceof Error) {
             onError(error);
           }
         } finally {
+          // End global loading state
+          endPurchase();
           isExecutingRef.current = false;
+
+          if (__DEV__) {
+            console.log("[SavedPurchaseAutoExecution] Purchase flow finished");
+          }
         }
 
         return;
@@ -99,7 +121,7 @@ export const useSavedPurchaseAutoExecution = (
     }
     clearSavedPurchase();
     isExecutingRef.current = false;
-  }, [userId, purchasePackage, onSuccess, onError]);
+  }, [userId, purchasePackage, onSuccess, onError, startPurchase, endPurchase]);
 
   useEffect(() => {
     const isAuthenticated = !!userId && !isAnonymous;
@@ -110,7 +132,7 @@ export const useSavedPurchaseAutoExecution = (
     const becameAuthenticated = wasAnonymous && isAuthenticated;
 
     if (__DEV__) {
-      console.log("[SavedPurchaseAutoExecution] Check:", {
+      console.log("[SavedPurchaseAutoExecution] Auth state check:", {
         userId: userId?.slice(0, 8),
         prevIsAnonymous,
         isAnonymous,
@@ -118,11 +140,15 @@ export const useSavedPurchaseAutoExecution = (
         wasAnonymous,
         becameAuthenticated,
         hasSavedPurchase: !!savedPurchase,
+        savedProductId: savedPurchase?.pkg.product.identifier,
         willExecute: becameAuthenticated && !!savedPurchase && !isExecutingRef.current,
       });
     }
 
     if (becameAuthenticated && savedPurchase && !isExecutingRef.current) {
+      if (__DEV__) {
+        console.log("[SavedPurchaseAutoExecution] Triggering auto-execution...");
+      }
       executeWithWait();
     }
 

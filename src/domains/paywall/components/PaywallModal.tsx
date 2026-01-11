@@ -12,6 +12,9 @@ import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from 
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";
+import { usePurchaseLoadingStore, selectIsPurchasing } from "../../../presentation/stores";
+
+declare const __DEV__: boolean;
 
 export interface PaywallModalProps {
   visible: boolean;
@@ -33,21 +36,61 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   const { visible, onClose, translations, packages = [], features = [], isLoading = false, legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore } = props;
   const tokens = useAppDesignTokens();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [isLocalProcessing, setIsLocalProcessing] = useState(false);
+
+  // Global purchase loading state (for auto-execution after auth)
+  const isGlobalPurchasing = usePurchaseLoadingStore(selectIsPurchasing);
+  const { startPurchase, endPurchase } = usePurchaseLoadingStore();
+
+  // Combined processing state
+  const isProcessing = isLocalProcessing || isGlobalPurchasing;
 
   const handlePurchase = useCallback(async () => {
     if (!selectedPlanId || !onPurchase) return;
-    setIsProcessing(true);
+
+    if (__DEV__) {
+      console.log("[PaywallModal] handlePurchase starting:", { selectedPlanId });
+    }
+
+    setIsLocalProcessing(true);
+    startPurchase(selectedPlanId, "manual");
+
     try {
       const pkg = packages.find((p) => p.product.identifier === selectedPlanId);
-      if (pkg) await onPurchase(pkg);
-    } finally { setIsProcessing(false); }
-  }, [selectedPlanId, packages, onPurchase]);
+      if (pkg) {
+        if (__DEV__) {
+          console.log("[PaywallModal] Calling onPurchase:", { productId: pkg.product.identifier });
+        }
+        await onPurchase(pkg);
+        if (__DEV__) {
+          console.log("[PaywallModal] onPurchase completed");
+        }
+      }
+    } finally {
+      setIsLocalProcessing(false);
+      endPurchase();
+      if (__DEV__) {
+        console.log("[PaywallModal] handlePurchase finished");
+      }
+    }
+  }, [selectedPlanId, packages, onPurchase, startPurchase, endPurchase]);
 
   const handleRestore = useCallback(async () => {
     if (!onRestore || isProcessing) return;
-    setIsProcessing(true);
-    try { await onRestore(); } finally { setIsProcessing(false); }
+
+    if (__DEV__) {
+      console.log("[PaywallModal] handleRestore starting");
+    }
+
+    setIsLocalProcessing(true);
+    try {
+      await onRestore();
+      if (__DEV__) {
+        console.log("[PaywallModal] handleRestore completed");
+      }
+    } finally {
+      setIsLocalProcessing(false);
+    }
   }, [onRestore, isProcessing]);
 
   const handleLegalUrl = useCallback(async (url: string | undefined) => {
