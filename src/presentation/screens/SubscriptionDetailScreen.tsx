@@ -17,6 +17,7 @@ import { DevTestSection } from "./components/DevTestSection";
 import type { SubscriptionDetailScreenProps } from "../types/SubscriptionDetailTypes";
 
 export type {
+  SubscriptionDisplayFlags,
   SubscriptionDetailTranslations,
   SubscriptionDetailConfig,
   SubscriptionDetailScreenProps,
@@ -31,8 +32,7 @@ export const SubscriptionDetailScreen: React.FC<
   SubscriptionDetailScreenProps
 > = ({ config }) => {
   const tokens = useAppDesignTokens();
-  const showCredits = config.credits && config.credits.length > 0;
-  const showUpgradePrompt = !config.isPremium && config.upgradePrompt && !showCredits;
+  const { showHeader, showCredits, showUpgradePrompt, showExpirationDate } = config.display;
 
   const styles = useMemo(
     () =>
@@ -69,10 +69,10 @@ export const SubscriptionDetailScreen: React.FC<
       }
     >
       <View style={styles.cardsContainer}>
-        {config.isPremium && (
+        {showHeader && (
           <SubscriptionHeader
             statusType={config.statusType}
-            isPremium={config.isPremium}
+            showExpirationDate={showExpirationDate}
             isLifetime={config.isLifetime}
             expirationDate={config.expirationDate}
             purchaseDate={config.purchaseDate}

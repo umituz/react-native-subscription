@@ -12,7 +12,7 @@ import type { SubscriptionHeaderProps } from "../../types/SubscriptionDetailType
 
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   statusType,
-  isPremium,
+  showExpirationDate,
   isLifetime,
   expirationDate,
   purchaseDate,
@@ -85,41 +85,39 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
         />
       </View>
 
-      {isPremium && (
-        <View style={styles.details}>
-          {isLifetime ? (
-            <DetailRow
-              label={translations.statusLabel}
-              value={translations.lifetimeLabel}
-              style={styles.row}
-              labelStyle={styles.label}
-              valueStyle={styles.value}
-            />
-          ) : (
-            <>
-              {expirationDate && (
-                <DetailRow
-                  label={translations.expiresLabel}
-                  value={expirationDate}
-                  highlight={showExpiring}
-                  style={styles.row}
-                  labelStyle={styles.label}
-                  valueStyle={styles.value}
-                />
-              )}
-              {purchaseDate && (
-                <DetailRow
-                  label={translations.purchasedLabel}
-                  value={purchaseDate}
-                  style={styles.row}
-                  labelStyle={styles.label}
-                  valueStyle={styles.value}
-                />
-              )}
-            </>
-          )}
-        </View>
-      )}
+      <View style={styles.details}>
+        {isLifetime ? (
+          <DetailRow
+            label={translations.statusLabel}
+            value={translations.lifetimeLabel}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        ) : (
+          <>
+            {showExpirationDate && expirationDate && (
+              <DetailRow
+                label={translations.expiresLabel}
+                value={expirationDate}
+                highlight={showExpiring}
+                style={styles.row}
+                labelStyle={styles.label}
+                valueStyle={styles.value}
+              />
+            )}
+            {purchaseDate && (
+              <DetailRow
+                label={translations.purchasedLabel}
+                value={purchaseDate}
+                style={styles.row}
+                labelStyle={styles.label}
+                valueStyle={styles.value}
+              />
+            )}
+          </>
+        )}
+      </View>
     </View>
   );
 };

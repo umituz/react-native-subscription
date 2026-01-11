@@ -53,10 +53,19 @@ export interface UpgradePromptConfig {
   benefits?: UpgradeBenefit[];
 }
 
+/** Display flags - centralized UI visibility control */
+export interface SubscriptionDisplayFlags {
+  showHeader: boolean;
+  showCredits: boolean;
+  showUpgradePrompt: boolean;
+  showExpirationDate: boolean;
+}
+
 /** Configuration for subscription detail screen */
 export interface SubscriptionDetailConfig {
   statusType: SubscriptionStatusType;
   isPremium: boolean;
+  display: SubscriptionDisplayFlags;
   expirationDate?: string | null;
   purchaseDate?: string | null;
   isLifetime?: boolean;
@@ -78,7 +87,7 @@ export interface SubscriptionDetailScreenProps {
 /** Props for subscription header component */
 export interface SubscriptionHeaderProps {
   statusType: SubscriptionStatusType;
-  isPremium: boolean;
+  showExpirationDate: boolean;
   isLifetime?: boolean;
   expirationDate?: string | null;
   purchaseDate?: string | null;

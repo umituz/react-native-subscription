@@ -129,6 +129,15 @@ export const useSubscriptionSettingsConfig = (
 
   const creditsArray = useCreditsArray(credits, dynamicCreditLimit, translations);
 
+  // Centralized display flags - single source of truth for UI visibility
+  const hasCredits = creditsArray.length > 0;
+  const display = useMemo(() => ({
+    showHeader: isPremium || hasCredits,
+    showCredits: hasCredits,
+    showUpgradePrompt: !isPremium && !hasCredits && !!upgradePrompt,
+    showExpirationDate: isPremium && !!expiresAtIso,
+  }), [isPremium, hasCredits, upgradePrompt, expiresAtIso]);
+
   // Build config
   const config = useMemo(
     (): SubscriptionSettingsConfig => ({
@@ -146,6 +155,7 @@ export const useSubscriptionSettingsConfig = (
       sectionConfig: {
         statusType,
         isPremium,
+        display,
         expirationDate: formattedExpirationDate,
         purchaseDate: formattedPurchaseDate,
         isLifetime: isPremium && !expiresAtIso,
@@ -175,6 +185,7 @@ export const useSubscriptionSettingsConfig = (
       translations,
       isPremium,
       statusType,
+      display,
       formattedExpirationDate,
       formattedPurchaseDate,
       expiresAtIso,
