@@ -1,20 +1,22 @@
 import type { UserCredits, SubscriptionStatus } from "../../domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
-/** Maps Firestore document to domain entity */
+/** Maps Firestore document to domain entity with expiration validation */
 export class CreditsMapper {
   static toEntity(doc: UserCreditsDocumentRead): UserCredits {
-    // Determine status from document or derive from isPremium/expirationDate
-    const status = doc.status ?? CreditsMapper.deriveStatus(doc);
+    const expirationDate = doc.expirationDate?.toDate?.() ?? null;
+
+    // Validate isPremium against expirationDate (real-time check)
+    const { isPremium, status } = CreditsMapper.validateSubscription(doc, expirationDate);
 
     return {
-      // Core subscription
-      isPremium: doc.isPremium ?? false,
+      // Core subscription (validated)
+      isPremium,
       status,
 
       // Dates
       purchasedAt: doc.purchasedAt?.toDate?.() ?? null,
-      expirationDate: doc.expirationDate?.toDate?.() ?? null,
+      expirationDate,
       lastUpdatedAt: doc.lastUpdatedAt?.toDate?.() ?? null,
 
       // RevenueCat details
@@ -35,14 +37,33 @@ export class CreditsMapper {
     };
   }
 
-  /** Derive status from isPremium and expirationDate for backward compatibility */
-  private static deriveStatus(doc: UserCreditsDocumentRead): SubscriptionStatus {
-    if (!doc.isPremium && !doc.expirationDate) return "free";
-    if (doc.isPremium) return "active";
-    if (doc.expirationDate) {
-      const expDate = doc.expirationDate.toDate?.();
-      if (expDate && expDate < new Date()) return "expired";
+  /** Validate subscription status against expirationDate */
+  private static validateSubscription(
+    doc: UserCreditsDocumentRead,
+    expirationDate: Date | null
+  ): { isPremium: boolean; status: SubscriptionStatus } {
+    const docIsPremium = doc.isPremium ?? false;
+
+    // No expiration date = lifetime or free
+    if (!expirationDate) {
+      return {
+        isPremium: docIsPremium,
+        status: docIsPremium ? "active" : "free",
+      };
     }
-    return "free";
+
+    // Check if subscription has expired
+    const isExpired = expirationDate < new Date();
+
+    if (isExpired) {
+      // Subscription expired - override document's isPremium
+      return { isPremium: false, status: "expired" };
+    }
+
+    // Subscription still active
+    return {
+      isPremium: docIsPremium,
+      status: docIsPremium ? "active" : "free",
+    };
   }
 }

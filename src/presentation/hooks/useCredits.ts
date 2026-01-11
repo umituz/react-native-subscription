@@ -88,15 +88,22 @@ export const useCredits = ({
         if (__DEV__) console.error("[useCredits] Query failed:", result.error?.message);
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
-      if (__DEV__) console.log("[useCredits] Query success:", { hasData: !!result.data, credits: result.data?.credits });
+
+      // Background sync: If mapper detected expired status, sync to Firestore
+      if (result.data?.status === "expired") {
+        if (__DEV__) console.log("[useCredits] Detected expired subscription, syncing...");
+        repository.syncExpiredStatus(userId).catch(() => {});
+      }
+
+      if (__DEV__) console.log("[useCredits] Query success:", { hasData: !!result.data, credits: result.data?.credits, status: result.data?.status });
       return result.data || null;
     },
     enabled: queryEnabled,
     staleTime,
     gcTime,
-    refetchOnMount: true, // Refetch when component mounts
-    refetchOnWindowFocus: true, // Refetch when app becomes active
-    refetchOnReconnect: true, // Refetch when network reconnects
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   const credits = data ?? null;

@@ -129,6 +129,26 @@ export class CreditsRepository extends BaseRepository {
     const res = await this.getCredits(userId);
     return !!(res.success && res.data && res.data.credits >= cost);
   }
+
+  /** Sync expired subscription status to Firestore (background) */
+  async syncExpiredStatus(userId: string): Promise<void> {
+    const db = getFirestore();
+    if (!db) return;
+
+    try {
+      const ref = this.getRef(db, userId);
+      const { updateDoc } = await import("firebase/firestore");
+      await updateDoc(ref, {
+        isPremium: false,
+        status: "expired",
+        lastUpdatedAt: serverTimestamp(),
+      });
+      if (__DEV__) console.log("[CreditsRepository] Synced expired status for:", userId.slice(0, 8));
+    } catch (e) {
+      if (__DEV__) console.error("[CreditsRepository] Sync expired failed:", e);
+    }
+  }
+
 }
 
 export const createCreditsRepository = (c: CreditsConfig) => new CreditsRepository(c);

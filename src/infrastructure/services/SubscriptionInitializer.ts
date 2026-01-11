@@ -41,16 +41,31 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
-  const onPurchase = async (userId: string, productId: string, _customerInfo: unknown, source?: string) => {
+  /** Extract RevenueCat data from CustomerInfo (Single Source of Truth) */
+  const extractRevenueCatData = (customerInfo: CustomerInfo, _productId: string): RevenueCatData => {
+    const entitlement = customerInfo.entitlements.active[entitlementId]
+      ?? customerInfo.entitlements.all[entitlementId];
+
+    return {
+      expirationDate: entitlement?.expirationDate ?? customerInfo.latestExpirationDate ?? null,
+      willRenew: entitlement?.willRenew ?? false,
+      originalTransactionId: entitlement?.originalPurchaseDate ?? undefined,
+      isPremium: Object.keys(customerInfo.entitlements.active).length > 0,
+    };
+  };
+
+  const onPurchase = async (userId: string, productId: string, customerInfo: CustomerInfo, source?: string) => {
     if (__DEV__) {
       console.log('[SubscriptionInitializer] onPurchase called:', { userId, productId, source });
     }
     try {
+      const revenueCatData = extractRevenueCatData(customerInfo, productId);
       const result = await getCreditsRepository().initializeCredits(
         userId,
         `purchase_${productId}_${Date.now()}`,
         productId,
-        source as any
+        source as any,
+        revenueCatData
       );
       if (__DEV__) {
         console.log('[SubscriptionInitializer] Credits initialized:', result);
@@ -63,16 +78,20 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     }
   };
 
-  const onRenewal = async (userId: string, productId: string, _newExpirationDate: string, _customerInfo: unknown) => {
+  const onRenewal = async (userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) => {
     if (__DEV__) {
       console.log('[SubscriptionInitializer] onRenewal called:', { userId, productId });
     }
     try {
+      const revenueCatData = extractRevenueCatData(customerInfo, productId);
+      // Update expiration date from renewal
+      revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
       const result = await getCreditsRepository().initializeCredits(
         userId,
         `renewal_${productId}_${Date.now()}`,
         productId,
-        "renewal" as any
+        "renewal" as any,
+        revenueCatData
       );
       if (__DEV__) {
         console.log('[SubscriptionInitializer] Credits reset on renewal:', result);
