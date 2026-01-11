@@ -32,7 +32,7 @@ export const useSavedPurchaseAutoExecution = (
 
   const executeWithWait = useCallback(async () => {
     const savedPurchase = getSavedPurchase();
-    if (!savedPurchase) return;
+    if (!savedPurchase || !userId) return;
 
     if (__DEV__) {
       console.log(
