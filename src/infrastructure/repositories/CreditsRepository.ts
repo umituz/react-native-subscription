@@ -2,6 +2,8 @@
  * Credits Repository
  */
 
+declare const __DEV__: boolean;
+
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore, type Transaction } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../../domain/entities/Credits";
@@ -23,13 +25,26 @@ export class CreditsRepository extends BaseRepository {
 
   async getCredits(userId: string): Promise<CreditsResult> {
     const db = getFirestore();
-    if (!db) return { success: false, error: { message: "No DB", code: "DB_ERR" } };
+    if (!db) {
+      if (__DEV__) console.log("[CreditsRepository] No Firestore instance");
+      return { success: false, error: { message: "No DB", code: "DB_ERR" } };
+    }
     try {
-      const snap = await getDoc(this.getRef(db, userId));
-      if (!snap.exists()) return { success: true, data: undefined };
+      const ref = this.getRef(db, userId);
+      if (__DEV__) console.log("[CreditsRepository] Fetching credits:", { userId: userId.slice(0, 8), path: ref.path });
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        if (__DEV__) console.log("[CreditsRepository] No credits document found");
+        return { success: true, data: undefined };
+      }
       const d = snap.data() as UserCreditsDocumentRead;
-      return { success: true, data: CreditsMapper.toEntity(d) };
-    } catch (e: any) { return { success: false, error: { message: e.message, code: "FETCH_ERR" } }; }
+      const entity = CreditsMapper.toEntity(d);
+      if (__DEV__) console.log("[CreditsRepository] Credits fetched:", { credits: entity.credits, limit: entity.creditLimit });
+      return { success: true, data: entity };
+    } catch (e: any) {
+      if (__DEV__) console.error("[CreditsRepository] Fetch error:", e.message);
+      return { success: false, error: { message: e.message, code: "FETCH_ERR" } };
+    }
   }
 
   async initializeCredits(

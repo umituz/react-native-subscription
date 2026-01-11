@@ -5,6 +5,8 @@
  * Generic and reusable - uses config from module-level provider.
  */
 
+declare const __DEV__: boolean;
+
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import type { UserCredits } from "../../domain/entities/Credits";
@@ -61,18 +63,35 @@ export const useCredits = ({
   const staleTime = cache?.staleTime ?? DEFAULT_STALE_TIME;
   const gcTime = cache?.gcTime ?? DEFAULT_GC_TIME;
 
+  const queryEnabled = enabled && !!userId && isConfigured;
+
+  if (__DEV__) {
+    console.log("[useCredits] Query state:", {
+      userId: userId?.slice(0, 8),
+      enabled,
+      isConfigured,
+      queryEnabled,
+    });
+  }
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
     queryFn: async () => {
-      if (!userId || !isConfigured) return null;
+      if (!userId || !isConfigured) {
+        if (__DEV__) console.log("[useCredits] Query skipped:", { hasUserId: !!userId, isConfigured });
+        return null;
+      }
+      if (__DEV__) console.log("[useCredits] Executing queryFn for userId:", userId.slice(0, 8));
       const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
       if (!result.success) {
+        if (__DEV__) console.error("[useCredits] Query failed:", result.error?.message);
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
+      if (__DEV__) console.log("[useCredits] Query success:", { hasData: !!result.data, credits: result.data?.credits });
       return result.data || null;
     },
-    enabled: enabled && !!userId && isConfigured,
+    enabled: queryEnabled,
     staleTime,
     gcTime,
     refetchOnMount: true, // Refetch when component mounts
