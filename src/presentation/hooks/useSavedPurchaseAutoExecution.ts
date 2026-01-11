@@ -6,7 +6,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { getSavedPurchase, clearSavedPurchase } from "./useAuthAwarePurchase";
 import { usePremium } from "./usePremium";
-import { SubscriptionManager } from "../../revenuecat/infrastructure/services/SubscriptionManager";
+import { SubscriptionManager } from "../../revenuecat";
 
 declare const __DEV__: boolean;
 
