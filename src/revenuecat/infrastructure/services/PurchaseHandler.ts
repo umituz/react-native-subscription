@@ -62,6 +62,7 @@ export async function handlePurchase(
 
     const consumableIds = deps.config.consumableProductIdentifiers || [];
     const isConsumable = isConsumableProduct(pkg, consumableIds);
+    const entitlementIdentifier = deps.config.entitlementIdentifier;
 
     try {
         if (__DEV__) {
@@ -69,21 +70,10 @@ export async function handlePurchase(
                 productId: pkg.product.identifier,
                 packageIdentifier: pkg.identifier,
                 offeringIdentifier: pkg.offeringIdentifier,
-                timestamp: new Date().toISOString()
             });
         }
 
-        const startTime = Date.now();
-        const purchaseResult = await Purchases.purchasePackage(pkg);
-        const duration = Date.now() - startTime;
-        const customerInfo = purchaseResult.customerInfo;
-
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Purchases.purchasePackage returned', {
-                duration: `${duration}ms`,
-                productId: pkg.product.identifier
-            });
-        }
+        const { customerInfo } = await Purchases.purchasePackage(pkg);
 
         if (__DEV__) {
             console.log('[DEBUG PurchaseHandler] Purchase completed', {
@@ -118,7 +108,6 @@ export async function handlePurchase(
             };
         }
 
-        const entitlementIdentifier = deps.config.entitlementIdentifier;
         const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
 
         if (__DEV__) {

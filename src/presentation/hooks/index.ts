@@ -21,3 +21,4 @@ export * from "./useSubscriptionStatus";
 export * from "./useUserTier";
 export * from "./useUserTierWithRepository";
 export * from "./feedback/usePaywallFeedback";
+export * from "./feedback/useFeedbackSubmit";

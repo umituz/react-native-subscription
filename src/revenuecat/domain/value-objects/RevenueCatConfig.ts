@@ -34,6 +34,13 @@ export interface RevenueCatConfig {
     isPremium: boolean,
     customerInfo: CustomerInfo
   ) => Promise<void> | void;
+  /** Callback when subscription renewal is detected */
+  onRenewalDetected?: (
+    userId: string,
+    productId: string,
+    newExpirationDate: string,
+    customerInfo: CustomerInfo
+  ) => Promise<void> | void;
   /** Callback after credits are successfully updated (for cache invalidation) */
   onCreditsUpdated?: (userId: string) => void;
 }

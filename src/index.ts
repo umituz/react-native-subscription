@@ -14,6 +14,13 @@ export type { ISubscriptionRepository } from "./application/ports/ISubscriptionR
 
 // Infrastructure Layer
 export { SubscriptionService, initializeSubscriptionService } from "./infrastructure/services/SubscriptionService";
+export {
+  submitFeedback,
+  submitPaywallFeedback,
+  submitSettingsFeedback,
+  type FeedbackData,
+  type FeedbackSubmitResult,
+} from "./infrastructure/services/FeedbackService";
 export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./infrastructure/services/SubscriptionInitializer";
 export { CreditsRepository, createCreditsRepository } from "./infrastructure/repositories/CreditsRepository";
 export { configureCreditsRepository, getCreditsRepository, getCreditsConfig, resetCreditsRepository, isCreditsRepositoryConfigured } from "./infrastructure/repositories/CreditsRepositoryProvider";

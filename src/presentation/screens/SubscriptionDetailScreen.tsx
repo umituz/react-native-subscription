@@ -31,7 +31,7 @@ export const SubscriptionDetailScreen: React.FC<
   SubscriptionDetailScreenProps
 > = ({ config }) => {
   const tokens = useAppDesignTokens();
-  const showCredits = config.isPremium && config.credits && config.credits.length > 0;
+  const showCredits = config.credits && config.credits.length > 0;
   const showUpgradePrompt = !config.isPremium && config.upgradePrompt;
 
   const styles = useMemo(
@@ -68,8 +68,8 @@ export const SubscriptionDetailScreen: React.FC<
         ) : undefined
       }
     >
-      {config.isPremium ? (
-        <View style={styles.cardsContainer}>
+      <View style={styles.cardsContainer}>
+        {config.isPremium && (
           <SubscriptionHeader
             statusType={config.statusType}
             isPremium={config.isPremium}
@@ -79,20 +79,20 @@ export const SubscriptionDetailScreen: React.FC<
             daysRemaining={config.daysRemaining}
             translations={config.translations}
           />
+        )}
 
-          {showCredits && (
-            <CreditsList
-              credits={config.credits!}
-              title={
-                config.translations.usageTitle || config.translations.creditsTitle
-              }
-              description={config.translations.creditsResetInfo}
-              remainingLabel={config.translations.remainingLabel}
-            />
-          )}
-        </View>
-      ) : (
-        showUpgradePrompt && (
+        {showCredits && (
+          <CreditsList
+            credits={config.credits!}
+            title={
+              config.translations.usageTitle || config.translations.creditsTitle
+            }
+            description={config.translations.creditsResetInfo}
+            remainingLabel={config.translations.remainingLabel}
+          />
+        )}
+
+        {showUpgradePrompt && (
           <UpgradePrompt
             title={config.upgradePrompt!.title}
             subtitle={config.upgradePrompt!.subtitle}
@@ -100,8 +100,8 @@ export const SubscriptionDetailScreen: React.FC<
             upgradeButtonLabel={config.translations.upgradeButton}
             onUpgrade={config.onUpgrade}
           />
-        )
-      )}
+        )}
+      </View>
 
       <View style={styles.spacer} />
     </ScreenLayout>
