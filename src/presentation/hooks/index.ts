@@ -1,6 +1,7 @@
 export * from "./useAuthAwarePurchase";
 export * from "./useAuthGate";
 export * from "./useAuthSubscriptionSync";
+export * from "./useSavedPurchaseAutoExecution";
 export * from "./useCreditChecker";
 export * from "./useCredits";
 export * from "./useCreditsGate";
