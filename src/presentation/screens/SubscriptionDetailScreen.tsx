@@ -32,7 +32,7 @@ export const SubscriptionDetailScreen: React.FC<
 > = ({ config }) => {
   const tokens = useAppDesignTokens();
   const showCredits = config.credits && config.credits.length > 0;
-  const showUpgradePrompt = !config.isPremium && config.upgradePrompt;
+  const showUpgradePrompt = !config.isPremium && config.upgradePrompt && !showCredits;
 
   const styles = useMemo(
     () =>
