@@ -3,7 +3,7 @@
  * TanStack mutation for initializing RevenueCat
  */
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 

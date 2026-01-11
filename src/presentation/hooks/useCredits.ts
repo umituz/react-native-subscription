@@ -7,7 +7,7 @@
 
 declare const __DEV__: boolean;
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@umituz/react-native-design-system";
 import { useCallback, useMemo } from "react";
 import type { UserCredits } from "../../domain/entities/Credits";
 import {

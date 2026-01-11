@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import { getCreditsRepository } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 import { creditsQueryKeys } from "./useCredits";
 

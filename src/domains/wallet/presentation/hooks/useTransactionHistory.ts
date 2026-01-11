@@ -5,7 +5,7 @@
  * Generic and reusable - uses config from TransactionRepository.
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@umituz/react-native-design-system";
 import type {
   CreditLog,
   TransactionRepositoryConfig,

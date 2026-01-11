@@ -3,7 +3,7 @@
  * TanStack query for fetching available packages
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@umituz/react-native-design-system";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import {
   SUBSCRIPTION_QUERY_KEYS,

@@ -5,7 +5,7 @@
  * This provides the actual premium status based on entitlements, not credits.
  */
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@umituz/react-native-design-system";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 
 export const subscriptionStatusQueryKeys = {
