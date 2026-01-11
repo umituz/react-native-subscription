@@ -18,7 +18,7 @@ import {
     syncPremiumStatus,
     notifyPurchaseCompleted,
 } from "../utils/PremiumStatusSyncer";
-import { usePendingPurchaseStore } from "../../../infrastructure/stores/PendingPurchaseStore";
+import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
 
 export interface PurchaseHandlerDeps {
     config: RevenueCatConfig;
@@ -77,10 +77,9 @@ export async function handlePurchase(
             });
         }
 
-        // Get purchase source from pending purchase store
-        const pendingPurchaseStore = usePendingPurchaseStore.getState();
-        const pending = pendingPurchaseStore.getPendingPurchase();
-        const source = pending?.source;
+        // Get purchase source from saved purchase
+        const savedPurchase = getSavedPurchase();
+        const source = savedPurchase?.source;
 
         if (isConsumable) {
             if (__DEV__) {
@@ -94,7 +93,7 @@ export async function handlePurchase(
                 source
             );
             // Clear pending purchase after successful purchase
-            pendingPurchaseStore.clearPendingPurchase();
+            clearSavedPurchase();
             return {
                 success: true,
                 isPremium: false,
@@ -129,7 +128,7 @@ export async function handlePurchase(
                 source
             );
             // Clear pending purchase after successful purchase
-            pendingPurchaseStore.clearPendingPurchase();
+            clearSavedPurchase();
             return { success: true, isPremium: true, customerInfo };
         }
 
@@ -147,7 +146,7 @@ export async function handlePurchase(
                 source
             );
             // Clear pending purchase after successful purchase
-            pendingPurchaseStore.clearPendingPurchase();
+            clearSavedPurchase();
             return { success: true, isPremium: false, customerInfo };
         }
 

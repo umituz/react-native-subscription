@@ -95,6 +95,7 @@ export async function initializeCreditsTransaction(
         }
 
         // Create purchase metadata for history (only if productId and source exists and packageType detected)
+        // NOTE: Cannot use serverTimestamp() in arrays, using Date.now() instead
         const purchaseMetadata: PurchaseMetadata | undefined =
           productId && metadata?.source && packageType && packageType !== "unknown" ? {
             productId,
@@ -104,7 +105,7 @@ export async function initializeCreditsTransaction(
             type: purchaseType,
             platform,
             appVersion,
-            timestamp: now as any,
+            timestamp: Date.now() as any,  // Use Date.now() instead of serverTimestamp() for arrays
           } : undefined;
 
         // Update purchase history (keep last 10, only if metadata exists)
@@ -113,21 +114,34 @@ export async function initializeCreditsTransaction(
           ? [...(existing?.purchaseHistory || []), purchaseMetadata].slice(-10)
           : existing?.purchaseHistory;
 
-        const creditsData = {
+        // Build credits data, excluding undefined values (Firestore doesn't accept undefined)
+        const creditsData: Record<string, unknown> = {
             credits: newCredits,
-            packageType: packageType !== "unknown" ? packageType : undefined,
             creditLimit,
-            productId: productId || undefined,
-            purchaseSource: metadata?.source,
-            purchaseType: metadata?.type ? purchaseType : undefined,
-            platform: productId ? platform : undefined,
-            appVersion: productId ? appVersion : undefined,
             purchasedAt,
             lastUpdatedAt: now,
             lastPurchaseAt: now,
             processedPurchases,
-            purchaseHistory,
         };
+
+        // Only add optional fields if they have values
+        if (packageType && packageType !== "unknown") {
+            creditsData.packageType = packageType;
+        }
+        if (productId) {
+            creditsData.productId = productId;
+            creditsData.platform = platform;
+            creditsData.appVersion = appVersion;
+        }
+        if (metadata?.source) {
+            creditsData.purchaseSource = metadata.source;
+        }
+        if (metadata?.type) {
+            creditsData.purchaseType = purchaseType;
+        }
+        if (purchaseHistory && purchaseHistory.length > 0) {
+            creditsData.purchaseHistory = purchaseHistory;
+        }
 
         transaction.set(creditsRef, creditsData, { merge: true });
 

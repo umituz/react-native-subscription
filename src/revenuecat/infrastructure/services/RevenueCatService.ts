@@ -30,9 +30,7 @@ export class RevenueCatService implements IRevenueCatService {
 
     constructor(config: RevenueCatConfig) {
         this.stateManager = new ServiceStateManager(config);
-        this.listenerManager = new CustomerInfoListenerManager(
-            config.entitlementIdentifier
-        );
+        this.listenerManager = new CustomerInfoListenerManager();
     }
 
     getRevenueCatKey(): string | null {

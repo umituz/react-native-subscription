@@ -40,31 +40,29 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
   const onPurchase = async (userId: string, productId: string, _customerInfo: unknown, source?: string) => {
+    if (__DEV__) {
+      console.log('[SubscriptionInitializer] onPurchase called:', { userId, productId, source });
+    }
     try {
-      await getCreditsRepository().initializeCredits(
+      const result = await getCreditsRepository().initializeCredits(
         userId,
         `purchase_${productId}_${Date.now()}`,
         productId,
         source as any
       );
+      if (__DEV__) {
+        console.log('[SubscriptionInitializer] Credits initialized:', result);
+      }
       onCreditsUpdated?.(userId);
-    } catch { /* Silent */ }
-  };
-
-  const onRenewal = async (userId: string, productId: string, renewalId: string) => {
-    try {
-      await getCreditsRepository().initializeCredits(
-        userId,
-        renewalId,
-        productId,
-        undefined
-      );
-      onCreditsUpdated?.(userId);
-    } catch { /* Silent */ }
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[SubscriptionInitializer] Credits init failed:', error);
+      }
+    }
   };
 
   SubscriptionManager.configure({
-    config: { apiKey: key, testStoreKey, entitlementIdentifier: entitlementId, consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"], onCreditRenewal: onRenewal, onPurchaseCompleted: onPurchase, onCreditsUpdated },
+    config: { apiKey: key, testStoreKey, entitlementIdentifier: entitlementId, consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"], onPurchaseCompleted: onPurchase, onCreditsUpdated },
     apiKey: key, getAnonymousUserId
   });
 

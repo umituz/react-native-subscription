@@ -18,13 +18,11 @@ export { initializeSubscription, type SubscriptionInitConfig, type CreditPackage
 export { CreditsRepository, createCreditsRepository } from "./infrastructure/repositories/CreditsRepository";
 export { configureCreditsRepository, getCreditsRepository, getCreditsConfig, resetCreditsRepository, isCreditsRepositoryConfigured } from "./infrastructure/repositories/CreditsRepositoryProvider";
 export {
-  usePendingPurchaseStore,
-  type PendingPurchaseData,
-} from "./infrastructure/stores/PendingPurchaseStore";
-export {
-  usePendingPurchaseHandler,
-  type UsePendingPurchaseHandlerParams,
-} from "./presentation/hooks/usePendingPurchaseHandler";
+  getSavedPurchase,
+  clearSavedPurchase,
+  configureAuthProvider,
+  type PurchaseAuthProvider,
+} from "./presentation/hooks/useAuthAwarePurchase";
 
 // Presentation Layer - Hooks
 export * from "./presentation/hooks";

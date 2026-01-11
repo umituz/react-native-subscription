@@ -1,116 +1,119 @@
 /**
  * Auth-Aware Purchase Hook
- * Uses globally configured auth provider
- * Configure once at app start with configureAuthProvider()
+ * Handles purchase flow with authentication requirement
  */
 
 import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
-import { usePendingPurchaseStore } from "../../infrastructure/stores/PendingPurchaseStore";
 import type { PurchaseSource } from "../../domain/entities/Credits";
 
 declare const __DEV__: boolean;
 
 export interface PurchaseAuthProvider {
-    isAuthenticated: () => boolean;
-    showAuthModal: () => void;
+  isAuthenticated: () => boolean;
+  showAuthModal: () => void;
 }
 
-// Global auth provider - configured once at app start
 let globalAuthProvider: PurchaseAuthProvider | null = null;
+let savedPackage: PurchasesPackage | null = null;
+let savedSource: PurchaseSource | null = null;
 
-/**
- * Configure auth provider for purchases
- * Call this once at app initialization
- */
 export const configureAuthProvider = (provider: PurchaseAuthProvider): void => {
-    globalAuthProvider = provider;
+  globalAuthProvider = provider;
+};
+
+export const getSavedPurchase = (): { pkg: PurchasesPackage; source: PurchaseSource } | null => {
+  if (savedPackage && savedSource) {
+    return { pkg: savedPackage, source: savedSource };
+  }
+  return null;
+};
+
+export const clearSavedPurchase = (): void => {
+  savedPackage = null;
+  savedSource = null;
 };
 
 export interface UseAuthAwarePurchaseParams {
   source?: PurchaseSource;
+  userId?: string;
 }
 
 export interface UseAuthAwarePurchaseResult {
-    handlePurchase: (pkg: PurchasesPackage, source?: PurchaseSource) => Promise<boolean>;
-    handleRestore: () => Promise<boolean>;
+  handlePurchase: (pkg: PurchasesPackage, source?: PurchaseSource) => Promise<boolean>;
+  handleRestore: () => Promise<boolean>;
+  executeSavedPurchase: () => Promise<boolean>;
 }
 
 export const useAuthAwarePurchase = (
   params?: UseAuthAwarePurchaseParams
 ): UseAuthAwarePurchaseResult => {
-    const { purchasePackage, restorePurchase, closePaywall } = usePremium();
-    const { setPendingPurchase } = usePendingPurchaseStore();
+  const { purchasePackage, restorePurchase } = usePremium(params?.userId);
 
-    const handlePurchase = useCallback(
-        async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
-            // SECURITY: Block purchase if auth provider not configured
-            if (!globalAuthProvider) {
-                if (__DEV__) {
-                    console.error(
-                        "[useAuthAwarePurchase] CRITICAL: Auth provider not configured. " +
-                        "Call configureAuthProvider() at app start. Purchase blocked for security.",
-                    );
-                }
-                return false;
-            }
-
-            // Block purchase if user not authenticated (anonymous users cannot purchase)
-            if (!globalAuthProvider.isAuthenticated()) {
-                if (__DEV__) {
-                    console.log(
-                        "[useAuthAwarePurchase] User not authenticated, saving pending purchase and opening auth modal",
-                    );
-                }
-
-                // Save pending purchase
-                setPendingPurchase({
-                  package: pkg,
-                  source: source || params?.source || "settings",
-                  selectedAt: Date.now(),
-                });
-
-                closePaywall();
-                globalAuthProvider.showAuthModal();
-                return false;
-            }
-
-            return purchasePackage(pkg);
-        },
-        [purchasePackage, closePaywall, setPendingPurchase, params?.source],
-    );
-
-    const handleRestore = useCallback(async (): Promise<boolean> => {
-        // SECURITY: Block restore if auth provider not configured
-        if (!globalAuthProvider) {
-            if (__DEV__) {
-                console.error(
-                    "[useAuthAwarePurchase] CRITICAL: Auth provider not configured. " +
-                    "Call configureAuthProvider() at app start. Restore blocked for security.",
-                );
-            }
-            // Block restore - never allow without auth provider
-            return false;
+  const handlePurchase = useCallback(
+    async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
+      if (!globalAuthProvider) {
+        if (__DEV__) {
+          console.error("[useAuthAwarePurchase] Auth provider not configured");
         }
+        return false;
+      }
 
-        // Block restore if user not authenticated
-        if (!globalAuthProvider.isAuthenticated()) {
-            if (__DEV__) {
-                console.log(
-                    "[useAuthAwarePurchase] User not authenticated, opening auth modal",
-                );
-            }
-            closePaywall();
-            globalAuthProvider.showAuthModal();
-            return false;
+      if (!globalAuthProvider.isAuthenticated()) {
+        if (__DEV__) {
+          console.log("[useAuthAwarePurchase] Not authenticated, saving and showing auth");
         }
+        savedPackage = pkg;
+        savedSource = source || params?.source || "settings";
+        globalAuthProvider.showAuthModal();
+        return false;
+      }
 
-        return restorePurchase();
-    }, [restorePurchase, closePaywall]);
+      return purchasePackage(pkg);
+    },
+    [purchasePackage, params?.source]
+  );
 
-    return {
-        handlePurchase,
-        handleRestore,
-    };
+  const handleRestore = useCallback(async (): Promise<boolean> => {
+    if (!globalAuthProvider) {
+      if (__DEV__) {
+        console.error("[useAuthAwarePurchase] Auth provider not configured");
+      }
+      return false;
+    }
+
+    if (!globalAuthProvider.isAuthenticated()) {
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] Not authenticated for restore");
+      }
+      globalAuthProvider.showAuthModal();
+      return false;
+    }
+
+    return restorePurchase();
+  }, [restorePurchase]);
+
+  const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
+    const saved = getSavedPurchase();
+    if (!saved) {
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] No saved purchase to execute");
+      }
+      return false;
+    }
+
+    if (__DEV__) {
+      console.log("[useAuthAwarePurchase] Executing saved purchase:", saved.pkg.product.identifier);
+    }
+
+    clearSavedPurchase();
+    return purchasePackage(saved.pkg);
+  }, [purchasePackage]);
+
+  return {
+    handlePurchase,
+    handleRestore,
+    executeSavedPurchase,
+  };
 };

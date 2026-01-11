@@ -8,7 +8,6 @@ declare const __DEV__: boolean;
 
 interface UsePaywallActionsProps {
   userId?: string;
-  isAnonymous: boolean;
   source?: PurchaseSource;
   onPurchaseSuccess?: () => void;
   onPurchaseError?: (error: string) => void;
@@ -18,23 +17,16 @@ interface UsePaywallActionsProps {
 
 export const usePaywallActions = ({
   userId,
-  isAnonymous,
   source,
   onPurchaseSuccess,
   onPurchaseError,
-  onAuthRequired,
+  onAuthRequired: _onAuthRequired,
   onClose,
 }: UsePaywallActionsProps) => {
-  const { handlePurchase: authAwarePurchase } = useAuthAwarePurchase({ source });
+  const { handlePurchase: authAwarePurchase } = useAuthAwarePurchase({ source, userId });
   const { mutateAsync: restorePurchases } = useRestorePurchase(userId);
 
   const handlePurchase = useCallback(async (pkg: PurchasesPackage) => {
-    if (isAnonymous) {
-      if (__DEV__) console.log("[PaywallActions] Anonymous user, redirecting to auth");
-      onAuthRequired?.();
-      return;
-    }
-
     try {
       if (__DEV__) console.log("[PaywallActions] Purchase started:", pkg.product.identifier);
       const res = await authAwarePurchase(pkg, source);
@@ -46,7 +38,7 @@ export const usePaywallActions = ({
       const message = err instanceof Error ? err.message : String(err);
       onPurchaseError?.(message);
     }
-  }, [isAnonymous, authAwarePurchase, source, onClose, onPurchaseSuccess, onPurchaseError, onAuthRequired]);
+  }, [authAwarePurchase, source, onClose, onPurchaseSuccess, onPurchaseError]);
 
   const handleRestore = useCallback(async () => {
     try {
