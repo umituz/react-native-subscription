@@ -3,10 +3,12 @@
  */
 
 import { Platform } from "react-native";
+import type { CustomerInfo } from "react-native-purchases";
 import type { CreditsConfig } from "../../domain/entities/Credits";
 import { configureCreditsRepository, getCreditsRepository } from "../repositories/CreditsRepositoryProvider";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 import { configureAuthProvider } from "../../presentation/hooks/useAuthAwarePurchase";
+import type { RevenueCatData } from "../repositories/CreditsRepository";
 
 export interface FirebaseAuthLike {
   currentUser: { uid: string; isAnonymous: boolean } | null;

@@ -19,17 +19,34 @@ export type PurchaseSource =
 
 export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 
+export type SubscriptionStatus = "active" | "expired" | "canceled" | "free";
+
+/** Single Source of Truth for user subscription + credits data */
 export interface UserCredits {
-  credits: number;
-  packageType?: "weekly" | "monthly" | "yearly";
-  creditLimit?: number;
+  // Core subscription
+  isPremium: boolean;
+  status: SubscriptionStatus;
+
+  // Dates
+  purchasedAt: Date | null;
+  expirationDate: Date | null;
+  lastUpdatedAt: Date | null;
+
+  // RevenueCat subscription details
+  willRenew: boolean;
   productId?: string;
+  packageType?: "weekly" | "monthly" | "yearly" | "lifetime";
+  originalTransactionId?: string;
+
+  // Credits
+  credits: number;
+  creditLimit?: number;
+
+  // Metadata
   purchaseSource?: PurchaseSource;
   purchaseType?: PurchaseType;
   platform?: "ios" | "android";
   appVersion?: string;
-  purchasedAt: Date | null;
-  lastUpdatedAt: Date | null;
 }
 
 export interface CreditAllocation {

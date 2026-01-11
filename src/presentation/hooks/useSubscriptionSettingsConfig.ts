@@ -61,11 +61,11 @@ export const useSubscriptionSettingsConfig = (
 
   // RevenueCat entitlement info - dynamically using configured entitlementId
   const entitlementId = SubscriptionManager.getEntitlementId() || "premium";
-  const premiumEntitlement = customerInfo?.entitlements.active[entitlementId];
+  const activeEntitlement = customerInfo?.entitlements.active[entitlementId];
+  const allEntitlement = customerInfo?.entitlements.all[entitlementId];
 
-  // Premium status: use customerInfo directly as it updates in real-time via listener
-  // This is the source of truth, subscriptionActive is just a backup
-  const isPremium = !!premiumEntitlement || subscriptionActive;
+  // Premium status: only active entitlements count as premium
+  const isPremium = !!activeEntitlement || subscriptionActive;
 
   const dynamicCreditLimit = useMemo(() => {
     const config = getCreditsConfig();
@@ -76,8 +76,8 @@ export const useSubscriptionSettingsConfig = (
     }
 
     // 2. FALLBACK: RevenueCat'ten detect et
-    if (premiumEntitlement?.productIdentifier) {
-      const packageType = detectPackageType(premiumEntitlement.productIdentifier);
+    if (activeEntitlement?.productIdentifier) {
+      const packageType = detectPackageType(activeEntitlement.productIdentifier);
       const allocation = getCreditAllocation(packageType, config.packageAllocations);
       if (allocation !== null) return allocation;
     }
@@ -92,19 +92,19 @@ export const useSubscriptionSettingsConfig = (
 
     // 4. FINAL FALLBACK: Config'den al
     return creditLimit ?? config.creditLimit;
-  }, [credits?.creditLimit, credits?.credits, premiumEntitlement?.productIdentifier, creditLimit]);
+  }, [credits?.creditLimit, credits?.credits, activeEntitlement?.productIdentifier, creditLimit]);
 
-  // Get expiration date directly from RevenueCat (source of truth)
-  const entitlementExpirationDate = premiumEntitlement?.expirationDate ?? null;
+  // Get expiration date with fallback chain (supports expired subscriptions)
+  // 1. Active entitlement (current subscription)
+  // 2. All entitlements (includes expired subscriptions)
+  // 3. latestExpirationDate from CustomerInfo
+  // 4. Status from Firestore
+  const expiresAtIso = activeEntitlement?.expirationDate
+    ?? allEntitlement?.expirationDate
+    ?? customerInfo?.latestExpirationDate
+    ?? (statusExpirationDate ? statusExpirationDate.toISOString() : null);
 
-  // Prefer CustomerInfo expiration (real-time) over cached status
-  const expiresAtIso = entitlementExpirationDate || (statusExpirationDate
-    ? statusExpirationDate.toISOString()
-    : null);
-
-
-
-  const willRenew = premiumEntitlement?.willRenew || false;
+  const willRenew = activeEntitlement?.willRenew || false;
   const purchasedAtIso = convertPurchasedAt(credits?.purchasedAt);
 
   // Formatted dates
@@ -135,7 +135,7 @@ export const useSubscriptionSettingsConfig = (
     showHeader: isPremium || hasCredits,
     showCredits: hasCredits,
     showUpgradePrompt: !isPremium && !hasCredits && !!upgradePrompt,
-    showExpirationDate: isPremium && !!expiresAtIso,
+    showExpirationDate: (isPremium || hasCredits) && !!expiresAtIso,
   }), [isPremium, hasCredits, upgradePrompt, expiresAtIso]);
 
   // Build config
@@ -196,8 +196,6 @@ export const useSubscriptionSettingsConfig = (
       upgradePrompt,
     ]
   );
-
-
 
   return config;
 };

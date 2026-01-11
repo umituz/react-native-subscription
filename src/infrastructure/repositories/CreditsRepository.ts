@@ -14,12 +14,20 @@ import { getCreditAllocation } from "../../utils/creditMapper";
 
 import { CreditsMapper } from "../mappers/CreditsMapper";
 
+/** RevenueCat subscription data to save (Single Source of Truth) */
+export interface RevenueCatData {
+  expirationDate?: string | null;
+  willRenew?: boolean;
+  originalTransactionId?: string;
+  isPremium?: boolean;
+}
+
 export class CreditsRepository extends BaseRepository {
   constructor(private config: CreditsConfig) { super(); }
 
   private getRef(db: Firestore, userId: string) {
-    return this.config.useUserSubcollection 
-      ? doc(db, "users", userId, "credits", "balance") 
+    return this.config.useUserSubcollection
+      ? doc(db, "users", userId, "credits", "balance")
       : doc(db, this.config.collectionName, userId);
   }
 
@@ -51,7 +59,8 @@ export class CreditsRepository extends BaseRepository {
     userId: string,
     purchaseId?: string,
     productId?: string,
-    source?: PurchaseSource
+    source?: PurchaseSource,
+    revenueCatData?: RevenueCatData
   ): Promise<CreditsResult> {
     const db = getFirestore();
     if (!db) return { success: false, error: { message: "No DB", code: "INIT_ERR" } };
@@ -70,6 +79,11 @@ export class CreditsRepository extends BaseRepository {
       const metadata: InitializeCreditsMetadata = {
         productId,
         source,
+        // RevenueCat data for Single Source of Truth
+        expirationDate: revenueCatData?.expirationDate,
+        willRenew: revenueCatData?.willRenew,
+        originalTransactionId: revenueCatData?.originalTransactionId,
+        isPremium: revenueCatData?.isPremium,
       };
 
       const res = await initializeCreditsTransaction(

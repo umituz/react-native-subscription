@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import {
     runTransaction,
     serverTimestamp,
+    Timestamp,
     type Firestore,
     type FieldValue,
     type Transaction,
@@ -14,6 +15,7 @@ import type {
   PurchaseSource,
   PurchaseType,
   PurchaseMetadata,
+  SubscriptionDocStatus,
 } from "../models/UserCreditsDocument";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
@@ -22,10 +24,16 @@ interface InitializationResult {
     credits: number;
 }
 
+/** RevenueCat data to save to Firestore (Single Source of Truth) */
 export interface InitializeCreditsMetadata {
   productId?: string;
   source?: PurchaseSource;
   type?: PurchaseType;
+  // RevenueCat subscription data
+  expirationDate?: string | null;
+  willRenew?: boolean;
+  originalTransactionId?: string;
+  isPremium?: boolean;
 }
 
 export async function initializeCreditsTransaction(
@@ -114,17 +122,41 @@ export async function initializeCreditsTransaction(
           ? [...(existing?.purchaseHistory || []), purchaseMetadata].slice(-10)
           : existing?.purchaseHistory;
 
-        // Build credits data, excluding undefined values (Firestore doesn't accept undefined)
+        // Determine subscription status
+        const isPremium = metadata?.isPremium ?? true;
+        const status: SubscriptionDocStatus = isPremium ? "active" : "expired";
+
+        // Build credits data (Single Source of Truth)
         const creditsData: Record<string, unknown> = {
+            // Core subscription
+            isPremium,
+            status,
+
+            // Credits
             credits: newCredits,
             creditLimit,
+
+            // Dates
             purchasedAt,
             lastUpdatedAt: now,
             lastPurchaseAt: now,
+
+            // Tracking
             processedPurchases,
         };
 
-        // Only add optional fields if they have values
+        // RevenueCat subscription data
+        if (metadata?.expirationDate) {
+            creditsData.expirationDate = Timestamp.fromDate(new Date(metadata.expirationDate));
+        }
+        if (metadata?.willRenew !== undefined) {
+            creditsData.willRenew = metadata.willRenew;
+        }
+        if (metadata?.originalTransactionId) {
+            creditsData.originalTransactionId = metadata.originalTransactionId;
+        }
+
+        // Package info
         if (packageType && packageType !== "unknown") {
             creditsData.packageType = packageType;
         }
@@ -133,6 +165,8 @@ export async function initializeCreditsTransaction(
             creditsData.platform = platform;
             creditsData.appVersion = appVersion;
         }
+
+        // Purchase metadata
         if (metadata?.source) {
             creditsData.purchaseSource = metadata.source;
         }
