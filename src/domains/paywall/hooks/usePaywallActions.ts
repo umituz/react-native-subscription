@@ -30,12 +30,17 @@ export const usePaywallActions = ({
     try {
       if (__DEV__) console.log("[PaywallActions] Purchase started:", pkg.product.identifier);
       const res = await authAwarePurchase(pkg, source);
+      if (__DEV__) console.log("[PaywallActions] Purchase result:", { res, productId: pkg.product.identifier });
       if (res) {
+        if (__DEV__) console.log("[PaywallActions] Purchase successful, closing paywall");
         onPurchaseSuccess?.();
         onClose();
+      } else {
+        if (__DEV__) console.log("[PaywallActions] Purchase returned false, paywall stays open");
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
+      if (__DEV__) console.log("[PaywallActions] Purchase error:", message);
       onPurchaseError?.(message);
     }
   }, [authAwarePurchase, source, onClose, onPurchaseSuccess, onPurchaseError]);

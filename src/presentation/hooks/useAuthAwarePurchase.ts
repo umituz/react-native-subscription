@@ -53,6 +53,13 @@ export const useAuthAwarePurchase = (
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] handlePurchase called:", {
+          productId: pkg.product.identifier,
+          hasAuthProvider: !!globalAuthProvider,
+        });
+      }
+
       if (!globalAuthProvider) {
         if (__DEV__) {
           console.error("[useAuthAwarePurchase] Auth provider not configured");
@@ -60,7 +67,12 @@ export const useAuthAwarePurchase = (
         return false;
       }
 
-      if (!globalAuthProvider.isAuthenticated()) {
+      const isAuth = globalAuthProvider.isAuthenticated();
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] Auth check:", { isAuthenticated: isAuth });
+      }
+
+      if (!isAuth) {
         if (__DEV__) {
           console.log("[useAuthAwarePurchase] Not authenticated, saving and showing auth");
         }
@@ -70,7 +82,14 @@ export const useAuthAwarePurchase = (
         return false;
       }
 
-      return purchasePackage(pkg);
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] Calling purchasePackage");
+      }
+      const result = await purchasePackage(pkg);
+      if (__DEV__) {
+        console.log("[useAuthAwarePurchase] purchasePackage returned:", result);
+      }
+      return result;
     },
     [purchasePackage, params?.source]
   );

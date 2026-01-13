@@ -85,8 +85,14 @@ export const usePremium = (userId?: string): UsePremiumResult => {
   // Purchase handler with proper error handling
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
+      if (__DEV__) {
+        console.log("[usePremium] handlePurchase called:", pkg.product.identifier);
+      }
       try {
         const result = await purchaseMutation.mutateAsync(pkg);
+        if (__DEV__) {
+          console.log("[usePremium] Purchase result:", { success: result.success });
+        }
         return result.success;
       } catch (error) {
         if (__DEV__) {

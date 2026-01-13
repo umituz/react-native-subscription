@@ -1,10 +1,11 @@
 /**
  * Feedback Service
  * Handles feedback submission to Firestore
+ * Feedback is stored under users/{userId}/feedback/{feedbackId}
  */
 
 import { getFirestore } from "@umituz/react-native-firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc } from "firebase/firestore";
 
 export interface FeedbackData {
   userId: string | null;
@@ -21,10 +22,9 @@ export interface FeedbackSubmitResult {
   error?: Error;
 }
 
-const FEEDBACK_COLLECTION = "feedback";
-
 /**
  * Submit feedback to Firestore
+ * Stores under users/{userId}/feedback
  */
 export async function submitFeedback(
   data: FeedbackData
@@ -38,6 +38,13 @@ export async function submitFeedback(
     return { success: false, error: new Error("Firestore not available") };
   }
 
+  if (!data.userId) {
+    if (__DEV__) {
+      console.warn("[FeedbackService] User ID is required for feedback");
+    }
+    return { success: false, error: new Error("User ID is required") };
+  }
+
   try {
     if (__DEV__) {
       console.log("[FeedbackService] Submitting feedback:", {
@@ -48,8 +55,11 @@ export async function submitFeedback(
 
     const now = new Date().toISOString();
 
-    await addDoc(collection(db, FEEDBACK_COLLECTION), {
-      userId: data.userId,
+    // Store under users/{userId}/feedback
+    const userDocRef = doc(db, "users", data.userId);
+    const feedbackCollectionRef = collection(userDocRef, "feedback");
+
+    await addDoc(feedbackCollectionRef, {
       userEmail: data.userEmail,
       type: data.type,
       title: data.title,
