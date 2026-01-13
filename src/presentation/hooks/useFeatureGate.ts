@@ -99,7 +99,26 @@ export function useFeatureGate(
 
       // Step 1: Auth check
       if (!authGate.requireAuth(() => {})) {
-        onShowAuthModal(action);
+        // Wrap action to re-check credits after auth succeeds
+        const postAuthAction = () => {
+          // Step 2: Subscription check (bypasses credits if subscribed)
+          if (hasSubscription) {
+            action();
+            return;
+          }
+
+          // Step 3: Credits check
+          if (!hasCredits) {
+            pendingActionRef.current = action;
+            isWaitingForPurchaseRef.current = true;
+            onShowPaywall(requiredCredits);
+            return;
+          }
+
+          // All checks passed
+          action();
+        };
+        onShowAuthModal(postAuthAction);
         return;
       }
 
@@ -124,7 +143,10 @@ export function useFeatureGate(
       authGate,
       creditsGate,
       hasSubscription,
+      hasCredits,
+      requiredCredits,
       onShowAuthModal,
+      onShowPaywall,
     ]
   );
 
