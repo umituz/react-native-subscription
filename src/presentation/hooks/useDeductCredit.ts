@@ -17,6 +17,8 @@ export interface UseDeductCreditParams {
 }
 
 export interface UseDeductCreditResult {
+  /** Check if user has enough credits (server-side validation) */
+  checkCredits: (cost?: number) => Promise<boolean>;
   deductCredit: (cost?: number) => Promise<boolean>;
   deductCredits: (cost: number) => Promise<boolean>;
   isDeducting: boolean;
@@ -73,5 +75,10 @@ export const useDeductCredit = ({
     return await deductCredit(cost);
   }, [deductCredit]);
 
-  return { deductCredit, deductCredits, isDeducting: mutation.isPending };
+  const checkCredits = useCallback(async (cost: number = 1): Promise<boolean> => {
+    if (!userId) return false;
+    return repository.hasCredits(userId, cost);
+  }, [userId, repository]);
+
+  return { checkCredits, deductCredit, deductCredits, isDeducting: mutation.isPending };
 };

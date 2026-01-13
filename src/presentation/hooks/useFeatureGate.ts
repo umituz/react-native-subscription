@@ -3,7 +3,7 @@
  * Combines auth, subscription, and credits gates into a unified feature gate.
  */
 
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import { useAuthGate } from "./useAuthGate";
 import { useSubscriptionGate } from "./useSubscriptionGate";
 import { useCreditsGate } from "./useCreditsGate";
@@ -55,6 +55,27 @@ export function useFeatureGate(
     onShowPaywall,
   } = params;
 
+  // Store pending action for execution after purchase
+  const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
+  const prevCreditBalanceRef = useRef(creditBalance);
+  const isWaitingForPurchaseRef = useRef(false);
+
+  // Execute pending action when credits increase after purchase
+  useEffect(() => {
+    const prevBalance = prevCreditBalanceRef.current;
+    const currentBalance = creditBalance;
+    const creditsIncreased = currentBalance > prevBalance;
+
+    if (isWaitingForPurchaseRef.current && creditsIncreased && pendingActionRef.current) {
+      const action = pendingActionRef.current;
+      pendingActionRef.current = null;
+      isWaitingForPurchaseRef.current = false;
+      action();
+    }
+
+    prevCreditBalanceRef.current = creditBalance;
+  }, [creditBalance]);
+
   // Compose individual gates
   const authGate = useAuthGate({
     isAuthenticated,
@@ -90,6 +111,9 @@ export function useFeatureGate(
 
       // Step 3: Credits check
       if (!creditsGate.requireCredits(() => {})) {
+        // Store pending action for execution after purchase
+        pendingActionRef.current = action;
+        isWaitingForPurchaseRef.current = true;
         return;
       }
 

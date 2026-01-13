@@ -21,8 +21,6 @@
 
 import { useCallback } from "react";
 
-declare const __DEV__: boolean;
-
 export interface UseCreditsGateParams {
   /** Whether user has enough credits for the action */
   hasCredits: boolean;
@@ -52,27 +50,12 @@ export function useCreditsGate(
   const requireCredits = useCallback(
     (_action: () => void | Promise<void>): boolean => {
       if (!hasCredits) {
-        if (__DEV__) {
-           
-          console.log("[useCreditsGate] Insufficient credits", {
-            creditBalance,
-            requiredCredits,
-          });
-        }
         onCreditsRequired(requiredCredits);
         return false;
       }
-
-      if (__DEV__) {
-         
-        console.log("[useCreditsGate] Has credits, proceeding", {
-          creditBalance,
-          requiredCredits,
-        });
-      }
       return true;
     },
-    [hasCredits, creditBalance, requiredCredits, onCreditsRequired]
+    [hasCredits, requiredCredits, onCreditsRequired]
   );
 
   return {
