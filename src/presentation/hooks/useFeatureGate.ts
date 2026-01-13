@@ -60,6 +60,23 @@ export function useFeatureGate(
   const prevCreditBalanceRef = useRef(creditBalance);
   const isWaitingForPurchaseRef = useRef(false);
 
+  // Refs to always get current values in closures
+  const hasCreditsRef = useRef(hasCredits);
+  const hasSubscriptionRef = useRef(hasSubscription);
+  const onShowPaywallRef = useRef(onShowPaywall);
+
+  useEffect(() => {
+    hasCreditsRef.current = hasCredits;
+  }, [hasCredits]);
+
+  useEffect(() => {
+    hasSubscriptionRef.current = hasSubscription;
+  }, [hasSubscription]);
+
+  useEffect(() => {
+    onShowPaywallRef.current = onShowPaywall;
+  }, [onShowPaywall]);
+
   // Execute pending action when credits increase after purchase
   useEffect(() => {
     const prevBalance = prevCreditBalanceRef.current;
@@ -100,18 +117,19 @@ export function useFeatureGate(
       // Step 1: Auth check
       if (!authGate.requireAuth(() => {})) {
         // Wrap action to re-check credits after auth succeeds
+        // Using refs to get current values when callback executes
         const postAuthAction = () => {
           // Step 2: Subscription check (bypasses credits if subscribed)
-          if (hasSubscription) {
+          if (hasSubscriptionRef.current) {
             action();
             return;
           }
 
-          // Step 3: Credits check
-          if (!hasCredits) {
+          // Step 3: Credits check (use ref for current value)
+          if (!hasCreditsRef.current) {
             pendingActionRef.current = action;
             isWaitingForPurchaseRef.current = true;
-            onShowPaywall(requiredCredits);
+            onShowPaywallRef.current(requiredCredits);
             return;
           }
 
