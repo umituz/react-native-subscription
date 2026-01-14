@@ -72,7 +72,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
         <Modal
             visible={visible}
             transparent
-            animationType="fade"
+            animationType="none"
             onRequestClose={handleSkip}
         >
             <Pressable onPress={handleSkip} style={styles.overlay}>

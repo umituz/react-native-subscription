@@ -8,6 +8,8 @@ import { useAuthGate } from "./useAuthGate";
 import { useSubscriptionGate } from "./useSubscriptionGate";
 import { useCreditsGate } from "./useCreditsGate";
 
+declare const __DEV__: boolean;
+
 
 
 export interface UseFeatureGateParams {
@@ -87,6 +89,10 @@ export function useFeatureGate(
       const action = pendingActionRef.current;
       pendingActionRef.current = null;
       isWaitingForPurchaseRef.current = false;
+
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[useFeatureGate] Credits increased, executing pending action");
+      }
       action();
     }
 
@@ -119,13 +125,16 @@ export function useFeatureGate(
         // Wrap action to re-check credits after auth succeeds
         // Using refs to get current values when callback executes
         const postAuthAction = () => {
-          // Step 2: Subscription check (bypasses credits if subscribed)
+          // Subscription check (bypasses credits if subscribed)
           if (hasSubscriptionRef.current) {
+            if (typeof __DEV__ !== "undefined" && __DEV__) {
+              console.log("[useFeatureGate] User has subscription, executing action");
+            }
             action();
             return;
           }
 
-          // Step 3: Credits check (use ref for current value)
+          // Credits check
           if (!hasCreditsRef.current) {
             pendingActionRef.current = action;
             isWaitingForPurchaseRef.current = true;
@@ -134,6 +143,9 @@ export function useFeatureGate(
           }
 
           // All checks passed
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.log("[useFeatureGate] User has credits, executing action");
+          }
           action();
         };
         onShowAuthModal(postAuthAction);

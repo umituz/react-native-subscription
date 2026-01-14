@@ -22,7 +22,7 @@ export const PurchaseLoadingOverlay: React.FC<PurchaseLoadingOverlayProps> = Rea
     if (!isPurchasing) return null;
 
     return (
-      <Modal visible transparent animationType="fade" statusBarTranslucent>
+      <Modal visible transparent animationType="none" statusBarTranslucent>
         <View style={[styles.container, { backgroundColor: "rgba(0, 0, 0, 0.7)" }]}>
           <View style={[styles.content, { backgroundColor: tokens.colors.surface }]}>
             <AtomicSpinner size="lg" color="primary" />
