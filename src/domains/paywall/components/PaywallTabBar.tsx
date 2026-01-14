@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
 import type { PaywallTabType } from '../entities';
 
@@ -18,18 +18,7 @@ interface PaywallTabBarProps {
 export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
     ({ activeTab, onTabChange, creditsLabel, subscriptionLabel }) => {
         const tokens = useAppDesignTokens();
-        const animatedValue = React.useRef(
-            new Animated.Value(activeTab === "credits" ? 0 : 1)
-        ).current;
-
-        React.useEffect(() => {
-            Animated.spring(animatedValue, {
-                toValue: activeTab === "credits" ? 0 : 1,
-                useNativeDriver: false,
-                tension: 68,
-                friction: 12,
-            }).start();
-        }, [activeTab, animatedValue]);
+        const isCreditsActive = activeTab === "credits";
 
         const renderTab = (tab: PaywallTabType, label: string) => {
             const isActive = activeTab === tab;
@@ -37,7 +26,10 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
             return (
                 <TouchableOpacity
                     key={tab}
-                    style={styles.tab}
+                    style={[
+                        styles.tab,
+                        isActive ? { backgroundColor: tokens.colors.surface } : undefined,
+                    ]}
                     onPress={() => onTabChange(tab)}
                     activeOpacity={0.7}
                 >
@@ -54,16 +46,8 @@ export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
             );
         };
 
-        const indicatorLeft = animatedValue.interpolate({
-            inputRange: [0, 1],
-            outputRange: ["2%", "50%"],
-        });
-
         return (
             <View style={[styles.container, { backgroundColor: tokens.colors.surfaceSecondary }]}>
-                <Animated.View
-                    style={[styles.indicator, { backgroundColor: tokens.colors.surface, left: indicatorLeft }] as any}
-                />
                 {renderTab("credits", creditsLabel)}
                 {renderTab("subscription", subscriptionLabel)}
             </View>
@@ -80,21 +64,13 @@ const styles = StyleSheet.create({
         padding: 4,
         marginHorizontal: 24,
         marginBottom: 16,
-        position: "relative",
         height: 44,
-    },
-    indicator: {
-        position: "absolute",
-        top: 4,
-        bottom: 4,
-        width: "46%",
-        borderRadius: 8,
     },
     tab: {
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 1,
+        borderRadius: 8,
     },
     tabText: {
         fontWeight: "600",
