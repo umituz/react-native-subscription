@@ -110,8 +110,23 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   });
 
   const userId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);
-  const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeoutMs));
-  await Promise.race([SubscriptionManager.initialize(userId), timeout]);
+  
+  // Initialize subscription without blocking - let it complete in background
+  try {
+    if (timeoutMs > 0) {
+      const timeout = new Promise<boolean>((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), timeoutMs)
+      );
+      await Promise.race([SubscriptionManager.initialize(userId), timeout]);
+    } else {
+      await SubscriptionManager.initialize(userId);
+    }
+  } catch (error) {
+    // Log error but don't throw - subscription will continue in background
+    if (__DEV__) {
+      console.warn('[SubscriptionInitializer] Initialize timeout/error (non-critical):', error);
+    }
+  }
 
   configureAuthProvider({
     isAuthenticated: () => {
