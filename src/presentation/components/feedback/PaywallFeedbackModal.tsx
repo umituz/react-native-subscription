@@ -74,13 +74,9 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
             visible={visible}
             onClose={handleSkip}
             title={displayTitle}
-            swipeToClose={true}
+            subtitle={displaySubtitle}
         >
-            <View style={{ paddingBottom: tokens.spacing.lg }}>
-                <AtomicText type="bodyMedium" style={[styles.subtitle, { marginBottom: tokens.spacing.md }]}>
-                    {displaySubtitle}
-                </AtomicText>
-
+            <View style={{ paddingHorizontal: tokens.spacing.md, paddingBottom: tokens.spacing.lg }}>
                 <View style={[styles.optionsContainer, { backgroundColor: 'transparent', padding: 0 }]}>
                     {FEEDBACK_OPTION_IDS.map((optionId, index) => {
                         const isSelected = selectedReason === optionId;
