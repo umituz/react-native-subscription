@@ -108,7 +108,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
           {heroImage && (
             <View style={styles.heroContainer}>
-              <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={300} />
+              <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={0} />
             </View>
           )}
 
