@@ -1,6 +1,6 @@
 {
   "name": "@umituz/react-native-subscription",
-  "version": "2.26.2",
+  "version": "2.26.3",
   "description": "Complete subscription management with RevenueCat, paywall UI, and credits system for React Native apps",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
