@@ -14,6 +14,8 @@ import {
     isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
+declare const __DEV__: boolean;
+
 export const creditsQueryKeys = {
   all: ["credits"] as const,
   user: (userId: string) => ["credits", userId] as const,
@@ -77,7 +79,11 @@ export const useCredits = ({
 
       // Background sync: If mapper detected expired status, sync to Firestore
       if (result.data?.status === "expired") {
-        repository.syncExpiredStatus(userId).catch(() => {});
+        repository.syncExpiredStatus(userId).catch((syncError) => {
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.warn("[useCredits] Background sync failed:", syncError);
+          }
+        });
       }
 
       return result.data || null;

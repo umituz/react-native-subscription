@@ -13,7 +13,8 @@ import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
 declare const __DEV__: boolean;
 
-export interface PurchaseResult {
+/** Purchase mutation result - simplified for presentation layer */
+export interface PurchaseMutationResult {
   success: boolean;
   productId: string;
 }
@@ -28,7 +29,7 @@ export const usePurchasePackage = (userId: string | undefined) => {
   const { showSuccess, showError } = useAlert();
 
   return useMutation({
-    mutationFn: async (pkg: PurchasesPackage): Promise<PurchaseResult> => {
+    mutationFn: async (pkg: PurchasesPackage): Promise<PurchaseMutationResult> => {
       if (!userId) {
         throw new Error("User not authenticated");
       }

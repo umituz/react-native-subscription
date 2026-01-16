@@ -173,10 +173,8 @@ export function useFeatureGate(
       authGate,
       creditsGate,
       hasSubscription,
-      hasCredits,
       requiredCredits,
       onShowAuthModal,
-      onShowPaywall,
     ]
   );
 

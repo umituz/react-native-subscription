@@ -18,6 +18,22 @@ export type { SubscriptionStatus, SubscriptionStatusType, PeriodType, StatusReso
 export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
 export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
 
+// Result Pattern (Functional Error Handling)
+export {
+  success,
+  failure,
+  isSuccess,
+  isFailure,
+  unwrap,
+  unwrapOr,
+  map,
+  flatMap,
+  tryCatch,
+  tryCatchSync,
+  combine,
+} from "./domain/value-objects/Result";
+export type { Result, Success, Failure } from "./domain/value-objects/Result";
+
 // Infrastructure Layer
 export { SubscriptionService, initializeSubscriptionService } from "./infrastructure/services/SubscriptionService";
 export {
