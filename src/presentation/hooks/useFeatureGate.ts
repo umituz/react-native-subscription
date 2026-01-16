@@ -81,7 +81,7 @@ export function useFeatureGate(
 
   // Execute pending action when credits increase after purchase
   useEffect(() => {
-    const prevBalance = prevCreditBalanceRef.current;
+    const prevBalance = prevCreditBalanceRef.current ?? 0; // ← FIX: Default to 0 if undefined
     const currentBalance = creditBalance;
     const creditsIncreased = currentBalance > prevBalance;
 
@@ -91,7 +91,11 @@ export function useFeatureGate(
       isWaitingForPurchaseRef.current = false;
 
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFeatureGate] Credits increased, executing pending action");
+        console.log("[useFeatureGate] Credits increased, executing pending action", {
+          prevBalance,
+          currentBalance,
+          creditsIncreased,
+        });
       }
       action();
     }
