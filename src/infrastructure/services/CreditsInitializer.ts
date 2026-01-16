@@ -122,9 +122,19 @@ export async function initializeCreditsTransaction(
           ? [...(existing?.purchaseHistory || []), purchaseMetadata].slice(-10)
           : existing?.purchaseHistory;
 
-        // Determine subscription status
+        // Determine subscription status based on isPremium and willRenew
         const isPremium = metadata?.isPremium ?? true;
-        const status: SubscriptionDocStatus = isPremium ? "active" : "expired";
+        const willRenew = metadata?.willRenew;
+
+        // Status logic: canceled if premium but willRenew=false, expired if not premium, active otherwise
+        let status: SubscriptionDocStatus;
+        if (!isPremium) {
+            status = "expired";
+        } else if (willRenew === false) {
+            status = "canceled";
+        } else {
+            status = "active";
+        }
 
         // Build credits data (Single Source of Truth)
         const creditsData: Record<string, unknown> = {

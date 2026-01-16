@@ -19,7 +19,8 @@ export interface RevenueCatConfig {
     userId: string,
     isPremium: boolean,
     productId?: string,
-    expiresAt?: string
+    expiresAt?: string,
+    willRenew?: boolean
   ) => Promise<void> | void;
   /** Callback for purchase completion */
   onPurchaseCompleted?: (

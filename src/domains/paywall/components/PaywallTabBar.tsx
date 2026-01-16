@@ -18,7 +18,6 @@ interface PaywallTabBarProps {
 export const PaywallTabBar: React.FC<PaywallTabBarProps> = React.memo(
     ({ activeTab, onTabChange, creditsLabel, subscriptionLabel }) => {
         const tokens = useAppDesignTokens();
-        const isCreditsActive = activeTab === "credits";
 
         const renderTab = (tab: PaywallTabType, label: string) => {
             const isActive = activeTab === tab;

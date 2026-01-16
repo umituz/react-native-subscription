@@ -104,9 +104,54 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     }
   };
 
+  /** Sync premium status changes (including cancellation) to Firestore */
+  const onPremiumStatusChanged = async (
+    userId: string,
+    isPremium: boolean,
+    productId?: string,
+    expiresAt?: string,
+    willRenew?: boolean
+  ) => {
+    if (__DEV__) {
+      console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew });
+    }
+    try {
+      const revenueCatData: RevenueCatData = {
+        expirationDate: expiresAt ?? null,
+        willRenew: willRenew ?? false,
+        isPremium,
+      };
+      await getCreditsRepository().initializeCredits(
+        userId,
+        `status_sync_${Date.now()}`,
+        productId,
+        "settings" as any,
+        revenueCatData
+      );
+      if (__DEV__) {
+        console.log('[SubscriptionInitializer] Premium status synced to Firestore');
+      }
+      onCreditsUpdated?.(userId);
+    } catch (error) {
+      if (__DEV__) {
+        console.error('[SubscriptionInitializer] Premium status sync failed:', error);
+      }
+    }
+  };
+
   SubscriptionManager.configure({
-    config: { apiKey: key, testStoreKey, entitlementIdentifier: entitlementId, consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"], onPurchaseCompleted: onPurchase, onRenewalDetected: onRenewal, onCreditsUpdated },
-    apiKey: key, getAnonymousUserId
+    config: {
+      apiKey: key,
+      testStoreKey,
+      entitlementIdentifier: entitlementId,
+      consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"],
+      onPurchaseCompleted: onPurchase,
+      onRenewalDetected: onRenewal,
+      onPremiumStatusChanged,
+      onCreditsUpdated,
+    },
+    apiKey: key,
+    getAnonymousUserId,
   });
 
   const userId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);

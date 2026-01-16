@@ -4,14 +4,7 @@
  */
 
 import React, { useMemo } from "react";
-import {
-    View,
-    Modal,
-    TouchableOpacity,
-    Pressable,
-    TextInput,
-    KeyboardAvoidingView,
-} from "react-native";
+import { View, TouchableOpacity, TextInput } from "react-native";
 import { AtomicText, BaseModal } from "@umituz/react-native-design-system";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 import { useLocalization } from "@umituz/react-native-localization";
@@ -78,7 +71,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
         >
             <View style={{ paddingHorizontal: tokens.spacing.md, paddingBottom: tokens.spacing.lg }}>
                 <View style={[styles.optionsContainer, { backgroundColor: 'transparent', padding: 0 }]}>
-                    {FEEDBACK_OPTION_IDS.map((optionId, index) => {
+                    {FEEDBACK_OPTION_IDS.map((optionId) => {
                         const isSelected = selectedReason === optionId;
                         const isOther = optionId === "other";
                         const showInput = isSelected && isOther;
