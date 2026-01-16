@@ -7,8 +7,14 @@ export * from "./domains/paywall";
 export * from "./domains/config";
 
 // Domain Layer
-export { createDefaultSubscriptionStatus, isSubscriptionValid } from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionStatus, SubscriptionStatusType, PeriodType } from "./domain/entities/SubscriptionStatus";
+export {
+  SUBSCRIPTION_STATUS,
+  PERIOD_TYPE,
+  createDefaultSubscriptionStatus,
+  isSubscriptionValid,
+  resolveSubscriptionStatus,
+} from "./domain/entities/SubscriptionStatus";
+export type { SubscriptionStatus, SubscriptionStatusType, PeriodType, StatusResolverInput } from "./domain/entities/SubscriptionStatus";
 export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
 export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
 

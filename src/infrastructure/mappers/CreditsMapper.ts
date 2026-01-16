@@ -1,4 +1,5 @@
-import type { UserCredits, SubscriptionStatus, PeriodType } from "../../domain/entities/Credits";
+import type { UserCredits } from "../../domain/entities/Credits";
+import { resolveSubscriptionStatus, type PeriodType, type SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
 /** Maps Firestore document to domain entity with expiration validation */
@@ -51,43 +52,22 @@ export class CreditsMapper {
     doc: UserCreditsDocumentRead,
     expirationDate: Date | null,
     periodType?: PeriodType
-  ): { isPremium: boolean; status: SubscriptionStatus } {
-    const docIsPremium = doc.isPremium ?? false;
+  ): { isPremium: boolean; status: SubscriptionStatusType } {
+    const isPremium = doc.isPremium ?? false;
     const willRenew = doc.willRenew ?? false;
+    const isExpired = expirationDate ? expirationDate < new Date() : false;
 
-    // No expiration date = lifetime or free
-    if (!expirationDate) {
-      return {
-        isPremium: docIsPremium,
-        status: docIsPremium ? "active" : "free",
-      };
-    }
+    const status = resolveSubscriptionStatus({
+      isPremium,
+      willRenew,
+      isExpired,
+      periodType,
+    });
 
-    // Check if subscription has expired
-    const isExpired = expirationDate < new Date();
-
-    if (isExpired) {
-      // Subscription expired - override document's isPremium
-      return { isPremium: false, status: "expired" };
-    }
-
-    // Handle trial period
-    if (periodType === "TRIAL") {
-      return {
-        isPremium: docIsPremium,
-        status: willRenew === false ? "trial_canceled" : "trial",
-      };
-    }
-
-    // Handle canceled subscription (will not renew but still active)
-    if (docIsPremium && willRenew === false) {
-      return { isPremium: true, status: "canceled" };
-    }
-
-    // Subscription still active
+    // Override isPremium if expired
     return {
-      isPremium: docIsPremium,
-      status: docIsPremium ? "active" : "free",
+      isPremium: isExpired ? false : isPremium,
+      status,
     };
   }
 }

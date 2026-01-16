@@ -9,8 +9,14 @@ export const SUBSCRIPTION_STATUS = {
   NONE: 'none',
 } as const;
 
-/** RevenueCat period types */
-export type PeriodType = "NORMAL" | "INTRO" | "TRIAL";
+/** RevenueCat period type constants */
+export const PERIOD_TYPE = {
+  NORMAL: 'NORMAL',
+  INTRO: 'INTRO',
+  TRIAL: 'TRIAL',
+} as const;
+
+export type PeriodType = (typeof PERIOD_TYPE)[keyof typeof PERIOD_TYPE];
 
 export type SubscriptionStatusType = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
 
@@ -35,7 +41,7 @@ export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
     purchasedAt: null,
     customerId: null,
     syncedAt: null,
-    status: 'none',
+    status: SUBSCRIPTION_STATUS.NONE,
 });
 
 export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean => {
@@ -48,5 +54,34 @@ export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean 
 export const calculateDaysRemaining = (expiresAt: string | null): number | null => {
     if (!expiresAt) return null;
     return timezoneService.getDaysUntil(new Date(expiresAt));
+};
+
+/** Subscription status resolver input */
+export interface StatusResolverInput {
+    isPremium: boolean;
+    willRenew?: boolean;
+    isExpired?: boolean;
+    periodType?: PeriodType;
+}
+
+/**
+ * Resolves subscription status from input parameters
+ * Single source of truth for status determination logic
+ */
+export const resolveSubscriptionStatus = (input: StatusResolverInput): SubscriptionStatusType => {
+    const { isPremium, willRenew, isExpired, periodType } = input;
+
+    if (!isPremium || isExpired) {
+        return isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.NONE;
+    }
+
+    const isTrial = periodType === PERIOD_TYPE.TRIAL;
+    const isCanceled = willRenew === false;
+
+    if (isTrial) {
+        return isCanceled ? SUBSCRIPTION_STATUS.TRIAL_CANCELED : SUBSCRIPTION_STATUS.TRIAL;
+    }
+
+    return isCanceled ? SUBSCRIPTION_STATUS.CANCELED : SUBSCRIPTION_STATUS.ACTIVE;
 };
 

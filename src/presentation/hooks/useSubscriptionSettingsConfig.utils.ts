@@ -5,6 +5,7 @@
 
 import { useMemo } from "react";
 import type { UserCredits } from "../../domain/entities/Credits";
+import { resolveSubscriptionStatus, type PeriodType, type SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
 import type { SubscriptionSettingsTranslations } from "../types/SubscriptionSettingsTypes";
 
 export interface CreditsInfo {
@@ -38,42 +39,19 @@ export function useCreditsArray(
 
 /**
  * Calculates subscription status type based on premium, renewal status, and period type
- * @param isPremium - Whether user has premium subscription
- * @param willRenew - Whether subscription will auto-renew (false = canceled)
- * @param expiresAt - Expiration date ISO string (null for lifetime)
- * @param periodType - RevenueCat period type: NORMAL, INTRO, or TRIAL
  */
 export function getSubscriptionStatusType(
   isPremium: boolean,
   willRenew?: boolean,
   expiresAt?: string | null,
-  periodType?: "NORMAL" | "INTRO" | "TRIAL"
-): "active" | "trial" | "trial_canceled" | "canceled" | "expired" | "none" {
-  if (!isPremium) {
-    return "none";
-  }
+  periodType?: PeriodType
+): SubscriptionStatusType {
+  const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
 
-  // Lifetime subscription (no expiration) - always active
-  if (!expiresAt) {
-    return "active";
-  }
-
-  // Check if expired
-  const now = new Date();
-  const expDate = new Date(expiresAt);
-  if (expDate < now) {
-    return "expired";
-  }
-
-  // Trial period handling
-  if (periodType === "TRIAL") {
-    return willRenew === false ? "trial_canceled" : "trial";
-  }
-
-  // Premium with willRenew=false means subscription is canceled but still active until expiration
-  if (willRenew === false) {
-    return "canceled";
-  }
-
-  return "active";
+  return resolveSubscriptionStatus({
+    isPremium,
+    willRenew,
+    isExpired,
+    periodType,
+  });
 }

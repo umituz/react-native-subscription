@@ -15,9 +15,8 @@ import type {
   PurchaseSource,
   PurchaseType,
   PurchaseMetadata,
-  SubscriptionDocStatus,
-  PeriodType,
 } from "../models/UserCreditsDocument";
+import { SUBSCRIPTION_STATUS, resolveSubscriptionStatus, type PeriodType } from "../../domain/entities/SubscriptionStatus";
 import { TRIAL_CONFIG } from "./TrialService";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
@@ -126,34 +125,23 @@ export async function initializeCreditsTransaction(
           ? [...(existing?.purchaseHistory || []), purchaseMetadata].slice(-10)
           : existing?.purchaseHistory;
 
-        // Determine subscription status based on isPremium, willRenew, and periodType
+        // Determine subscription status
         const isPremium = metadata?.isPremium ?? true;
         const willRenew = metadata?.willRenew;
         const periodType = metadata?.periodType;
-        const isTrialing = periodType === "TRIAL";
 
-        // Status logic:
-        // - trial: periodType is TRIAL and premium
-        // - trial_canceled: periodType is TRIAL and premium but willRenew=false
-        // - canceled: premium but willRenew=false (non-trial)
-        // - expired: not premium
-        // - active: premium and will renew (non-trial)
-        let status: SubscriptionDocStatus;
-        if (!isPremium) {
-            status = "expired";
-        } else if (isTrialing) {
-            status = willRenew === false ? "trial_canceled" : "trial";
-        } else if (willRenew === false) {
-            status = "canceled";
-        } else {
-            status = "active";
-        }
+        const status = resolveSubscriptionStatus({
+            isPremium,
+            willRenew,
+            isExpired: !isPremium,
+            periodType,
+        });
 
         // Determine credits based on status
         // Trial: 5 credits, Trial canceled: 0 credits, Normal: plan-based credits
-        if (status === "trial") {
+        if (status === SUBSCRIPTION_STATUS.TRIAL) {
             newCredits = TRIAL_CONFIG.CREDITS;
-        } else if (status === "trial_canceled") {
+        } else if (status === SUBSCRIPTION_STATUS.TRIAL_CANCELED) {
             newCredits = 0;
         }
 
@@ -198,11 +186,13 @@ export async function initializeCreditsTransaction(
         }
 
         // Trial-specific fields
+        const isTrialing = status === SUBSCRIPTION_STATUS.TRIAL || status === SUBSCRIPTION_STATUS.TRIAL_CANCELED;
+
         if (periodType) {
             creditsData.periodType = periodType;
         }
         if (isTrialing) {
-            creditsData.isTrialing = true;
+            creditsData.isTrialing = status === SUBSCRIPTION_STATUS.TRIAL;
             creditsData.trialCredits = TRIAL_CONFIG.CREDITS;
             // Set trial dates if this is a new trial
             if (!existing?.trialStartDate) {
@@ -211,7 +201,7 @@ export async function initializeCreditsTransaction(
             if (metadata?.expirationDate) {
                 creditsData.trialEndDate = Timestamp.fromDate(new Date(metadata.expirationDate));
             }
-        } else if (existing?.isTrialing && !isTrialing && isPremium) {
+        } else if (existing?.isTrialing && isPremium) {
             // User converted from trial to paid
             creditsData.isTrialing = false;
             creditsData.convertedFromTrial = true;

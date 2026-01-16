@@ -6,6 +6,7 @@
  */
 
 import type { SubscriptionPackageType } from "../../utils/packageTypeDetector";
+import type { SubscriptionStatusType, PeriodType } from "./SubscriptionStatus";
 
 export type CreditType = "text" | "image";
 
@@ -19,16 +20,11 @@ export type PurchaseSource =
 
 export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 
-export type SubscriptionStatus = "active" | "trial" | "trial_canceled" | "expired" | "canceled" | "free";
-
-/** RevenueCat period types */
-export type PeriodType = "NORMAL" | "INTRO" | "TRIAL";
-
 /** Single Source of Truth for user subscription + credits data */
 export interface UserCredits {
   // Core subscription
   isPremium: boolean;
-  status: SubscriptionStatus;
+  status: SubscriptionStatusType;
 
   // Dates
   purchasedAt: Date | null;
