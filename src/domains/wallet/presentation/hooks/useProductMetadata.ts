@@ -6,12 +6,15 @@
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
+import { useMemo } from "react";
 import type {
   ProductMetadata,
   ProductMetadataConfig,
   ProductType,
 } from "../../domain/types/wallet.types";
 import { ProductMetadataService } from "../../infrastructure/services/ProductMetadataService";
+
+declare const __DEV__: boolean;
 
 const CACHE_CONFIG = {
   staleTime: 5 * 60 * 1000, // 5 minutes
@@ -43,7 +46,11 @@ export function useProductMetadata({
   type,
   enabled = true,
 }: UseProductMetadataParams): UseProductMetadataResult {
-  const service = new ProductMetadataService(config);
+  // Memoize service to prevent recreation on every render
+  const service = useMemo(
+    () => new ProductMetadataService(config),
+    [config]
+  );
 
   const queryKey = type
     ? productMetadataQueryKeys.byType(type)

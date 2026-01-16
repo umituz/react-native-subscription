@@ -6,11 +6,14 @@
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
+import { useMemo } from "react";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
 } from "../../domain/types/transaction.types";
 import { TransactionRepository } from "../../infrastructure/repositories/TransactionRepository";
+
+declare const __DEV__: boolean;
 
 const CACHE_CONFIG = {
   staleTime: 60 * 1000, // 1 minute
@@ -43,7 +46,11 @@ export function useTransactionHistory({
   limit = 50,
   enabled = true,
 }: UseTransactionHistoryParams): UseTransactionHistoryResult {
-  const repository = new TransactionRepository(config);
+  // Memoize repository to prevent recreation on every render
+  const repository = useMemo(
+    () => new TransactionRepository(config),
+    [config]
+  );
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [...transactionQueryKeys.user(userId ?? ""), limit],
