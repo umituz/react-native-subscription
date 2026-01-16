@@ -16,6 +16,10 @@ export interface PremiumStatusBadgeProps {
   expiredLabel: string;
   noneLabel: string;
   canceledLabel: string;
+  /** Label for trial status (defaults to activeLabel if not provided) */
+  trialLabel?: string;
+  /** Label for trial_canceled status (defaults to canceledLabel if not provided) */
+  trialCanceledLabel?: string;
 }
 
 export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
@@ -24,11 +28,15 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   expiredLabel,
   noneLabel,
   canceledLabel,
+  trialLabel,
+  trialCanceledLabel,
 }) => {
   const tokens = useAppDesignTokens();
 
   const labels: Record<SubscriptionStatusType, string> = {
     active: activeLabel,
+    trial: trialLabel ?? activeLabel,
+    trial_canceled: trialCanceledLabel ?? canceledLabel,
     expired: expiredLabel,
     none: noneLabel,
     canceled: canceledLabel,
@@ -37,6 +45,8 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   const backgroundColor = useMemo(() => {
     const colors: Record<SubscriptionStatusType, string> = {
       active: tokens.colors.success,
+      trial: tokens.colors.primary, // Blue/purple for trial
+      trial_canceled: tokens.colors.warning, // Orange for trial canceled
       expired: tokens.colors.error,
       none: tokens.colors.textTertiary,
       canceled: tokens.colors.warning,

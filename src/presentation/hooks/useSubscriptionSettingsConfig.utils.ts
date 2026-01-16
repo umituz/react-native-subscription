@@ -37,16 +37,18 @@ export function useCreditsArray(
 }
 
 /**
- * Calculates subscription status type based on premium and renewal status
+ * Calculates subscription status type based on premium, renewal status, and period type
  * @param isPremium - Whether user has premium subscription
  * @param willRenew - Whether subscription will auto-renew (false = canceled)
  * @param expiresAt - Expiration date ISO string (null for lifetime)
+ * @param periodType - RevenueCat period type: NORMAL, INTRO, or TRIAL
  */
 export function getSubscriptionStatusType(
   isPremium: boolean,
   willRenew?: boolean,
-  expiresAt?: string | null
-): "active" | "canceled" | "expired" | "none" {
+  expiresAt?: string | null,
+  periodType?: "NORMAL" | "INTRO" | "TRIAL"
+): "active" | "trial" | "trial_canceled" | "canceled" | "expired" | "none" {
   if (!isPremium) {
     return "none";
   }
@@ -61,6 +63,11 @@ export function getSubscriptionStatusType(
   const expDate = new Date(expiresAt);
   if (expDate < now) {
     return "expired";
+  }
+
+  // Trial period handling
+  if (periodType === "TRIAL") {
+    return willRenew === false ? "trial_canceled" : "trial";
   }
 
   // Premium with willRenew=false means subscription is canceled but still active until expiration

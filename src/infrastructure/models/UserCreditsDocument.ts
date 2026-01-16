@@ -12,7 +12,10 @@ export type PurchaseSource =
 
 export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 
-export type SubscriptionDocStatus = "active" | "expired" | "canceled" | "free";
+export type SubscriptionDocStatus = "active" | "trial" | "trial_canceled" | "expired" | "canceled" | "free";
+
+/** RevenueCat period types */
+export type PeriodType = "NORMAL" | "INTRO" | "TRIAL";
 
 export interface PurchaseMetadata {
   productId: string;
@@ -42,6 +45,14 @@ export interface UserCreditsDocumentRead {
     productId?: string;
     packageType?: "weekly" | "monthly" | "yearly" | "lifetime";
     originalTransactionId?: string;
+
+    // Trial fields
+    periodType?: PeriodType;
+    isTrialing?: boolean;
+    trialStartDate?: FirestoreTimestamp;
+    trialEndDate?: FirestoreTimestamp;
+    trialCredits?: number;
+    convertedFromTrial?: boolean;
 
     // Credits
     credits: number;

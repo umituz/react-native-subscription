@@ -20,5 +20,6 @@ export * from "./useSubscriptionSettingsConfig";
 export * from "./useSubscriptionStatus";
 export * from "./useUserTier";
 export * from "./useUserTierWithRepository";
+export * from "./useTrialEligibility";
 export * from "./feedback/usePaywallFeedback";
 export * from "./feedback/useFeedbackSubmit";

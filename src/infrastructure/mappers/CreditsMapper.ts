@@ -1,13 +1,14 @@
-import type { UserCredits, SubscriptionStatus } from "../../domain/entities/Credits";
+import type { UserCredits, SubscriptionStatus, PeriodType } from "../../domain/entities/Credits";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
 /** Maps Firestore document to domain entity with expiration validation */
 export class CreditsMapper {
   static toEntity(doc: UserCreditsDocumentRead): UserCredits {
     const expirationDate = doc.expirationDate?.toDate?.() ?? null;
+    const periodType = doc.periodType as PeriodType | undefined;
 
     // Validate isPremium against expirationDate (real-time check)
-    const { isPremium, status } = CreditsMapper.validateSubscription(doc, expirationDate);
+    const { isPremium, status } = CreditsMapper.validateSubscription(doc, expirationDate, periodType);
 
     return {
       // Core subscription (validated)
@@ -25,6 +26,14 @@ export class CreditsMapper {
       packageType: doc.packageType,
       originalTransactionId: doc.originalTransactionId,
 
+      // Trial fields
+      periodType,
+      isTrialing: doc.isTrialing,
+      trialStartDate: doc.trialStartDate?.toDate?.() ?? null,
+      trialEndDate: doc.trialEndDate?.toDate?.() ?? null,
+      trialCredits: doc.trialCredits,
+      convertedFromTrial: doc.convertedFromTrial,
+
       // Credits
       credits: doc.credits,
       creditLimit: doc.creditLimit,
@@ -37,12 +46,14 @@ export class CreditsMapper {
     };
   }
 
-  /** Validate subscription status against expirationDate */
+  /** Validate subscription status against expirationDate and periodType */
   private static validateSubscription(
     doc: UserCreditsDocumentRead,
-    expirationDate: Date | null
+    expirationDate: Date | null,
+    periodType?: PeriodType
   ): { isPremium: boolean; status: SubscriptionStatus } {
     const docIsPremium = doc.isPremium ?? false;
+    const willRenew = doc.willRenew ?? false;
 
     // No expiration date = lifetime or free
     if (!expirationDate) {
@@ -58,6 +69,19 @@ export class CreditsMapper {
     if (isExpired) {
       // Subscription expired - override document's isPremium
       return { isPremium: false, status: "expired" };
+    }
+
+    // Handle trial period
+    if (periodType === "TRIAL") {
+      return {
+        isPremium: docIsPremium,
+        status: willRenew === false ? "trial_canceled" : "trial",
+      };
+    }
+
+    // Handle canceled subscription (will not renew but still active)
+    if (docIsPremium && willRenew === false) {
+      return { isPremium: true, status: "canceled" };
     }
 
     // Subscription still active

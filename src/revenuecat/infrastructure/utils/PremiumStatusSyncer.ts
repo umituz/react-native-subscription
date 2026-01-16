@@ -28,10 +28,11 @@ export async function syncPremiumStatus(
                 true,
                 premiumEntitlement.productIdentifier,
                 premiumEntitlement.expirationDate ?? undefined,
-                premiumEntitlement.willRenew
+                premiumEntitlement.willRenew,
+                premiumEntitlement.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined
             );
         } else {
-            await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined);
+            await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
     } catch {
         // Silent error handling

@@ -19,7 +19,10 @@ export type PurchaseSource =
 
 export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 
-export type SubscriptionStatus = "active" | "expired" | "canceled" | "free";
+export type SubscriptionStatus = "active" | "trial" | "trial_canceled" | "expired" | "canceled" | "free";
+
+/** RevenueCat period types */
+export type PeriodType = "NORMAL" | "INTRO" | "TRIAL";
 
 /** Single Source of Truth for user subscription + credits data */
 export interface UserCredits {
@@ -37,6 +40,14 @@ export interface UserCredits {
   productId?: string;
   packageType?: "weekly" | "monthly" | "yearly" | "lifetime";
   originalTransactionId?: string;
+
+  // Trial fields
+  periodType?: PeriodType;
+  isTrialing?: boolean;
+  trialStartDate?: Date | null;
+  trialEndDate?: Date | null;
+  trialCredits?: number;
+  convertedFromTrial?: boolean;
 
   // Credits
   credits: number;

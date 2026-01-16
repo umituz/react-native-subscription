@@ -51,6 +51,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
       willRenew: entitlement?.willRenew ?? false,
       originalTransactionId: entitlement?.originalPurchaseDate ?? undefined,
       isPremium: Object.keys(customerInfo.entitlements.active).length > 0,
+      periodType: entitlement?.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined,
     };
   };
 
@@ -110,16 +111,18 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     isPremium: boolean,
     productId?: string,
     expiresAt?: string,
-    willRenew?: boolean
+    willRenew?: boolean,
+    periodType?: "NORMAL" | "INTRO" | "TRIAL"
   ) => {
     if (__DEV__) {
-      console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew });
+      console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew, periodType });
     }
     try {
       const revenueCatData: RevenueCatData = {
         expirationDate: expiresAt ?? null,
         willRenew: willRenew ?? false,
         isPremium,
+        periodType,
       };
       await getCreditsRepository().initializeCredits(
         userId,

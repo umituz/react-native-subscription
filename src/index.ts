@@ -8,7 +8,7 @@ export * from "./domains/config";
 
 // Domain Layer
 export { createDefaultSubscriptionStatus, isSubscriptionValid } from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionStatus, SubscriptionStatusType } from "./domain/entities/SubscriptionStatus";
+export type { SubscriptionStatus, SubscriptionStatusType, PeriodType } from "./domain/entities/SubscriptionStatus";
 export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
 export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
 
@@ -22,6 +22,16 @@ export {
   type FeedbackSubmitResult,
 } from "./infrastructure/services/FeedbackService";
 export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./infrastructure/services/SubscriptionInitializer";
+export {
+  getDeviceId,
+  checkTrialEligibility,
+  recordTrialStart,
+  recordTrialEnd,
+  recordTrialConversion,
+  TRIAL_CONFIG,
+  type DeviceTrialRecord,
+  type TrialEligibilityResult,
+} from "./infrastructure/services/TrialService";
 export { CreditsRepository, createCreditsRepository } from "./infrastructure/repositories/CreditsRepository";
 export { configureCreditsRepository, getCreditsRepository, getCreditsConfig, resetCreditsRepository, isCreditsRepositoryConfigured } from "./infrastructure/repositories/CreditsRepositoryProvider";
 export {

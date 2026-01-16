@@ -20,6 +20,8 @@ export interface RevenueCatData {
   willRenew?: boolean;
   originalTransactionId?: string;
   isPremium?: boolean;
+  /** RevenueCat period type: NORMAL, INTRO, or TRIAL */
+  periodType?: "NORMAL" | "INTRO" | "TRIAL";
 }
 
 export class CreditsRepository extends BaseRepository {
@@ -84,6 +86,7 @@ export class CreditsRepository extends BaseRepository {
         willRenew: revenueCatData?.willRenew,
         originalTransactionId: revenueCatData?.originalTransactionId,
         isPremium: revenueCatData?.isPremium,
+        periodType: revenueCatData?.periodType,
       };
 
       const res = await initializeCreditsTransaction(

@@ -20,7 +20,9 @@ export interface RevenueCatConfig {
     isPremium: boolean,
     productId?: string,
     expiresAt?: string,
-    willRenew?: boolean
+    willRenew?: boolean,
+    /** RevenueCat period type: NORMAL, INTRO, or TRIAL */
+    periodType?: "NORMAL" | "INTRO" | "TRIAL"
   ) => Promise<void> | void;
   /** Callback for purchase completion */
   onPurchaseCompleted?: (

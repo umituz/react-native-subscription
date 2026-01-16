@@ -42,6 +42,10 @@ export interface SubscriptionSettingsTranslations {
   statusFree: string;
   statusExpired: string;
   statusCanceled: string;
+  /** Trial status label (defaults to statusActive if not provided) */
+  statusTrial?: string;
+  /** Trial canceled status label (defaults to statusCanceled if not provided) */
+  statusTrialCanceled?: string;
   /** Detail screen translations */
   statusLabel: string;
   expiresLabel: string;

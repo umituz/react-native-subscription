@@ -65,10 +65,13 @@ export const useSubscriptionSettingsConfig = (
   // Days remaining
   const daysRemaining = useMemo(() => calculateDaysRemaining(expiresAtIso), [expiresAtIso]);
 
-  // Status type: prioritize Firestore status, then derive from willRenew + expiration
+  // Period type from Firestore
+  const periodType = credits?.periodType;
+
+  // Status type: prioritize Firestore status, then derive from willRenew + expiration + periodType
   const statusType: SubscriptionStatusType = credits?.status
     ? (credits.status as SubscriptionStatusType)
-    : getSubscriptionStatusType(isPremium, willRenew, expiresAtIso);
+    : getSubscriptionStatusType(isPremium, willRenew, expiresAtIso, periodType);
 
   const creditsArray = useCreditsArray(credits, dynamicCreditLimit, translations);
 
