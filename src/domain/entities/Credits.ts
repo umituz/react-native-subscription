@@ -74,6 +74,10 @@ export interface CreditsConfig {
   creditPackageAmounts?: Record<string, number>;
   /** Credit allocations for different subscription types (weekly, monthly, yearly) */
   packageAllocations?: PackageAllocationMap;
+  /** Free credits given to new users on registration (default: 0) */
+  freeCredits?: number;
+  /** Whether to auto-initialize free credits when user has no credits document (default: true if freeCredits > 0) */
+  autoInitializeFreeCredits?: boolean;
 }
 
 export interface CreditsResult<T = UserCredits> {

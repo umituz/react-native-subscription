@@ -133,6 +133,73 @@ export class CreditsRepository extends BaseRepository {
     return !!(res.success && res.data && res.data.credits >= cost);
   }
 
+  /**
+   * Initialize free credits for new users
+   * Creates a credits document with freeCredits amount (no subscription)
+   */
+  async initializeFreeCredits(userId: string): Promise<CreditsResult> {
+    const db = getFirestore();
+    if (!db) return { success: false, error: { message: "No DB", code: "INIT_ERR" } };
+
+    const freeCredits = this.config.freeCredits ?? 0;
+    if (freeCredits <= 0) {
+      return { success: false, error: { message: "Free credits not configured", code: "NO_FREE_CREDITS" } };
+    }
+
+    try {
+      const ref = this.getRef(db, userId);
+      const snap = await getDoc(ref);
+
+      // Don't overwrite if document already exists
+      if (snap.exists()) {
+        if (__DEV__) console.log("[CreditsRepository] Credits document already exists, skipping free credits init");
+        const existing = snap.data() as UserCreditsDocumentRead;
+        return { success: true, data: CreditsMapper.toEntity(existing) };
+      }
+
+      // Create new document with free credits
+      const { setDoc } = await import("firebase/firestore");
+      const now = serverTimestamp();
+
+      const creditsData = {
+        // Not premium - just free credits
+        isPremium: false,
+        status: "free" as const,
+
+        // Free credits - store initial amount for tracking
+        credits: freeCredits,
+        creditLimit: freeCredits,
+        initialFreeCredits: freeCredits,
+        isFreeCredits: true,
+
+        // Dates
+        createdAt: now,
+        lastUpdatedAt: now,
+      };
+
+      await setDoc(ref, creditsData);
+
+      if (__DEV__) console.log("[CreditsRepository] Initialized free credits:", { userId: userId.slice(0, 8), credits: freeCredits });
+
+      return {
+        success: true,
+        data: {
+          isPremium: false,
+          status: "free",
+          credits: freeCredits,
+          creditLimit: freeCredits,
+          purchasedAt: null,
+          expirationDate: null,
+          lastUpdatedAt: null,
+          willRenew: false,
+        }
+      };
+    } catch (e: any) {
+      if (__DEV__) console.error("[CreditsRepository] Free credits init error:", e.message);
+      return { success: false, error: { message: e.message, code: "INIT_ERR" } };
+    }
+  }
+
   /** Sync expired subscription status to Firestore (background) */
   async syncExpiredStatus(userId: string): Promise<void> {
     const db = getFirestore();

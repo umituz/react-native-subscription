@@ -3,10 +3,11 @@
  *
  * TanStack Query hook for fetching user credits.
  * Generic and reusable - uses config from module-level provider.
+ * Auto-initializes free credits for new users if configured.
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import type { UserCredits } from "../../domain/entities/Credits";
 import {
     getCreditsRepository,
@@ -26,6 +27,12 @@ const DEFAULT_STALE_TIME = 30 * 1000;
 /** Default gc time: 5 minutes */
 const DEFAULT_GC_TIME = 5 * 60 * 1000;
 
+/**
+ * Global tracker for free credits initialization attempts.
+ * Shared across all useCredits hook instances to prevent multiple inits.
+ */
+const freeCreditsInitAttempted = new Set<string>();
+
 export interface CreditsCacheConfig {
   /** Time in ms before data is considered stale. Default: 30 seconds */
   staleTime?: number;
@@ -36,6 +43,8 @@ export interface CreditsCacheConfig {
 export interface UseCreditsParams {
   userId: string | undefined;
   enabled?: boolean;
+  /** Whether user is anonymous. Anonymous users don't get free credits. */
+  isAnonymous?: boolean;
   /** Cache configuration. Default: 30 second staleTime, 5 minute gcTime */
   cache?: CreditsCacheConfig;
 }
@@ -54,6 +63,7 @@ export interface UseCreditsResult {
 export const useCredits = ({
   userId,
   enabled = true,
+  isAnonymous = false,
   cache,
 }: UseCreditsParams): UseCreditsResult => {
   const isConfigured = isCreditsRepositoryConfigured();
@@ -65,7 +75,7 @@ export const useCredits = ({
 
   const queryEnabled = enabled && !!userId && isConfigured;
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch, isFetched } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
     queryFn: async () => {
       if (!userId || !isConfigured) {
@@ -97,6 +107,55 @@ export const useCredits = ({
   });
 
   const credits = data ?? null;
+
+  // Auto-initialize free credits for new users
+  const freeCredits = config.freeCredits ?? 0;
+  const autoInit = config.autoInitializeFreeCredits !== false && freeCredits > 0;
+
+  useEffect(() => {
+    // Only run if:
+    // 1. Query has completed (isFetched)
+    // 2. User is authenticated (not anonymous)
+    // 3. No credits data exists
+    // 4. Free credits configured
+    // 5. Auto-init enabled
+    // 6. Haven't already attempted for this user (global tracking)
+    // 7. User is NOT anonymous (anonymous users must register first)
+    if (
+      isFetched &&
+      userId &&
+      !isAnonymous &&
+      isConfigured &&
+      !credits &&
+      autoInit &&
+      !freeCreditsInitAttempted.has(userId)
+    ) {
+      // Mark as attempted IMMEDIATELY to prevent other hook instances
+      freeCreditsInitAttempted.add(userId);
+
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[useCredits] Auto-initializing free credits for new registered user:", userId.slice(0, 8));
+      }
+
+      const repository = getCreditsRepository();
+      repository.initializeFreeCredits(userId).then((result) => {
+        if (result.success) {
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.log("[useCredits] Free credits initialized:", result.data?.credits);
+          }
+          refetch();
+        } else {
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.warn("[useCredits] Free credits init failed:", result.error?.message);
+          }
+        }
+      });
+    } else if (isFetched && userId && isAnonymous && !credits && autoInit) {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[useCredits] Skipping free credits for anonymous user - registration required");
+      }
+    }
+  }, [isFetched, userId, isAnonymous, isConfigured, credits, autoInit, refetch]);
 
   // Memoize derived values to prevent unnecessary re-renders
   const derivedValues = useMemo(() => {
@@ -132,9 +191,10 @@ export const useCredits = ({
 };
 
 export const useHasCredits = (
-  userId: string | undefined
+  userId: string | undefined,
+  isAnonymous?: boolean
 ): boolean => {
-  const { credits } = useCredits({ userId });
+  const { credits } = useCredits({ userId, isAnonymous });
   if (!credits) return false;
   return credits.credits > 0;
 };
