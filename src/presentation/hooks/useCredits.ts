@@ -3,11 +3,11 @@
  *
  * Fetches user credits with TanStack Query best practices.
  * Uses status-based state management for reliable loading detection.
- * Auto-initializes free credits for registered users only.
+ * Free credits initialization is delegated to useFreeCreditsInit hook.
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
-import { useCallback, useMemo, useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
   useAuthStore,
   selectUserId,
@@ -19,6 +19,7 @@ import {
   getCreditsConfig,
   isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
+import { useFreeCreditsInit } from "./useFreeCreditsInit";
 
 declare const __DEV__: boolean;
 
@@ -26,8 +27,6 @@ export const creditsQueryKeys = {
   all: ["credits"] as const,
   user: (userId: string) => ["credits", userId] as const,
 };
-
-const freeCreditsInitAttempted = new Set<string>();
 
 export type CreditsLoadStatus = "idle" | "loading" | "initializing" | "ready" | "error";
 
@@ -59,7 +58,6 @@ export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
   const isAnonymous = useAuthStore(selectIsAnonymous);
   const isRegisteredUser = !!userId && !isAnonymous;
-  const [isInitializingFreeCredits, setIsInitializingFreeCredits] = useState(false);
 
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
@@ -96,47 +94,18 @@ export const useCredits = (): UseCreditsResult => {
   });
 
   const credits = data ?? null;
-  const freeCredits = config.freeCredits ?? 0;
-  const autoInit = config.autoInitializeFreeCredits !== false && freeCredits > 0;
   const querySuccess = status === "success";
+  const hasCreditsData = (credits?.credits ?? 0) > 0;
 
-  useEffect(() => {
-    const shouldInitFreeCredits =
-      querySuccess &&
-      userId &&
-      isRegisteredUser &&
-      isConfigured &&
-      !credits &&
-      autoInit &&
-      !freeCreditsInitAttempted.has(userId);
-
-    if (shouldInitFreeCredits) {
-      freeCreditsInitAttempted.add(userId);
-      setIsInitializingFreeCredits(true);
-
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useCredits] Initializing free credits:", userId.slice(0, 8));
-      }
-
-      const repository = getCreditsRepository();
-      repository.initializeFreeCredits(userId).then((result) => {
-        setIsInitializingFreeCredits(false);
-
-        if (result.success) {
-          if (typeof __DEV__ !== "undefined" && __DEV__) {
-            console.log("[useCredits] Free credits initialized:", result.data?.credits);
-          }
-          refetch();
-        } else if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.warn("[useCredits] Free credits init failed:", result.error?.message);
-        }
-      });
-    } else if (querySuccess && userId && isAnonymous && !credits && autoInit) {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useCredits] Skipping free credits - anonymous user must register first");
-      }
-    }
-  }, [querySuccess, userId, isRegisteredUser, isAnonymous, isConfigured, credits, autoInit, refetch]);
+  // Delegate free credits initialization to dedicated hook
+  const { isInitializing, needsInit } = useFreeCreditsInit({
+    userId,
+    isRegisteredUser,
+    isAnonymous,
+    hasCredits: hasCreditsData,
+    querySuccess,
+    onInitComplete: refetch,
+  });
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
@@ -149,7 +118,12 @@ export const useCredits = (): UseCreditsResult => {
     [credits]
   );
 
-  const loadStatus = deriveLoadStatus(status, isInitializingFreeCredits, queryEnabled);
+  // Include needsInit in initializing state for accurate loading detection
+  const loadStatus = deriveLoadStatus(
+    status,
+    isInitializing || needsInit,
+    queryEnabled
+  );
   const isCreditsLoaded = loadStatus === "ready";
   const isLoading = loadStatus === "loading" || loadStatus === "initializing";
 
