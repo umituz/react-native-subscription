@@ -1,8 +1,8 @@
 /**
  * useCredits Hook
  *
- * Fetches user credits - NO CACHE, always fresh data.
- * Auth info automatically read from @umituz/react-native-auth.
+ * Fetches user credits with TanStack Query best practices.
+ * Uses status-based state management for reliable loading detection.
  * Auto-initializes free credits for registered users only.
  */
 
@@ -29,15 +29,30 @@ export const creditsQueryKeys = {
 
 const freeCreditsInitAttempted = new Set<string>();
 
+export type CreditsLoadStatus = "idle" | "loading" | "initializing" | "ready" | "error";
+
 export interface UseCreditsResult {
   credits: UserCredits | null;
   isLoading: boolean;
   isCreditsLoaded: boolean;
+  loadStatus: CreditsLoadStatus;
   error: Error | null;
   hasCredits: boolean;
   creditsPercent: number;
   refetch: () => void;
   canAfford: (cost: number) => boolean;
+}
+
+function deriveLoadStatus(
+  queryStatus: "pending" | "error" | "success",
+  isInitializing: boolean,
+  queryEnabled: boolean
+): CreditsLoadStatus {
+  if (!queryEnabled) return "idle";
+  if (queryStatus === "pending") return "loading";
+  if (queryStatus === "error") return "error";
+  if (isInitializing) return "initializing";
+  return "ready";
 }
 
 export const useCredits = (): UseCreditsResult => {
@@ -48,17 +63,16 @@ export const useCredits = (): UseCreditsResult => {
 
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
-
   const queryEnabled = !!userId && isConfigured;
 
-  const { data, isLoading, error, refetch, isFetched } = useQuery({
+  const { data, status, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId ?? ""),
     queryFn: async () => {
-      if (!userId || !isConfigured) {
-        return null;
-      }
+      if (!userId || !isConfigured) return null;
+
       const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
+
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
@@ -82,72 +96,69 @@ export const useCredits = (): UseCreditsResult => {
   });
 
   const credits = data ?? null;
-
   const freeCredits = config.freeCredits ?? 0;
   const autoInit = config.autoInitializeFreeCredits !== false && freeCredits > 0;
+  const querySuccess = status === "success";
 
   useEffect(() => {
-    if (
-      isFetched &&
+    const shouldInitFreeCredits =
+      querySuccess &&
       userId &&
       isRegisteredUser &&
       isConfigured &&
       !credits &&
       autoInit &&
-      !freeCreditsInitAttempted.has(userId)
-    ) {
+      !freeCreditsInitAttempted.has(userId);
+
+    if (shouldInitFreeCredits) {
       freeCreditsInitAttempted.add(userId);
       setIsInitializingFreeCredits(true);
 
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useCredits] Initializing free credits for registered user:", userId.slice(0, 8));
+        console.log("[useCredits] Initializing free credits:", userId.slice(0, 8));
       }
 
       const repository = getCreditsRepository();
       repository.initializeFreeCredits(userId).then((result) => {
         setIsInitializingFreeCredits(false);
+
         if (result.success) {
           if (typeof __DEV__ !== "undefined" && __DEV__) {
             console.log("[useCredits] Free credits initialized:", result.data?.credits);
           }
           refetch();
-        } else {
-          if (typeof __DEV__ !== "undefined" && __DEV__) {
-            console.warn("[useCredits] Free credits init failed:", result.error?.message);
-          }
+        } else if (typeof __DEV__ !== "undefined" && __DEV__) {
+          console.warn("[useCredits] Free credits init failed:", result.error?.message);
         }
       });
-    } else if (isFetched && userId && isAnonymous && !credits && autoInit) {
+    } else if (querySuccess && userId && isAnonymous && !credits && autoInit) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[useCredits] Skipping free credits - anonymous user must register first");
       }
     }
-  }, [isFetched, userId, isRegisteredUser, isAnonymous, isConfigured, credits, autoInit, refetch]);
+  }, [querySuccess, userId, isRegisteredUser, isAnonymous, isConfigured, credits, autoInit, refetch]);
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
-    const percent = credits
-      ? Math.round((credits.credits / config.creditLimit) * 100)
-      : 0;
-
+    const percent = credits ? Math.round((credits.credits / config.creditLimit) * 100) : 0;
     return { hasCredits: has, creditsPercent: percent };
   }, [credits, config.creditLimit]);
 
   const canAfford = useCallback(
-    (cost: number): boolean => {
-      if (!credits) return false;
-      return credits.credits >= cost;
-    },
+    (cost: number): boolean => (credits?.credits ?? 0) >= cost,
     [credits]
   );
 
-  const isCreditsLoaded = isFetched && !isLoading && !isInitializingFreeCredits;
+  const loadStatus = deriveLoadStatus(status, isInitializingFreeCredits, queryEnabled);
+  const isCreditsLoaded = loadStatus === "ready";
+  const isLoading = loadStatus === "loading" || loadStatus === "initializing";
 
   return {
     credits,
     isLoading,
     isCreditsLoaded,
-    error: error as Error | null,
+    loadStatus,
+    error: error instanceof Error ? error : null,
     hasCredits: derivedValues.hasCredits,
     creditsPercent: derivedValues.creditsPercent,
     refetch,
