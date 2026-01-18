@@ -7,9 +7,6 @@
       "dom"
     ],
     "jsx": "react-native",
-    "types": [
-      "node"
-    ],
     /* Modules */
     "module": "ES2020",
     "moduleResolution": "node",
