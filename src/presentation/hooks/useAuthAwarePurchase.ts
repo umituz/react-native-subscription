@@ -37,7 +37,6 @@ export const clearSavedPurchase = (): void => {
 
 export interface UseAuthAwarePurchaseParams {
   source?: PurchaseSource;
-  userId?: string;
 }
 
 export interface UseAuthAwarePurchaseResult {
@@ -49,63 +48,44 @@ export interface UseAuthAwarePurchaseResult {
 export const useAuthAwarePurchase = (
   params?: UseAuthAwarePurchaseParams
 ): UseAuthAwarePurchaseResult => {
-  const { purchasePackage, restorePurchase } = usePremium(params?.userId);
+  const { purchasePackage, restorePurchase } = usePremium();
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] handlePurchase called:", {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[useAuthAwarePurchase] handlePurchase:", {
           productId: pkg.product.identifier,
           hasAuthProvider: !!globalAuthProvider,
         });
       }
 
       if (!globalAuthProvider) {
-        if (__DEV__) {
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
           console.error("[useAuthAwarePurchase] Auth provider not configured");
         }
         return false;
       }
 
       const isAuth = globalAuthProvider.isAuthenticated();
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] Auth check:", { isAuthenticated: isAuth });
-      }
 
       if (!isAuth) {
-        if (__DEV__) {
-          console.log("[useAuthAwarePurchase] Not authenticated, saving and showing auth");
-        }
         savedPackage = pkg;
         savedSource = source || params?.source || "settings";
         globalAuthProvider.showAuthModal();
         return false;
       }
 
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] Calling purchasePackage");
-      }
-      const result = await purchasePackage(pkg);
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] purchasePackage returned:", result);
-      }
-      return result;
+      return purchasePackage(pkg);
     },
     [purchasePackage, params?.source]
   );
 
   const handleRestore = useCallback(async (): Promise<boolean> => {
     if (!globalAuthProvider) {
-      if (__DEV__) {
-        console.error("[useAuthAwarePurchase] Auth provider not configured");
-      }
       return false;
     }
 
     if (!globalAuthProvider.isAuthenticated()) {
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] Not authenticated for restore");
-      }
       globalAuthProvider.showAuthModal();
       return false;
     }
@@ -116,13 +96,10 @@ export const useAuthAwarePurchase = (
   const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
     const saved = getSavedPurchase();
     if (!saved) {
-      if (__DEV__) {
-        console.log("[useAuthAwarePurchase] No saved purchase to execute");
-      }
       return false;
     }
 
-    if (__DEV__) {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log("[useAuthAwarePurchase] Executing saved purchase:", saved.pkg.product.identifier);
     }
 

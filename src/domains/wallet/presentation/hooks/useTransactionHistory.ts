@@ -2,11 +2,15 @@
  * useTransactionHistory Hook
  *
  * TanStack Query hook for fetching credit transaction history.
- * Generic and reusable - uses config from TransactionRepository.
+ * Auth info automatically read from @umituz/react-native-auth.
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
 import { useMemo } from "react";
+import {
+  useAuthStore,
+  selectUserId,
+} from "@umituz/react-native-auth";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
@@ -15,21 +19,14 @@ import { TransactionRepository } from "../../infrastructure/repositories/Transac
 
 declare const __DEV__: boolean;
 
-const CACHE_CONFIG = {
-  staleTime: 60 * 1000, // 1 minute
-  gcTime: 5 * 60 * 1000, // 5 minutes
-};
-
 export const transactionQueryKeys = {
   all: ["transactions"] as const,
   user: (userId: string) => ["transactions", userId] as const,
 };
 
 export interface UseTransactionHistoryParams {
-  userId: string | undefined;
   config: TransactionRepositoryConfig;
   limit?: number;
-  enabled?: boolean;
 }
 
 export interface UseTransactionHistoryResult {
@@ -41,12 +38,11 @@ export interface UseTransactionHistoryResult {
 }
 
 export function useTransactionHistory({
-  userId,
   config,
   limit = 50,
-  enabled = true,
 }: UseTransactionHistoryParams): UseTransactionHistoryResult {
-  // Memoize repository to prevent recreation on every render
+  const userId = useAuthStore(selectUserId);
+
   const repository = useMemo(
     () => new TransactionRepository(config),
     [config]
@@ -68,17 +64,16 @@ export function useTransactionHistory({
 
       return result.data ?? [];
     },
-    enabled: enabled && !!userId,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
+    enabled: !!userId,
+    staleTime: 0,
+    gcTime: 0,
   });
 
   const transactions = data ?? [];
 
-  if (__DEV__) {
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
     console.log("[useTransactionHistory] State", {
-      userId,
-      enabled,
+      userId: userId?.slice(0, 8),
       isLoading,
       count: transactions.length,
     });

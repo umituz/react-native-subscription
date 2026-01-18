@@ -16,6 +16,14 @@ import { usePurchaseLoadingStore, selectIsPurchasing } from "../../../presentati
 
 declare const __DEV__: boolean;
 
+/** Trial eligibility info per product */
+export interface TrialEligibilityInfo {
+  /** Whether eligible for trial */
+  eligible: boolean;
+  /** Trial duration in days */
+  durationDays?: number;
+}
+
 export interface PaywallModalProps {
   visible: boolean;
   onClose: () => void;
@@ -30,10 +38,14 @@ export interface PaywallModalProps {
   heroImage?: ImageSourcePropType;
   onPurchase?: (pkg: PurchasesPackage) => Promise<void | boolean>;
   onRestore?: () => Promise<void | boolean>;
+  /** Trial eligibility map per product ID */
+  trialEligibility?: Record<string, TrialEligibilityInfo>;
+  /** Trial subtitle text for PlanCard (e.g., "7 days free, then billed") */
+  trialSubtitleText?: string;
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
-  const { visible, onClose, translations, packages = [], features = [], isLoading = false, legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore } = props;
+  const { visible, onClose, translations, packages = [], features = [], isLoading = false, legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText } = props;
   const tokens = useAppDesignTokens();
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [isLocalProcessing, setIsLocalProcessing] = useState(false);
@@ -114,7 +126,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
           <View style={styles.header}>
             <AtomicText type="headlineMedium" style={[styles.title, { color: tokens.colors.textPrimary }]}>{translations.title}</AtomicText>
-            {translations.subtitle && <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>{translations.subtitle}</AtomicText>}
+            {/* Apple compliance: Don't promote trial in header, show regular subtitle only */}
+            {translations.subtitle && (
+              <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>
+                {translations.subtitle}
+              </AtomicText>
+            )}
           </View>
 
           <PaywallFeatures features={features} />
@@ -123,17 +140,25 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
             <View style={styles.loading}><AtomicSpinner size="lg" color="primary" text={translations.loadingText} /></View>
           ) : (
             <View style={styles.plans}>
-              {packages.map((pkg) => (
-                <PlanCard
-                  key={pkg.product.identifier}
-                  pkg={pkg}
-                  isSelected={selectedPlanId === pkg.product.identifier}
-                  onSelect={() => setSelectedPlanId(pkg.product.identifier)}
-                  badge={pkg.product.identifier === bestValueIdentifier ? translations.bestValueBadgeText : undefined}
-                  creditAmount={creditAmounts?.[pkg.product.identifier]}
-                  creditsLabel={creditsLabel}
-                />
-              ))}
+              {packages.map((pkg) => {
+                const productId = pkg.product.identifier;
+                const eligibility = trialEligibility[productId];
+                const hasFreeTrial = eligibility?.eligible ?? false;
+
+                return (
+                  <PlanCard
+                    key={productId}
+                    pkg={pkg}
+                    isSelected={selectedPlanId === productId}
+                    onSelect={() => setSelectedPlanId(productId)}
+                    badge={productId === bestValueIdentifier ? translations.bestValueBadgeText : undefined}
+                    creditAmount={creditAmounts?.[productId]}
+                    creditsLabel={creditsLabel}
+                    hasFreeTrial={hasFreeTrial}
+                    trialSubtitleText={hasFreeTrial ? trialSubtitleText : undefined}
+                  />
+                );
+              })}
             </View>
           )}
 

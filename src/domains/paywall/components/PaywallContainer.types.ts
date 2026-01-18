@@ -8,11 +8,22 @@ import type { PaywallMode, PaywallTranslations, PaywallLegalUrls, SubscriptionFe
 import type { PackageFilterConfig } from "../../../utils/packageFilter";
 import type { PurchaseSource } from "../../../domain/entities/Credits";
 
+/**
+ * Trial display configuration
+ * Controls how free trial info is displayed (Apple-compliant)
+ */
+export interface TrialConfig {
+  /** Enable trial display (default: false) */
+  readonly enabled: boolean;
+  /** Product IDs that have trial offers (if empty, checks all via RevenueCat) */
+  readonly eligibleProductIds?: readonly string[];
+  /** Trial duration in days (default: 7) */
+  readonly durationDays?: number;
+  /** Text to show for trial (e.g., "7 days free, then billed") */
+  readonly trialText?: string;
+}
+
 export interface PaywallContainerProps {
-  /** User ID for subscription management */
-  readonly userId: string | null;
-  /** Whether user is anonymous (requires auth before purchase) */
-  readonly isAnonymous?: boolean;
   /** Paywall translations - no defaults, must be provided */
   readonly translations: PaywallTranslations;
   /** Paywall mode - subscription, credits, or hybrid */
@@ -43,5 +54,7 @@ export interface PaywallContainerProps {
   readonly visible?: boolean;
   /** Callback when paywall is closed */
   readonly onClose?: () => void;
+  /** Trial display configuration (Apple-compliant) */
+  readonly trialConfig?: TrialConfig;
 }
 

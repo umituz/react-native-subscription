@@ -1,11 +1,15 @@
 /**
  * useSubscriptionStatus Hook
  *
- * TanStack Query hook for checking real subscription status from RevenueCat.
- * This provides the actual premium status based on entitlements, not credits.
+ * Checks real subscription status from RevenueCat.
+ * Auth info automatically read from @umituz/react-native-auth.
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
+import {
+  useAuthStore,
+  selectUserId,
+} from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 
 export const subscriptionStatusQueryKeys = {
@@ -21,34 +25,20 @@ export interface SubscriptionStatusResult {
   refetch: () => void;
 }
 
-export interface UseSubscriptionStatusParams {
-  userId: string | undefined;
-  enabled?: boolean;
-}
+export const useSubscriptionStatus = (): SubscriptionStatusResult => {
+  const userId = useAuthStore(selectUserId);
 
-/**
- * Check real subscription status from RevenueCat
- *
- * @param userId - User ID
- * @param enabled - Whether to enable the query
- * @returns Subscription status with isPremium flag
- */
-export const useSubscriptionStatus = ({
-  userId,
-  enabled = true,
-}: UseSubscriptionStatusParams): SubscriptionStatusResult => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId ?? ""),
     queryFn: async () => {
       if (!userId) {
         return { isPremium: false, expirationDate: null };
       }
-
       return SubscriptionManager.checkPremiumStatus();
     },
-    enabled: enabled && !!userId && SubscriptionManager.isInitializedForUser(userId),
-    staleTime: 0, // No cache - always fetch fresh premium status
-    gcTime: 0, // Don't cache - garbage collect immediately
+    enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
+    staleTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,

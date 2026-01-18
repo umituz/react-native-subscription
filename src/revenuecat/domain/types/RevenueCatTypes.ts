@@ -57,13 +57,20 @@ export function getPremiumEntitlement(
 }
 
 /**
+ * Type guard for RevenueCat purchase error
+ */
+function isRevenueCatPurchaseError(error: unknown): error is RevenueCatPurchaseErrorInfo {
+  return error instanceof Error && "userCancelled" in error;
+}
+
+/**
  * Check if error is a user cancellation
  */
 export function isUserCancelledError(error: unknown): boolean {
-  if (!error || typeof error !== "object") {
+  if (!isRevenueCatPurchaseError(error)) {
     return false;
   }
-  return (error as RevenueCatPurchaseErrorInfo).userCancelled === true;
+  return error.userCancelled === true;
 }
 
 /**
@@ -75,3 +82,4 @@ export function getErrorMessage(error: unknown, fallback: string): string {
   }
   return fallback;
 }
+

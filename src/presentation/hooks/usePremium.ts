@@ -1,10 +1,8 @@
 /**
  * usePremium Hook
- * Complete subscription management for 100+ apps
- * Works for both authenticated and anonymous users
  *
- * IMPORTANT: isPremium is based on actual RevenueCat subscription status,
- * NOT on whether credits document exists.
+ * Complete subscription management.
+ * Auth info automatically read from @umituz/react-native-auth.
  */
 
 import { useCallback } from 'react';
@@ -13,89 +11,50 @@ import type { UserCredits } from '../../domain/entities/Credits';
 import { useCredits } from './useCredits';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
 import {
-    useSubscriptionPackages,
-    usePurchasePackage,
-    useRestorePurchase,
+  useSubscriptionPackages,
+  usePurchasePackage,
+  useRestorePurchase,
 } from '../../revenuecat/presentation/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
 
+declare const __DEV__: boolean;
+
 export interface UsePremiumResult {
-  /** User has active premium subscription */
   isPremium: boolean;
-  /** Loading credits or packages */
   isLoading: boolean;
-  /** Available subscription packages */
   packages: PurchasesPackage[];
-  /** User's credits (null if not premium) */
   credits: UserCredits | null;
-  /** Paywall visibility state */
   showPaywall: boolean;
-  /** Purchase a subscription package */
   purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
-  /** Restore previous purchases */
   restorePurchase: () => Promise<boolean>;
-  /** Set paywall visibility */
   setShowPaywall: (show: boolean) => void;
-  /** Close paywall */
   closePaywall: () => void;
-  /** Open paywall */
   openPaywall: () => void;
 }
 
-/**
- * Complete premium subscription management
- *
- * @param userId - User ID (undefined for anonymous users)
- * @returns Premium status, packages, and subscription actions
- *
- * @example
- * ```typescript
- * const { isPremium, packages, purchasePackage } = usePremium(userId);
- * ```
- */
-export const usePremium = (userId?: string): UsePremiumResult => {
-  // Fetch real subscription status from RevenueCat
-  const { isPremium: subscriptionActive, isLoading: statusLoading } =
-    useSubscriptionStatus({
-      userId,
-      enabled: !!userId,
-    });
+export const usePremium = (): UsePremiumResult => {
+  const { isPremium: subscriptionActive, isLoading: statusLoading } = useSubscriptionStatus();
+  const { credits, isLoading: creditsLoading } = useCredits();
 
-  // Fetch user credits (server state)
-  const { credits, isLoading: creditsLoading } = useCredits({
-    userId,
-    enabled: !!userId,
-  });
+  const { data: packages = [], isLoading: packagesLoading } = useSubscriptionPackages();
 
-  // Fetch subscription packages (works for anonymous too)
-  const { data: packages = [], isLoading: packagesLoading } =
-    useSubscriptionPackages(userId);
+  const purchaseMutation = usePurchasePackage();
+  const restoreMutation = useRestorePurchase();
 
-  // Purchase and restore mutations
-  const purchaseMutation = usePurchasePackage(userId);
-  const restoreMutation = useRestorePurchase(userId);
+  const { showPaywall, setShowPaywall, closePaywall, openPaywall } = usePaywallVisibility();
 
-  // Paywall visibility state
-  const { showPaywall, setShowPaywall, closePaywall, openPaywall } =
-    usePaywallVisibility();
-
-  // Premium status = actual subscription status from RevenueCat
   const isPremium = subscriptionActive;
 
-  // Purchase handler with proper error handling
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
-      if (__DEV__) {
-        console.log("[usePremium] handlePurchase called:", pkg.product.identifier);
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[usePremium] handlePurchase:", pkg.product.identifier);
       }
       try {
         const result = await purchaseMutation.mutateAsync(pkg);
-        if (__DEV__) {
-          console.log("[usePremium] Purchase result:", { success: result.success });
-        }
         return result.success;
       } catch (error) {
-        if (__DEV__) {
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
           console.error("[usePremium] Purchase failed:", error);
         }
         return false;
@@ -104,13 +63,12 @@ export const usePremium = (userId?: string): UsePremiumResult => {
     [purchaseMutation],
   );
 
-  // Restore handler with proper error handling
   const handleRestore = useCallback(async (): Promise<boolean> => {
     try {
       const result = await restoreMutation.mutateAsync();
       return result.success;
     } catch (error) {
-      if (__DEV__) {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.error("[usePremium] Restore failed:", error);
       }
       return false;

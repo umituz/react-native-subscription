@@ -10,3 +10,4 @@ export * from "./presentation/hooks/useRevenueCat";
 export * from "./presentation/hooks/useCustomerInfo";
 export * from "./presentation/hooks/usePaywallFlow";
 export * from "./presentation/hooks/useSubscriptionQueries";
+export * from "./presentation/hooks/useRevenueCatTrialEligibility";

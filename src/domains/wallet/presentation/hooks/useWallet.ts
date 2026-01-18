@@ -6,21 +6,16 @@
  */
 
 import { useCallback, useMemo } from "react";
+import { useCredits } from "../../../../presentation/hooks/useCredits";
 import {
-    useCredits,
-    type UseCreditsParams,
-} from "../../../../presentation/hooks/useCredits";
-import {
-    useTransactionHistory,
-    type UseTransactionHistoryParams,
+  useTransactionHistory,
+  type UseTransactionHistoryParams,
 } from "./useTransactionHistory";
 import type { CreditLog } from "../../domain/types/transaction.types";
 
 export interface UseWalletParams {
-  userId: string | undefined;
   transactionConfig: UseTransactionHistoryParams["config"];
   transactionLimit?: number;
-  enabled?: boolean;
 }
 
 export interface UseWalletResult {
@@ -35,35 +30,24 @@ export interface UseWalletResult {
 }
 
 export function useWallet({
-  userId,
   transactionConfig,
   transactionLimit = 50,
-  enabled = true,
 }: UseWalletParams): UseWalletResult {
-  const creditsParams: UseCreditsParams = {
-    userId,
-    enabled,
-  };
-
-  const transactionParams: UseTransactionHistoryParams = {
-    userId,
-    config: transactionConfig,
-    limit: transactionLimit,
-    enabled,
-  };
-
   const {
     credits,
     isLoading: balanceLoading,
     refetch: refetchBalance,
     hasCredits,
-  } = useCredits(creditsParams);
+  } = useCredits();
 
   const {
     transactions,
     isLoading: transactionsLoading,
     refetch: refetchTransactions,
-  } = useTransactionHistory(transactionParams);
+  } = useTransactionHistory({
+    config: transactionConfig,
+    limit: transactionLimit,
+  });
 
   const balance = useMemo(() => {
     return credits?.credits ?? 0;

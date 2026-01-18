@@ -1,7 +1,6 @@
 /**
  * useSubscriptionSettingsConfig Hook
  * Returns ready-to-use config for settings screens
- * Single Source of Truth: Firestore (credits document)
  */
 
 import { useMemo, useCallback } from "react";
@@ -24,58 +23,43 @@ export type {
   UseSubscriptionSettingsConfigParams,
 } from "../types/SubscriptionSettingsTypes";
 
-/**
- * Hook that returns ready-to-use subscription config for settings
- * Single Source of Truth: Firestore credits document
- */
 export const useSubscriptionSettingsConfig = (
-  params: UseSubscriptionSettingsConfigParams
+  params: Omit<UseSubscriptionSettingsConfigParams, 'userId'>
 ): SubscriptionSettingsConfig => {
-  const { userId, translations, creditLimit, upgradePrompt } = params;
+  const { translations, creditLimit, upgradePrompt } = params;
 
-  // Single Source of Truth: Firestore credits document
-  const { credits } = useCredits({ userId, enabled: !!userId });
+  const { credits } = useCredits();
   const { openPaywall } = usePaywallVisibility();
 
   const handleOpenPaywall = useCallback(() => {
     openPaywall("settings");
   }, [openPaywall]);
 
-  // All data from Firestore (Single Source of Truth)
   const isPremium = credits?.isPremium ?? false;
   const willRenew = credits?.willRenew ?? false;
 
-  // Expiration date from Firestore
   const expiresAtIso = credits?.expirationDate?.toISOString() ?? null;
-
-  // Purchase date from Firestore
   const purchasedAtIso = credits?.purchasedAt?.toISOString() ?? null;
 
-  // Credit limit from Firestore or config fallback
   const dynamicCreditLimit = useMemo(() => {
     if (credits?.creditLimit) return credits.creditLimit;
     const config = getCreditsConfig();
     return creditLimit ?? config.creditLimit;
   }, [credits?.creditLimit, creditLimit]);
 
-  // Formatted dates
   const formattedExpirationDate = useMemo(() => formatDate(expiresAtIso), [expiresAtIso]);
   const formattedPurchaseDate = useMemo(() => formatDate(purchasedAtIso), [purchasedAtIso]);
 
-  // Days remaining
   const daysRemaining = useMemo(() => calculateDaysRemaining(expiresAtIso), [expiresAtIso]);
 
-  // Period type from Firestore
   const periodType = credits?.periodType;
 
-  // Status type: prioritize Firestore status, then derive from willRenew + expiration + periodType
   const statusType: SubscriptionStatusType = credits?.status
     ? (credits.status as SubscriptionStatusType)
     : getSubscriptionStatusType(isPremium, willRenew, expiresAtIso, periodType);
 
   const creditsArray = useCreditsArray(credits, dynamicCreditLimit, translations);
 
-  // Centralized display flags
   const hasCredits = creditsArray.length > 0;
   const display = useMemo(() => ({
     showHeader: isPremium || hasCredits,
@@ -84,7 +68,6 @@ export const useSubscriptionSettingsConfig = (
     showExpirationDate: (isPremium || hasCredits) && !!expiresAtIso,
   }), [isPremium, hasCredits, upgradePrompt, expiresAtIso]);
 
-  // Build config
   return useMemo((): SubscriptionSettingsConfig => ({
     enabled: true,
     settingsItem: {

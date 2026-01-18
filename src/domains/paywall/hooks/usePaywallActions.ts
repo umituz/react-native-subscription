@@ -7,7 +7,6 @@ import type { PurchaseSource } from "../../../domain/entities/Credits";
 declare const __DEV__: boolean;
 
 interface UsePaywallActionsProps {
-  userId?: string;
   source?: PurchaseSource;
   onPurchaseSuccess?: () => void;
   onPurchaseError?: (error: string) => void;
@@ -16,38 +15,33 @@ interface UsePaywallActionsProps {
 }
 
 export const usePaywallActions = ({
-  userId,
   source,
   onPurchaseSuccess,
   onPurchaseError,
   onAuthRequired: _onAuthRequired,
   onClose,
 }: UsePaywallActionsProps) => {
-  const { handlePurchase: authAwarePurchase } = useAuthAwarePurchase({ source, userId });
-  const { mutateAsync: restorePurchases } = useRestorePurchase(userId);
+  const { handlePurchase: authAwarePurchase } = useAuthAwarePurchase({ source });
+  const { mutateAsync: restorePurchases } = useRestorePurchase();
 
   const handlePurchase = useCallback(async (pkg: PurchasesPackage) => {
     try {
-      if (__DEV__) console.log("[PaywallActions] Purchase started:", pkg.product.identifier);
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[PaywallActions] Purchase started:", pkg.product.identifier);
+      }
       const res = await authAwarePurchase(pkg, source);
-      if (__DEV__) console.log("[PaywallActions] Purchase result:", { res, productId: pkg.product.identifier });
       if (res) {
-        if (__DEV__) console.log("[PaywallActions] Purchase successful, closing paywall");
         onPurchaseSuccess?.();
         onClose();
-      } else {
-        if (__DEV__) console.log("[PaywallActions] Purchase returned false, paywall stays open");
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      if (__DEV__) console.log("[PaywallActions] Purchase error:", message);
       onPurchaseError?.(message);
     }
   }, [authAwarePurchase, source, onClose, onPurchaseSuccess, onPurchaseError]);
 
   const handleRestore = useCallback(async () => {
     try {
-      if (__DEV__) console.log("[PaywallActions] Restore started");
       const res = await restorePurchases();
       if (res.success) {
         onPurchaseSuccess?.();

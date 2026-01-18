@@ -1,6 +1,11 @@
 /**
  * Plan Card
- * Subscription plan selection card
+ * Subscription plan selection card (Apple-compliant)
+ *
+ * Apple Guideline 3.1.2 Compliance:
+ * - Price is the most prominent element
+ * - Trial info is displayed in subordinate position and size
+ * - No toggle for enabling/disabling trial
  */
 
 import React from "react";
@@ -14,13 +19,18 @@ interface PlanCardProps {
     pkg: PurchasesPackage;
     isSelected: boolean;
     onSelect: () => void;
+    /** Badge text (e.g., "Best Value") - NOT for trial */
     badge?: string;
     creditAmount?: number;
     creditsLabel?: string;
+    /** Whether this plan has a free trial (Apple-compliant display) */
+    hasFreeTrial?: boolean;
+    /** Trial subtitle text (e.g., "7 days free, then billed") - shown as small gray text */
+    trialSubtitleText?: string;
 }
 
 export const PlanCard: React.FC<PlanCardProps> = React.memo(
-    ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel }) => {
+    ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel, hasFreeTrial, trialSubtitleText }) => {
         const tokens = useAppDesignTokens();
         const title = pkg.product.title;
         const price = formatPrice(pkg.product.price, pkg.product.currencyCode);
@@ -37,6 +47,7 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                         },
                     ]}
                 >
+                    {/* Badge for "Best Value" etc. - NOT for trial (Apple compliance) */}
                     {badge && (
                         <View style={styles.badgeContainer}>
                             <AtomicBadge text={badge} variant="primary" size="sm" />
@@ -63,17 +74,38 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                                 <AtomicText type="titleSmall" style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}>
                                     {title}
                                 </AtomicText>
+
+                                {/* Credits info */}
                                 {creditAmount && creditsLabel && (
                                     <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
                                         {creditAmount} {creditsLabel}
                                     </AtomicText>
                                 )}
+
+                                {/* Trial info - Apple-compliant: small, gray, subordinate */}
+                                {hasFreeTrial && trialSubtitleText && (
+                                    <AtomicText
+                                        type="bodySmall"
+                                        style={{
+                                            color: tokens.colors.textTertiary ?? tokens.colors.textSecondary,
+                                            fontSize: 11,
+                                            marginTop: 2,
+                                        }}
+                                    >
+                                        {trialSubtitleText}
+                                    </AtomicText>
+                                )}
                             </View>
                         </View>
 
+                        {/* Price - MOST PROMINENT (Apple compliance) */}
                         <AtomicText
                             type="titleMedium"
-                            style={{ color: isSelected ? tokens.colors.primary : tokens.colors.textPrimary, fontWeight: "700" }}
+                            style={{
+                                color: isSelected ? tokens.colors.primary : tokens.colors.textPrimary,
+                                fontWeight: "700",
+                                fontSize: 18,
+                            }}
                         >
                             {price}
                         </AtomicText>

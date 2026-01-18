@@ -2,11 +2,16 @@
  * Purchase Package Hook
  * TanStack mutation for purchasing subscription packages
  * Credits are initialized by CustomerInfoListener (not here to avoid duplicates)
+ * Auth info automatically read from @umituz/react-native-auth
  */
 
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { useAlert } from "@umituz/react-native-design-system";
+import {
+  useAuthStore,
+  selectUserId,
+} from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
@@ -23,8 +28,10 @@ export interface PurchaseMutationResult {
 /**
  * Purchase a subscription package
  * Credits are initialized by CustomerInfoListener when entitlement becomes active
+ * Auth info automatically read from auth store
  */
-export const usePurchasePackage = (userId: string | undefined) => {
+export const usePurchasePackage = () => {
+  const userId = useAuthStore(selectUserId);
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlert();
 
