@@ -86,7 +86,28 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       }
 
       if (!isAuthenticated) {
-        const postAuthAction = () => {
+        const postAuthAction = async () => {
+          // Wait for free credits to initialize after registration (max 3 seconds)
+          const maxWaitTime = 3000;
+          const checkInterval = 100;
+          let waited = 0;
+
+          while (waited < maxWaitTime) {
+            await new Promise((resolve) => setTimeout(resolve, checkInterval));
+            waited += checkInterval;
+
+            if (creditBalanceRef.current > 0 || hasSubscriptionRef.current) {
+              if (typeof __DEV__ !== "undefined" && __DEV__) {
+                console.log("[useFeatureGate] Credits/subscription detected after auth", {
+                  credits: creditBalanceRef.current,
+                  hasSubscription: hasSubscriptionRef.current,
+                  waitedMs: waited,
+                });
+              }
+              break;
+            }
+          }
+
           if (hasSubscriptionRef.current) {
             action();
             return;
@@ -94,12 +115,23 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
           const currentBalance = creditBalanceRef.current;
           if (currentBalance < requiredCredits) {
+            if (typeof __DEV__ !== "undefined" && __DEV__) {
+              console.log("[useFeatureGate] No credits after waiting, showing paywall", {
+                credits: currentBalance,
+                waitedMs: waited,
+              });
+            }
             pendingActionRef.current = action;
             isWaitingForPurchaseRef.current = true;
             onShowPaywallRef.current(requiredCredits);
             return;
           }
 
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.log("[useFeatureGate] Proceeding with action after auth", {
+              credits: currentBalance,
+            });
+          }
           action();
         };
         onShowAuthModal(postAuthAction);
