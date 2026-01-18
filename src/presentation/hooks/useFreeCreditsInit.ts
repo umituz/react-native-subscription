@@ -2,10 +2,12 @@
  * useFreeCreditsInit Hook
  *
  * Handles free credits initialization for newly registered users.
- * Separated from useCredits for better maintainability and testability.
+ * Uses singleton pattern to prevent race conditions across multiple hook instances.
+ *
+ * @see https://medium.com/@shubhamkandharkar/creating-a-singleton-hook-in-react-a-practical-guide-fe5bf9aaefed
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useSyncExternalStore } from "react";
 import {
   getCreditsRepository,
   getCreditsConfig,
@@ -14,8 +16,82 @@ import {
 
 declare const __DEV__: boolean;
 
+// ============================================================================
+// SINGLETON STATE - Shared across all hook instances
+// ============================================================================
 const freeCreditsInitAttempted = new Set<string>();
+const freeCreditsInitInProgress = new Set<string>();
+const initPromises = new Map<string, Promise<boolean>>();
+const subscribers = new Set<() => void>();
 
+function notifySubscribers(): void {
+  subscribers.forEach((cb) => cb());
+}
+
+function subscribe(callback: () => void): () => void {
+  subscribers.add(callback);
+  return () => subscribers.delete(callback);
+}
+
+function getSnapshot(): Set<string> {
+  return freeCreditsInitInProgress;
+}
+
+async function initializeFreeCreditsForUser(
+  userId: string,
+  onComplete: () => void
+): Promise<boolean> {
+  // Already completed for this user
+  if (freeCreditsInitAttempted.has(userId) && !freeCreditsInitInProgress.has(userId)) {
+    return true;
+  }
+
+  // Already in progress - return existing promise
+  const existingPromise = initPromises.get(userId);
+  if (existingPromise) {
+    return existingPromise;
+  }
+
+  // Mark as attempted and in progress
+  freeCreditsInitAttempted.add(userId);
+  freeCreditsInitInProgress.add(userId);
+  notifySubscribers();
+
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[useFreeCreditsInit] Initializing free credits:", userId.slice(0, 8));
+  }
+
+  const promise = (async () => {
+    try {
+      const repository = getCreditsRepository();
+      const result = await repository.initializeFreeCredits(userId);
+
+      if (result.success) {
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
+          console.log("[useFreeCreditsInit] Free credits initialized:", result.data?.credits);
+        }
+        onComplete();
+        return true;
+      } else {
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
+          console.warn("[useFreeCreditsInit] Free credits init failed:", result.error?.message);
+        }
+        return false;
+      }
+    } finally {
+      freeCreditsInitInProgress.delete(userId);
+      initPromises.delete(userId);
+      notifySubscribers();
+    }
+  })();
+
+  initPromises.set(userId, promise);
+  return promise;
+}
+
+// ============================================================================
+// HOOK INTERFACE
+// ============================================================================
 export interface UseFreeCreditsInitParams {
   userId: string | null | undefined;
   isRegisteredUser: boolean;
@@ -32,13 +108,19 @@ export interface UseFreeCreditsInitResult {
 
 export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCreditsInitResult {
   const { userId, isRegisteredUser, isAnonymous, hasCredits, querySuccess, onInitComplete } = params;
-  const [isInitializing, setIsInitializing] = useState(false);
+
+  // Subscribe to singleton state changes
+  const inProgressSet = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
   const freeCredits = config.freeCredits ?? 0;
   const autoInit = config.autoInitializeFreeCredits !== false && freeCredits > 0;
 
+  // Check if THIS user's init is in progress (shared across all hook instances)
+  const isInitializing = userId ? inProgressSet.has(userId) : false;
+
+  // Need init if: query succeeded, registered user, no credits, not attempted yet
   const needsInit =
     querySuccess &&
     !!userId &&
@@ -48,40 +130,28 @@ export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCre
     autoInit &&
     !freeCreditsInitAttempted.has(userId);
 
-  const initializeFreeCredits = useCallback(async (uid: string) => {
-    freeCreditsInitAttempted.add(uid);
-    setIsInitializing(true);
-
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[useFreeCreditsInit] Initializing free credits:", uid.slice(0, 8));
-    }
-
-    const repository = getCreditsRepository();
-    const result = await repository.initializeFreeCredits(uid);
-    setIsInitializing(false);
-
-    if (result.success) {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFreeCreditsInit] Free credits initialized:", result.data?.credits);
-      }
-      onInitComplete();
-    } else if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.warn("[useFreeCreditsInit] Free credits init failed:", result.error?.message);
-    }
+  // Stable callback reference
+  const stableOnComplete = useCallback(() => {
+    onInitComplete();
   }, [onInitComplete]);
 
   useEffect(() => {
-    if (needsInit && userId) {
-      initializeFreeCredits(userId);
-    } else if (querySuccess && userId && isAnonymous && !hasCredits && autoInit) {
+    if (!userId) return;
+
+    if (needsInit) {
+      // Double-check inside effect to handle race conditions
+      if (!freeCreditsInitAttempted.has(userId)) {
+        initializeFreeCreditsForUser(userId, stableOnComplete);
+      }
+    } else if (querySuccess && isAnonymous && !hasCredits && autoInit) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[useFreeCreditsInit] Skipping - anonymous user must register first");
       }
     }
-  }, [needsInit, userId, querySuccess, isAnonymous, hasCredits, autoInit, initializeFreeCredits]);
+  }, [needsInit, userId, querySuccess, isAnonymous, hasCredits, autoInit, stableOnComplete]);
 
   return {
-    isInitializing,
+    isInitializing: isInitializing || needsInit,
     needsInit,
   };
 }
