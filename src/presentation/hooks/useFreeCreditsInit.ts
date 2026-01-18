@@ -115,7 +115,8 @@ export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCre
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
   const freeCredits = config.freeCredits ?? 0;
-  const autoInit = config.autoInitializeFreeCredits !== false && freeCredits > 0;
+  // Free credits only enabled when explicitly set to true AND freeCredits > 0
+  const isFreeCreditsEnabled = config.enableFreeCredits === true && freeCredits > 0;
 
   // Check if THIS user's init is in progress (shared across all hook instances)
   const isInitializing = userId ? inProgressSet.has(userId) : false;
@@ -127,7 +128,7 @@ export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCre
     isRegisteredUser &&
     isConfigured &&
     !hasCredits &&
-    autoInit &&
+    isFreeCreditsEnabled &&
     !freeCreditsInitAttempted.has(userId);
 
   // Stable callback reference
@@ -143,12 +144,12 @@ export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCre
       if (!freeCreditsInitAttempted.has(userId)) {
         initializeFreeCreditsForUser(userId, stableOnComplete);
       }
-    } else if (querySuccess && isAnonymous && !hasCredits && autoInit) {
+    } else if (querySuccess && isAnonymous && !hasCredits && isFreeCreditsEnabled) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[useFreeCreditsInit] Skipping - anonymous user must register first");
       }
     }
-  }, [needsInit, userId, querySuccess, isAnonymous, hasCredits, autoInit, stableOnComplete]);
+  }, [needsInit, userId, querySuccess, isAnonymous, hasCredits, isFreeCreditsEnabled, stableOnComplete]);
 
   return {
     isInitializing: isInitializing || needsInit,
