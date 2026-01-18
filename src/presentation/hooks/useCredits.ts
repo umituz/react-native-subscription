@@ -7,7 +7,7 @@
  */
 
 import { useQuery } from "@umituz/react-native-design-system";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import {
   useAuthStore,
   selectUserId,
@@ -32,6 +32,7 @@ const freeCreditsInitAttempted = new Set<string>();
 export interface UseCreditsResult {
   credits: UserCredits | null;
   isLoading: boolean;
+  isCreditsLoaded: boolean;
   error: Error | null;
   hasCredits: boolean;
   creditsPercent: number;
@@ -43,6 +44,7 @@ export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
   const isAnonymous = useAuthStore(selectIsAnonymous);
   const isRegisteredUser = !!userId && !isAnonymous;
+  const [isInitializingFreeCredits, setIsInitializingFreeCredits] = useState(false);
 
   const isConfigured = isCreditsRepositoryConfigured();
   const config = getCreditsConfig();
@@ -95,6 +97,7 @@ export const useCredits = (): UseCreditsResult => {
       !freeCreditsInitAttempted.has(userId)
     ) {
       freeCreditsInitAttempted.add(userId);
+      setIsInitializingFreeCredits(true);
 
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[useCredits] Initializing free credits for registered user:", userId.slice(0, 8));
@@ -102,6 +105,7 @@ export const useCredits = (): UseCreditsResult => {
 
       const repository = getCreditsRepository();
       repository.initializeFreeCredits(userId).then((result) => {
+        setIsInitializingFreeCredits(false);
         if (result.success) {
           if (typeof __DEV__ !== "undefined" && __DEV__) {
             console.log("[useCredits] Free credits initialized:", result.data?.credits);
@@ -137,9 +141,12 @@ export const useCredits = (): UseCreditsResult => {
     [credits]
   );
 
+  const isCreditsLoaded = isFetched && !isLoading && !isInitializingFreeCredits;
+
   return {
     credits,
     isLoading,
+    isCreditsLoaded,
     error: error as Error | null,
     hasCredits: derivedValues.hasCredits,
     creditsPercent: derivedValues.creditsPercent,
