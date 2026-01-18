@@ -118,6 +118,25 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
       console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew, periodType });
     }
     try {
+      // If not premium and no productId, this is a free user - don't overwrite free credits
+      if (!isPremium && !productId) {
+        if (__DEV__) {
+          console.log('[SubscriptionInitializer] Free user detected, preserving free credits');
+        }
+        return;
+      }
+
+      // If premium became false (subscription expired/canceled), sync expired status only
+      if (!isPremium && productId) {
+        await getCreditsRepository().syncExpiredStatus(userId);
+        if (__DEV__) {
+          console.log('[SubscriptionInitializer] Subscription expired, synced status');
+        }
+        onCreditsUpdated?.(userId);
+        return;
+      }
+
+      // Premium user - initialize credits with subscription data
       const revenueCatData: RevenueCatData = {
         expirationDate: expiresAt ?? null,
         willRenew: willRenew ?? false,
