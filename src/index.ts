@@ -96,3 +96,18 @@ export * from "./utils";
 
 // RevenueCat
 export * from "./revenuecat";
+
+// App Service Helpers (for configureAppServices)
+export {
+  createCreditService,
+  createPaywallService,
+  type CreditServiceConfig,
+  type ICreditService,
+  type IPaywallService,
+} from "./infrastructure/services/app-service-helpers";
+
+// Init Module Factory
+export {
+  createSubscriptionInitModule,
+  type SubscriptionInitModuleConfig,
+} from './init';

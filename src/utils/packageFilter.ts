@@ -5,8 +5,6 @@
 
 import type { PurchasesPackage } from "react-native-purchases";
 
-declare const __DEV__: boolean;
-
 export type PackageCategory = "credits" | "subscription";
 
 export interface PackageFilterConfig {
@@ -30,17 +28,7 @@ export function getPackageCategory(
     config.creditIdentifierPattern?.test(identifier) ||
     config.creditIdentifierPattern?.test(productIdentifier);
 
-  if (isCreditPackage) {
-    if (__DEV__) {
-      console.log("[PackageFilter] Credit package:", identifier);
-    }
-    return "credits";
-  }
-
-  if (__DEV__) {
-    console.log("[PackageFilter] Subscription package:", identifier);
-  }
-  return "subscription";
+  return isCreditPackage ? "credits" : "subscription";
 }
 
 export function filterPackagesByMode(
@@ -49,22 +37,10 @@ export function filterPackagesByMode(
   config: PackageFilterConfig = DEFAULT_CONFIG
 ): PurchasesPackage[] {
   if (mode === "hybrid") {
-    if (__DEV__) {
-      console.log("[PackageFilter] Hybrid mode - returning all packages:", packages.length);
-    }
     return packages;
   }
 
-  const filtered = packages.filter((pkg) => {
-    const category = getPackageCategory(pkg, config);
-    return category === mode;
-  });
-
-  if (__DEV__) {
-    console.log(`[PackageFilter] Mode: ${mode}, Filtered: ${filtered.length}/${packages.length}`);
-  }
-
-  return filtered;
+  return packages.filter((pkg) => getPackageCategory(pkg, config) === mode);
 }
 
 export function separatePackages(
@@ -75,19 +51,11 @@ export function separatePackages(
   const subscriptionPackages: PurchasesPackage[] = [];
 
   for (const pkg of packages) {
-    const category = getPackageCategory(pkg, config);
-    if (category === "credits") {
+    if (getPackageCategory(pkg, config) === "credits") {
       creditPackages.push(pkg);
     } else {
       subscriptionPackages.push(pkg);
     }
-  }
-
-  if (__DEV__) {
-    console.log("[PackageFilter] Separated:", {
-      credits: creditPackages.length,
-      subscriptions: subscriptionPackages.length,
-    });
   }
 
   return { creditPackages, subscriptionPackages };
