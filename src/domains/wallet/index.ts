@@ -4,6 +4,14 @@
  * Public API for wallet functionality.
  */
 
+// Config
+export {
+  configureWallet,
+  getWalletConfig,
+  resetWalletConfig,
+  type WalletConfiguration,
+} from "./infrastructure/config/walletConfig";
+
 // Types
 export type {
   TransactionReason,
@@ -114,3 +122,8 @@ export {
   type WalletScreenConfig,
   type WalletScreenTranslations,
 } from "./presentation/screens/WalletScreen";
+
+export {
+  WalletScreenContainer,
+  type WalletScreenContainerProps,
+} from "./presentation/screens/WalletScreenContainer";
