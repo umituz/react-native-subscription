@@ -66,6 +66,15 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   }, [requiredCredits]);
 
   useEffect(() => {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log("[useFeatureGate] Auth credits effect", {
+        isWaiting: isWaitingForAuthCreditsRef.current,
+        isLoaded: isCreditsLoaded,
+        hasPending: !!pendingActionRef.current,
+        credits: creditBalance,
+      });
+    }
+
     if (!isWaitingForAuthCreditsRef.current || !isCreditsLoaded || !pendingActionRef.current) {
       return;
     }
