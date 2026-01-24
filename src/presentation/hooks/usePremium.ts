@@ -33,6 +33,9 @@ export interface UsePremiumResult {
 }
 
 export const usePremium = (): UsePremiumResult => {
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    console.log('[usePremium] Hook called');
+  }
   const { isPremium: subscriptionActive, isLoading: statusLoading } = useSubscriptionStatus();
   const { credits, isLoading: creditsLoading } = useCredits();
 
