@@ -136,6 +136,7 @@ export class CreditsRepository extends BaseRepository {
   /**
    * Initialize free credits for new users
    * Creates a credits document with freeCredits amount (no subscription)
+   * Uses transaction to prevent race condition with premium init
    */
   async initializeFreeCredits(userId: string): Promise<CreditsResult> {
     const db = getFirestore();
@@ -148,52 +149,57 @@ export class CreditsRepository extends BaseRepository {
 
     try {
       const ref = this.getRef(db, userId);
-      const snap = await getDoc(ref);
 
-      // Don't overwrite if document already exists
-      if (snap.exists()) {
-        if (__DEV__) console.log("[CreditsRepository] Credits document already exists, skipping free credits init");
-        const existing = snap.data() as UserCreditsDocumentRead;
-        return { success: true, data: CreditsMapper.toEntity(existing) };
-      }
+      // Use transaction to atomically check-and-set
+      const result = await runTransaction(db, async (tx: Transaction) => {
+        const snap = await tx.get(ref);
 
-      // Create new document with free credits
-      const { setDoc } = await import("firebase/firestore");
-      const now = serverTimestamp();
+        // Don't overwrite if document already exists (premium or previous init)
+        if (snap.exists()) {
+          if (__DEV__) console.log("[CreditsRepository] Credits document already exists, skipping free credits init");
+          const existing = snap.data() as UserCreditsDocumentRead;
+          return { skipped: true, data: CreditsMapper.toEntity(existing) };
+        }
 
-      const creditsData = {
-        // Not premium - just free credits
-        isPremium: false,
-        status: "free" as const,
+        // Create new document with free credits
+        const now = serverTimestamp();
 
-        // Free credits - store initial amount for tracking
-        credits: freeCredits,
-        creditLimit: freeCredits,
-        initialFreeCredits: freeCredits,
-        isFreeCredits: true,
-
-        // Dates
-        createdAt: now,
-        lastUpdatedAt: now,
-      };
-
-      await setDoc(ref, creditsData);
-
-      if (__DEV__) console.log("[CreditsRepository] Initialized free credits:", { userId: userId.slice(0, 8), credits: freeCredits });
-
-      return {
-        success: true,
-        data: {
+        const creditsData = {
+          // Not premium - just free credits
           isPremium: false,
-          status: "free",
+          status: "free" as const,
+
+          // Free credits - store initial amount for tracking
           credits: freeCredits,
           creditLimit: freeCredits,
-          purchasedAt: null,
-          expirationDate: null,
-          lastUpdatedAt: null,
-          willRenew: false,
-        }
-      };
+          initialFreeCredits: freeCredits,
+          isFreeCredits: true,
+
+          // Dates
+          createdAt: now,
+          lastUpdatedAt: now,
+        };
+
+        tx.set(ref, creditsData);
+
+        if (__DEV__) console.log("[CreditsRepository] Initialized free credits:", { userId: userId.slice(0, 8), credits: freeCredits });
+
+        return {
+          skipped: false,
+          data: {
+            isPremium: false,
+            status: "free" as const,
+            credits: freeCredits,
+            creditLimit: freeCredits,
+            purchasedAt: null,
+            expirationDate: null,
+            lastUpdatedAt: null,
+            willRenew: false,
+          }
+        };
+      });
+
+      return { success: true, data: result.data };
     } catch (e: any) {
       if (__DEV__) console.error("[CreditsRepository] Free credits init error:", e.message);
       return { success: false, error: { message: e.message, code: "INIT_ERR" } };

@@ -75,12 +75,22 @@ export const useCredits = (): UseCreditsResult => {
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
 
+      // If subscription is expired, immediately return 0 credits
+      // to prevent any window where expired user could deduct
       if (result.data?.status === "expired") {
+        // Sync to Firestore in background
         repository.syncExpiredStatus(userId).catch((syncError) => {
           if (typeof __DEV__ !== "undefined" && __DEV__) {
             console.warn("[useCredits] Background sync failed:", syncError);
           }
         });
+
+        // Return expired data with 0 credits immediately
+        return {
+          ...result.data,
+          credits: 0,
+          isPremium: false,
+        };
       }
 
       return result.data || null;

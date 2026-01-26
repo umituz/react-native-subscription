@@ -26,6 +26,13 @@ export class CustomerInfoListenerManager {
     };
 
     setUserId(userId: string): void {
+        // Reset renewal state when user changes to prevent state leak between users
+        if (this.currentUserId && this.currentUserId !== userId) {
+            this.renewalState = {
+                previousExpirationDate: null,
+                previousProductId: null,
+            };
+        }
         this.currentUserId = userId;
     }
 
@@ -51,6 +58,7 @@ export class CustomerInfoListenerManager {
                 config.entitlementIdentifier
             );
 
+            // Handle renewal (same product, extended expiration)
             if (renewalResult.isRenewal && config.onRenewalDetected) {
                 if (__DEV__) {
                     console.log("[CustomerInfoListener] Renewal detected:", {
@@ -74,13 +82,44 @@ export class CustomerInfoListenerManager {
                 }
             }
 
+            // Handle plan change (upgrade/downgrade)
+            if (renewalResult.isPlanChange && config.onPlanChanged) {
+                if (__DEV__) {
+                    console.log("[CustomerInfoListener] Plan change detected:", {
+                        userId: this.currentUserId,
+                        previousProductId: renewalResult.previousProductId,
+                        newProductId: renewalResult.productId,
+                        isUpgrade: renewalResult.isUpgrade,
+                        isDowngrade: renewalResult.isDowngrade,
+                    });
+                }
+
+                try {
+                    await config.onPlanChanged(
+                        this.currentUserId,
+                        renewalResult.productId!,
+                        renewalResult.previousProductId!,
+                        renewalResult.isUpgrade,
+                        customerInfo
+                    );
+                } catch (error) {
+                    if (__DEV__) {
+                        console.error("[CustomerInfoListener] Plan change callback failed:", error);
+                    }
+                }
+            }
+
             this.renewalState = updateRenewalState(this.renewalState, renewalResult);
 
-            try {
-                await syncPremiumStatus(config, this.currentUserId, customerInfo);
-            } catch (error) {
-                if (__DEV__) {
-                    console.error("[CustomerInfoListener] syncPremiumStatus failed:", error);
+            // Only sync premium status if NOT a renewal or plan change
+            // This prevents double credit initialization
+            if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
+                try {
+                    await syncPremiumStatus(config, this.currentUserId, customerInfo);
+                } catch (error) {
+                    if (__DEV__) {
+                        console.error("[CustomerInfoListener] syncPremiumStatus failed:", error);
+                    }
                 }
             }
         };

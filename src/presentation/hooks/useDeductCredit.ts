@@ -39,26 +39,37 @@ export const useDeductCredit = ({
       return repository.deductCredit(userId, cost);
     },
     onMutate: async (cost: number) => {
-      if (!userId) return;
+      if (!userId) return { previousCredits: null, skippedOptimistic: true };
+
       await queryClient.cancelQueries({ queryKey: creditsQueryKeys.user(userId) });
       const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(userId));
+
+      // Skip optimistic update if insufficient credits to prevent showing 0
+      if (!previousCredits || previousCredits.credits < cost) {
+        return { previousCredits, skippedOptimistic: true };
+      }
+
       queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(userId), (old) => {
         if (!old) return old;
-        return { 
-          ...old, 
-          credits: Math.max(0, old.credits - cost), 
-          lastUpdatedAt: timezoneService.getNow() 
+        return {
+          ...old,
+          credits: old.credits - cost,
+          lastUpdatedAt: timezoneService.getNow()
         };
       });
-      return { previousCredits };
+      return { previousCredits, skippedOptimistic: false };
     },
     onError: (_err, _cost, context) => {
-      if (userId && context?.previousCredits) {
+      // Always restore previous credits on error if we have them
+      if (userId && context?.previousCredits && !context.skippedOptimistic) {
         queryClient.setQueryData(creditsQueryKeys.user(userId), context.previousCredits);
       }
     },
-    onSettled: () => {
-      if (userId) queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+    onSuccess: () => {
+      // Only invalidate on success to get fresh server data
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+      }
     },
   });
 

@@ -119,8 +119,20 @@ export const useAuthAwarePurchase = (
       console.log("[useAuthAwarePurchase] Executing saved purchase:", saved.pkg.product.identifier);
     }
 
-    clearSavedPurchase();
-    return purchasePackage(saved.pkg);
+    try {
+      const result = await purchasePackage(saved.pkg);
+      // Only clear after successful purchase
+      if (result) {
+        clearSavedPurchase();
+      }
+      return result;
+    } catch (error) {
+      // Don't clear on error - allow retry
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.error("[useAuthAwarePurchase] Saved purchase failed:", error);
+      }
+      throw error;
+    }
   }, [purchasePackage]);
 
   return {

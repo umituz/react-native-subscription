@@ -2,6 +2,8 @@
  * Subscription Initializer
  */
 
+declare const __DEV__: boolean;
+
 import { Platform } from "react-native";
 import type { CustomerInfo } from "react-native-purchases";
 import type { CreditsConfig } from "../../domain/entities/Credits";
@@ -126,11 +128,36 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
         return;
       }
 
-      // If premium became false (subscription expired/canceled), sync expired status only
+      // If premium became false, check if actually expired or just canceled
       if (!isPremium && productId) {
-        await getCreditsRepository().syncExpiredStatus(userId);
-        if (__DEV__) {
-          console.log('[SubscriptionInitializer] Subscription expired, synced status');
+        // Check if subscription is truly expired (expiration date in the past)
+        const isActuallyExpired = !expiresAt || new Date(expiresAt) < new Date();
+
+        if (isActuallyExpired) {
+          // Subscription truly expired - zero out credits
+          await getCreditsRepository().syncExpiredStatus(userId);
+          if (__DEV__) {
+            console.log('[SubscriptionInitializer] Subscription expired, synced status');
+          }
+        } else {
+          // Subscription canceled but not expired - preserve credits until expiration
+          if (__DEV__) {
+            console.log('[SubscriptionInitializer] Subscription canceled but not expired, preserving credits until:', expiresAt);
+          }
+          // Update willRenew to false but keep credits
+          const revenueCatData: RevenueCatData = {
+            expirationDate: expiresAt,
+            willRenew: false, // Canceled
+            isPremium: true, // Still has access until expiration
+            periodType,
+          };
+          await getCreditsRepository().initializeCredits(
+            userId,
+            `status_sync_canceled_${Date.now()}`,
+            productId,
+            "settings" as any,
+            revenueCatData
+          );
         }
         onCreditsUpdated?.(userId);
         return;

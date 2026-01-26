@@ -5,6 +5,7 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
+import { detectPackageType, type SubscriptionPackageType } from "../../../utils/packageTypeDetector";
 
 export interface RenewalState {
   previousExpirationDate: string | null;
@@ -13,17 +14,35 @@ export interface RenewalState {
 
 export interface RenewalDetectionResult {
   isRenewal: boolean;
+  isPlanChange: boolean;
+  isUpgrade: boolean;
+  isDowngrade: boolean;
   productId: string | null;
+  previousProductId: string | null;
   newExpirationDate: string | null;
 }
 
+const PACKAGE_TIER_ORDER: Record<SubscriptionPackageType, number> = {
+  weekly: 1,
+  monthly: 2,
+  yearly: 3,
+  unknown: 0,
+};
+
+function getPackageTier(productId: string | null): number {
+  if (!productId) return 0;
+  const packageType = detectPackageType(productId);
+  return PACKAGE_TIER_ORDER[packageType] ?? 0;
+}
+
 /**
- * Detects if a subscription renewal occurred
+ * Detects if a subscription renewal or plan change occurred
  *
  * Best Practice (RevenueCat):
  * - Track previous expiration date
  * - If new expiration > previous → Renewal detected
- * - Reset credits on renewal (industry standard)
+ * - If productId changed → Plan change (upgrade/downgrade)
+ * - Reset credits on renewal or plan change (industry standard)
  *
  * @param state Previous state (expiration date, product ID)
  * @param customerInfo Current CustomerInfo from RevenueCat
@@ -37,34 +56,65 @@ export function detectRenewal(
 ): RenewalDetectionResult {
   const entitlement = customerInfo.entitlements.active[entitlementId];
 
+  const baseResult: RenewalDetectionResult = {
+    isRenewal: false,
+    isPlanChange: false,
+    isUpgrade: false,
+    isDowngrade: false,
+    productId: null,
+    previousProductId: state.previousProductId,
+    newExpirationDate: null,
+  };
+
   if (!entitlement) {
-    return {
-      isRenewal: false,
-      productId: null,
-      newExpirationDate: null,
-    };
+    return baseResult;
   }
 
   const newExpirationDate = entitlement.expirationDate;
   const productId = entitlement.productIdentifier;
 
-  if (!newExpirationDate || !state.previousExpirationDate) {
+  // First time seeing this subscription - not a renewal
+  if (!state.previousExpirationDate || !state.previousProductId) {
     return {
-      isRenewal: false,
+      ...baseResult,
       productId,
       newExpirationDate,
     };
   }
 
-  const newExpiration = new Date(newExpirationDate);
+  const newExpiration = new Date(newExpirationDate ?? 0);
   const previousExpiration = new Date(state.previousExpirationDate);
+  const productChanged = productId !== state.previousProductId;
+  const expirationExtended = newExpiration > previousExpiration;
 
-  const isRenewal = newExpiration > previousExpiration &&
-                    productId === state.previousProductId;
+  // Plan change detection (upgrade/downgrade)
+  if (productChanged) {
+    const oldTier = getPackageTier(state.previousProductId);
+    const newTier = getPackageTier(productId);
+    const isUpgrade = newTier > oldTier;
+    const isDowngrade = newTier < oldTier;
+
+    return {
+      isRenewal: false,
+      isPlanChange: true,
+      isUpgrade,
+      isDowngrade,
+      productId,
+      previousProductId: state.previousProductId,
+      newExpirationDate,
+    };
+  }
+
+  // Same product renewal
+  const isRenewal = expirationExtended;
 
   return {
     isRenewal,
+    isPlanChange: false,
+    isUpgrade: false,
+    isDowngrade: false,
     productId,
+    previousProductId: state.previousProductId,
     newExpirationDate,
   };
 }

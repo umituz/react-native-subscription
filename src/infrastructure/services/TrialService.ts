@@ -28,6 +28,7 @@ export const TRIAL_CONFIG = {
 export interface DeviceTrialRecord {
   deviceId: string;
   hasUsedTrial: boolean;
+  trialInProgress?: boolean;
   trialStartedAt?: Date;
   trialEndedAt?: Date;
   trialConvertedAt?: Date;
@@ -80,15 +81,19 @@ export async function checkTrialEligibility(
 
     const data = trialDoc.data();
     const hasUsedTrial = data?.hasUsedTrial === true;
+    const trialInProgress = data?.trialInProgress === true;
 
     if (__DEV__) {
       console.log("[TrialService] Trial record found:", {
         deviceId: effectiveDeviceId.slice(0, 8),
         hasUsedTrial,
+        trialInProgress,
       });
     }
 
-    if (hasUsedTrial) {
+    // Not eligible if trial was already used (converted or ended)
+    // OR if trial is currently in progress
+    if (hasUsedTrial || trialInProgress) {
       return {
         eligible: false,
         reason: "already_used",
@@ -129,7 +134,9 @@ export async function recordTrialStart(
       trialRef,
       {
         deviceId: effectiveDeviceId,
-        hasUsedTrial: true,
+        // Don't set hasUsedTrial here - only set when trial ends or converts
+        // This allows retry if user cancels before trial period ends
+        trialInProgress: true,
         trialStartedAt: serverTimestamp(),
         lastUserId: userId,
         userIds: arrayUnion(userId),
@@ -183,6 +190,9 @@ export async function recordTrialEnd(
     await setDoc(
       trialRef,
       {
+        // Mark trial as used when it ends (prevents retry)
+        hasUsedTrial: true,
+        trialInProgress: false,
         trialEndedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       },
@@ -190,7 +200,7 @@ export async function recordTrialEnd(
     );
 
     if (__DEV__) {
-      console.log("[TrialService] Trial end recorded");
+      console.log("[TrialService] Trial end recorded - trial now consumed");
     }
 
     return true;
@@ -221,6 +231,9 @@ export async function recordTrialConversion(
     await setDoc(
       trialRef,
       {
+        // Mark trial as used after conversion (prevents retry)
+        hasUsedTrial: true,
+        trialInProgress: false,
         trialConvertedAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       },
@@ -228,7 +241,7 @@ export async function recordTrialConversion(
     );
 
     if (__DEV__) {
-      console.log("[TrialService] Trial conversion recorded");
+      console.log("[TrialService] Trial conversion recorded - user converted to paid");
     }
 
     return true;

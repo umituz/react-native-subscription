@@ -44,6 +44,14 @@ export interface RevenueCatConfig {
     newExpirationDate: string,
     customerInfo: CustomerInfo
   ) => Promise<void> | void;
+  /** Callback when subscription plan changes (upgrade/downgrade) */
+  onPlanChanged?: (
+    userId: string,
+    newProductId: string,
+    previousProductId: string,
+    isUpgrade: boolean,
+    customerInfo: CustomerInfo
+  ) => Promise<void> | void;
   /** Callback after credits are successfully updated (for cache invalidation) */
   onCreditsUpdated?: (userId: string) => void;
 }
