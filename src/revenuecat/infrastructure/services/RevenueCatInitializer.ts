@@ -20,6 +20,8 @@ export interface InitializerDeps {
 
 let isPurchasesConfigured = false;
 let isLogHandlerConfigured = false;
+// Mutex to prevent concurrent configuration
+let configurationInProgress = false;
 
 function configureLogHandler(): void {
     if (isLogHandlerConfigured) return;
@@ -97,11 +99,25 @@ export async function initializeSDK(
     }
 
     // Case 3: First time configuration
+    // Check mutex to prevent double configuration
+    if (configurationInProgress) {
+        // Wait a bit and retry - another thread is configuring
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // After waiting, isPurchasesConfigured should be true
+        if (isPurchasesConfigured) {
+            return initializeSDK(deps, userId, apiKey);
+        }
+        return { success: false, offering: null, hasPremium: false };
+    }
+
     const key = apiKey || resolveApiKey(deps.config);
 
     if (!key) {
         return { success: false, offering: null, hasPremium: false };
     }
+
+    // Acquire mutex
+    configurationInProgress = true;
 
     try {
         configureLogHandler();
@@ -123,5 +139,8 @@ export async function initializeSDK(
     } catch (error) {
         getErrorMessage(error, "RevenueCat init failed");
         return { success: false, offering: null, hasPremium: false };
+    } finally {
+        // Release mutex
+        configurationInProgress = false;
     }
 }

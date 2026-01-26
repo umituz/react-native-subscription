@@ -64,9 +64,11 @@ class SubscriptionManagerImpl {
 
     const effectiveUserId = userId || (await this.userIdProvider.getOrCreateAnonymousUserId());
 
-    if (!this.initCache.shouldReinitialize(effectiveUserId)) {
-      const existingPromise = this.initCache.getExistingPromise();
-      if (existingPromise) return existingPromise;
+    // Atomic check-and-acquire to prevent race conditions
+    const { shouldInit, existingPromise } = this.initCache.tryAcquireInitialization(effectiveUserId);
+
+    if (!shouldInit && existingPromise) {
+      return existingPromise;
     }
 
     const promise = this.performInitialization(effectiveUserId);
