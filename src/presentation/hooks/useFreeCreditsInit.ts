@@ -63,6 +63,13 @@ async function initializeFreeCreditsForUser(
 
   const promise = (async () => {
     try {
+      if (!isCreditsRepositoryConfigured()) {
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
+          console.warn("[useFreeCreditsInit] Credits repository not configured");
+        }
+        return false;
+      }
+
       const repository = getCreditsRepository();
       const result = await repository.initializeFreeCredits(userId);
 
@@ -78,6 +85,11 @@ async function initializeFreeCreditsForUser(
         }
         return false;
       }
+    } catch (error) {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.error("[useFreeCreditsInit] Unexpected error:", error);
+      }
+      return false;
     } finally {
       freeCreditsInitInProgress.delete(userId);
       initPromises.delete(userId);
@@ -142,7 +154,11 @@ export function useFreeCreditsInit(params: UseFreeCreditsInitParams): UseFreeCre
     if (needsInit) {
       // Double-check inside effect to handle race conditions
       if (!freeCreditsInitAttempted.has(userId)) {
-        initializeFreeCreditsForUser(userId, stableOnComplete);
+        initializeFreeCreditsForUser(userId, stableOnComplete).catch((error) => {
+          if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.error("[useFreeCreditsInit] Init failed:", error);
+          }
+        });
       }
     } else if (querySuccess && isAnonymous && !hasCredits && isFreeCreditsEnabled) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {

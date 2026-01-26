@@ -76,7 +76,13 @@ export class CustomerInfoListenerManager {
 
             this.renewalState = updateRenewalState(this.renewalState, renewalResult);
 
-            syncPremiumStatus(config, this.currentUserId, customerInfo);
+            try {
+                await syncPremiumStatus(config, this.currentUserId, customerInfo);
+            } catch (error) {
+                if (__DEV__) {
+                    console.error("[CustomerInfoListener] syncPremiumStatus failed:", error);
+                }
+            }
         };
 
         Purchases.addCustomerInfoUpdateListener(this.listener);

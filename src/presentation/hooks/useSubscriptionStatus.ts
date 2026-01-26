@@ -37,9 +37,9 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       return SubscriptionManager.checkPremiumStatus();
     },
     enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: "always",
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });

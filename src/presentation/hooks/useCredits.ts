@@ -86,9 +86,9 @@ export const useCredits = (): UseCreditsResult => {
       return result.data || null;
     },
     enabled: queryEnabled,
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
+    staleTime: 30 * 1000, // 30 seconds - data considered fresh
+    gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache after unmount
+    refetchOnMount: "always",
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });

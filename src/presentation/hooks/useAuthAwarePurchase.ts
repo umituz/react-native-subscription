@@ -16,23 +16,40 @@ export interface PurchaseAuthProvider {
 }
 
 let globalAuthProvider: PurchaseAuthProvider | null = null;
-let savedPackage: PurchasesPackage | null = null;
-let savedSource: PurchaseSource | null = null;
+
+interface SavedPurchaseState {
+  pkg: PurchasesPackage;
+  source: PurchaseSource;
+  timestamp: number;
+}
+
+const SAVED_PURCHASE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
+let savedPurchaseState: SavedPurchaseState | null = null;
 
 export const configureAuthProvider = (provider: PurchaseAuthProvider): void => {
   globalAuthProvider = provider;
 };
 
+const savePurchase = (pkg: PurchasesPackage, source: PurchaseSource): void => {
+  savedPurchaseState = { pkg, source, timestamp: Date.now() };
+};
+
 export const getSavedPurchase = (): { pkg: PurchasesPackage; source: PurchaseSource } | null => {
-  if (savedPackage && savedSource) {
-    return { pkg: savedPackage, source: savedSource };
+  if (!savedPurchaseState) {
+    return null;
   }
-  return null;
+
+  const isExpired = Date.now() - savedPurchaseState.timestamp > SAVED_PURCHASE_EXPIRY_MS;
+  if (isExpired) {
+    savedPurchaseState = null;
+    return null;
+  }
+
+  return { pkg: savedPurchaseState.pkg, source: savedPurchaseState.source };
 };
 
 export const clearSavedPurchase = (): void => {
-  savedPackage = null;
-  savedSource = null;
+  savedPurchaseState = null;
 };
 
 export interface UseAuthAwarePurchaseParams {
@@ -69,8 +86,7 @@ export const useAuthAwarePurchase = (
       const isAuth = globalAuthProvider.isAuthenticated();
 
       if (!isAuth) {
-        savedPackage = pkg;
-        savedSource = source || params?.source || "settings";
+        savePurchase(pkg, source || params?.source || "settings");
         globalAuthProvider.showAuthModal();
         return false;
       }

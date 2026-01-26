@@ -7,6 +7,8 @@ import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 
+declare const __DEV__: boolean;
+
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
     userId: string,
@@ -34,12 +36,12 @@ export async function syncPremiumStatus(
         } else {
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
-    } catch {
-        // Silent error handling
+    } catch (error) {
+        if (__DEV__) {
+            console.error('[PremiumStatusSyncer] syncPremiumStatus failed:', error);
+        }
     }
 }
-
-declare const __DEV__: boolean;
 
 export async function notifyPurchaseCompleted(
     config: RevenueCatConfig,
@@ -88,7 +90,9 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch {
-        // Silent error handling
+    } catch (error) {
+        if (__DEV__) {
+            console.error('[PremiumStatusSyncer] notifyRestoreCompleted failed:', error);
+        }
     }
 }

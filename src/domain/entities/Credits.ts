@@ -101,4 +101,6 @@ export interface DeductCreditsResult {
 export const DEFAULT_CREDITS_CONFIG: CreditsConfig = {
   collectionName: "user_credits",
   creditLimit: 100,
+  enableFreeCredits: false,
+  freeCredits: 0,
 };

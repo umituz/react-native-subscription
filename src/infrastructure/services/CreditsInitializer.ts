@@ -29,6 +29,7 @@ import { getCreditAllocation } from "../../utils/creditMapper";
 
 interface InitializationResult {
     credits: number;
+    alreadyProcessed?: boolean;
 }
 
 export interface InitializeCreditsMetadata {
@@ -58,7 +59,7 @@ export async function initializeCreditsTransaction(
         let processedPurchases: string[] = existingData?.processedPurchases || [];
 
         if (existingData && purchaseId && processedPurchases.includes(purchaseId)) {
-            return { credits: existingData.credits, alreadyProcessed: true } as InitializationResult & { alreadyProcessed: boolean };
+            return { credits: existingData.credits, alreadyProcessed: true };
         }
 
         if (existingData?.purchasedAt) {

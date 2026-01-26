@@ -87,6 +87,8 @@ export type {
   DeductCreditsResult,
   PurchaseSource,
   PurchaseType,
+  CreditAllocation,
+  PackageAllocationMap,
 } from "./domain/entities/Credits";
 export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
 export { InsufficientCreditsError } from "./domain/errors/InsufficientCreditsError";

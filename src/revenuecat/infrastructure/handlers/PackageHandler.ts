@@ -7,6 +7,8 @@ import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 
+declare const __DEV__: boolean;
+
 export interface PremiumStatus {
   isPremium: boolean;
   expirationDate: Date | null;
