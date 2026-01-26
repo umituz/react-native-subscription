@@ -109,18 +109,31 @@ export async function initializeCreditsTransaction(
 
         const status = resolveSubscriptionStatus({ isPremium, willRenew, isExpired: !isPremium, periodType });
 
+        // Determine if this is a status sync (not a new purchase or renewal)
+        // Status sync should preserve existing credits, only update metadata
+        const isStatusSync = purchaseId?.startsWith("status_sync_") ?? false;
+        const isNewPurchaseOrRenewal = purchaseId?.startsWith("purchase_") || purchaseId?.startsWith("renewal_");
+
         let newCredits = creditLimit;
-        if (status === SUBSCRIPTION_STATUS.TRIAL) newCredits = TRIAL_CONFIG.CREDITS;
-        else if (status === SUBSCRIPTION_STATUS.TRIAL_CANCELED) newCredits = 0;
+        if (status === SUBSCRIPTION_STATUS.TRIAL) {
+            newCredits = TRIAL_CONFIG.CREDITS;
+        } else if (status === SUBSCRIPTION_STATUS.TRIAL_CANCELED) {
+            newCredits = 0;
+        } else if (isStatusSync && existingData?.credits !== undefined && existingData.isPremium) {
+            // Status sync for existing premium user: preserve current credits
+            newCredits = existingData.credits;
+        }
 
         const creditsData: Record<string, unknown> = {
             isPremium,
             status,
             credits: newCredits,
             creditLimit,
+            // Clear free credits flag when user becomes premium
+            isFreeCredits: false,
             purchasedAt,
             lastUpdatedAt: now,
-            lastPurchaseAt: now,
+            lastPurchaseAt: isNewPurchaseOrRenewal ? now : (existingData?.lastPurchaseAt ?? now),
             processedPurchases,
         };
 
