@@ -1,13 +1,6 @@
-/**
- * Paywall Feedback Modal
- * Collects user feedback when declining paywall
- */
-
 import React, { useMemo } from "react";
 import { View, TouchableOpacity, TextInput } from "react-native";
-import { AtomicText, BaseModal } from "@umituz/react-native-design-system";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
-import { useLocalization } from "@umituz/react-native-localization";
+import { AtomicText, BaseModal, useAppDesignTokens } from "@umituz/react-native-design-system";
 import { usePaywallFeedback } from "../../hooks/feedback/usePaywallFeedback";
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
 
@@ -19,26 +12,33 @@ const FEEDBACK_OPTION_IDS = [
     "other",
 ] as const;
 
+export interface PaywallFeedbackTranslations {
+    title: string;
+    subtitle: string;
+    submit: string;
+    otherPlaceholder: string;
+    reasons: {
+        too_expensive: string;
+        no_need: string;
+        trying_out: string;
+        technical_issues: string;
+        other: string;
+    };
+}
+
 export interface PaywallFeedbackModalProps {
+    translations: PaywallFeedbackTranslations;
     visible: boolean;
     onClose: () => void;
     onSubmit: (reason: string) => void;
-    title?: string;
-    subtitle?: string;
-    submitText?: string;
-    otherPlaceholder?: string;
 }
 
 export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.memo(({
+    translations,
     visible,
     onClose,
     onSubmit,
-    title,
-    subtitle,
-    submitText,
-    otherPlaceholder,
 }) => {
-    const { t } = useLocalization();
     const tokens = useAppDesignTokens();
 
     const {
@@ -47,7 +47,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
         setOtherText,
         selectReason,
         handleSubmit,
-        handleSkip, // BaseModal's onClose will handle skipping
+        handleSkip,
         canSubmit,
     } = usePaywallFeedback({ onSubmit, onClose });
 
@@ -56,18 +56,12 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
         [tokens, canSubmit],
     );
 
-    const displayTitle = title || t("paywall.feedback.title");
-    const displaySubtitle = subtitle || t("paywall.feedback.subtitle");
-    const displaySubmitText = submitText || t("paywall.feedback.submit");
-    const displayOtherPlaceholder = otherPlaceholder || t("paywall.feedback.otherPlaceholder");
-
-    // BaseModal from design system handles animations, safe areas, keyboard avoiding, and overlay backdrop
     return (
         <BaseModal
             visible={visible}
             onClose={handleSkip}
-            title={displayTitle}
-            subtitle={displaySubtitle}
+            title={translations.title}
+            subtitle={translations.subtitle}
         >
             <View style={{ paddingHorizontal: tokens.spacing.md, paddingBottom: tokens.spacing.lg }}>
                 <View style={[styles.optionsContainer, { backgroundColor: 'transparent', padding: 0 }]}>
@@ -75,7 +69,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
                         const isSelected = selectedReason === optionId;
                         const isOther = optionId === "other";
                         const showInput = isSelected && isOther;
-                        const displayText = t(`paywall.feedback.reasons.${optionId}`);
+                        const displayText = translations.reasons[optionId];
                         
                         // Dynamic styles for the container
                         const containerStyle = {
@@ -135,7 +129,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
                                                     padding: tokens.spacing.sm,
                                                 }
                                             ]}
-                                            placeholder={displayOtherPlaceholder}
+                                            placeholder={translations.otherPlaceholder}
                                             placeholderTextColor={tokens.colors.textTertiary}
                                             multiline
                                             maxLength={200}
@@ -157,7 +151,7 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
                     activeOpacity={0.8}
                 >
                     <AtomicText type="labelLarge" style={styles.submitText}>
-                        {displaySubmitText}
+                        {translations.submit}
                     </AtomicText>
                 </TouchableOpacity>
             </View>
