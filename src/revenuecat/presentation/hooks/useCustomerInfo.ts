@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useState, useCallback } from "react";
-import Purchases, { type CustomerInfo } from "react-native-purchases";
+import { Purchases, type CustomerInfo } from "../../infrastructure/utils/PurchasesSDK";
 
 export interface UseCustomerInfoResult {
   /** Current CustomerInfo from RevenueCat SDK */

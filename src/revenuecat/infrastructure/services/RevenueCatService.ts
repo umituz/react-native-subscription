@@ -3,12 +3,12 @@
  * Main service class for RevenueCat operations
  */
 
-import Purchases from "react-native-purchases";
-import type {
-    PurchasesOffering,
-    PurchasesPackage,
-    CustomerInfo,
-} from "react-native-purchases";
+import {
+    Purchases,
+    type PurchasesOffering,
+    type PurchasesPackage,
+    type CustomerInfo,
+} from "../utils/PurchasesSDK";
 import type {
     IRevenueCatService,
     InitializeResult,

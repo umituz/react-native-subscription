@@ -3,10 +3,11 @@
  * Handles RevenueCat customer info update listeners with renewal detection
  */
 
-import Purchases, {
+import {
+    Purchases,
     type CustomerInfo,
     type CustomerInfoUpdateListener,
-} from "react-native-purchases";
+} from "../utils/PurchasesSDK";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { syncPremiumStatus } from "../utils/PremiumStatusSyncer";
 import {
