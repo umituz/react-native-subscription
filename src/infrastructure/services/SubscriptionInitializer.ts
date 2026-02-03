@@ -1,5 +1,10 @@
 /**
  * Subscription Initializer
+ *
+ * Uses RevenueCat best practices:
+ * - Non-blocking initialization (fire and forget)
+ * - Relies on CustomerInfoUpdateListener for state updates
+ * - No manual timeouts - uses auth state listener with cleanup
  */
 declare const __DEV__: boolean;
 
@@ -13,13 +18,30 @@ import type { SubscriptionInitConfig, FirebaseAuthLike } from "./SubscriptionIni
 
 export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } from "./SubscriptionInitializerTypes";
 
-const waitForAuthState = async (getAuth: () => FirebaseAuthLike | null, timeoutMs: number): Promise<string | undefined> => {
+/**
+ * Gets the current user ID from Firebase auth.
+ * Uses listener pattern for reliability instead of timeout.
+ * Falls back immediately if no auth is available.
+ */
+const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string | undefined => {
   const auth = getAuth();
   if (!auth) return undefined;
-  if (auth.currentUser) return auth.currentUser.uid;
-  return new Promise((resolve) => {
-    const unsub = auth.onAuthStateChanged((u) => { unsub(); resolve(u?.uid); });
-    setTimeout(() => { unsub(); resolve(undefined); }, timeoutMs);
+  return auth.currentUser?.uid;
+};
+
+/**
+ * Sets up auth state listener that will re-initialize subscription
+ * when user auth state changes (login/logout).
+ */
+const setupAuthStateListener = (
+  getAuth: () => FirebaseAuthLike | null,
+  onUserChange: (userId: string | undefined) => void
+): (() => void) | null => {
+  const auth = getAuth();
+  if (!auth) return null;
+
+  return auth.onAuthStateChanged((user) => {
+    onUserChange(user?.uid);
   });
 };
 
@@ -40,7 +62,8 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   const {
     apiKey, apiKeyIos, apiKeyAndroid, entitlementId, credits,
     getAnonymousUserId, getFirebaseAuth, showAuthModal,
-    onCreditsUpdated, creditPackages, timeoutMs = 10000, authStateTimeoutMs = 2000,
+    onCreditsUpdated, creditPackages,
+    // Note: timeoutMs and authStateTimeoutMs are deprecated and ignored
   } = config;
 
   const key = Platform.OS === 'ios' ? (apiKeyIos || apiKey || '') : (apiKeyAndroid || apiKey || '');
@@ -122,24 +145,40 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     getAnonymousUserId,
   });
 
-  const userId = await waitForAuthState(getFirebaseAuth, authStateTimeoutMs);
-
-  try {
-    if (timeoutMs > 0) {
-      const timeout = new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error("Timeout")), timeoutMs));
-      await Promise.race([SubscriptionManager.initialize(userId), timeout]);
-    } else {
-      await SubscriptionManager.initialize(userId);
-    }
-  } catch (error) {
-    if (__DEV__) console.warn('[SubscriptionInitializer] Initialize timeout/error (non-critical):', error);
-  }
-
+  // Configure auth provider immediately (sync)
   configureAuthProvider({
     isAuthenticated: () => {
       const u = getFirebaseAuth()?.currentUser;
       return !!(u && !u.isAnonymous);
     },
     showAuthModal,
+  });
+
+  // Get initial user ID (sync - no waiting)
+  const initialUserId = getCurrentUserId(getFirebaseAuth);
+
+  /**
+   * Non-blocking initialization (fire and forget)
+   * RevenueCat best practice: Don't block on initialization.
+   * The CustomerInfoUpdateListener will handle state updates reactively.
+   */
+  const initializeInBackground = async (userId?: string) => {
+    try {
+      await SubscriptionManager.initialize(userId);
+      if (__DEV__) console.log('[SubscriptionInitializer] Background init complete');
+    } catch (error) {
+      // Non-critical - listener will handle updates
+      if (__DEV__) console.log('[SubscriptionInitializer] Background init error (non-critical):', error);
+    }
+  };
+
+  // Start initialization in background (non-blocking)
+  initializeInBackground(initialUserId);
+
+  // Set up auth state listener for reactive updates
+  // When user logs in/out, re-initialize with new user ID
+  setupAuthStateListener(getFirebaseAuth, (newUserId) => {
+    if (__DEV__) console.log('[SubscriptionInitializer] Auth state changed:', newUserId ? 'logged in' : 'logged out');
+    initializeInBackground(newUserId);
   });
 };
