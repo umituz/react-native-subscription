@@ -19,12 +19,17 @@ let configurationInProgress = false;
 
 function configureLogHandler(): void {
   if (isLogHandlerConfigured) return;
-  Purchases.setLogHandler((logLevel, message) => {
-    const ignoreMessages = ['Purchase was cancelled', 'AppTransaction', "Couldn't find previous transactions"];
-    if (ignoreMessages.some(m => message.includes(m))) return;
-    if (logLevel === LOG_LEVEL.ERROR && __DEV__) console.error('[RevenueCat]', message);
-  });
-  isLogHandlerConfigured = true;
+  if (typeof Purchases.setLogHandler !== 'function') return;
+  try {
+    Purchases.setLogHandler((logLevel, message) => {
+      const ignoreMessages = ['Purchase was cancelled', 'AppTransaction', "Couldn't find previous transactions"];
+      if (ignoreMessages.some(m => message.includes(m))) return;
+      if (logLevel === LOG_LEVEL.ERROR && __DEV__) console.error('[RevenueCat]', message);
+    });
+    isLogHandlerConfigured = true;
+  } catch {
+    // Native module not available (Expo Go)
+  }
 }
 
 function buildSuccessResult(deps: InitializerDeps, customerInfo: any, offerings: any): InitializeResult {
@@ -32,11 +37,20 @@ function buildSuccessResult(deps: InitializerDeps, customerInfo: any, offerings:
   return { success: true, offering: offerings.current, hasPremium };
 }
 
+function isNativeModuleAvailable(): boolean {
+  return typeof Purchases?.configure === 'function';
+}
+
 export async function initializeSDK(
   deps: InitializerDeps,
   userId: string,
   apiKey?: string
 ): Promise<InitializeResult> {
+  if (!isNativeModuleAvailable()) {
+    if (__DEV__) console.log('[RevenueCat] Native module not available (Expo Go)');
+    return { success: false, offering: null, hasPremium: false };
+  }
+
   if (deps.isInitialized() && deps.getCurrentUserId() === userId) {
     try {
       const [customerInfo, offerings] = await Promise.all([
