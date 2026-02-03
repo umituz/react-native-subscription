@@ -57,8 +57,6 @@ export interface UserCreditsDocumentRead {
     // Credits
     credits: number;
     creditLimit?: number;
-    initialFreeCredits?: number;
-    isFreeCredits?: boolean;
 
     // Metadata
     purchaseSource?: PurchaseSource;

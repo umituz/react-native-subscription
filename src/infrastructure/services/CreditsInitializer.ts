@@ -129,8 +129,6 @@ export async function initializeCreditsTransaction(
             status,
             credits: newCredits,
             creditLimit,
-            // Clear free credits flag when user becomes premium
-            isFreeCredits: false,
             purchasedAt,
             lastUpdatedAt: now,
             lastPurchaseAt: isNewPurchaseOrRenewal ? now : (existingData?.lastPurchaseAt ?? now),
