@@ -20,9 +20,18 @@ export interface FirebaseAuthLike {
 export interface CreditPackageConfig { identifierPattern?: string; amounts?: Record<string, number>; }
 
 export interface SubscriptionInitConfig {
-  apiKey?: string; apiKeyIos?: string; apiKeyAndroid?: string; testStoreKey?: string; entitlementId: string; credits: CreditsConfig;
-  getAnonymousUserId: () => Promise<string>; getFirebaseAuth: () => FirebaseAuthLike | null; showAuthModal: () => void;
-  onCreditsUpdated?: (userId: string) => void; creditPackages?: CreditPackageConfig; timeoutMs?: number; authStateTimeoutMs?: number;
+  apiKey?: string;
+  apiKeyIos?: string;
+  apiKeyAndroid?: string;
+  entitlementId: string;
+  credits: CreditsConfig;
+  getAnonymousUserId: () => Promise<string>;
+  getFirebaseAuth: () => FirebaseAuthLike | null;
+  showAuthModal: () => void;
+  onCreditsUpdated?: (userId: string) => void;
+  creditPackages?: CreditPackageConfig;
+  timeoutMs?: number;
+  authStateTimeoutMs?: number;
 }
 
 const waitForAuthState = async (getAuth: () => FirebaseAuthLike | null, timeoutMs: number): Promise<string | undefined> => {
@@ -36,10 +45,14 @@ const waitForAuthState = async (getAuth: () => FirebaseAuthLike | null, timeoutM
 };
 
 export const initializeSubscription = async (config: SubscriptionInitConfig): Promise<void> => {
-  const { apiKey, apiKeyIos, apiKeyAndroid, testStoreKey, entitlementId, credits, getAnonymousUserId, getFirebaseAuth, showAuthModal, onCreditsUpdated, creditPackages, timeoutMs = 10000, authStateTimeoutMs = 2000 } = config;
+  const {
+    apiKey, apiKeyIos, apiKeyAndroid, entitlementId, credits,
+    getAnonymousUserId, getFirebaseAuth, showAuthModal,
+    onCreditsUpdated, creditPackages, timeoutMs = 10000, authStateTimeoutMs = 2000,
+  } = config;
 
-  const key = Platform.OS === "ios" ? (apiKeyIos || apiKey || "") : (apiKeyAndroid || apiKey || "");
-  if (!key) throw new Error("API key required");
+  const key = Platform.OS === 'ios' ? (apiKeyIos || apiKey || '') : (apiKeyAndroid || apiKey || '');
+  if (!key) throw new Error('API key required');
 
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
@@ -191,9 +204,8 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   SubscriptionManager.configure({
     config: {
       apiKey: key,
-      testStoreKey,
       entitlementIdentifier: entitlementId,
-      consumableProductIdentifiers: [creditPackages?.identifierPattern || "credit"],
+      consumableProductIdentifiers: [creditPackages?.identifierPattern || 'credit'],
       onPurchaseCompleted: onPurchase,
       onRenewalDetected: onRenewal,
       onPremiumStatusChanged,

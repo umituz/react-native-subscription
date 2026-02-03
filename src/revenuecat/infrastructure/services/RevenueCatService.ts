@@ -41,10 +41,6 @@ export class RevenueCatService implements IRevenueCatService {
         return this.stateManager.isInitialized();
     }
 
-    isUsingTestStore(): boolean {
-        return this.stateManager.isUsingTestStore();
-    }
-
     getCurrentUserId(): string | null {
         return this.stateManager.getCurrentUserId();
     }
@@ -52,7 +48,6 @@ export class RevenueCatService implements IRevenueCatService {
     private getSDKParams() {
         return {
             config: this.stateManager.getConfig(),
-            isUsingTestStore: () => this.isUsingTestStore(),
             isInitialized: () => this.isInitialized(),
             getCurrentUserId: () => this.stateManager.getCurrentUserId(),
             setInitialized: (value: boolean) => this.stateManager.setInitialized(value),

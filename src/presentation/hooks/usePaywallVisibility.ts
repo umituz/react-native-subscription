@@ -48,9 +48,6 @@ export interface UsePaywallVisibilityResult {
 }
 
 export function usePaywallVisibility(): UsePaywallVisibilityResult {
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[usePaywallVisibility] Hook called');
-  }
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   const setShowPaywall = useCallback((visible: boolean, source?: PurchaseSource) => {

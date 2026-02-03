@@ -30,7 +30,16 @@ export class PackageHandler {
   }
 
   async fetchPackages(): Promise<PurchasesPackage[]> {
+    if (__DEV__) {
+      console.log('[DEBUG PackageHandler] fetchPackages called', {
+        hasService: !!this.service,
+        isInitialized: this.service?.isInitialized(),
+      });
+    }
     if (!this.service?.isInitialized()) {
+      if (__DEV__) {
+        console.log('[DEBUG PackageHandler] Service not initialized, returning empty');
+      }
       return [];
     }
 

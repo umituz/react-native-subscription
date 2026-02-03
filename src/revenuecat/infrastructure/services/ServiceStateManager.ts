@@ -1,32 +1,17 @@
-/**
- * Service State Manager
- * Manages RevenueCat service state
- */
-
 import type { RevenueCatConfig } from '../../domain/value-objects/RevenueCatConfig';
-import { isExpoGo, isDevelopment } from '../utils/ExpoGoDetector';
 
 export class ServiceStateManager {
-  private isInitializedFlag: boolean = false;
-  private usingTestStore: boolean = false;
+  private isInitializedFlag = false;
   private currentUserId: string | null = null;
   private config: RevenueCatConfig;
 
   constructor(config: RevenueCatConfig) {
     this.config = config;
-    this.usingTestStore = this.shouldUseTestStore();
-  }
-
-  private shouldUseTestStore(): boolean {
-    const testKey = this.config.testStoreKey;
-    return !!(testKey && (isExpoGo() || isDevelopment()));
   }
 
   setInitialized(value: boolean): void {
     this.isInitializedFlag = value;
-    if (!value) {
-      this.currentUserId = null;
-    }
+    if (!value) this.currentUserId = null;
   }
 
   isInitialized(): boolean {
@@ -41,16 +26,7 @@ export class ServiceStateManager {
     return this.currentUserId;
   }
 
-  isUsingTestStore(): boolean {
-    return this.usingTestStore;
-  }
-
   getConfig(): RevenueCatConfig {
     return this.config;
-  }
-
-  updateConfig(config: RevenueCatConfig): void {
-    this.config = config;
-    this.usingTestStore = this.shouldUseTestStore();
   }
 }

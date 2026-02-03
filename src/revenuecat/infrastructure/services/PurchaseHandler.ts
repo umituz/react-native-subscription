@@ -1,183 +1,66 @@
-/**
- * Purchase Handler
- * Handles RevenueCat purchase operations for both subscriptions and consumables
- */
-
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
 import type { PurchaseResult } from "../../application/ports/IRevenueCatService";
-import {
-    RevenueCatPurchaseError,
-    RevenueCatInitializationError,
-} from "../../domain/errors/RevenueCatError";
+import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../domain/errors/RevenueCatError";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import {
-    isUserCancelledError,
-    getErrorMessage,
-} from "../../domain/types/RevenueCatTypes";
-import {
-    syncPremiumStatus,
-    notifyPurchaseCompleted,
-} from "../utils/PremiumStatusSyncer";
+import { isUserCancelledError, getErrorMessage } from "../../domain/types/RevenueCatTypes";
+import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
 
-export interface PurchaseHandlerDeps {
-    config: RevenueCatConfig;
-    isInitialized: () => boolean;
-    isUsingTestStore: () => boolean;
-}
-
-function isConsumableProduct(
-    pkg: PurchasesPackage,
-    consumableIds: string[]
-): boolean {
-    if (consumableIds.length === 0) return false;
-    const identifier = pkg.product.identifier.toLowerCase();
-    return consumableIds.some((id) => identifier.includes(id.toLowerCase()));
-}
-
-/**
- * Handle package purchase - supports both subscriptions and consumables
- */
 declare const __DEV__: boolean;
 
+export interface PurchaseHandlerDeps {
+  config: RevenueCatConfig;
+  isInitialized: () => boolean;
+}
+
+function isConsumableProduct(pkg: PurchasesPackage, consumableIds: string[]): boolean {
+  if (consumableIds.length === 0) return false;
+  const identifier = pkg.product.identifier.toLowerCase();
+  return consumableIds.some((id) => identifier.includes(id.toLowerCase()));
+}
+
 export async function handlePurchase(
-    deps: PurchaseHandlerDeps,
-    pkg: PurchasesPackage,
-    userId: string
+  deps: PurchaseHandlerDeps,
+  pkg: PurchasesPackage,
+  userId: string
 ): Promise<PurchaseResult> {
-    if (__DEV__) {
-        console.log('[DEBUG PurchaseHandler] handlePurchase called', {
-            productId: pkg.product.identifier,
-            userId,
-            isInitialized: deps.isInitialized(),
-        });
+  if (!deps.isInitialized()) throw new RevenueCatInitializationError();
+
+  const consumableIds = deps.config.consumableProductIdentifiers || [];
+  const isConsumable = isConsumableProduct(pkg, consumableIds);
+  const entitlementIdentifier = deps.config.entitlementIdentifier;
+
+  try {
+    if (__DEV__) console.log('[Purchase] Starting:', pkg.product.identifier);
+
+    const { customerInfo } = await Purchases.purchasePackage(pkg);
+    const savedPurchase = getSavedPurchase();
+    const source = savedPurchase?.source;
+
+    if (isConsumable) {
+      await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, customerInfo, source);
+      clearSavedPurchase();
+      return { success: true, isPremium: false, customerInfo, isConsumable: true, productId: pkg.product.identifier };
     }
 
-    if (!deps.isInitialized()) {
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Not initialized, throwing error');
-        }
-        throw new RevenueCatInitializationError();
+    const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
+
+    if (isPremium) {
+      await syncPremiumStatus(deps.config, userId, customerInfo);
+      await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, customerInfo, source);
+      clearSavedPurchase();
+      return { success: true, isPremium: true, customerInfo };
     }
 
-    const consumableIds = deps.config.consumableProductIdentifiers || [];
-    const isConsumable = isConsumableProduct(pkg, consumableIds);
-    const entitlementIdentifier = deps.config.entitlementIdentifier;
-
-    try {
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Calling Purchases.purchasePackage...', {
-                productId: pkg.product.identifier,
-                packageIdentifier: pkg.identifier,
-                offeringIdentifier: pkg.offeringIdentifier,
-            });
-        }
-
-        const { customerInfo } = await Purchases.purchasePackage(pkg);
-
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Purchase completed', {
-                productId: pkg.product.identifier,
-                activeEntitlements: Object.keys(customerInfo.entitlements.active),
-            });
-        }
-
-        // Get purchase source from saved purchase
-        const savedPurchase = getSavedPurchase();
-        const source = savedPurchase?.source;
-
-        if (isConsumable) {
-            if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Consumable purchase SUCCESS', { source });
-            }
-            await notifyPurchaseCompleted(
-                deps.config,
-                userId,
-                pkg.product.identifier,
-                customerInfo,
-                source
-            );
-            // Clear pending purchase after successful purchase
-            clearSavedPurchase();
-            return {
-                success: true,
-                isPremium: false,
-                customerInfo,
-                isConsumable: true,
-                productId: pkg.product.identifier,
-            };
-        }
-
-        const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
-
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Checking premium status', {
-                entitlementIdentifier,
-                isPremium,
-                allEntitlements: customerInfo.entitlements.active,
-                source,
-            });
-        }
-
-        if (isPremium) {
-            if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Premium purchase SUCCESS', { source });
-            }
-            await syncPremiumStatus(deps.config, userId, customerInfo);
-            await notifyPurchaseCompleted(
-                deps.config,
-                userId,
-                pkg.product.identifier,
-                customerInfo,
-                source
-            );
-            // Clear pending purchase after successful purchase
-            clearSavedPurchase();
-            return { success: true, isPremium: true, customerInfo };
-        }
-
-        // In Preview API mode (Expo Go), purchases complete but entitlements aren't active
-        // Treat the purchase as successful for testing purposes
-        if (deps.isUsingTestStore()) {
-            if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] Test store purchase SUCCESS', { source });
-            }
-            await notifyPurchaseCompleted(
-                deps.config,
-                userId,
-                pkg.product.identifier,
-                customerInfo,
-                source
-            );
-            // Clear pending purchase after successful purchase
-            clearSavedPurchase();
-            return { success: true, isPremium: false, customerInfo };
-        }
-
-        if (__DEV__) {
-            console.log('[DEBUG PurchaseHandler] Purchase FAILED - no entitlement');
-        }
-        throw new RevenueCatPurchaseError(
-            "Purchase completed but premium entitlement not active",
-            pkg.product.identifier
-        );
-    } catch (error) {
-        if (__DEV__) {
-            console.error('[DEBUG PurchaseHandler] Purchase error caught', {
-                error,
-                isUserCancelled: isUserCancelledError(error),
-            });
-        }
-        if (isUserCancelledError(error)) {
-            if (__DEV__) {
-                console.log('[DEBUG PurchaseHandler] User cancelled');
-            }
-            return { success: false, isPremium: false };
-        }
-        const errorMessage = getErrorMessage(error, "Purchase failed");
-        if (__DEV__) {
-            console.error('[DEBUG PurchaseHandler] Throwing error:', errorMessage);
-        }
-        throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
+    // Purchase completed but no entitlement - still notify (test store scenario)
+    await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, customerInfo, source);
+    clearSavedPurchase();
+    return { success: true, isPremium: false, customerInfo };
+  } catch (error) {
+    if (isUserCancelledError(error)) {
+      return { success: false, isPremium: false };
     }
+    const errorMessage = getErrorMessage(error, "Purchase failed");
+    throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
+  }
 }

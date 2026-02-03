@@ -95,6 +95,13 @@ class SubscriptionManagerImpl {
   }
 
   async getPackages(): Promise<PurchasesPackage[]> {
+    if (__DEV__) {
+      console.log('[DEBUG SubscriptionManager] getPackages called', {
+        isConfigured: this.isConfigured(),
+        isInitialized: this.isInitialized(),
+        hasServiceInstance: !!this.serviceInstance,
+      });
+    }
     this.ensureConfigured();
     if (!this.serviceInstance) {
       this.serviceInstance = getRevenueCatService();
