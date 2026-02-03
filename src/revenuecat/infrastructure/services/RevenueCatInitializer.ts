@@ -37,20 +37,11 @@ function buildSuccessResult(deps: InitializerDeps, customerInfo: any, offerings:
   return { success: true, offering: offerings.current, hasPremium };
 }
 
-function isNativeModuleAvailable(): boolean {
-  return typeof Purchases?.configure === 'function';
-}
-
 export async function initializeSDK(
   deps: InitializerDeps,
   userId: string,
   apiKey?: string
 ): Promise<InitializeResult> {
-  if (!isNativeModuleAvailable()) {
-    if (__DEV__) console.log('[RevenueCat] Native module not available (Expo Go)');
-    return { success: false, offering: null, hasPremium: false };
-  }
-
   if (deps.isInitialized() && deps.getCurrentUserId() === userId) {
     try {
       const [customerInfo, offerings] = await Promise.all([
