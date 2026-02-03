@@ -12,7 +12,6 @@ import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
 import { CreditsMapper } from "../mappers/CreditsMapper";
 import type { RevenueCatData } from "../../domain/types/RevenueCatData";
-import { initializeFreeCredits as initializeFreeCreditsService } from "../services/FreeCreditsService";
 
 export type { RevenueCatData } from "../../domain/types/RevenueCatData";
 
@@ -109,10 +108,6 @@ export class CreditsRepository extends BaseRepository {
   async hasCredits(userId: string, cost: number = 1): Promise<boolean> {
     const res = await this.getCredits(userId);
     return !!(res.success && res.data && res.data.credits >= cost);
-  }
-
-  async initializeFreeCredits(userId: string): Promise<CreditsResult> {
-    return initializeFreeCreditsService({ config: this.config, getRef: this.getRef.bind(this) }, userId);
   }
 
   async syncExpiredStatus(userId: string): Promise<void> {

@@ -1,7 +1,6 @@
 /**
  * Credits Initializer
- * Handles subscription credit initialization (NOT free credits)
- * Free credits are handled by CreditsRepository.initializeFreeCredits()
+ * Handles subscription credit initialization for premium users
  */
 
 import { Platform } from "react-native";

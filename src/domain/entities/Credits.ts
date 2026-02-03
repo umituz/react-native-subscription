@@ -74,10 +74,6 @@ export interface CreditsConfig {
   creditPackageAmounts?: Record<string, number>;
   /** Credit allocations for different subscription types (weekly, monthly, yearly) */
   packageAllocations?: PackageAllocationMap;
-  /** Enable free credits for new users (default: false) */
-  enableFreeCredits?: boolean;
-  /** Free credits given to new users on registration (only used when enableFreeCredits: true) */
-  freeCredits?: number;
 }
 
 export interface CreditsResult<T = UserCredits> {
@@ -101,6 +97,4 @@ export interface DeductCreditsResult {
 export const DEFAULT_CREDITS_CONFIG: CreditsConfig = {
   collectionName: "user_credits",
   creditLimit: 100,
-  enableFreeCredits: false,
-  freeCredits: 0,
 };
