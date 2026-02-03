@@ -1,4 +1,4 @@
-import { Purchases, LOG_LEVEL } from "../utils/PurchasesSDK";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 import type { InitializeResult } from "../../application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";

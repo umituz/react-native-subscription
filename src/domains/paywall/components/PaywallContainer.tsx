@@ -8,7 +8,6 @@ import React, { useMemo, useEffect } from "react";
 import { usePaywallVisibility } from "../../../presentation/hooks/usePaywallVisibility";
 import { useSubscriptionPackages } from "../../../revenuecat/presentation/hooks/useSubscriptionPackages";
 import { useRevenueCatTrialEligibility } from "../../../revenuecat/presentation/hooks/useRevenueCatTrialEligibility";
-import { filterPackagesByMode } from "../../../utils/packageFilter";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal, type TrialEligibilityInfo } from "./PaywallModal";
 import { usePaywallActions } from "../hooks/usePaywallActions";
@@ -17,14 +16,13 @@ import type { PaywallContainerProps } from "./PaywallContainer.types";
 export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
   const {
     translations,
-    mode = "subscription",
     legalUrls,
     features,
     heroImage,
     bestValueIdentifier,
+    creditAmounts: providedCreditAmounts,
     creditsLabel,
-    creditAmounts,
-    packageFilterConfig,
+    packageAllocations,
     source,
     onPurchaseSuccess,
     onPurchaseError,
@@ -40,7 +38,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
 
   const purchaseSource = source ?? currentSource ?? "settings";
 
-  const { data: allPackages = [], isLoading } = useSubscriptionPackages();
+  const { data: packages = [], isLoading } = useSubscriptionPackages();
   const { eligibilityMap, checkEligibility } = useRevenueCatTrialEligibility();
   const { handlePurchase, handleRestore } = usePaywallActions({
     source: purchaseSource,
@@ -53,10 +51,10 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
   // Check trial eligibility only if trialConfig is enabled
   useEffect(() => {
     if (!trialConfig?.enabled) return;
-    if (allPackages.length === 0) return;
+    if (packages.length === 0) return;
 
     // Get all actual product IDs from packages
-    const allProductIds = allPackages.map((pkg) => pkg.product.identifier);
+    const allProductIds = packages.map((pkg) => pkg.product.identifier);
 
     // If eligibleProductIds are provided, filter to matching packages (partial match)
     // e.g., "yearly" matches "futureus.yearly"
@@ -74,7 +72,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     if (productIdsToCheck.length > 0) {
       checkEligibility(productIdsToCheck);
     }
-  }, [allPackages, checkEligibility, trialConfig?.enabled, trialConfig?.eligibleProductIds]);
+  }, [packages, checkEligibility, trialConfig?.enabled, trialConfig?.eligibleProductIds]);
 
   // Convert eligibility map to format expected by PaywallModal
   // Only process if trial is enabled
@@ -91,10 +89,12 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     return result;
   }, [eligibilityMap, trialConfig?.enabled, trialConfig?.durationDays]);
 
-  const { filteredPackages, computedCreditAmounts } = useMemo(() => ({
-    filteredPackages: filterPackagesByMode(allPackages, mode, packageFilterConfig),
-    computedCreditAmounts: mode !== "subscription" && !creditAmounts ? createCreditAmountsFromPackages(allPackages) : creditAmounts
-  }), [allPackages, mode, packageFilterConfig, creditAmounts]);
+  // Compute credit amounts from packageAllocations if not provided directly
+  const creditAmounts = useMemo(() => {
+    if (providedCreditAmounts) return providedCreditAmounts;
+    if (!packageAllocations || packages.length === 0) return undefined;
+    return createCreditAmountsFromPackages(packages, packageAllocations);
+  }, [providedCreditAmounts, packageAllocations, packages]);
 
   if (!isVisible) return null;
 
@@ -103,14 +103,14 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       visible={isVisible}
       onClose={handleClose}
       translations={translations}
-      packages={filteredPackages}
+      packages={packages}
       isLoading={isLoading}
       legalUrls={legalUrls}
       features={features ? [...features] : undefined}
       heroImage={heroImage}
       bestValueIdentifier={bestValueIdentifier}
+      creditAmounts={creditAmounts}
       creditsLabel={creditsLabel}
-      creditAmounts={computedCreditAmounts}
       onPurchase={handlePurchase}
       onRestore={handleRestore}
       trialEligibility={trialEligibility}

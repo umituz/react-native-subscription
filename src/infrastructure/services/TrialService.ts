@@ -1,63 +1,24 @@
 /**
- * Trial Service
- * Handles device-based trial tracking to prevent abuse
- * Uses persistent device ID that survives app reinstalls
+ * Trial Service - Device-based trial tracking to prevent abuse
  */
-
 declare const __DEV__: boolean;
 
-import {
-  doc,
-  getDoc,
-  setDoc,
-  serverTimestamp,
-  arrayUnion,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { getFirestore } from "@umituz/react-native-firebase";
 import { PersistentDeviceIdService } from "@umituz/react-native-design-system";
+import type { TrialEligibilityResult } from "./TrialTypes";
+
+export { TRIAL_CONFIG, type DeviceTrialRecord, type TrialEligibilityResult } from "./TrialTypes";
 
 const DEVICE_TRIALS_COLLECTION = "device_trials";
 
-/** Trial constants */
-export const TRIAL_CONFIG = {
-  DURATION_DAYS: 3,
-  CREDITS: 5,
-} as const;
-
-/** Device trial record in Firestore */
-export interface DeviceTrialRecord {
-  deviceId: string;
-  hasUsedTrial: boolean;
-  trialInProgress?: boolean;
-  trialStartedAt?: Date;
-  trialEndedAt?: Date;
-  trialConvertedAt?: Date;
-  lastUserId?: string;
-  userIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-/** Trial eligibility result */
-export interface TrialEligibilityResult {
-  eligible: boolean;
-  reason?: "already_used" | "device_not_found" | "error";
-  deviceId?: string;
-}
-
-/**
- * Get persistent device ID
- */
+/** Get persistent device ID */
 export async function getDeviceId(): Promise<string> {
   return PersistentDeviceIdService.getDeviceId();
 }
 
-/**
- * Check if device is eligible for trial
- */
-export async function checkTrialEligibility(
-  deviceId?: string
-): Promise<TrialEligibilityResult> {
+/** Check if device is eligible for trial */
+export async function checkTrialEligibility(deviceId?: string): Promise<TrialEligibilityResult> {
   try {
     const effectiveDeviceId = deviceId || await getDeviceId();
     const db = getFirestore();
@@ -110,13 +71,8 @@ export async function checkTrialEligibility(
   }
 }
 
-/**
- * Record trial start for a device
- */
-export async function recordTrialStart(
-  userId: string,
-  deviceId?: string
-): Promise<boolean> {
+/** Record trial start for a device */
+export async function recordTrialStart(userId: string, deviceId?: string): Promise<boolean> {
   try {
     const effectiveDeviceId = deviceId || await getDeviceId();
     const db = getFirestore();
@@ -134,8 +90,6 @@ export async function recordTrialStart(
       trialRef,
       {
         deviceId: effectiveDeviceId,
-        // Don't set hasUsedTrial here - only set when trial ends or converts
-        // This allows retry if user cancels before trial period ends
         trialInProgress: true,
         trialStartedAt: serverTimestamp(),
         lastUserId: userId,
@@ -174,23 +128,18 @@ export async function recordTrialStart(
 /**
  * Record trial end (cancelled or expired)
  */
-export async function recordTrialEnd(
-  deviceId?: string
-): Promise<boolean> {
+export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
   try {
     const effectiveDeviceId = deviceId || await getDeviceId();
     const db = getFirestore();
 
-    if (!db) {
-      return false;
-    }
+    if (!db) return false;
 
     const trialRef = doc(db, DEVICE_TRIALS_COLLECTION, effectiveDeviceId);
 
     await setDoc(
       trialRef,
       {
-        // Mark trial as used when it ends (prevents retry)
         hasUsedTrial: true,
         trialInProgress: false,
         trialEndedAt: serverTimestamp(),
@@ -215,23 +164,18 @@ export async function recordTrialEnd(
 /**
  * Record trial conversion to paid subscription
  */
-export async function recordTrialConversion(
-  deviceId?: string
-): Promise<boolean> {
+export async function recordTrialConversion(deviceId?: string): Promise<boolean> {
   try {
     const effectiveDeviceId = deviceId || await getDeviceId();
     const db = getFirestore();
 
-    if (!db) {
-      return false;
-    }
+    if (!db) return false;
 
     const trialRef = doc(db, DEVICE_TRIALS_COLLECTION, effectiveDeviceId);
 
     await setDoc(
       trialRef,
       {
-        // Mark trial as used after conversion (prevents retry)
         hasUsedTrial: true,
         trialInProgress: false,
         trialConvertedAt: serverTimestamp(),

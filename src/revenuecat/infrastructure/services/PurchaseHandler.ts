@@ -1,4 +1,4 @@
-import { Purchases, type PurchasesPackage } from "../utils/PurchasesSDK";
+import Purchases, { type PurchasesPackage } from "react-native-purchases";
 import type { PurchaseResult } from "../../application/ports/IRevenueCatService";
 import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../domain/errors/RevenueCatError";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";

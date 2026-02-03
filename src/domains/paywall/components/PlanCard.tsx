@@ -21,7 +21,9 @@ interface PlanCardProps {
     onSelect: () => void;
     /** Badge text (e.g., "Best Value") - NOT for trial */
     badge?: string;
+    /** Credit amount for this plan */
     creditAmount?: number;
+    /** Credits label text (e.g., "credits") */
     creditsLabel?: string;
     /** Whether this plan has a free trial (Apple-compliant display) */
     hasFreeTrial?: boolean;

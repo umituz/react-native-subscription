@@ -1,7 +1,6 @@
 /**
  * Credits Repository
  */
-
 declare const __DEV__: boolean;
 
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore, type Transaction } from "firebase/firestore";
@@ -11,18 +10,11 @@ import type { UserCreditsDocumentRead, PurchaseSource } from "../models/UserCred
 import { initializeCreditsTransaction, type InitializeCreditsMetadata } from "../services/CreditsInitializer";
 import { detectPackageType } from "../../utils/packageTypeDetector";
 import { getCreditAllocation } from "../../utils/creditMapper";
-
 import { CreditsMapper } from "../mappers/CreditsMapper";
+import type { RevenueCatData } from "../../domain/types/RevenueCatData";
+import { initializeFreeCredits as initializeFreeCreditsService } from "../services/FreeCreditsService";
 
-/** RevenueCat subscription data to save (Single Source of Truth) */
-export interface RevenueCatData {
-  expirationDate?: string | null;
-  willRenew?: boolean;
-  originalTransactionId?: string;
-  isPremium?: boolean;
-  /** RevenueCat period type: NORMAL, INTRO, or TRIAL */
-  periodType?: "NORMAL" | "INTRO" | "TRIAL";
-}
+export type { RevenueCatData } from "../../domain/types/RevenueCatData";
 
 export class CreditsRepository extends BaseRepository {
   constructor(private config: CreditsConfig) { super(); }
@@ -58,11 +50,8 @@ export class CreditsRepository extends BaseRepository {
   }
 
   async initializeCredits(
-    userId: string,
-    purchaseId?: string,
-    productId?: string,
-    source?: PurchaseSource,
-    revenueCatData?: RevenueCatData
+    userId: string, purchaseId?: string, productId?: string,
+    source?: PurchaseSource, revenueCatData?: RevenueCatData
   ): Promise<CreditsResult> {
     const db = getFirestore();
     if (!db) return { success: false, error: { message: "No DB", code: "INIT_ERR" } };
@@ -79,9 +68,7 @@ export class CreditsRepository extends BaseRepository {
       }
 
       const metadata: InitializeCreditsMetadata = {
-        productId,
-        source,
-        // RevenueCat data for Single Source of Truth
+        productId, source,
         expirationDate: revenueCatData?.expirationDate,
         willRenew: revenueCatData?.willRenew,
         originalTransactionId: revenueCatData?.originalTransactionId,
@@ -89,23 +76,14 @@ export class CreditsRepository extends BaseRepository {
         periodType: revenueCatData?.periodType,
       };
 
-      const res = await initializeCreditsTransaction(
-        db,
-        this.getRef(db, userId),
-        cfg,
-        purchaseId,
-        metadata
-      );
-
+      const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId, metadata);
       return {
         success: true,
-        data: CreditsMapper.toEntity({
-            ...res,
-            purchasedAt: undefined,
-            lastUpdatedAt: undefined,
-        })
+        data: CreditsMapper.toEntity({ ...res, purchasedAt: undefined, lastUpdatedAt: undefined })
       };
-    } catch (e: any) { return { success: false, error: { message: e.message, code: "INIT_ERR" } }; }
+    } catch (e: any) {
+      return { success: false, error: { message: e.message, code: "INIT_ERR" } };
+    }
   }
 
   async deductCredit(userId: string, cost: number = 1): Promise<DeductCreditsResult> {
@@ -133,98 +111,22 @@ export class CreditsRepository extends BaseRepository {
     return !!(res.success && res.data && res.data.credits >= cost);
   }
 
-  /**
-   * Initialize free credits for new users
-   * Creates a credits document with freeCredits amount (no subscription)
-   * Uses transaction to prevent race condition with premium init
-   */
   async initializeFreeCredits(userId: string): Promise<CreditsResult> {
-    const db = getFirestore();
-    if (!db) return { success: false, error: { message: "No DB", code: "INIT_ERR" } };
-
-    const freeCredits = this.config.freeCredits ?? 0;
-    if (freeCredits <= 0) {
-      return { success: false, error: { message: "Free credits not configured", code: "NO_FREE_CREDITS" } };
-    }
-
-    try {
-      const ref = this.getRef(db, userId);
-
-      // Use transaction to atomically check-and-set
-      const result = await runTransaction(db, async (tx: Transaction) => {
-        const snap = await tx.get(ref);
-
-        // Don't overwrite if document already exists (premium or previous init)
-        if (snap.exists()) {
-          if (__DEV__) console.log("[CreditsRepository] Credits document already exists, skipping free credits init");
-          const existing = snap.data() as UserCreditsDocumentRead;
-          return { skipped: true, data: CreditsMapper.toEntity(existing) };
-        }
-
-        // Create new document with free credits
-        const now = serverTimestamp();
-
-        const creditsData = {
-          // Not premium - just free credits
-          isPremium: false,
-          status: "free" as const,
-
-          // Free credits - store initial amount for tracking
-          credits: freeCredits,
-          creditLimit: freeCredits,
-          initialFreeCredits: freeCredits,
-          isFreeCredits: true,
-
-          // Dates
-          createdAt: now,
-          lastUpdatedAt: now,
-        };
-
-        tx.set(ref, creditsData);
-
-        if (__DEV__) console.log("[CreditsRepository] Initialized free credits:", { userId: userId.slice(0, 8), credits: freeCredits });
-
-        return {
-          skipped: false,
-          data: {
-            isPremium: false,
-            status: "free" as const,
-            credits: freeCredits,
-            creditLimit: freeCredits,
-            purchasedAt: null,
-            expirationDate: null,
-            lastUpdatedAt: null,
-            willRenew: false,
-          }
-        };
-      });
-
-      return { success: true, data: result.data };
-    } catch (e: any) {
-      if (__DEV__) console.error("[CreditsRepository] Free credits init error:", e.message);
-      return { success: false, error: { message: e.message, code: "INIT_ERR" } };
-    }
+    return initializeFreeCreditsService({ config: this.config, getRef: this.getRef.bind(this) }, userId);
   }
 
-  /** Sync expired subscription status to Firestore (background) */
   async syncExpiredStatus(userId: string): Promise<void> {
     const db = getFirestore();
     if (!db) return;
-
     try {
       const ref = this.getRef(db, userId);
       const { updateDoc } = await import("firebase/firestore");
-      await updateDoc(ref, {
-        isPremium: false,
-        status: "expired",
-        lastUpdatedAt: serverTimestamp(),
-      });
-      if (__DEV__) console.log("[CreditsRepository] Synced expired status for:", userId.slice(0, 8));
+      await updateDoc(ref, { isPremium: false, status: "expired", lastUpdatedAt: serverTimestamp() });
+      if (__DEV__) console.log("[CreditsRepository] Synced expired status:", userId.slice(0, 8));
     } catch (e) {
       if (__DEV__) console.error("[CreditsRepository] Sync expired failed:", e);
     }
   }
-
 }
 
 export const createCreditsRepository = (c: CreditsConfig) => new CreditsRepository(c);

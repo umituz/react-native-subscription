@@ -33,7 +33,9 @@ export interface PaywallModalProps {
   isLoading?: boolean;
   legalUrls?: PaywallLegalUrls;
   bestValueIdentifier?: string;
+  /** Credit amounts per product identifier */
   creditAmounts?: Record<string, number>;
+  /** Credits label text (e.g., "credits") */
   creditsLabel?: string;
   heroImage?: ImageSourcePropType;
   onPurchase?: (pkg: PurchasesPackage) => Promise<void | boolean>;

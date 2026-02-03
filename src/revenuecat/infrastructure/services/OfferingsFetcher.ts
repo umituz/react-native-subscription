@@ -1,4 +1,4 @@
-import { Purchases, type PurchasesOffering } from "../utils/PurchasesSDK";
+import Purchases, { type PurchasesOffering } from "react-native-purchases";
 
 export interface OfferingsFetcherDeps {
   isInitialized: () => boolean;

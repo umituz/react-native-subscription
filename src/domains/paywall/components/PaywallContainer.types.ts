@@ -1,12 +1,11 @@
 /**
  * PaywallContainer Types
- * Props for package-driven paywall with mode-based filtering
+ * Props for subscription paywall
  */
 
 import type { ImageSourcePropType } from "react-native";
-import type { PaywallMode, PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities";
-import type { PackageFilterConfig } from "../../../utils/packageFilter";
-import type { PurchaseSource } from "../../../domain/entities/Credits";
+import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities";
+import type { PurchaseSource, PackageAllocationMap } from "../../../domain/entities/Credits";
 
 /**
  * Trial display configuration
@@ -26,8 +25,6 @@ export interface TrialConfig {
 export interface PaywallContainerProps {
   /** Paywall translations - no defaults, must be provided */
   readonly translations: PaywallTranslations;
-  /** Paywall mode - subscription, credits, or hybrid */
-  readonly mode?: PaywallMode;
   /** Legal URLs for privacy and terms */
   readonly legalUrls?: PaywallLegalUrls;
   /** Feature list to display */
@@ -36,12 +33,12 @@ export interface PaywallContainerProps {
   readonly heroImage?: ImageSourcePropType;
   /** Best value package identifier for badge */
   readonly bestValueIdentifier?: string;
-  /** Credits label text */
-  readonly creditsLabel?: string;
-  /** Credit amounts per package identifier */
+  /** Credit amounts per product identifier (takes precedence over packageAllocations) */
   readonly creditAmounts?: Record<string, number>;
-  /** Custom filter config for package categorization */
-  readonly packageFilterConfig?: PackageFilterConfig;
+  /** Credits label text (e.g., "credits") */
+  readonly creditsLabel?: string;
+  /** Package allocations for auto-computing creditAmounts (used when creditAmounts not provided) */
+  readonly packageAllocations?: PackageAllocationMap;
   /** Source of the paywall - affects pending purchase handling */
   readonly source?: PurchaseSource;
   /** Callback when purchase succeeds */
@@ -57,4 +54,3 @@ export interface PaywallContainerProps {
   /** Trial display configuration (Apple-compliant) */
   readonly trialConfig?: TrialConfig;
 }
-
