@@ -67,7 +67,7 @@ export async function checkTrialEligibility(deviceId?: string): Promise<TrialEli
     if (__DEV__) {
       console.error("[TrialService] Eligibility check error:", error);
     }
-    return { eligible: true, reason: "error" };
+    return { eligible: false, reason: "error" };
   }
 }
 
