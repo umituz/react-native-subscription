@@ -1,4 +1,4 @@
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
+import Purchases, { LOG_LEVEL, type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
 import type { InitializeResult } from "../../application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
@@ -32,7 +32,7 @@ function configureLogHandler(): void {
   }
 }
 
-function buildSuccessResult(deps: InitializerDeps, customerInfo: any, offerings: any): InitializeResult {
+function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: PurchasesOfferings): InitializeResult {
   const hasPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
   return { success: true, offering: offerings.current, hasPremium };
 }

@@ -15,6 +15,7 @@ import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/Su
 import { configureAuthProvider } from "../../presentation/hooks/useAuthAwarePurchase";
 import type { RevenueCatData } from "../../domain/types/RevenueCatData";
 import type { SubscriptionInitConfig, FirebaseAuthLike } from "./SubscriptionInitializerTypes";
+import type { PurchaseSource } from "../../domain/entities/Credits";
 
 export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } from "./SubscriptionInitializerTypes";
 
@@ -63,7 +64,6 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     apiKey, apiKeyIos, apiKeyAndroid, entitlementId, credits,
     getAnonymousUserId, getFirebaseAuth, showAuthModal,
     onCreditsUpdated, creditPackages,
-    // Note: timeoutMs and authStateTimeoutMs are deprecated and ignored
   } = config;
 
   const key = Platform.OS === 'ios' ? (apiKeyIos || apiKey || '') : (apiKeyAndroid || apiKey || '');
@@ -71,11 +71,11 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
 
-  const onPurchase = async (userId: string, productId: string, customerInfo: CustomerInfo, source?: string) => {
+  const onPurchase = async (userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) => {
     if (__DEV__) console.log('[SubscriptionInitializer] onPurchase:', { userId, productId, source });
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, entitlementId);
-      await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId, source as any, revenueCatData);
+      await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId, source, revenueCatData);
       onCreditsUpdated?.(userId);
     } catch (error) {
       if (__DEV__) console.error('[SubscriptionInitializer] Credits init failed:', error);
@@ -87,7 +87,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, entitlementId);
       revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
-      await getCreditsRepository().initializeCredits(userId, `renewal_${productId}_${Date.now()}`, productId, "renewal" as any, revenueCatData);
+      await getCreditsRepository().initializeCredits(userId, `renewal_${productId}_${Date.now()}`, productId, "renewal", revenueCatData);
       onCreditsUpdated?.(userId);
     } catch (error) {
       if (__DEV__) console.error('[SubscriptionInitializer] Renewal credits init failed:', error);
@@ -115,7 +115,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
         } else {
           if (__DEV__) console.log('[SubscriptionInitializer] Canceled but not expired, preserving until:', expiresAt);
           const revenueCatData: RevenueCatData = { expirationDate: expiresAt, willRenew: false, isPremium: true, periodType };
-          await getCreditsRepository().initializeCredits(userId, `status_sync_canceled_${Date.now()}`, productId, "settings" as any, revenueCatData);
+          await getCreditsRepository().initializeCredits(userId, `status_sync_canceled_${Date.now()}`, productId, "settings", revenueCatData);
         }
         onCreditsUpdated?.(userId);
         return;
@@ -123,7 +123,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
       // Premium user - initialize credits with subscription data
       const revenueCatData: RevenueCatData = { expirationDate: expiresAt ?? null, willRenew: willRenew ?? false, isPremium, periodType };
-      await getCreditsRepository().initializeCredits(userId, `status_sync_${Date.now()}`, productId, "settings" as any, revenueCatData);
+      await getCreditsRepository().initializeCredits(userId, `status_sync_${Date.now()}`, productId, "settings", revenueCatData);
       if (__DEV__) console.log('[SubscriptionInitializer] Premium status synced to Firestore');
       onCreditsUpdated?.(userId);
     } catch (error) {

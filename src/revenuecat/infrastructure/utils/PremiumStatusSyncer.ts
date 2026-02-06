@@ -5,6 +5,7 @@
 
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import type { PurchaseSource } from "../../../domain/entities/Credits";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 
 declare const __DEV__: boolean;
@@ -48,7 +49,7 @@ export async function notifyPurchaseCompleted(
     userId: string,
     productId: string,
     customerInfo: CustomerInfo,
-    source?: string
+    source?: PurchaseSource
 ): Promise<void> {
     if (__DEV__) {
         console.log('[PremiumStatusSyncer] notifyPurchaseCompleted called:', {

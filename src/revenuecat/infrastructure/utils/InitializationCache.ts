@@ -35,28 +35,6 @@ export class InitializationCache {
         return { shouldInit: true, existingPromise: null };
     }
 
-    /**
-     * @deprecated Use tryAcquireInitialization instead for atomic operations
-     */
-    shouldReinitialize(userId: string): boolean {
-        if (!this.initPromise) {
-            return true;
-        }
-
-        if (this.currentUserId !== userId) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @deprecated Use tryAcquireInitialization instead for atomic operations
-     */
-    getExistingPromise(): Promise<boolean> | null {
-        return this.initPromise;
-    }
-
     setPromise(promise: Promise<boolean>, userId: string): void {
         this.initPromise = promise;
         this.promiseUserId = userId;

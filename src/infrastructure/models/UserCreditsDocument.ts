@@ -8,7 +8,8 @@ export type PurchaseSource =
   | "upgrade_prompt"
   | "home_screen"
   | "feature_gate"
-  | "credits_exhausted";
+  | "credits_exhausted"
+  | "renewal";
 
 export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 

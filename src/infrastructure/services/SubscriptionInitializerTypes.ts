@@ -25,14 +25,4 @@ export interface SubscriptionInitConfig {
   showAuthModal: () => void;
   onCreditsUpdated?: (userId: string) => void;
   creditPackages?: CreditPackageConfig;
-  /**
-   * @deprecated No longer used. Initialization is now non-blocking.
-   * RevenueCat best practice: Use listener pattern instead of timeouts.
-   */
-  timeoutMs?: number;
-  /**
-   * @deprecated No longer used. Auth state is read synchronously.
-   * Auth state changes are handled reactively via onAuthStateChanged listener.
-   */
-  authStateTimeoutMs?: number;
 }

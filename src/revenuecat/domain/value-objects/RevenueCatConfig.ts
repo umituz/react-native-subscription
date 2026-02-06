@@ -1,4 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
+import type { PurchaseSource } from "../../../domain/entities/Credits";
 
 export interface RevenueCatConfig {
   apiKey?: string;
@@ -16,7 +17,7 @@ export interface RevenueCatConfig {
     userId: string,
     productId: string,
     customerInfo: CustomerInfo,
-    source?: string
+    source?: PurchaseSource
   ) => Promise<void> | void;
   onRestoreCompleted?: (
     userId: string,

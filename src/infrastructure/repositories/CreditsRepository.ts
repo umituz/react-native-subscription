@@ -42,9 +42,10 @@ export class CreditsRepository extends BaseRepository {
       const entity = CreditsMapper.toEntity(d);
       if (__DEV__) console.log("[CreditsRepository] Credits fetched:", { credits: entity.credits, limit: entity.creditLimit });
       return { success: true, data: entity };
-    } catch (e: any) {
-      if (__DEV__) console.error("[CreditsRepository] Fetch error:", e.message);
-      return { success: false, error: { message: e.message, code: "FETCH_ERR" } };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (__DEV__) console.error("[CreditsRepository] Fetch error:", message);
+      return { success: false, error: { message, code: "FETCH_ERR" } };
     }
   }
 
@@ -80,8 +81,9 @@ export class CreditsRepository extends BaseRepository {
         success: true,
         data: CreditsMapper.toEntity({ ...res, purchasedAt: undefined, lastUpdatedAt: undefined })
       };
-    } catch (e: any) {
-      return { success: false, error: { message: e.message, code: "INIT_ERR" } };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      return { success: false, error: { message, code: "INIT_ERR" } };
     }
   }
 
@@ -99,9 +101,10 @@ export class CreditsRepository extends BaseRepository {
         return updated;
       });
       return { success: true, remainingCredits: remaining };
-    } catch (e: any) {
-      const code = e.message === "NO_CREDITS" || e.message === "CREDITS_EXHAUSTED" ? e.message : "DEDUCT_ERR";
-      return { success: false, error: { message: e.message, code } };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      const code = message === "NO_CREDITS" || message === "CREDITS_EXHAUSTED" ? message : "DEDUCT_ERR";
+      return { success: false, error: { message, code } };
     }
   }
 
