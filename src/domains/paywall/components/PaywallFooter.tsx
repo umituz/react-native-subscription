@@ -1,7 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { PaywallTranslations, PaywallLegalUrls } from "../entities";
+import type { PaywallTranslations, PaywallLegalUrls } from "../entities/types";
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 
 interface PaywallFooterProps {

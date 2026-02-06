@@ -1,7 +1,7 @@
 import React from "react";
 import { View } from "react-native";
 import { AtomicText, AtomicIcon, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { SubscriptionFeature } from "../entities";
+import type { SubscriptionFeature } from "../entities/types";
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 
 export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({ features }) => {

@@ -3,7 +3,7 @@
  * Defines app-specific subscription plans and settings
  */
 
-import type { Plan } from "../entities";
+import type { Plan } from "../entities/Plan";
 
 export interface ConfigTranslations {
     readonly title: string;

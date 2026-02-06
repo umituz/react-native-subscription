@@ -55,12 +55,6 @@ export class SubscriptionService implements ISubscriptionService {
     }
   }
 
-  // Alias for ISubscriptionService interface compliance
-  async getStatus(userId: string): Promise<SubscriptionStatus | null> {
-    const status = await this.getSubscriptionStatus(userId);
-    return status.isPremium ? status : null;
-  }
-
   async isPremium(userId: string): Promise<boolean> {
     const status = await this.getSubscriptionStatus(userId);
     return this.repository.isSubscriptionValid(status);

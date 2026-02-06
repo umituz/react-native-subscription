@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { PaywallTranslations, PaywallLegalUrls } from "../entities";
+import type { PaywallTranslations, PaywallLegalUrls } from "../entities/types";
 
 type TranslationFunction = (key: string) => string;
 

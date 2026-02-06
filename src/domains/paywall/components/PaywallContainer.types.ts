@@ -4,7 +4,7 @@
  */
 
 import type { ImageSourcePropType } from "react-native";
-import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities";
+import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities/types";
 import type { PurchaseSource, PackageAllocationMap } from "../../../domain/entities/Credits";
 
 /**

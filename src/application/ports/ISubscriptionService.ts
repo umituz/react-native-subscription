@@ -7,11 +7,6 @@ import type { SubscriptionStatus } from '../../domain/entities/SubscriptionStatu
 
 export interface ISubscriptionService {
     /**
-     * Get current subscription status
-     */
-    getStatus(userId: string): Promise<SubscriptionStatus | null>;
-
-    /**
      * Activate a subscription
      */
     activateSubscription(

@@ -8,7 +8,7 @@ import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner } 
 import { Image } from "expo-image";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
-import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "../entities";
+import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "../entities/types";
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";

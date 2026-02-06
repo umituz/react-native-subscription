@@ -4,7 +4,7 @@
  */
 
 // Entities
-export * from "./entities";
+export * from "./entities/types";
 
 // Components
 export * from "./components";
