@@ -15,8 +15,6 @@ import {
     type RenewalState,
 } from "../utils/RenewalDetector";
 
-declare const __DEV__: boolean;
-
 export class CustomerInfoListenerManager {
     private listener: CustomerInfoUpdateListener | null = null;
     private currentUserId: string | null = null;

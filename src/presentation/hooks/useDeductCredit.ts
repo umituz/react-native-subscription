@@ -11,8 +11,6 @@ import { creditsQueryKeys } from "./useCredits";
 
 import { timezoneService } from "@umituz/react-native-design-system";
 
-declare const __DEV__: boolean;
-
 export interface UseDeductCreditParams {
   userId: string | undefined;
   onCreditsExhausted?: () => void;

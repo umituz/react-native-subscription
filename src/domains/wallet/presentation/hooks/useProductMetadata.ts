@@ -14,8 +14,6 @@ import type {
 } from "../../domain/types/wallet.types";
 import { ProductMetadataService } from "../../infrastructure/services/ProductMetadataService";
 
-declare const __DEV__: boolean;
-
 const CACHE_CONFIG = {
   staleTime: 5 * 60 * 1000, // 5 minutes
   gcTime: 30 * 60 * 1000, // 30 minutes

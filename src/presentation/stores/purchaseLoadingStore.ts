@@ -6,8 +6,6 @@
 
 import { create } from "zustand";
 
-declare const __DEV__: boolean;
-
 export interface PurchaseLoadingState {
   /** Whether a purchase is in progress */
   isPurchasing: boolean;

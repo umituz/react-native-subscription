@@ -1,8 +1,6 @@
 import type { InitModule } from '@umituz/react-native-design-system';
 import { initializeSubscription, type SubscriptionInitConfig } from '../infrastructure/services/SubscriptionInitializer';
 
-declare const __DEV__: boolean;
-
 export interface SubscriptionInitModuleConfig extends Omit<SubscriptionInitConfig, 'apiKey'> {
   getApiKey: () => string | undefined;
   critical?: boolean;
@@ -29,7 +27,7 @@ export function createSubscriptionInitModule(config: SubscriptionInitModuleConfi
         return true;
       } catch (error) {
         if (__DEV__) console.error('[SubscriptionInit] Error:', error);
-        return true;
+        return false;
       }
     },
   };

@@ -1,7 +1,6 @@
 /**
  * Credits Repository
  */
-declare const __DEV__: boolean;
 
 import { doc, getDoc, runTransaction, serverTimestamp, type Firestore, type Transaction } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
@@ -76,10 +75,13 @@ export class CreditsRepository extends BaseRepository {
         periodType: revenueCatData?.periodType,
       };
 
-      const res = await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId, metadata);
+      await initializeCreditsTransaction(db, this.getRef(db, userId), cfg, purchaseId, metadata);
+      // Re-fetch from Firestore to get the actual stored data with all fields
+      const snap = await getDoc(this.getRef(db, userId));
+      const fullData = snap.exists() ? snap.data() as UserCreditsDocumentRead : undefined;
       return {
         success: true,
-        data: CreditsMapper.toEntity({ ...res, purchasedAt: undefined, lastUpdatedAt: undefined })
+        data: fullData ? CreditsMapper.toEntity(fullData) : undefined,
       };
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);

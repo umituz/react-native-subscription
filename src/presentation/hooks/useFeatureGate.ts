@@ -7,8 +7,6 @@
 
 import { useCallback, useRef, useEffect } from "react";
 
-declare const __DEV__: boolean;
-
 export interface UseFeatureGateParams {
   readonly isAuthenticated: boolean;
   readonly onShowAuthModal: (pendingCallback: () => void | Promise<void>) => void;

@@ -17,8 +17,6 @@ import type {
 } from "../../domain/types/transaction.types";
 import { TransactionRepository } from "../../infrastructure/repositories/TransactionRepository";
 
-declare const __DEV__: boolean;
-
 export const transactionQueryKeys = {
   all: ["transactions"] as const,
   user: (userId: string) => ["transactions", userId] as const,

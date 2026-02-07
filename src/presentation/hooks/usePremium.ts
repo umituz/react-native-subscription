@@ -17,8 +17,6 @@ import {
 } from '../../revenuecat/presentation/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
 
-declare const __DEV__: boolean;
-
 export interface UsePremiumResult {
   isPremium: boolean;
   isLoading: boolean;

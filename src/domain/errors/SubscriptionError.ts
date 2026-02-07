@@ -10,6 +10,7 @@ export class SubscriptionError extends Error {
         super(message);
         this.name = 'SubscriptionError';
         this.code = code;
+        Object.setPrototypeOf(this, SubscriptionError.prototype);
     }
 
     static notFound(message: string = 'Subscription not found'): SubscriptionError {
@@ -40,6 +41,7 @@ export class SubscriptionRepositoryError extends Error {
         super(message);
         this.name = 'SubscriptionRepositoryError';
         this.code = code;
+        Object.setPrototypeOf(this, SubscriptionRepositoryError.prototype);
     }
 }
 
@@ -50,5 +52,6 @@ export class SubscriptionValidationError extends Error {
         super(message);
         this.name = 'SubscriptionValidationError';
         this.code = code;
+        Object.setPrototypeOf(this, SubscriptionValidationError.prototype);
     }
 }

@@ -78,7 +78,7 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                                 </AtomicText>
 
                                 {/* Credits info */}
-                                {creditAmount && creditsLabel && (
+                                {creditAmount != null && creditAmount > 0 && creditsLabel && (
                                     <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>
                                         {creditAmount} {creditsLabel}
                                     </AtomicText>

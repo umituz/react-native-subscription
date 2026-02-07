@@ -41,11 +41,15 @@ export function useAuthSubscriptionSync(
         return;
       }
 
-      if (previousUserId && previousUserId !== userId) {
-        await initialize(userId);
-      } else if (!isInitializedRef.current) {
-        await initialize(userId);
-        isInitializedRef.current = true;
+      try {
+        if (previousUserId && previousUserId !== userId) {
+          await initialize(userId);
+        } else if (!isInitializedRef.current) {
+          await initialize(userId);
+          isInitializedRef.current = true;
+        }
+      } catch {
+        // Prevent unhandled promise rejection from async auth callback
       }
 
       previousUserIdRef.current = userId;

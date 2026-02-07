@@ -15,8 +15,6 @@ import {
   isCreditsRepositoryConfigured,
 } from "../../infrastructure/repositories/CreditsRepositoryProvider";
 
-declare const __DEV__: boolean;
-
 export const creditsQueryKeys = {
   all: ["credits"] as const,
   user: (userId: string) => ["credits", userId] as const,

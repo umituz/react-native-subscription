@@ -2,7 +2,7 @@
  * Paywall Modal
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { View, ScrollView, TouchableOpacity, Linking, type ImageSourcePropType } from "react-native";
 import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system";
 import { Image } from "expo-image";
@@ -13,8 +13,6 @@ import { paywallModalStyles as styles } from "./PaywallModal.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";
 import { usePurchaseLoadingStore, selectIsPurchasing } from "../../../presentation/stores";
-
-declare const __DEV__: boolean;
 
 /** Trial eligibility info per product */
 export interface TrialEligibilityInfo {
@@ -55,6 +53,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   // Global purchase loading state (for auto-execution after auth)
   const isGlobalPurchasing = usePurchaseLoadingStore(selectIsPurchasing);
   const { startPurchase, endPurchase } = usePurchaseLoadingStore();
+
+  // Reset selected plan when packages change
+  useEffect(() => {
+    setSelectedPlanId(null);
+  }, [packages]);
 
   // Combined processing state
   const isProcessing = isLocalProcessing || isGlobalPurchasing;

@@ -3,8 +3,6 @@ import type { InitializeResult } from "../../application/ports/IRevenueCatServic
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
 
-declare const __DEV__: boolean;
-
 export interface InitializerDeps {
   config: RevenueCatConfig;
   isInitialized: () => boolean;
@@ -33,8 +31,8 @@ function configureLogHandler(): void {
 }
 
 function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: PurchasesOfferings): InitializeResult {
-  const hasPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
-  return { success: true, offering: offerings.current, hasPremium };
+  const isPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
+  return { success: true, offering: offerings.current, isPremium };
 }
 
 export async function initializeSDK(
@@ -50,7 +48,7 @@ export async function initializeSDK(
       ]);
       return buildSuccessResult(deps, customerInfo, offerings);
     } catch {
-      return { success: false, offering: null, hasPremium: false };
+      return { success: false, offering: null, isPremium: false };
     }
   }
 
@@ -69,20 +67,20 @@ export async function initializeSDK(
       const offerings = await Purchases.getOfferings();
       return buildSuccessResult(deps, customerInfo, offerings);
     } catch {
-      return { success: false, offering: null, hasPremium: false };
+      return { success: false, offering: null, isPremium: false };
     }
   }
 
   if (configurationInProgress) {
     await new Promise(resolve => setTimeout(resolve, 100));
     if (isPurchasesConfigured) return initializeSDK(deps, userId, apiKey);
-    return { success: false, offering: null, hasPremium: false };
+    return { success: false, offering: null, isPremium: false };
   }
 
   const key = apiKey || resolveApiKey(deps.config);
   if (!key) {
     if (__DEV__) console.log('[RevenueCat] No API key');
-    return { success: false, offering: null, hasPremium: false };
+    return { success: false, offering: null, isPremium: false };
   }
 
   configurationInProgress = true;
@@ -108,7 +106,7 @@ export async function initializeSDK(
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
     if (__DEV__) console.error('[RevenueCat] Init failed:', error);
-    return { success: false, offering: null, hasPremium: false };
+    return { success: false, offering: null, isPremium: false };
   } finally {
     configurationInProgress = false;
   }

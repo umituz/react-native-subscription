@@ -32,8 +32,8 @@ export const calculatePlanMetadata = (
   const totalCost = plan.credits * costPerCredit;
   const netRevenue = plan.price * (1 - commissionRate);
   const profit = netRevenue - totalCost;
-  const profitMargin = (profit / plan.price) * 100;
-  const pricePerCredit = plan.price / plan.credits;
+  const profitMargin = plan.price > 0 ? (profit / plan.price) * 100 : 0;
+  const pricePerCredit = plan.credits > 0 ? plan.price / plan.credits : 0;
 
   return {
     cost: totalCost,

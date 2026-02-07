@@ -6,7 +6,6 @@
  * - Relies on CustomerInfoUpdateListener for state updates
  * - No manual timeouts - uses auth state listener with cleanup
  */
-declare const __DEV__: boolean;
 
 import { Platform } from "react-native";
 import type { CustomerInfo } from "react-native-purchases";

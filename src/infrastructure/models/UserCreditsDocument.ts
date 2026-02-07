@@ -1,22 +1,12 @@
+import type { PurchaseSource, PurchaseType } from "../../domain/entities/Credits";
+import type { SubscriptionStatusType, PeriodType } from "../../domain/entities/SubscriptionStatus";
+
+export type { PurchaseSource, PurchaseType } from "../../domain/entities/Credits";
+export type { SubscriptionStatusType, PeriodType } from "../../domain/entities/SubscriptionStatus";
+
 export interface FirestoreTimestamp {
     toDate: () => Date;
 }
-
-export type PurchaseSource =
-  | "onboarding"
-  | "settings"
-  | "upgrade_prompt"
-  | "home_screen"
-  | "feature_gate"
-  | "credits_exhausted"
-  | "renewal";
-
-export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
-
-export type SubscriptionDocStatus = "active" | "trial" | "trial_canceled" | "expired" | "canceled" | "free";
-
-/** RevenueCat period types */
-export type PeriodType = "NORMAL" | "INTRO" | "TRIAL";
 
 export interface PurchaseMetadata {
   productId: string;
@@ -33,7 +23,7 @@ export interface PurchaseMetadata {
 export interface UserCreditsDocumentRead {
     // Core subscription status
     isPremium?: boolean;
-    status?: SubscriptionDocStatus;
+    status?: SubscriptionStatusType;
 
     // Dates (all from RevenueCat)
     purchasedAt?: FirestoreTimestamp;

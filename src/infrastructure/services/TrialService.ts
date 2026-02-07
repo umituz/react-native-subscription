@@ -1,7 +1,6 @@
 /**
  * Trial Service - Device-based trial tracking to prevent abuse
  */
-declare const __DEV__: boolean;
 
 import { doc, getDoc, setDoc, serverTimestamp, arrayUnion } from "firebase/firestore";
 import { getFirestore } from "@umituz/react-native-firebase";

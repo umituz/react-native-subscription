@@ -4,8 +4,6 @@
  * Coordinates UserIdProvider, InitializationCache, and PackageHandler
  */
 
-declare const __DEV__: boolean;
-
 import type { PurchasesPackage } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";

@@ -14,8 +14,6 @@ import { usePremium } from "./usePremium";
 import { SubscriptionManager } from "../../revenuecat";
 import { usePurchaseLoadingStore } from "../stores";
 
-declare const __DEV__: boolean;
-
 export interface UseSavedPurchaseAutoExecutionParams {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
@@ -118,15 +116,17 @@ export const useSavedPurchaseAutoExecution = (
 
           if (isReady) {
             const pkg = savedPurchase.pkg;
-            clearSavedPurchase();
 
             startPurchaseRef.current(pkg.product.identifier, "auto-execution");
 
             try {
               const success = await purchasePackageRef.current(pkg);
 
-              if (success && onSuccessRef.current) {
-                onSuccessRef.current();
+              if (success) {
+                clearSavedPurchase();
+                if (onSuccessRef.current) {
+                  onSuccessRef.current();
+                }
               }
             } catch (error) {
               if (onErrorRef.current && error instanceof Error) {

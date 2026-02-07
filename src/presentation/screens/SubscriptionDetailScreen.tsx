@@ -81,9 +81,9 @@ export const SubscriptionDetailScreen: React.FC<
           />
         )}
 
-        {showCredits && (
+        {showCredits && config.credits && (
           <CreditsList
-            credits={config.credits!}
+            credits={config.credits}
             title={
               config.translations.usageTitle || config.translations.creditsTitle
             }
@@ -92,11 +92,11 @@ export const SubscriptionDetailScreen: React.FC<
           />
         )}
 
-        {showUpgradePrompt && (
+        {showUpgradePrompt && config.upgradePrompt && (
           <UpgradePrompt
-            title={config.upgradePrompt!.title}
-            subtitle={config.upgradePrompt!.subtitle}
-            benefits={config.upgradePrompt!.benefits}
+            title={config.upgradePrompt.title}
+            subtitle={config.upgradePrompt.subtitle}
+            benefits={config.upgradePrompt.benefits}
             upgradeButtonLabel={config.translations.upgradeButton}
             onUpgrade={config.onUpgrade}
           />

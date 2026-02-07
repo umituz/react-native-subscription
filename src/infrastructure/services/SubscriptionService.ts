@@ -16,6 +16,7 @@ import type { SubscriptionConfig } from "../../domain/value-objects/Subscription
 import {
   activateSubscription,
   deactivateSubscription,
+  safeHandleError,
   type ActivationHandlerConfig,
 } from "./ActivationHandler";
 
@@ -108,14 +109,7 @@ export class SubscriptionService implements ISubscriptionService {
   }
 
   private async handleError(error: unknown, context: string): Promise<void> {
-    if (!this.handlerConfig.onError) return;
-
-    try {
-      const err = error instanceof Error ? error : new Error("Unknown error");
-      await this.handlerConfig.onError(err, `SubscriptionService.${context}`);
-    } catch {
-      // Ignore callback errors
-    }
+    await safeHandleError(this.handlerConfig.onError, error, `SubscriptionService.${context}`);
   }
 }
 

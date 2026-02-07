@@ -20,6 +20,14 @@ export function formatPrice(price: number, currencyCode: string): string {
   }
 }
 
+import { detectPackageType } from './packageTypeDetector';
+
+const PERIOD_SUFFIX_MAP: Record<string, string> = {
+  weekly: '/week',
+  monthly: '/month',
+  yearly: '/year',
+};
+
 /**
  * Extract billing period suffix from package identifier
  * Apple App Store Guideline 3.1.2 Compliance:
@@ -30,21 +38,8 @@ export function formatPrice(price: number, currencyCode: string): string {
  * @returns Billing period suffix (e.g., "/week", "/month", "/year") or empty string
  */
 export function getBillingPeriodSuffix(identifier: string): string {
-  const lowerIdentifier = identifier.toLowerCase();
-
-  if (lowerIdentifier.includes('weekly') || lowerIdentifier.includes('week')) {
-    return '/week';
-  }
-
-  if (lowerIdentifier.includes('monthly') || lowerIdentifier.includes('month')) {
-    return '/month';
-  }
-
-  if (lowerIdentifier.includes('annual') || lowerIdentifier.includes('year') || lowerIdentifier.includes('yearly')) {
-    return '/year';
-  }
-
-  return '';
+  const packageType = detectPackageType(identifier);
+  return PERIOD_SUFFIX_MAP[packageType] ?? '';
 }
 
 /**

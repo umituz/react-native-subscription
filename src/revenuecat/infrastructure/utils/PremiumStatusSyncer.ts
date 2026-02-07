@@ -8,8 +8,6 @@ import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConf
 import type { PurchaseSource } from "../../../domain/entities/Credits";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 
-declare const __DEV__: boolean;
-
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
     userId: string,

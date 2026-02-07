@@ -4,8 +4,6 @@
  * All logs are dev-only and automatically stripped in production.
  */
 
-declare const __DEV__: boolean;
-
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogContext {

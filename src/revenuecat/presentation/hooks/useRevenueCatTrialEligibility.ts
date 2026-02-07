@@ -11,8 +11,6 @@ import Purchases, {
 } from "react-native-purchases";
 import { getRevenueCatService } from "../../infrastructure/services/RevenueCatService";
 
-declare const __DEV__: boolean;
-
 /** Trial eligibility info for a single product */
 export interface ProductTrialEligibility {
   /** Product identifier */

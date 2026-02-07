@@ -74,7 +74,7 @@ export async function initializeCreditsTransaction(
         const allocation = packageType && packageType !== "unknown"
           ? getCreditAllocation(packageType, config.packageAllocations)
           : null;
-        const creditLimit = allocation || config.creditLimit;
+        const creditLimit = allocation ?? config.creditLimit;
 
         const platform = Platform.OS as "ios" | "android";
         const appVersion = Constants.expoConfig?.version;
@@ -96,7 +96,7 @@ export async function initializeCreditsTransaction(
             type: purchaseType,
             platform,
             appVersion,
-            timestamp: Date.now() as unknown as PurchaseMetadata["timestamp"],
+            timestamp: Timestamp.fromDate(new Date()) as unknown as PurchaseMetadata["timestamp"],
           } : undefined;
 
         const purchaseHistory = purchaseMetadata
@@ -107,7 +107,9 @@ export async function initializeCreditsTransaction(
         const willRenew = metadata?.willRenew;
         const periodType = metadata?.periodType;
 
-        const status = resolveSubscriptionStatus({ isPremium, willRenew, isExpired: !isPremium, periodType });
+        const expirationDateStr = metadata?.expirationDate;
+        const isExpired = expirationDateStr ? new Date(expirationDateStr).getTime() < Date.now() : false;
+        const status = resolveSubscriptionStatus({ isPremium, willRenew, isExpired, periodType });
 
         // Determine if this is a status sync (not a new purchase or renewal)
         // Status sync should preserve existing credits, only update metadata

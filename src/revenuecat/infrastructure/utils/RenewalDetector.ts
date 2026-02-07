@@ -82,7 +82,15 @@ export function detectRenewal(
     };
   }
 
-  const newExpiration = new Date(newExpirationDate ?? 0);
+  if (!newExpirationDate) {
+    // Lifetime subscription (no expiration) - not a renewal
+    return {
+      ...baseResult,
+      productId,
+      newExpirationDate,
+    };
+  }
+  const newExpiration = new Date(newExpirationDate);
   const previousExpiration = new Date(state.previousExpirationDate);
   const productChanged = productId !== state.previousProductId;
   const expirationExtended = newExpiration > previousExpiration;

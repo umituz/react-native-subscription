@@ -16,8 +16,6 @@ import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionM
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
 
-declare const __DEV__: boolean;
-
 /** Purchase mutation result - simplified for presentation layer */
 export interface PurchaseMutationResult {
   success: boolean;

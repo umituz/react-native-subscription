@@ -57,10 +57,12 @@ export class RevenueCatService implements IRevenueCatService {
 
     async initialize(userId: string, apiKey?: string): Promise<InitializeResult> {
         if (this.isInitialized() && this.getCurrentUserId() === userId) {
+            const customerInfo = await Purchases.getCustomerInfo();
+            const isPremium = !!customerInfo.entitlements.active[this.stateManager.getConfig().entitlementIdentifier];
             return {
                 success: true,
                 offering: await this.fetchOfferings(),
-                hasPremium: false,
+                isPremium,
             };
         }
 

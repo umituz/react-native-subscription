@@ -34,19 +34,23 @@ export function usePaywallFeedbackSubmit(
         });
       }
 
-      const result = await submitPaywallFeedback(
-        user?.uid ?? null,
-        user?.email ?? null,
-        reason
-      );
+      try {
+        const result = await submitPaywallFeedback(
+          user?.uid ?? null,
+          user?.email ?? null,
+          reason
+        );
 
-      if (result.success) {
-        onSuccess?.();
-      } else if (result.error) {
-        onError?.(result.error);
+        if (result.success) {
+          onSuccess?.();
+        } else if (result.error) {
+          onError?.(result.error);
+        }
+      } catch (err) {
+        onError?.(err instanceof Error ? err : new Error("Feedback submission failed"));
+      } finally {
+        onComplete?.();
       }
-
-      onComplete?.();
     },
     [user, onSuccess, onError, onComplete]
   );
@@ -84,19 +88,24 @@ export function useSettingsFeedbackSubmit(
         });
       }
 
-      const result = await submitSettingsFeedback(
-        user?.uid ?? null,
-        user?.email ?? null,
-        data
-      );
+      try {
+        const result = await submitSettingsFeedback(
+          user?.uid ?? null,
+          user?.email ?? null,
+          data
+        );
 
-      if (result.success) {
-        onSuccess?.();
-      } else if (result.error) {
-        onError?.(result.error);
+        if (result.success) {
+          onSuccess?.();
+        } else if (result.error) {
+          onError?.(result.error);
+        }
+
+        return result;
+      } catch (err) {
+        onError?.(err instanceof Error ? err : new Error("Feedback submission failed"));
+        return { success: false, error: err instanceof Error ? err : new Error("Feedback submission failed") };
       }
-
-      return result;
     },
     [user, onSuccess, onError]
   );

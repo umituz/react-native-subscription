@@ -5,13 +5,14 @@
  */
 
 import type { UserTierInfo } from './types';
+import { isGuest } from './authUtils';
 
 export function getUserTierInfo(
   isGuestFlag: boolean,
   userId: string | null,
   isPremium: boolean,
 ): UserTierInfo {
-  if (isGuestFlag || userId === null) {
+  if (isGuest(isGuestFlag, userId)) {
     return {
       tier: 'guest',
       isPremium: false,
@@ -35,6 +36,6 @@ export function checkPremiumAccess(
   userId: string | null,
   isPremium: boolean,
 ): boolean {
-  if (isGuestFlag || userId === null) return false;
+  if (isGuest(isGuestFlag, userId)) return false;
   return isPremium;
 }

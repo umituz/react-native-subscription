@@ -11,7 +11,7 @@ export class TransactionMapper {
     const data = docSnap.data();
     return {
       id: docSnap.id,
-      userId: data.userId || defaultUserId,
+      userId: data.userId ?? defaultUserId,
       change: data.change,
       reason: data.reason,
       feature: data.feature,
@@ -19,7 +19,7 @@ export class TransactionMapper {
       packageId: data.packageId,
       subscriptionPlan: data.subscriptionPlan,
       description: data.description,
-      createdAt: data.createdAt?.toMillis?.() || Date.now(),
+      createdAt: data.createdAt?.toMillis?.() ?? Date.now(),
     };
   }
 

@@ -4,8 +4,6 @@ import { useRestorePurchase } from "../../../revenuecat/presentation/hooks/useRe
 import { useAuthAwarePurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
 import type { PurchaseSource } from "../../../domain/entities/Credits";
 
-declare const __DEV__: boolean;
-
 interface UsePaywallActionsProps {
   source?: PurchaseSource;
   onPurchaseSuccess?: () => void;

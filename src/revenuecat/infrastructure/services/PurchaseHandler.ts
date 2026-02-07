@@ -6,8 +6,6 @@ import { isUserCancelledError, getErrorMessage } from "../../domain/types/Revenu
 import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
 
-declare const __DEV__: boolean;
-
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
   isInitialized: () => boolean;

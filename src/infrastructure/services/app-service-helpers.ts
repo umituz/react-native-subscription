@@ -17,8 +17,6 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 
-declare const __DEV__: boolean;
-
 export interface CreditServiceConfig {
   entitlementId: string;
 }

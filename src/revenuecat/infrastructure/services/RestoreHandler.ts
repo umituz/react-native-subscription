@@ -22,7 +22,7 @@ export async function handleRestore(deps: RestoreHandlerDeps, userId: string): P
     }
     await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
 
-    return { success: isPremium, isPremium, customerInfo };
+    return { success: true, isPremium, customerInfo };
   } catch (error) {
     throw new RevenueCatRestoreError(getErrorMessage(error, "Restore failed"));
   }

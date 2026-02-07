@@ -13,8 +13,6 @@ import type {
   ProductType,
 } from "../../domain/types/wallet.types";
 
-declare const __DEV__: boolean;
-
 interface CacheEntry {
   data: ProductMetadata[];
   timestamp: number;

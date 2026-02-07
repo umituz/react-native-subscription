@@ -8,8 +8,6 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
 import type { PurchaseSource } from "../../domain/entities/Credits";
 
-declare const __DEV__: boolean;
-
 export interface PurchaseAuthProvider {
   isAuthenticated: () => boolean;
   showAuthModal: () => void;

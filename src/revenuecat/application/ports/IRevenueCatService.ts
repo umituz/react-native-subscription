@@ -8,7 +8,7 @@ import type { PurchasesPackage, PurchasesOffering, CustomerInfo } from "react-na
 export interface InitializeResult {
   success: boolean;
   offering: PurchasesOffering | null;
-  hasPremium: boolean;
+  isPremium: boolean;
 }
 
 export interface PurchaseResult {
