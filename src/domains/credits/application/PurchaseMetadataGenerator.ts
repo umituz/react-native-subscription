@@ -4,8 +4,8 @@ import type {
   PurchaseMetadata,
   UserCreditsDocumentRead,
   PurchaseSource
-} from "../models/UserCreditsDocument";
-import { detectPackageType } from "../../utils/packageTypeDetector";
+} from "../core/UserCreditsDocument";
+import { detectPackageType } from "../../../utils/packageTypeDetector";
 
 export interface MetadataGeneratorConfig {
   productId?: string;
