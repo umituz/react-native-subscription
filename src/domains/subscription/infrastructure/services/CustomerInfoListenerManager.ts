@@ -7,7 +7,7 @@ import Purchases, {
     type CustomerInfo,
     type CustomerInfoUpdateListener,
 } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { syncPremiumStatus } from "../utils/PremiumStatusSyncer";
 import {
     detectRenewal,

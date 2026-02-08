@@ -10,7 +10,7 @@ import {
   useAuthStore,
   selectUserId,
 } from "@umituz/react-native-auth";
-import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
+import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 
 export const subscriptionStatusQueryKeys = {
   all: ["subscriptionStatus"] as const,

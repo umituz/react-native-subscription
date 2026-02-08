@@ -6,8 +6,8 @@
 
 import React, { useMemo, useEffect } from "react";
 import { usePaywallVisibility } from "../../../presentation/hooks/usePaywallVisibility";
-import { useSubscriptionPackages } from "../../../revenuecat/presentation/hooks/useSubscriptionPackages";
-import { useRevenueCatTrialEligibility } from "../../../revenuecat/presentation/hooks/useRevenueCatTrialEligibility";
+import { useSubscriptionPackages } from "../../subscription/infrastructure/hooks/useSubscriptionPackages";
+import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure/hooks/useRevenueCatTrialEligibility";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal, type TrialEligibilityInfo } from "./PaywallModal";
 import { usePaywallActions } from "../hooks/usePaywallActions";

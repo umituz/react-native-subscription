@@ -1,8 +1,8 @@
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
 import type { PurchaseResult } from "../../../../shared/application/ports/IRevenueCatService";
-import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../domain/errors/RevenueCatError";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import { isUserCancelledError, getErrorMessage } from "../../domain/types/RevenueCatTypes";
+import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../core/RevenueCatError";
+import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
+import { isUserCancelledError, getErrorMessage } from "../../core/RevenueCatTypes";
 import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
 

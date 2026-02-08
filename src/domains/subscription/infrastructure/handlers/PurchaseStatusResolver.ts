@@ -1,5 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
-import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
+import { getPremiumEntitlement } from "../../core/RevenueCatTypes";
 
 export interface PremiumStatus {
   isPremium: boolean;

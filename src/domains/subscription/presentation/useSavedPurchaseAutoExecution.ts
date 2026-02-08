@@ -11,7 +11,7 @@ import {
 } from "@umituz/react-native-auth";
 import { getSavedPurchase, clearSavedPurchase } from "./useAuthAwarePurchase";
 import { usePremium } from "./usePremium";
-import { SubscriptionManager } from "../../revenuecat";
+import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { usePurchaseLoadingStore } from "../stores";
 
 export interface UseSavedPurchaseAutoExecutionParams {
