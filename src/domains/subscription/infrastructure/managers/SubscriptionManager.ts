@@ -14,7 +14,7 @@ import { SubscriptionInternalState } from "./SubscriptionInternalState";
 export interface SubscriptionManagerConfig {
   config: RevenueCatConfig;
   apiKey: string;
-  getAnonymousUserId?: () => Promise<string>;
+  getAnonymousUserId: () => Promise<string>;
 }
 
 class SubscriptionManagerImpl {
@@ -25,93 +25,161 @@ class SubscriptionManagerImpl {
 
   configure(config: SubscriptionManagerConfig): void {
     this.managerConfig = config;
-    this.packageHandler = new PackageHandler(null, config.config.entitlementIdentifier);
-    if (config.getAnonymousUserId) this.state.userIdProvider.configure(config.getAnonymousUserId);
+    this.state.userIdProvider.configure(config.getAnonymousUserId);
+  }
+
+  private ensurePackageHandlerInitialized(): void {
+    if (this.packageHandler) {
+      return;
+    }
+
+    if (!this.serviceInstance) {
+      throw new Error("Service instance not available");
+    }
+
+    if (!this.managerConfig) {
+      throw new Error("Manager not configured");
+    }
+
+    this.packageHandler = new PackageHandler(
+      this.serviceInstance,
+      this.managerConfig.config.entitlementIdentifier
+    );
   }
 
   private ensureConfigured(): void {
-    if (!this.managerConfig || !this.packageHandler) throw new Error("SubscriptionManager not configured");
+    if (!this.managerConfig) {
+      throw new Error("SubscriptionManager not configured");
+    }
   }
 
-  async initialize(userId?: string): Promise<boolean> {
+  async initialize(userId: string): Promise<boolean> {
     this.ensureConfigured();
-    const effectiveUserId = userId || (await this.state.userIdProvider.getOrCreateAnonymousUserId());
-    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(effectiveUserId);
 
-    if (!shouldInit && existingPromise) return existingPromise;
+    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(userId);
+
+    if (!shouldInit && existingPromise) {
+      return existingPromise;
+    }
 
     const promise = (async () => {
-        try {
-          await initializeRevenueCatService(this.managerConfig!.config);
-          this.serviceInstance = getRevenueCatService();
-          if (!this.serviceInstance) {
-            if (__DEV__) {
-              console.error('[SubscriptionManager] Service instance not available after initialization');
-            }
-            return false;
-          }
-          this.packageHandler!.setService(this.serviceInstance);
-          const result = await this.serviceInstance.initialize(effectiveUserId);
-          return result.success;
-        } catch (error) {
-          if (__DEV__) {
-            console.error('[SubscriptionManager] Initialization failed:', error);
-          }
-          return false;
+        await initializeRevenueCatService(this.managerConfig!.config);
+        this.serviceInstance = getRevenueCatService();
+
+        if (!this.serviceInstance) {
+          throw new Error("Service instance not available after initialization");
         }
+
+        this.ensurePackageHandlerInitialized();
+        const result = await this.serviceInstance.initialize(userId);
+        return result.success;
     })();
 
-    this.state.initCache.setPromise(promise, effectiveUserId);
+    this.state.initCache.setPromise(promise, userId);
     return promise;
   }
 
   isInitializedForUser(userId: string): boolean {
-    return this.serviceInstance?.isInitialized() === true && this.state.initCache.getCurrentUserId() === userId;
+    if (!this.serviceInstance) {
+      return false;
+    }
+
+    if (!this.serviceInstance.isInitialized()) {
+      return false;
+    }
+
+    return this.state.initCache.getCurrentUserId() === userId;
   }
 
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
+
     if (!this.serviceInstance) {
       this.serviceInstance = getRevenueCatService();
-      this.packageHandler!.setService(this.serviceInstance);
     }
+
+    if (!this.serviceInstance) {
+      throw new Error("Service instance not available");
+    }
+
+    this.ensurePackageHandlerInitialized();
     return this.packageHandler!.fetchPackages();
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
     this.ensureConfigured();
+
     const userId = this.state.initCache.getCurrentUserId();
-    if (!userId) return false;
+    if (!userId) {
+      throw new Error("No current user found");
+    }
+
+    this.ensurePackageHandlerInitialized();
     return this.packageHandler!.purchase(pkg, userId);
   }
 
   async restore(): Promise<RestoreResultInfo> {
     this.ensureConfigured();
+
     const userId = this.state.initCache.getCurrentUserId();
-    if (!userId) return { success: false, productId: null };
+    if (!userId) {
+      throw new Error("No current user found");
+    }
+
+    this.ensurePackageHandlerInitialized();
     return this.packageHandler!.restore(userId);
   }
 
   async checkPremiumStatus(): Promise<PremiumStatus> {
     this.ensureConfigured();
-    const userId = this.state.initCache.getCurrentUserId();
-    if (!userId) return { isPremium: false, expirationDate: null };
 
-    const customerInfo = await this.serviceInstance?.getCustomerInfo();
-    if (customerInfo) return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
-    return { isPremium: false, expirationDate: null };
+    const userId = this.state.initCache.getCurrentUserId();
+    if (!userId) {
+      throw new Error("No current user found");
+    }
+
+    if (!this.serviceInstance) {
+      throw new Error("Service instance not available");
+    }
+
+    const customerInfo = await this.serviceInstance.getCustomerInfo();
+
+    if (!customerInfo) {
+      throw new Error("Customer info not available");
+    }
+
+    this.ensurePackageHandlerInitialized();
+    return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
   }
 
   async reset(): Promise<void> {
-    if (this.serviceInstance) await this.serviceInstance.reset();
+    if (this.serviceInstance) {
+      await this.serviceInstance.reset();
+    }
+
     this.state.reset();
     this.serviceInstance = null;
   }
 
-  // Helper status checks
-  isConfigured = () => !!this.managerConfig;
-  isInitialized = () => this.serviceInstance?.isInitialized() ?? false;
-  getEntitlementId = () => this.managerConfig?.config.entitlementIdentifier || null;
+  isConfigured(): boolean {
+    return this.managerConfig !== null;
+  }
+
+  isInitialized(): boolean {
+    if (!this.serviceInstance) {
+      return false;
+    }
+
+    return this.serviceInstance.isInitialized();
+  }
+
+  getEntitlementId(): string {
+    if (!this.managerConfig) {
+      throw new Error("SubscriptionManager not configured");
+    }
+
+    return this.managerConfig.config.entitlementIdentifier;
+  }
 }
 
 export const SubscriptionManager = new SubscriptionManagerImpl();

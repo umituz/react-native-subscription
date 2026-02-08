@@ -18,16 +18,47 @@ export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } fr
 
 export const initializeSubscription = async (config: SubscriptionInitConfig): Promise<void> => {
   const {
-    apiKey, apiKeyIos, apiKeyAndroid, entitlementId, credits,
-    getAnonymousUserId, getFirebaseAuth, showAuthModal,
-    onCreditsUpdated, creditPackages,
+    apiKey,
+    apiKeyIos,
+    apiKeyAndroid,
+    entitlementId,
+    credits,
+    getAnonymousUserId,
+    getFirebaseAuth,
+    showAuthModal,
+    onCreditsUpdated,
+    creditPackages,
   } = config;
 
-  const key = Platform.OS === 'ios' ? (apiKeyIos || apiKey || '') : (apiKeyAndroid || apiKey || '');
-  if (!key) throw new Error('API key required');
+  const key = Platform.OS === 'ios'
+    ? (apiKeyIos || apiKey)
+    : (apiKeyAndroid || apiKey);
+
+  if (!key) {
+    throw new Error('API key required');
+  }
+
+  if (!creditPackages) {
+    throw new Error('creditPackages is required');
+  }
+
+  if (!creditPackages.identifierPattern) {
+    throw new Error('creditPackages.identifierPattern is required');
+  }
+
+  if (!creditPackages.amounts) {
+    throw new Error('creditPackages.amounts is required');
+  }
+
+  if (!getAnonymousUserId) {
+    throw new Error('getAnonymousUserId is required');
+  }
 
   // 1. Configure Repository
-  configureCreditsRepository({ ...credits, creditPackageAmounts: creditPackages?.amounts });
+  configureCreditsRepository({
+    ...credits,
+    creditPackageAmounts: creditPackages.amounts
+  });
 
   // 2. Setup Sync Service
   const syncService = new SubscriptionSyncService(entitlementId);
@@ -37,7 +68,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     config: {
       apiKey: key,
       entitlementIdentifier: entitlementId,
-      consumableProductIdentifiers: [creditPackages?.identifierPattern || 'credit'],
+      consumableProductIdentifiers: [creditPackages.identifierPattern],
       onPurchaseCompleted: (u: string, p: string, c: any, s: any) => syncService.handlePurchase(u, p, c, s),
       onRenewalDetected: (u: string, p: string, expires: string, c: any) => syncService.handleRenewal(u, p, expires, c),
       onPremiumStatusChanged: (u: string, isP: boolean, pId: any, exp: any, willR: any, pt: any) => syncService.handlePremiumStatusChanged(u, isP, pId, exp, willR, pt),
@@ -50,28 +81,38 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   // 4. Configure Auth aware actions
   configureAuthProvider({
     isAuthenticated: () => {
-      const u = getFirebaseAuth()?.currentUser;
+      const auth = getFirebaseAuth();
+      if (!auth) {
+        throw new Error("Firebase auth is not available");
+      }
+
+      const u = auth.currentUser;
       return !!(u && !u.isAnonymous);
     },
     showAuthModal,
   });
 
-  const initializeInBackground = async (userId?: string) => {
-    try {
-      await SubscriptionManager.initialize(userId);
-      if (__DEV__) console.log('[SubscriptionInitializer] Background init complete');
-    } catch (error) {
-      if (__DEV__) console.log('[SubscriptionInitializer] Background init failed (non-critical):', error);
+  const initializeInBackground = async (userId: string): Promise<void> => {
+    await SubscriptionManager.initialize(userId);
+    if (__DEV__) {
+      console.log('[SubscriptionInitializer] Background init complete');
     }
   };
 
   // 5. Start Background Init
-  const initialUserId = getCurrentUserId(getFirebaseAuth);
-  initializeInBackground(initialUserId);
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    throw new Error("Firebase auth is not available");
+  }
+
+  const initialUserId = getCurrentUserId(() => auth);
+  await initializeInBackground(initialUserId);
 
   // 6. Listen for Auth Changes
-  setupAuthStateListener(getFirebaseAuth, (newUserId) => {
-    if (__DEV__) console.log('[SubscriptionInitializer] Auth changed, re-init:', newUserId);
+  setupAuthStateListener(() => auth, (newUserId) => {
+    if (__DEV__) {
+      console.log('[SubscriptionInitializer] Auth changed, re-init:', newUserId);
+    }
     initializeInBackground(newUserId);
   });
 };

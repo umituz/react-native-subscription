@@ -1,17 +1,17 @@
-import type { 
-  PurchaseSource, 
-  PurchaseType, 
-  SubscriptionStatusType, 
+import type {
+  PurchaseSource,
+  PurchaseType,
+  SubscriptionStatusType,
   PeriodType,
   PackageType,
   Platform
 } from "../../subscription/core/SubscriptionConstants";
 
-export type { 
-  PurchaseSource, 
-  PurchaseType, 
-  SubscriptionStatusType, 
-  PeriodType 
+export type {
+  PurchaseSource,
+  PurchaseType,
+  SubscriptionStatusType,
+  PeriodType
 };
 
 export interface FirestoreTimestamp {
@@ -25,45 +25,45 @@ export interface PurchaseMetadata {
   source: PurchaseSource;
   type: PurchaseType;
   platform: Platform;
-  appVersion?: string;
+  appVersion: string;
   timestamp: FirestoreTimestamp;
 }
 
 /** Single Source of Truth for user subscription data */
 export interface UserCreditsDocumentRead {
     // Core subscription status
-    isPremium?: boolean;
-    status?: SubscriptionStatusType;
+    isPremium: boolean;
+    status: SubscriptionStatusType;
 
     // Dates (all from RevenueCat)
-    purchasedAt?: FirestoreTimestamp;
-    expirationDate?: FirestoreTimestamp;
-    lastUpdatedAt?: FirestoreTimestamp;
-    lastPurchaseAt?: FirestoreTimestamp;
+    purchasedAt: FirestoreTimestamp;
+    expirationDate: FirestoreTimestamp | null;
+    lastUpdatedAt: FirestoreTimestamp;
+    lastPurchaseAt: FirestoreTimestamp | null;
 
     // RevenueCat subscription details
-    willRenew?: boolean;
-    productId?: string;
-    packageType?: PackageType;
-    originalTransactionId?: string;
+    willRenew: boolean | null;
+    productId: string | null;
+    packageType: PackageType | null;
+    originalTransactionId: string | null;
 
     // Trial fields
-    periodType?: PeriodType;
-    isTrialing?: boolean;
-    trialStartDate?: FirestoreTimestamp;
-    trialEndDate?: FirestoreTimestamp;
-    trialCredits?: number;
-    convertedFromTrial?: boolean;
+    periodType: PeriodType | null;
+    isTrialing: boolean | null;
+    trialStartDate: FirestoreTimestamp | null;
+    trialEndDate: FirestoreTimestamp | null;
+    trialCredits: number | null;
+    convertedFromTrial: boolean | null;
 
     // Credits
     credits: number;
-    creditLimit?: number;
+    creditLimit: number;
 
     // Metadata
-    purchaseSource?: PurchaseSource;
-    purchaseType?: PurchaseType;
-    platform?: Platform;
-    appVersion?: string;
-    processedPurchases?: string[];
-    purchaseHistory?: PurchaseMetadata[];
+    purchaseSource: PurchaseSource | null;
+    purchaseType: PurchaseType | null;
+    platform: Platform;
+    appVersion: string | null;
+    processedPurchases: string[];
+    purchaseHistory: PurchaseMetadata[];
 }

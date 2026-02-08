@@ -15,48 +15,67 @@ export interface RestoreResultInfo {
 
 export class PackageHandler {
   constructor(
-    private service: IRevenueCatService | null,
+    private service: IRevenueCatService,
     private entitlementId: string
   ) { }
 
-  setService = (service: IRevenueCatService | null) => { this.service = service; };
+  setService(service: IRevenueCatService): void {
+    this.service = service;
+  }
 
   async fetchPackages(): Promise<PurchasesPackage[]> {
-    if (!this.service?.isInitialized()) return [];
-    try {
-      const offering = await this.service.fetchOfferings();
-      return offering?.availablePackages ?? [];
-    } catch (error) {
-      if (__DEV__) console.error('[PackageHandler] fetchOfferings failed:', error);
-      return [];
+    if (!this.service.isInitialized()) {
+      throw new Error("Service not initialized");
     }
+
+    const offering = await this.service.fetchOfferings();
+
+    if (!offering) {
+      throw new Error("No offerings available");
+    }
+
+    const packages = offering.availablePackages;
+    if (!packages) {
+      throw new Error("No packages available in offering");
+    }
+
+    return packages;
   }
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {
-    if (!this.service?.isInitialized()) return false;
-    try {
-      const result = await this.service.purchasePackage(pkg, userId);
-      return result.success;
-    } catch (error) {
-      if (__DEV__) console.error('[PackageHandler] Purchase failed:', error);
-      return false;
+    if (!this.service.isInitialized()) {
+      throw new Error("Service not initialized");
     }
+
+    const result = await this.service.purchasePackage(pkg, userId);
+    return result.success;
   }
 
   async restore(userId: string): Promise<RestoreResultInfo> {
-    if (!this.service?.isInitialized()) return { success: false, productId: null };
-    try {
-      const result = await this.service.restorePurchases(userId);
-      let productId: string | null = null;
-      if (result.success && result.customerInfo) {
-        const entitlement = getPremiumEntitlement(result.customerInfo, this.entitlementId);
-        if (entitlement) productId = entitlement.productIdentifier;
-      }
-      return { success: result.success, productId };
-    } catch (error) {
-      if (__DEV__) console.error('[PackageHandler] Restore failed:', error);
+    if (!this.service.isInitialized()) {
+      throw new Error("Service not initialized");
+    }
+
+    const result = await this.service.restorePurchases(userId);
+
+    if (!result.success) {
       return { success: false, productId: null };
     }
+
+    if (!result.customerInfo) {
+      return { success: true, productId: null };
+    }
+
+    const entitlement = getPremiumEntitlement(result.customerInfo, this.entitlementId);
+
+    if (!entitlement) {
+      return { success: true, productId: null };
+    }
+
+    return {
+      success: true,
+      productId: entitlement.productIdentifier,
+    };
   }
 
   checkPremiumStatusFromInfo(customerInfo: CustomerInfo): PremiumStatus {
