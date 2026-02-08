@@ -3,7 +3,7 @@
  * Optimized to use Design Patterns: Command, Observer, and Strategy.
  */
 
-import { doc, getDoc, serverTimestamp, updateDoc, type Firestore } from "firebase/firestore";
+import { doc, getDoc, type Firestore } from "firebase/firestore";
 import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
@@ -35,11 +35,11 @@ export class CreditsRepository extends BaseRepository {
 
     const snap = await getDoc(this.getRef(db, userId));
     if (!snap.exists()) {
-      return { success: true, data: undefined };
+      return { success: true, data: null, error: null };
     }
 
     const entity = CreditsMapper.toEntity(snap.data() as UserCreditsDocumentRead);
-    return { success: true, data: entity };
+    return { success: true, data: entity, error: null };
   }
 
   async initializeCredits(
@@ -75,7 +75,8 @@ export class CreditsRepository extends BaseRepository {
 
     return {
       success: true,
-      data: result.finalData ? CreditsMapper.toEntity(result.finalData) : undefined,
+      data: result.finalData ? CreditsMapper.toEntity(result.finalData) : null,
+      error: null,
     };
   }
 

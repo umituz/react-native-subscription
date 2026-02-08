@@ -13,38 +13,38 @@ export interface FirebaseAuthLike {
 }
 
 export interface CreditPackageConfig {
-  identifierPattern?: string;
-  amounts?: Record<string, number>;
+  identifierPattern: string;
+  amounts: Record<string, number>;
 }
 
 export interface SubscriptionInitConfig {
-  apiKey?: string;
-  apiKeyIos?: string;
-  apiKeyAndroid?: string;
+  apiKey: string;
+  apiKeyIos: string;
+  apiKeyAndroid: string;
   entitlementId: string;
   credits: CreditsConfig;
   getAnonymousUserId: () => Promise<string>;
   getFirebaseAuth: () => FirebaseAuthLike | null;
   showAuthModal: () => void;
-  onCreditsUpdated?: (userId: string) => void;
-  creditPackages?: CreditPackageConfig;
-  timeoutMs?: number;
-  authStateTimeoutMs?: number;
+  onCreditsUpdated: (userId: string) => void;
+  creditPackages: CreditPackageConfig;
+  timeoutMs: number;
+  authStateTimeoutMs: number;
 }
 
 export interface InitializeCreditsMetadata {
-  productId?: string;
-  source?: PurchaseSource;
-  type?: PurchaseType;
-  expirationDate?: string | null;
-  willRenew?: boolean;
-  originalTransactionId?: string;
-  isPremium?: boolean;
-  periodType?: PeriodType;
+  productId: string;
+  source: PurchaseSource;
+  type: PurchaseType;
+  expirationDate: string | null;
+  willRenew: boolean | null;
+  originalTransactionId: string | null;
+  isPremium: boolean;
+  periodType: PeriodType | null;
 }
 
 export interface InitializationResult {
-    credits: number;
-    alreadyProcessed?: boolean;
-    finalData?: UserCreditsDocumentRead;
+  credits: number;
+  alreadyProcessed: boolean;
+  finalData: UserCreditsDocumentRead | null;
 }

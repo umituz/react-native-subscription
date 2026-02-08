@@ -28,10 +28,6 @@ export async function initializeCreditsTransaction(
         throw new Error("Firestore instance is not available");
     }
 
-    if (!metadata.productId) {
-        throw new Error("productId is required in metadata");
-    }
-
     return runTransaction(db, async (transaction: Transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
         const now = serverTimestamp();
@@ -44,7 +40,11 @@ export async function initializeCreditsTransaction(
         }
 
         if (existingData.processedPurchases.includes(purchaseId)) {
-            return { credits: existingData.credits, alreadyProcessed: true };
+            return {
+                credits: existingData.credits,
+                alreadyProcessed: true,
+                finalData: existingData
+            };
         }
 
         const creditLimit = CreditLimitCalculator.calculate(metadata.productId, config);
@@ -69,15 +69,17 @@ export async function initializeCreditsTransaction(
         }, existingData);
 
         const isPremium = metadata.isPremium;
-        const isExpired = metadata.expirationDate
-            ? new Date(metadata.expirationDate).getTime() < Date.now()
-            : false;
+
+        let isExpired = false;
+        if (metadata.expirationDate) {
+            isExpired = new Date(metadata.expirationDate).getTime() < Date.now();
+        }
 
         const status = resolveSubscriptionStatus({
             isPremium,
-            willRenew: metadata.willRenew,
+            willRenew: metadata.willRenew ?? false,
             isExpired,
-            periodType: metadata.periodType,
+            periodType: metadata.periodType ?? undefined,
         });
 
         const isStatusSync = purchaseId.startsWith("status_sync_");
@@ -136,6 +138,10 @@ export async function initializeCreditsTransaction(
             ...creditsData,
         };
 
-        return { credits: newCredits, finalData };
+        return {
+            credits: newCredits,
+            alreadyProcessed: false,
+            finalData
+        };
     });
 }
