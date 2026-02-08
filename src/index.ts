@@ -68,7 +68,6 @@ export type {
   DeductCreditsResult,
 } from "./domains/credits/core/Credits";
 
-export { DEFAULT_CREDITS_CONFIG } from "./domains/credits/core/Credits";
 
 // Utils
 export * from "./utils";

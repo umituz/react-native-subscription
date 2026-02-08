@@ -14,7 +14,7 @@
  *   });
  */
 
-import type { CreditsRepository } from "../infrastructure/repositories/CreditsRepository";
+import type { CreditsRepository } from "../domains/credits/infrastructure/CreditsRepository";
 import { createCreditChecker } from "./creditChecker";
 
 export interface AICreditHelpersConfig {

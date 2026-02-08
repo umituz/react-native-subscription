@@ -5,7 +5,7 @@
  */
 
 import { useCallback, useSyncExternalStore } from "react";
-import type { PurchaseSource } from "../../domain/entities/Credits";
+import type { PurchaseSource } from "../../credits/core/Credits";
 
 type Listener = () => void;
 

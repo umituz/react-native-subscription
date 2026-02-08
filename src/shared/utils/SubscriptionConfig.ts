@@ -2,8 +2,8 @@
  * Subscription Config Value Object
  */
 
-import { ISubscriptionRepository } from "../../application/ports/ISubscriptionRepository";
-import { SubscriptionStatus } from "../entities/SubscriptionStatus";
+import { ISubscriptionRepository } from "../application/ports/ISubscriptionRepository";
+import { SubscriptionStatus } from "../../domains/subscription/core/SubscriptionStatus";
 
 export interface SubscriptionConfig {
     repository: ISubscriptionRepository;

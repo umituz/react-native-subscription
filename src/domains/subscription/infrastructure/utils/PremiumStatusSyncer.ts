@@ -4,9 +4,9 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
-import type { PurchaseSource } from "../../../domain/entities/Credits";
-import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
+import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
+import type { PurchaseSource } from "../../../credits/core/Credits";
+import { getPremiumEntitlement } from "../../core/RevenueCatTypes";
 
 export async function syncPremiumStatus(
     config: RevenueCatConfig,

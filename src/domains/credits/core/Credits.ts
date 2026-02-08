@@ -15,6 +15,15 @@ import type {
   PurchaseType 
 } from "./SubscriptionConstants";
 
+export type { 
+  SubscriptionStatusType, 
+  PeriodType, 
+  PackageType, 
+  Platform, 
+  PurchaseSource, 
+  PurchaseType 
+};
+
 export type CreditType = "text" | "image";
 
 /** Single Source of Truth for user subscription + credits data */
@@ -91,7 +100,3 @@ export interface DeductCreditsResult {
   };
 }
 
-export const DEFAULT_CREDITS_CONFIG: CreditsConfig = {
-  collectionName: "user_credits",
-  creditLimit: 0,
-};

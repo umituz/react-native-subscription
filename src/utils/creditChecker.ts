@@ -5,7 +5,7 @@
  * Generic - works with any generation type mapping.
  */
 
-import type { CreditsRepository } from "../infrastructure/repositories/CreditsRepository";
+import type { CreditsRepository } from "../domains/credits/infrastructure/CreditsRepository";
 
 export interface CreditCheckResult {
   success: boolean;

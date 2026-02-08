@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { useRestorePurchase } from "../../../revenuecat/presentation/hooks/useRestorePurchase";
 import { useAuthAwarePurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
-import type { PurchaseSource } from "../../../domain/entities/Credits";
+import type { PurchaseSource } from "../../credits/core/Credits";
 
 interface UsePaywallActionsProps {
   source?: PurchaseSource;

@@ -1,5 +1,5 @@
 import { detectPackageType, type SubscriptionPackageType } from "./packageTypeDetector";
-import type { PackageAllocationMap } from "../domain/entities/Credits";
+import type { PackageAllocationMap } from "../domains/credits/core/Credits";
 
 /**
  * Get credit allocation for a package type from provided allocations map

@@ -4,8 +4,8 @@
  */
 
 import { useMemo } from "react";
-import type { UserCredits } from "../../domain/entities/Credits";
-import { resolveSubscriptionStatus, type PeriodType, type SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
+import type { UserCredits } from "../../credits/core/Credits";
+import { resolveSubscriptionStatus, type PeriodType, type SubscriptionStatusType } from "../core/SubscriptionStatus";
 import type { SubscriptionSettingsTranslations } from "../types/SubscriptionSettingsTypes";
 
 export interface CreditsInfo {
