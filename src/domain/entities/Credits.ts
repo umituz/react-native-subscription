@@ -75,6 +75,10 @@ export interface CreditsConfig {
   creditPackageAmounts?: Record<string, number>;
   /** Credit allocations for different subscription types (weekly, monthly, yearly) */
   packageAllocations?: PackageAllocationMap;
+  /** Whether to enable free credits for non-premium users */
+  enableFreeCredits?: boolean;
+  /** Number of free credits given to non-premium users */
+  freeCredits?: number;
 }
 
 export interface CreditsResult<T = UserCredits> {

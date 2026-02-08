@@ -25,4 +25,6 @@ export interface SubscriptionInitConfig {
   showAuthModal: () => void;
   onCreditsUpdated?: (userId: string) => void;
   creditPackages?: CreditPackageConfig;
+  timeoutMs?: number;
+  authStateTimeoutMs?: number;
 }
