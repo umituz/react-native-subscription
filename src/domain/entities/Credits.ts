@@ -101,10 +101,5 @@ export interface DeductCreditsResult {
 
 export const DEFAULT_CREDITS_CONFIG: CreditsConfig = {
   collectionName: "user_credits",
-  creditLimit: 10,
-  packageAllocations: {
-    weekly: { credits: 10 },
-    monthly: { credits: 25 },
-    yearly: { credits: 200 },
-  },
+  creditLimit: 0,
 };
