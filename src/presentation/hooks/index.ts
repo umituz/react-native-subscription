@@ -6,6 +6,7 @@ export * from "./useDeductCredit";
 export * from "./useFeatureGate";
 export * from "./usePaywallVisibility";
 export * from "./usePremium";
+export * from "./usePremiumGate";
 export * from "./useSubscriptionSettingsConfig";
 export * from "./useSubscriptionStatus";
 export * from "./feedback/usePaywallFeedback";
