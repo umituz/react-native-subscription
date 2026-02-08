@@ -19,28 +19,12 @@ export const useInitializeSubscription = (userId: string | undefined) => {
         throw new Error("User not authenticated");
       }
 
-      if (__DEV__) {
-        console.log('[DEBUG useInitializeSubscription] Initializing:', { userId });
-      }
-
       return SubscriptionManager.initialize(userId);
     },
     onSuccess: () => {
       if (userId) {
         queryClient.invalidateQueries({
           queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
-        });
-
-        if (__DEV__) {
-          console.log('[DEBUG useInitializeSubscription] Success:', { userId });
-        }
-      }
-    },
-    onError: (error) => {
-      if (__DEV__) {
-        console.error('[DEBUG useInitializeSubscription] Error:', {
-          error,
-          userId: userId ?? "ANONYMOUS",
         });
       }
     },

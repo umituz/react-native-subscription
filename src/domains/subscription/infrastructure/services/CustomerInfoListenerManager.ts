@@ -58,14 +58,6 @@ export class CustomerInfoListenerManager {
 
             // Handle renewal (same product, extended expiration)
             if (renewalResult.isRenewal && config.onRenewalDetected) {
-                if (__DEV__) {
-                    console.log("[CustomerInfoListener] Renewal detected:", {
-                        userId: this.currentUserId,
-                        productId: renewalResult.productId,
-                        newExpiration: renewalResult.newExpirationDate,
-                    });
-                }
-
                 try {
                     await config.onRenewalDetected(
                         this.currentUserId,
@@ -82,16 +74,6 @@ export class CustomerInfoListenerManager {
 
             // Handle plan change (upgrade/downgrade)
             if (renewalResult.isPlanChange && config.onPlanChanged) {
-                if (__DEV__) {
-                    console.log("[CustomerInfoListener] Plan change detected:", {
-                        userId: this.currentUserId,
-                        previousProductId: renewalResult.previousProductId,
-                        newProductId: renewalResult.productId,
-                        isUpgrade: renewalResult.isUpgrade,
-                        isDowngrade: renewalResult.isDowngrade,
-                    });
-                }
-
                 try {
                     await config.onPlanChanged(
                         this.currentUserId,
@@ -133,9 +115,6 @@ export class CustomerInfoListenerManager {
     }
 
     destroy(): void {
-        if (__DEV__) {
-            console.log('[CustomerInfoListenerManager] Destroying listener manager');
-        }
         this.removeListener();
         this.clearUserId();
         // Reset renewal state to ensure clean state

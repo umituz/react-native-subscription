@@ -34,26 +34,7 @@ export const useRestorePurchase = () => {
         throw new Error("User not authenticated");
       }
 
-      if (__DEV__) {
-        console.log('[DEBUG useRestorePurchase] Starting restore:', { userId });
-      }
-
       const result = await SubscriptionManager.restore();
-
-      if (result.success) {
-        if (__DEV__) {
-          console.log('[DEBUG useRestorePurchase] Restore successful:', {
-            userId,
-            productId: result.productId,
-          });
-        }
-        // Credits will be initialized by CustomerInfoListener
-      } else {
-        if (__DEV__) {
-          console.log('[DEBUG useRestorePurchase] Restore failed:', { userId });
-        }
-      }
-
       return result;
     },
     onSuccess: (result) => {
@@ -66,14 +47,6 @@ export const useRestorePurchase = () => {
             queryKey: creditsQueryKeys.user(userId),
           });
         }
-      }
-    },
-    onError: (error) => {
-      if (__DEV__) {
-        console.error('[DEBUG useRestorePurchase] Restore mutation failed:', {
-          error,
-          userId: userId ?? "ANONYMOUS",
-        });
       }
     },
   });

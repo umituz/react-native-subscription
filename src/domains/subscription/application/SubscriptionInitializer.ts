@@ -94,9 +94,6 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   const initializeInBackground = async (userId?: string): Promise<void> => {
     await SubscriptionManager.initialize(userId);
-    if (__DEV__) {
-      console.log('[SubscriptionInitializer] Background init complete');
-    }
   };
 
   // 5. Start Background Init
@@ -110,9 +107,6 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   // 6. Listen for Auth Changes
   setupAuthStateListener(() => auth, (newUserId) => {
-    if (__DEV__) {
-      console.log('[SubscriptionInitializer] Auth changed, re-init:', newUserId);
-    }
     initializeInBackground(newUserId);
   });
 };

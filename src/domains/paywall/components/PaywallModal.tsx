@@ -74,7 +74,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     if (!selectedPlanId || !onPurchase) return;
 
     if (__DEV__) {
-      console.log("[PaywallModal] handlePurchase starting:", { selectedPlanId });
     }
 
     setIsLocalProcessing(true);
@@ -84,11 +83,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
       const pkg = packages.find((p) => p.product.identifier === selectedPlanId);
       if (pkg) {
         if (__DEV__) {
-          console.log("[PaywallModal] Calling onPurchase:", { productId: pkg.product.identifier });
         }
         await onPurchase(pkg);
         if (__DEV__) {
-          console.log("[PaywallModal] onPurchase completed");
         }
       }
     } catch (error) {
@@ -100,7 +97,6 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
       setIsLocalProcessing(false);
       endPurchase();
       if (__DEV__) {
-        console.log("[PaywallModal] handlePurchase finished");
       }
     }
   }, [selectedPlanId, packages, onPurchase, startPurchase, endPurchase]);
@@ -109,14 +105,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     if (!onRestore || isProcessing) return;
 
     if (__DEV__) {
-      console.log("[PaywallModal] handleRestore starting");
     }
 
     setIsLocalProcessing(true);
     try {
       await onRestore();
       if (__DEV__) {
-        console.log("[PaywallModal] handleRestore completed");
       }
     } finally {
       setIsLocalProcessing(false);

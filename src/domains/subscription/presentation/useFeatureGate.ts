@@ -64,25 +64,8 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   }, [requiredCredits]);
 
   useEffect(() => {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[useFeatureGate] Auth credits effect", {
-        isWaiting: isWaitingForAuthCreditsRef.current,
-        isLoaded: isCreditsLoaded,
-        hasPending: !!pendingActionRef.current,
-        credits: creditBalance,
-      });
-    }
-
     if (!isWaitingForAuthCreditsRef.current || !isCreditsLoaded || !pendingActionRef.current) {
       return;
-    }
-
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[useFeatureGate] Credits loaded after auth", {
-        credits: creditBalance,
-        hasSubscription,
-        isCreditsLoaded,
-      });
     }
 
     isWaitingForAuthCreditsRef.current = false;
@@ -90,22 +73,10 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     if (hasSubscription || creditBalance >= requiredCredits) {
       const action = pendingActionRef.current;
       pendingActionRef.current = null;
-
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFeatureGate] Proceeding with action after auth", {
-          credits: creditBalance,
-          hasSubscription,
-        });
-      }
       action();
       return;
     }
 
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[useFeatureGate] No credits after auth, showing paywall", {
-        credits: creditBalance,
-      });
-    }
     isWaitingForPurchaseRef.current = true;
     onShowPaywall(requiredCredits);
   }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywall]);
@@ -119,10 +90,6 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       const action = pendingActionRef.current;
       pendingActionRef.current = null;
       isWaitingForPurchaseRef.current = false;
-
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFeatureGate] Access acquired (credits or subscription), executing pending action");
-      }
       action();
     }
 
@@ -132,24 +99,10 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>) => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFeatureGate] requireFeature", {
-          isAuthenticated,
-          hasSubscription: hasSubscriptionRef.current,
-          creditBalance: creditBalanceRef.current,
-          requiredCredits: requiredCreditsRef.current,
-          isCreditsLoaded,
-        });
-      }
-
       if (!isAuthenticated) {
         const postAuthAction = () => {
           pendingActionRef.current = action;
           isWaitingForAuthCreditsRef.current = true;
-
-          if (typeof __DEV__ !== "undefined" && __DEV__) {
-            console.log("[useFeatureGate] Auth completed, waiting for credits to load");
-          }
         };
         onShowAuthModal(postAuthAction);
         return;
@@ -166,9 +119,6 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       }
 
       if (currentBalance < currentRequiredCredits) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.log("[useFeatureGate] No credits, showing paywall");
-        }
         pendingActionRef.current = action;
         isWaitingForPurchaseRef.current = true;
         onShowPaywallRef.current(currentRequiredCredits);

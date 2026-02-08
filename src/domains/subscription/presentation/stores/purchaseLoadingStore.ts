@@ -49,7 +49,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
       // Still update to the new purchase to recover from potential stuck state
     }
     if (__DEV__) {
-      console.log("[PurchaseLoadingStore] startPurchase:", { productId, source });
     }
     set({
       isPurchasing: true,
@@ -67,7 +66,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
       // Reset to initial state to recover from potential stuck state
     }
     if (__DEV__) {
-      console.log("[PurchaseLoadingStore] endPurchase");
     }
     set({
       isPurchasing: false,
@@ -78,7 +76,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
 
   reset: () => {
     if (__DEV__) {
-      console.log("[PurchaseLoadingStore] reset");
     }
     set(initialState);
   },

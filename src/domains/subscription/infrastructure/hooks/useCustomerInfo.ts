@@ -71,23 +71,10 @@ export function useCustomerInfo(): UseCustomerInfoResult {
       const info = await Purchases.getCustomerInfo();
 
       setCustomerInfo(info);
-
-      if (__DEV__) {
-        console.log('[DEBUG useCustomerInfo] Fetched:', {
-          hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
-          latestExpiration: info.latestExpirationDate || "none",
-        });
-      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fetch customer info";
       setError(errorMessage);
-
-      if (__DEV__) {
-        console.error('[DEBUG useCustomerInfo] Error:', {
-          error: err,
-        });
-      }
     } finally {
       setLoading(false);
       setIsFetching(false);
@@ -100,12 +87,6 @@ export function useCustomerInfo(): UseCustomerInfoResult {
 
     // Listen for real-time updates (renewals, purchases, restore)
     const listener = (info: CustomerInfo) => {
-      if (__DEV__) {
-        console.log('[DEBUG useCustomerInfo] Listener update:', {
-          hasActiveEntitlements: Object.keys(info.entitlements.active).length > 0,
-        });
-      }
-
       setCustomerInfo(info);
       setError(null);
     };

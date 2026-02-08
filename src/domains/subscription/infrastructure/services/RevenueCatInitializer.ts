@@ -85,15 +85,12 @@ export async function initializeSDK(
 
   const key = apiKey || resolveApiKey(deps.config);
   if (!key) {
-    if (__DEV__) console.log('[RevenueCat] No API key');
     return { success: false, offering: null, isPremium: false };
   }
 
   configurationState.configurationInProgress = true;
   try {
     configureLogHandler();
-    if (__DEV__) console.log('[RevenueCat] Configuring:', key.substring(0, 10) + '...');
-
     await Purchases.configure({ apiKey: key, appUserID: userId });
     configurationState.isPurchasesConfigured = true;
     deps.setInitialized(true);
@@ -104,14 +101,8 @@ export async function initializeSDK(
       Purchases.getOfferings(),
     ]);
 
-    if (__DEV__) {
-      console.log('[RevenueCat] Initialized', {
-        packages: offerings.current?.availablePackages?.length ?? 0,
-      });
-    }
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
-    if (__DEV__) console.error('[RevenueCat] Init failed:', error);
     return { success: false, offering: null, isPremium: false };
   } finally {
     configurationState.configurationInProgress = false;

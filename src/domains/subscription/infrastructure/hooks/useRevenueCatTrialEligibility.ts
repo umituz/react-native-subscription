@@ -85,9 +85,6 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
 
     const service = getRevenueCatService();
     if (!service || !service.isInitialized()) {
-      if (__DEV__) {
-        console.log("[TrialEligibility] RevenueCat not initialized");
-      }
       return;
     }
 
@@ -109,12 +106,6 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
           eligible: isEligible,
           trialDurationDays: 7, // Default to 7 days as configured in App Store Connect
         };
-
-        if (__DEV__) {
-          console.log(
-            `[TrialEligibility] ${productId}: ${isEligible ? "ELIGIBLE" : "NOT_ELIGIBLE"}`
-          );
-        }
       }
 
       // Update cache
@@ -127,9 +118,6 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
         setEligibilityMap((prev) => ({ ...prev, ...newMap }));
       }
     } catch (error) {
-      if (__DEV__) {
-        console.log("[TrialEligibility] Error checking eligibility:", error);
-      }
       // On error, default to eligible (better UX)
       const fallbackMap: TrialEligibilityMap = {};
       for (const productId of productIds) {

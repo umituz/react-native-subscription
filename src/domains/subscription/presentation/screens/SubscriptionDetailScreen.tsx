@@ -13,7 +13,6 @@ import {
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList, type CreditItem } from "./components/CreditsList";
 import { UpgradePrompt, type Benefit } from "./components/UpgradePrompt";
-import { DevTestSection, type DevTestActions } from "./components/DevTestSection";
 
 export interface SubscriptionDisplayFlags {
   showHeader: boolean;
@@ -39,15 +38,11 @@ export interface SubscriptionDetailTranslations {
   upgradeButton: string;
 }
 
-export interface DevToolsConfig {
-  actions: DevTestActions;
-  title?: string;
-}
-
 export interface UpgradePromptConfig {
   title: string;
   subtitle?: string;
   benefits?: readonly Benefit[];
+  onUpgrade?: () => void;
 }
 
 export interface SubscriptionDetailConfig {
@@ -59,8 +54,7 @@ export interface SubscriptionDetailConfig {
   daysRemaining?: number | null;
   credits?: readonly CreditItem[];
   translations: SubscriptionDetailTranslations;
-  upgradePrompt?: UpgradePromptConfig & { onUpgrade?: () => void };
-  devTools?: DevToolsConfig;
+  upgradePrompt?: UpgradePromptConfig;
 }
 
 export interface SubscriptionDetailScreenProps {
@@ -98,14 +92,6 @@ export const SubscriptionDetailScreen: React.FC<
       edges={["bottom"]}
       backgroundColor={tokens.colors.backgroundPrimary}
       contentContainerStyle={styles.content}
-      footer={
-        config.devTools ? (
-          <DevTestSection
-            actions={config.devTools.actions}
-            title={config.devTools.title}
-          />
-        ) : undefined
-      }
     >
       <View style={styles.cardsContainer}>
         {showHeader && (

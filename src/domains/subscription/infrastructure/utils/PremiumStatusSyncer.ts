@@ -49,27 +49,12 @@ export async function notifyPurchaseCompleted(
     customerInfo: CustomerInfo,
     source?: PurchaseSource
 ): Promise<void> {
-    if (__DEV__) {
-        console.log('[PremiumStatusSyncer] notifyPurchaseCompleted called:', {
-            userId,
-            productId,
-            source,
-            hasCallback: !!config.onPurchaseCompleted,
-        });
-    }
-
     if (!config.onPurchaseCompleted) {
-        if (__DEV__) {
-            console.warn('[PremiumStatusSyncer] No onPurchaseCompleted callback configured!');
-        }
         return;
     }
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source);
-        if (__DEV__) {
-            console.log('[PremiumStatusSyncer] onPurchaseCompleted callback executed successfully');
-        }
     } catch (error) {
         if (__DEV__) {
             console.error('[PremiumStatusSyncer] onPurchaseCompleted callback failed:', error);

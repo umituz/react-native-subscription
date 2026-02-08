@@ -32,27 +32,18 @@ export class PackageHandler {
       const offering = await this.service.fetchOfferings();
 
       if (!offering) {
-        if (__DEV__) {
-          console.warn("[PackageHandler] No offerings available from RevenueCat");
-        }
         // Return empty array instead of throwing - allows graceful degradation
         return [];
       }
 
       const packages = offering.availablePackages;
       if (!packages || packages.length === 0) {
-        if (__DEV__) {
-          console.warn("[PackageHandler] No packages available in offering");
-        }
         // Return empty array instead of throwing - allows graceful degradation
         return [];
       }
 
       return packages;
     } catch (error) {
-      if (__DEV__) {
-        console.error("[PackageHandler] Failed to fetch packages:", error);
-      }
       // Re-throw with more context
       throw new Error(
         `Failed to fetch subscription packages. ${
