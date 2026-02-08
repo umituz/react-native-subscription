@@ -6,15 +6,14 @@ export * from "./domains/wallet";
 export * from "./domains/paywall";
 export * from "./domains/config";
 
-// Domain Layer
+// Domain Layer - Constants & Types
+export * from "./domain/entities/SubscriptionConstants";
 export {
-  SUBSCRIPTION_STATUS,
-  PERIOD_TYPE,
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
   resolveSubscriptionStatus,
 } from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionStatus, SubscriptionStatusType, PeriodType, StatusResolverInput } from "./domain/entities/SubscriptionStatus";
+export type { SubscriptionStatus, StatusResolverInput } from "./domain/entities/SubscriptionStatus";
 export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
 export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
 
@@ -78,15 +77,12 @@ export * from "./presentation/types/SubscriptionDetailTypes";
 // Presentation Layer - Stores
 export * from "./presentation/stores";
 
-// Credits Domain
 export type {
   CreditType,
   UserCredits,
   CreditsConfig,
   CreditsResult,
   DeductCreditsResult,
-  PurchaseSource,
-  PurchaseType,
   CreditAllocation,
   PackageAllocationMap,
 } from "./domain/entities/Credits";

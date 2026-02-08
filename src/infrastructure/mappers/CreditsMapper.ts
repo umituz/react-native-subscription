@@ -1,5 +1,6 @@
 import type { UserCredits } from "../../domain/entities/Credits";
-import { resolveSubscriptionStatus, type PeriodType, type SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
+import { resolveSubscriptionStatus } from "../../domain/entities/SubscriptionStatus";
+import type { PeriodType, SubscriptionStatusType } from "../../domain/entities/SubscriptionConstants";
 import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
 
 /** Maps Firestore document to domain entity with expiration validation */

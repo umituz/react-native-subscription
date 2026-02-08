@@ -13,8 +13,8 @@ import { configureCreditsRepository, getCreditsRepository } from "../repositorie
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 import { configureAuthProvider } from "../../presentation/hooks/useAuthAwarePurchase";
 import type { RevenueCatData } from "../../domain/types/RevenueCatData";
+import { PERIOD_TYPE, type PeriodType, type PurchaseSource } from "../../domain/entities/SubscriptionConstants";
 import type { SubscriptionInitConfig, FirebaseAuthLike } from "./SubscriptionInitializerTypes";
-import type { PurchaseSource } from "../../domain/entities/Credits";
 
 export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } from "./SubscriptionInitializerTypes";
 
@@ -53,8 +53,7 @@ const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId: string
     expirationDate: entitlement?.expirationDate ?? customerInfo.latestExpirationDate ?? null,
     willRenew: entitlement?.willRenew ?? false,
     originalTransactionId: entitlement?.originalPurchaseDate ?? undefined,
-    isPremium: Object.keys(customerInfo.entitlements.active).length > 0,
-    periodType: entitlement?.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined,
+    periodType: entitlement?.periodType as PeriodType | undefined,
   };
 };
 
@@ -95,7 +94,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
 
   const onPremiumStatusChanged = async (
     userId: string, isPremium: boolean, productId?: string,
-    expiresAt?: string, willRenew?: boolean, periodType?: "NORMAL" | "INTRO" | "TRIAL"
+    expiresAt?: string, willRenew?: boolean, periodType?: PeriodType
   ) => {
     if (__DEV__) console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew, periodType });
     try {

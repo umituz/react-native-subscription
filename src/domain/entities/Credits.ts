@@ -6,20 +6,16 @@
  */
 
 import type { SubscriptionPackageType } from "../../utils/packageTypeDetector";
-import type { SubscriptionStatusType, PeriodType } from "./SubscriptionStatus";
+import type { 
+  SubscriptionStatusType, 
+  PeriodType, 
+  PackageType, 
+  Platform, 
+  PurchaseSource, 
+  PurchaseType 
+} from "./SubscriptionConstants";
 
 export type CreditType = "text" | "image";
-
-export type PurchaseSource =
-  | "onboarding"
-  | "settings"
-  | "upgrade_prompt"
-  | "home_screen"
-  | "feature_gate"
-  | "credits_exhausted"
-  | "renewal";
-
-export type PurchaseType = "initial" | "renewal" | "upgrade" | "downgrade";
 
 /** Single Source of Truth for user subscription + credits data */
 export interface UserCredits {
@@ -35,7 +31,7 @@ export interface UserCredits {
   // RevenueCat subscription details
   willRenew: boolean;
   productId?: string;
-  packageType?: "weekly" | "monthly" | "yearly" | "lifetime";
+  packageType?: PackageType;
   originalTransactionId?: string;
 
   // Trial fields
@@ -53,7 +49,7 @@ export interface UserCredits {
   // Metadata
   purchaseSource?: PurchaseSource;
   purchaseType?: PurchaseType;
-  platform?: "ios" | "android";
+  platform?: Platform;
   appVersion?: string;
 }
 

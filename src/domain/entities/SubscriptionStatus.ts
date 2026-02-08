@@ -1,24 +1,17 @@
 import { timezoneService } from "@umituz/react-native-design-system";
+import { 
+  SUBSCRIPTION_STATUS, 
+  PERIOD_TYPE, 
+  type PeriodType, 
+  type SubscriptionStatusType 
+} from "./SubscriptionConstants";
 
-export const SUBSCRIPTION_STATUS = {
-  ACTIVE: 'active',
-  TRIAL: 'trial',
-  TRIAL_CANCELED: 'trial_canceled',
-  EXPIRED: 'expired',
-  CANCELED: 'canceled',
-  NONE: 'none',
-} as const;
-
-/** RevenueCat period type constants */
-export const PERIOD_TYPE = {
-  NORMAL: 'NORMAL',
-  INTRO: 'INTRO',
-  TRIAL: 'TRIAL',
-} as const;
-
-export type PeriodType = (typeof PERIOD_TYPE)[keyof typeof PERIOD_TYPE];
-
-export type SubscriptionStatusType = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
+export { 
+  SUBSCRIPTION_STATUS, 
+  PERIOD_TYPE, 
+  type PeriodType, 
+  type SubscriptionStatusType 
+};
 
 export interface SubscriptionStatus {
     isPremium: boolean;

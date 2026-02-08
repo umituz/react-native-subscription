@@ -3,7 +3,9 @@
  * Detects subscription package type from RevenueCat package identifier
  */
 
-export type SubscriptionPackageType = "weekly" | "monthly" | "yearly" | "unknown";
+import { PACKAGE_TYPE, type PackageType } from "../domain/entities/SubscriptionConstants";
+
+export type SubscriptionPackageType = PackageType;
 
 /**
  * Check if identifier is a credit package (consumable purchase)
@@ -25,14 +27,14 @@ function isCreditPackage(identifier: string): boolean {
  */
 export function detectPackageType(productIdentifier: string): SubscriptionPackageType {
   if (!productIdentifier) {
-    return "unknown";
+    return PACKAGE_TYPE.UNKNOWN;
   }
 
   const normalized = productIdentifier.toLowerCase();
 
   // Skip credit packages silently - they use creditPackageConfig instead
   if (isCreditPackage(normalized)) {
-    return "unknown";
+    return PACKAGE_TYPE.UNKNOWN;
   }
 
   // Preview API mode (Expo Go testing)
@@ -40,7 +42,7 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: PREVIEW (monthly)");
     }
-    return "monthly";
+    return PACKAGE_TYPE.MONTHLY;
   }
 
   // Weekly detection
@@ -48,7 +50,7 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: WEEKLY");
     }
-    return "weekly";
+    return PACKAGE_TYPE.WEEKLY;
   }
 
   // Monthly detection
@@ -56,7 +58,7 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: MONTHLY");
     }
-    return "monthly";
+    return PACKAGE_TYPE.MONTHLY;
   }
 
   // Yearly detection (includes annual)
@@ -68,12 +70,12 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: YEARLY");
     }
-    return "yearly";
+    return PACKAGE_TYPE.YEARLY;
   }
 
   if (__DEV__) {
     console.warn("[PackageTypeDetector] Unknown package type for:", productIdentifier);
   }
 
-  return "unknown";
+  return PACKAGE_TYPE.UNKNOWN;
 }

@@ -1,8 +1,18 @@
-import type { PurchaseSource, PurchaseType } from "../../domain/entities/Credits";
-import type { SubscriptionStatusType, PeriodType } from "../../domain/entities/SubscriptionStatus";
+import type { 
+  PurchaseSource, 
+  PurchaseType, 
+  SubscriptionStatusType, 
+  PeriodType,
+  PackageType,
+  Platform
+} from "../../domain/entities/SubscriptionConstants";
 
-export type { PurchaseSource, PurchaseType } from "../../domain/entities/Credits";
-export type { SubscriptionStatusType, PeriodType } from "../../domain/entities/SubscriptionStatus";
+export type { 
+  PurchaseSource, 
+  PurchaseType, 
+  SubscriptionStatusType, 
+  PeriodType 
+};
 
 export interface FirestoreTimestamp {
     toDate: () => Date;
@@ -10,11 +20,11 @@ export interface FirestoreTimestamp {
 
 export interface PurchaseMetadata {
   productId: string;
-  packageType: "weekly" | "monthly" | "yearly" | "lifetime";
+  packageType: PackageType;
   creditLimit: number;
   source: PurchaseSource;
   type: PurchaseType;
-  platform: "ios" | "android";
+  platform: Platform;
   appVersion?: string;
   timestamp: FirestoreTimestamp;
 }
@@ -34,7 +44,7 @@ export interface UserCreditsDocumentRead {
     // RevenueCat subscription details
     willRenew?: boolean;
     productId?: string;
-    packageType?: "weekly" | "monthly" | "yearly" | "lifetime";
+    packageType?: PackageType;
     originalTransactionId?: string;
 
     // Trial fields
@@ -52,7 +62,7 @@ export interface UserCreditsDocumentRead {
     // Metadata
     purchaseSource?: PurchaseSource;
     purchaseType?: PurchaseType;
-    platform?: "ios" | "android";
+    platform?: Platform;
     appVersion?: string;
     processedPurchases?: string[];
     purchaseHistory?: PurchaseMetadata[];

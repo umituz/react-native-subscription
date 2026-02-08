@@ -6,7 +6,10 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import type { SubscriptionStatusType } from "../../../domain/entities/SubscriptionStatus";
+import { 
+  SUBSCRIPTION_STATUS, 
+  type SubscriptionStatusType 
+} from "../../../domain/entities/SubscriptionConstants";
 
 export type { SubscriptionStatusType };
 
@@ -31,22 +34,22 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   const tokens = useAppDesignTokens();
 
   const labels: Record<SubscriptionStatusType, string> = {
-    active: activeLabel,
-    trial: activeLabel,
-    trial_canceled: trialCanceledLabel ?? canceledLabel,
-    expired: expiredLabel,
-    none: noneLabel,
-    canceled: canceledLabel,
+    [SUBSCRIPTION_STATUS.ACTIVE]: activeLabel,
+    [SUBSCRIPTION_STATUS.TRIAL]: activeLabel,
+    [SUBSCRIPTION_STATUS.TRIAL_CANCELED]: trialCanceledLabel ?? canceledLabel,
+    [SUBSCRIPTION_STATUS.EXPIRED]: expiredLabel,
+    [SUBSCRIPTION_STATUS.NONE]: noneLabel,
+    [SUBSCRIPTION_STATUS.CANCELED]: canceledLabel,
   };
 
   const backgroundColor = useMemo(() => {
     const colors: Record<SubscriptionStatusType, string> = {
-      active: tokens.colors.success,
-      trial: tokens.colors.primary, // Blue/purple for trial
-      trial_canceled: tokens.colors.warning, // Orange for trial canceled
-      expired: tokens.colors.error,
-      none: tokens.colors.textTertiary,
-      canceled: tokens.colors.warning,
+      [SUBSCRIPTION_STATUS.ACTIVE]: tokens.colors.success,
+      [SUBSCRIPTION_STATUS.TRIAL]: tokens.colors.primary, // Blue/purple for trial
+      [SUBSCRIPTION_STATUS.TRIAL_CANCELED]: tokens.colors.warning, // Orange for trial canceled
+      [SUBSCRIPTION_STATUS.EXPIRED]: tokens.colors.error,
+      [SUBSCRIPTION_STATUS.NONE]: tokens.colors.textTertiary,
+      [SUBSCRIPTION_STATUS.CANCELED]: tokens.colors.warning,
     };
     return colors[status];
   }, [status, tokens.colors]);
