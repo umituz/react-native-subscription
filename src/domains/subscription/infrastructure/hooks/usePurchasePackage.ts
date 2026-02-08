@@ -14,7 +14,7 @@ import {
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
-import { creditsQueryKeys } from "../../../presentation/hooks/useCredits";
+import { creditsQueryKeys } from "../../../credits/presentation/useCredits";
 
 /** Purchase mutation result - simplified for presentation layer */
 export interface PurchaseMutationResult {

@@ -4,7 +4,7 @@ import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../co
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { isUserCancelledError, getErrorMessage } from "../../core/RevenueCatTypes";
 import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
-import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/hooks/useAuthAwarePurchase";
+import { getSavedPurchase, clearSavedPurchase } from "../../presentation/useAuthAwarePurchase";
 
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
@@ -47,16 +47,16 @@ export async function handlePurchase(
       await syncPremiumStatus(deps.config, userId, customerInfo);
       await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, customerInfo, source);
       clearSavedPurchase();
-      return { success: true, isPremium: true, customerInfo };
+      return { success: true, isPremium: true, customerInfo, productId: pkg.product.identifier };
     }
 
     // Purchase completed but no entitlement - still notify (test store scenario)
     await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, customerInfo, source);
     clearSavedPurchase();
-    return { success: true, isPremium: false, customerInfo };
+    return { success: true, isPremium: false, customerInfo, productId: pkg.product.identifier };
   } catch (error) {
     if (isUserCancelledError(error)) {
-      return { success: false, isPremium: false };
+      return { success: false, isPremium: false, productId: pkg.product.identifier };
     }
     const errorMessage = getErrorMessage(error, "Purchase failed");
     throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);

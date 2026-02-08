@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { useCredits } from "../../../../presentation/hooks/useCredits";
+import { useCredits } from "../../../credits/presentation/useCredits";
 import {
   useTransactionHistory,
   type UseTransactionHistoryParams,

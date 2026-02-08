@@ -13,6 +13,9 @@ export interface InitializeResult {
 export interface PurchaseResult {
     success: boolean;
     productId: string | null;
+    isPremium: boolean;
+    customerInfo?: CustomerInfo;
+    isConsumable?: boolean;
 }
 
 export interface RestoreResult {

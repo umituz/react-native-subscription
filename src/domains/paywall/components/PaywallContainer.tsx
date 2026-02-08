@@ -5,7 +5,7 @@
  */
 
 import React, { useMemo, useEffect } from "react";
-import { usePaywallVisibility } from "../../../presentation/hooks/usePaywallVisibility";
+import { usePaywallVisibility } from "../../subscription/presentation/usePaywallVisibility";
 import { useSubscriptionPackages } from "../../subscription/infrastructure/hooks/useSubscriptionPackages";
 import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure/hooks/useRevenueCatTrialEligibility";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
