@@ -3,7 +3,7 @@
  * Detects subscription package type from RevenueCat package identifier
  */
 
-import { PACKAGE_TYPE, type PackageType } from "../domain/entities/SubscriptionConstants";
+import { PACKAGE_TYPE, type PackageType } from "../domains/subscription/core/SubscriptionConstants";
 
 export type SubscriptionPackageType = PackageType;
 
@@ -15,7 +15,7 @@ export type SubscriptionPackageType = PackageType;
  * Check if identifier is a credit package (consumable purchase)
  * Credit packages use a different system and don't need type detection
  */
-function isCreditPackage(identifier: string): boolean {
+export function isCreditPackage(identifier: string): boolean {
   // Matches "credit" as a word or part of a common naming pattern
   return /\bcredit\b|_credit_|-credit-/i.test(identifier) || identifier.toLowerCase().includes("credit");
 }

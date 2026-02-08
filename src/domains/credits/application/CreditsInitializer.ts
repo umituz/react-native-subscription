@@ -33,7 +33,7 @@ export async function initializeCreditsTransaction(
         }
 
         const creditLimit = CreditLimitCalculator.calculate(metadata?.productId, config);
-        const { purchaseType, purchaseHistory } = PurchaseMetadataGenerator.generate({
+        const { purchaseHistory } = PurchaseMetadataGenerator.generate({
           productId: metadata?.productId,
           source: metadata?.source,
           type: metadata?.type,
@@ -51,19 +51,22 @@ export async function initializeCreditsTransaction(
         // Resolve credits using Strategy Pattern
         const isStatusSync = purchaseId?.startsWith("status_sync_") ?? false;
         const isSubscriptionActive = isPremium && !isExpired;
+        const productId = metadata?.productId;
 
         const newCredits = creditAllocationContext.allocate({
             status,
             isStatusSync,
             existingData,
             creditLimit,
-            isSubscriptionActive
+            isSubscriptionActive,
+            productId,
         });
 
         const creditsData: Record<string, any> = {
             isPremium, status, credits: newCredits, creditLimit, 
             lastUpdatedAt: now, 
-            processedPurchases: (purchaseId ? [...(existingData?.processedPurchases || []), purchaseId].slice(-10) : existingData?.processedPurchases) || [],
+            // Increase history window to 50 for better idempotency
+            processedPurchases: (purchaseId ? [...(existingData?.processedPurchases || []), purchaseId].slice(-50) : existingData?.processedPurchases) || [],
             purchaseHistory: purchaseHistory.length ? purchaseHistory : undefined
         };
 

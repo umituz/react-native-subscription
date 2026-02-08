@@ -1,6 +1,6 @@
 import { ICreditStrategy, type CreditAllocationParams } from "./ICreditStrategy";
-import { SUBSCRIPTION_STATUS } from "../../../domain/entities/SubscriptionStatus";
-import { TRIAL_CONFIG } from "../TrialService";
+import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionConstants";
+import { TRIAL_CONFIG } from "../../../trial/core/TrialTypes";
 
 /**
  * Strategy for Trial and Trial Canceled users.

@@ -1,7 +1,7 @@
 import { runTransaction, serverTimestamp, type Firestore, type Transaction, type DocumentReference } from "firebase/firestore";
 import { getFirestore } from "@umituz/react-native-firebase";
-import type { DeductCreditsResult } from "../../../domain/entities/Credits";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../SubscriptionEventBus";
+import type { DeductCreditsResult } from "../core/Credits";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 export interface IDeductCreditsCommand {
   execute(userId: string, cost: number): Promise<DeductCreditsResult>;

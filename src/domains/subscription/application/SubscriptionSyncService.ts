@@ -15,7 +15,11 @@ export class SubscriptionSyncService {
   async handlePurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-      await getCreditsRepository().initializeCredits(userId, `purchase_${productId}_${Date.now()}`, productId, source, revenueCatData);
+      const purchaseId = revenueCatData.originalTransactionId 
+        ? `purchase_${revenueCatData.originalTransactionId}`
+        : `purchase_${productId}_${Date.now()}`;
+
+      await getCreditsRepository().initializeCredits(userId, purchaseId, productId, source, revenueCatData);
       
       // Notify listeners via Event Bus
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
@@ -29,7 +33,11 @@ export class SubscriptionSyncService {
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
       revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
-      await getCreditsRepository().initializeCredits(userId, `renewal_${productId}_${Date.now()}`, productId, "renewal", revenueCatData);
+      const purchaseId = revenueCatData.originalTransactionId 
+        ? `renewal_${revenueCatData.originalTransactionId}_${newExpirationDate}`
+        : `renewal_${productId}_${Date.now()}`;
+
+      await getCreditsRepository().initializeCredits(userId, purchaseId, productId, "renewal", revenueCatData);
       
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });

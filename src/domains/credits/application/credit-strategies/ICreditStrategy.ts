@@ -1,5 +1,5 @@
-import type { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
-import type { UserCreditsDocumentRead } from "../models/UserCreditsDocument";
+import type { SubscriptionStatusType } from "../../../subscription/core/SubscriptionStatus";
+import type { UserCreditsDocumentRead } from "../../core/UserCreditsDocument";
 
 export interface CreditStrategyParams {
     status: SubscriptionStatusType;
@@ -7,6 +7,7 @@ export interface CreditStrategyParams {
     existingData: UserCreditsDocumentRead | null;
     creditLimit: number;
     isSubscriptionActive: boolean;
+    productId?: string;
 }
 
 export interface ICreditStrategy {

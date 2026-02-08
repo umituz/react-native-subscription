@@ -1,6 +1,6 @@
-import type { CreditsConfig } from "../../domain/entities/Credits";
-import { detectPackageType } from "../../utils/packageTypeDetector";
-import { getCreditAllocation } from "../../utils/creditMapper";
+import type { CreditsConfig } from "../core/Credits";
+import { detectPackageType } from "../../../utils/packageTypeDetector";
+import { getCreditAllocation } from "../../../utils/creditMapper";
 
 export class CreditLimitCalculator {
   static calculate(productId: string | undefined, config: CreditsConfig): number {
