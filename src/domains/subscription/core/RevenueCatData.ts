@@ -5,10 +5,10 @@ import type { PeriodType } from "./SubscriptionStatus";
  * Used across the subscription package for storing RevenueCat data in Firestore
  */
 export interface RevenueCatData {
-  expirationDate?: string | null;
-  willRenew?: boolean;
-  originalTransactionId?: string;
-  isPremium?: boolean;
+  expirationDate: string | null;
+  willRenew: boolean | null;
+  originalTransactionId: string | null;
+  isPremium: boolean;
   /** RevenueCat period type: NORMAL, INTRO, or TRIAL */
-  periodType?: PeriodType;
+  periodType: PeriodType | null;
 }
