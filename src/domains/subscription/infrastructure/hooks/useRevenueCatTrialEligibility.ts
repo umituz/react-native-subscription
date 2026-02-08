@@ -117,7 +117,7 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
       if (isMountedRef.current) {
         setEligibilityMap((prev) => ({ ...prev, ...newMap }));
       }
-    } catch (error) {
+    } catch {
       // On error, default to eligible (better UX)
       const fallbackMap: TrialEligibilityMap = {};
       for (const productId of productIds) {

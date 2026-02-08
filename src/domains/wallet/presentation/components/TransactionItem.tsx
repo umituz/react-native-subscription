@@ -13,7 +13,8 @@ import {
     AtomicIcon,
 } from "@umituz/react-native-design-system";
 import { timezoneService } from "@umituz/react-native-design-system";
-import type { CreditLog, TransactionReason } from "../../domain/types/transaction.types";
+import type { CreditLog } from "../../domain/types/transaction.types";
+import { getTransactionIcon } from "../../utils/transactionIconMap";
 
 export interface TransactionItemTranslations {
   purchase: string;
@@ -31,20 +32,6 @@ export interface TransactionItemProps {
   translations: TransactionItemTranslations;
   dateFormatter?: (timestamp: number) => string;
 }
-
-const getReasonIcon = (reason: TransactionReason): string => {
-  const iconMap: Record<TransactionReason, string> = {
-    purchase: "shopping-cart",
-    usage: "zap",
-    refund: "rotate-ccw",
-    bonus: "gift",
-    subscription: "star",
-    admin: "shield",
-    reward: "award",
-    expired: "clock",
-  };
-  return iconMap[reason] || "circle";
-};
 
 const defaultDateFormatter = (timestamp: number): string => {
   return timezoneService.formatToDisplayDateTime(new Date(timestamp));
@@ -64,7 +51,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   const isPositive = transaction.change > 0;
   const changeColor = isPositive ? tokens.colors.success : tokens.colors.error;
   const changePrefix = isPositive ? "+" : "";
-  const iconName = getReasonIcon(transaction.reason);
+  const iconName = getTransactionIcon(transaction.reason);
 
   return (
     <View

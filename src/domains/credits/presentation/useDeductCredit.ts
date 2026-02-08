@@ -81,22 +81,14 @@ export const useDeductCredit = ({
   });
 
   const deductCredit = useCallback(async (cost: number = 1): Promise<boolean> => {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-    }
     try {
       const res = await mutation.mutateAsync(cost);
       if (!res.success) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-        }
         if (res.error?.code === "CREDITS_EXHAUSTED") onCreditsExhausted?.();
         return false;
       }
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-      }
       return true;
-    } catch (err) {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-      }
+    } catch {
       return false;
     }
   }, [mutation, onCreditsExhausted]);

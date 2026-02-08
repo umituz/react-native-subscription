@@ -46,9 +46,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
           newSource: source,
         });
       }
-      // Still update to the new purchase to recover from potential stuck state
-    }
-    if (__DEV__) {
     }
     set({
       isPurchasing: true,
@@ -63,9 +60,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
       if (__DEV__) {
         console.warn("[PurchaseLoadingStore] endPurchase called while no purchase in progress");
       }
-      // Reset to initial state to recover from potential stuck state
-    }
-    if (__DEV__) {
     }
     set({
       isPurchasing: false,
@@ -75,8 +69,6 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
   },
 
   reset: () => {
-    if (__DEV__) {
-    }
     set(initialState);
   },
 }));

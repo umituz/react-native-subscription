@@ -73,45 +73,30 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   const handlePurchase = useCallback(async () => {
     if (!selectedPlanId || !onPurchase) return;
 
-    if (__DEV__) {
-    }
-
     setIsLocalProcessing(true);
     startPurchase(selectedPlanId, "manual");
 
     try {
       const pkg = packages.find((p) => p.product.identifier === selectedPlanId);
       if (pkg) {
-        if (__DEV__) {
-        }
         await onPurchase(pkg);
-        if (__DEV__) {
-        }
       }
     } catch (error) {
-      // Error is handled by usePurchasePackage, just log for debugging
       if (__DEV__) {
         console.error("[PaywallModal] Purchase failed:", error);
       }
     } finally {
       setIsLocalProcessing(false);
       endPurchase();
-      if (__DEV__) {
-      }
     }
   }, [selectedPlanId, packages, onPurchase, startPurchase, endPurchase]);
 
   const handleRestore = useCallback(async () => {
     if (!onRestore || isProcessing) return;
 
-    if (__DEV__) {
-    }
-
     setIsLocalProcessing(true);
     try {
       await onRestore();
-      if (__DEV__) {
-      }
     } finally {
       setIsLocalProcessing(false);
     }

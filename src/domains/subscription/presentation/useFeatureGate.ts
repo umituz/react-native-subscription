@@ -127,7 +127,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
       action();
     },
-    [isAuthenticated, onShowAuthModal, isCreditsLoaded]
+    [isAuthenticated, onShowAuthModal]
   );
 
   const hasCredits = creditBalance >= requiredCredits;

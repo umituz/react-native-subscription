@@ -102,7 +102,7 @@ export async function initializeSDK(
     ]);
 
     return buildSuccessResult(deps, customerInfo, offerings);
-  } catch (error) {
+  } catch {
     return { success: false, offering: null, isPremium: false };
   } finally {
     configurationState.configurationInProgress = false;
