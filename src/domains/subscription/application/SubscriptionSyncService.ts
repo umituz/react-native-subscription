@@ -1,6 +1,6 @@
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatData } from "../core/RevenueCatData";
-import { type PeriodType, type PurchaseSource } from "../core/SubscriptionConstants";
+import { type PeriodType, type PurchaseSource, PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryProvider";
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
@@ -19,7 +19,14 @@ export class SubscriptionSyncService {
         ? `purchase_${revenueCatData.originalTransactionId}`
         : `purchase_${productId}_${Date.now()}`;
 
-      await getCreditsRepository().initializeCredits(userId, purchaseId, productId, source, revenueCatData);
+      await getCreditsRepository().initializeCredits(
+        userId, 
+        purchaseId, 
+        productId, 
+        source ?? PURCHASE_SOURCE.SETTINGS, // Default to settings if source unknown
+        revenueCatData,
+        PURCHASE_TYPE.INITIAL // Default to INITIAL
+      );
       
       // Notify listeners via Event Bus
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
@@ -37,7 +44,14 @@ export class SubscriptionSyncService {
         ? `renewal_${revenueCatData.originalTransactionId}_${newExpirationDate}`
         : `renewal_${productId}_${Date.now()}`;
 
-      await getCreditsRepository().initializeCredits(userId, purchaseId, productId, "renewal", revenueCatData);
+      await getCreditsRepository().initializeCredits(
+        userId, 
+        purchaseId, 
+        productId, 
+        PURCHASE_SOURCE.RENEWAL, 
+        revenueCatData,
+        PURCHASE_TYPE.RENEWAL
+      );
       
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });
@@ -61,14 +75,27 @@ export class SubscriptionSyncService {
         return;
       }
 
+      // If productId is missing, we can't initialize credits fully, 
+      // but if isPremium is true, we should have it.
+      // Fallback to 'unknown' if missing, but this might throw in CreditLimitCalculator.
+      const validProductId = productId ?? 'unknown_product';
+
       const revenueCatData: RevenueCatData = { 
         expirationDate: expiresAt ?? null, 
         willRenew: willRenew ?? false, 
         isPremium, 
-        periodType 
+        periodType: periodType ?? null, // Fix undefined vs null
+        originalTransactionId: null // Initialize with null as we might not have it here
       };
       
-      await getCreditsRepository().initializeCredits(userId, `status_sync_${Date.now()}`, productId, "settings", revenueCatData);
+      await getCreditsRepository().initializeCredits(
+        userId, 
+        `status_sync_${Date.now()}`, 
+        validProductId, 
+        PURCHASE_SOURCE.SETTINGS, 
+        revenueCatData,
+        PURCHASE_TYPE.INITIAL // Status sync treated as Initial or Update
+      );
       
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, { userId, isPremium });

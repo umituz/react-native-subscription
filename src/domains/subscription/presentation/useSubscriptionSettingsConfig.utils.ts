@@ -44,7 +44,7 @@ export function getSubscriptionStatusType(
   isPremium: boolean,
   willRenew?: boolean,
   expiresAt?: string | null,
-  periodType?: PeriodType
+  periodType?: PeriodType | null
 ): SubscriptionStatusType {
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
 
@@ -52,6 +52,6 @@ export function getSubscriptionStatusType(
     isPremium,
     willRenew,
     isExpired,
-    periodType,
+    periodType: periodType ?? undefined,
   });
 }

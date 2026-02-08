@@ -12,6 +12,8 @@ import { CreditsMapper } from "../core/CreditsMapper";
 import type { RevenueCatData } from "../../subscription/core/RevenueCatData";
 import { DeductCreditsCommand } from "../application/DeductCreditsCommand";
 import { CreditLimitCalculator } from "../application/CreditLimitCalculator";
+import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
+import { updateDoc } from "firebase/firestore";
 
 export class CreditsRepository extends BaseRepository {
   private deductCommand: DeductCreditsCommand;
@@ -47,7 +49,8 @@ export class CreditsRepository extends BaseRepository {
     purchaseId: string,
     productId: string,
     source: PurchaseSource,
-    revenueCatData: RevenueCatData
+    revenueCatData: RevenueCatData,
+    type: PurchaseType = PURCHASE_TYPE.INITIAL
   ): Promise<CreditsResult> {
     const db = getFirestore();
     if (!db) {
@@ -70,6 +73,7 @@ export class CreditsRepository extends BaseRepository {
         originalTransactionId: revenueCatData.originalTransactionId,
         isPremium: revenueCatData.isPremium,
         periodType: revenueCatData.periodType,
+        type,
       }
     );
 
@@ -86,4 +90,27 @@ export class CreditsRepository extends BaseRepository {
   async deductCredit(userId: string, cost: number): Promise<DeductCreditsResult> {
     return this.deductCommand.execute(userId, cost);
   }
+
+  async hasCredits(userId: string, cost: number): Promise<boolean> {
+    const result = await this.getCredits(userId);
+    if (!result.success || !result.data) return false;
+    return result.data.credits >= cost;
+  }
+
+  async syncExpiredStatus(userId: string): Promise<void> {
+    const db = getFirestore();
+    if (!db) throw new Error("Firestore instance is not available");
+
+    const ref = this.getRef(db, userId);
+    await updateDoc(ref, {
+      isPremium: false,
+      status: "expired",
+      willRenew: false,
+      expirationDate: new Date().toISOString()
+    });
+  }
+}
+
+export function createCreditsRepository(config: CreditsConfig): CreditsRepository {
+  return new CreditsRepository(config);
 }

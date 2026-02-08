@@ -53,10 +53,11 @@ class SubscriptionManagerImpl {
     }
   }
 
-  async initialize(userId: string): Promise<boolean> {
+  async initialize(userId?: string): Promise<boolean> {
     this.ensureConfigured();
 
-    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(userId);
+    const actualUserId = userId ?? (await this.managerConfig!.getAnonymousUserId());
+    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(actualUserId);
 
     if (!shouldInit && existingPromise) {
       return existingPromise;
@@ -71,11 +72,11 @@ class SubscriptionManagerImpl {
         }
 
         this.ensurePackageHandlerInitialized();
-        const result = await this.serviceInstance.initialize(userId);
+        const result = await this.serviceInstance.initialize(actualUserId);
         return result.success;
     })();
 
-    this.state.initCache.setPromise(promise, userId);
+    this.state.initCache.setPromise(promise, actualUserId);
     return promise;
   }
 

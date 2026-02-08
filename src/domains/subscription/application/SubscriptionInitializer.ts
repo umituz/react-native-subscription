@@ -92,7 +92,7 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
     showAuthModal,
   });
 
-  const initializeInBackground = async (userId: string): Promise<void> => {
+  const initializeInBackground = async (userId?: string): Promise<void> => {
     await SubscriptionManager.initialize(userId);
     if (__DEV__) {
       console.log('[SubscriptionInitializer] Background init complete');

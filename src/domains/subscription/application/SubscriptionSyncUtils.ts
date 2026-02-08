@@ -12,7 +12,7 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
     willRenew: entitlement?.willRenew ?? false,
     // Use latestPurchaseDate if originalPurchaseDate is missing, or a combine id
     originalTransactionId: entitlement?.originalPurchaseDate || customerInfo.firstSeen, 
-    periodType: entitlement?.periodType as PeriodType | undefined,
+    periodType: (entitlement?.periodType as PeriodType) ?? null,
     isPremium: !!customerInfo.entitlements.active[entitlementId],
   };
 };
