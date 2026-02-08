@@ -4,10 +4,10 @@ import {
   runTransaction,
   serverTimestamp,
   Timestamp,
-  type Firestore,
   type Transaction,
   type DocumentReference,
-} from "firebase/firestore";
+  type Firestore,
+} from "@umituz/react-native-firebase";
 import type { CreditsConfig } from "../core/Credits";
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
