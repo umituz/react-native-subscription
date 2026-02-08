@@ -33,14 +33,14 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
 }) => {
   const tokens = useAppDesignTokens();
 
-  const labels: Record<SubscriptionStatusType, string> = {
+  const labels: Record<SubscriptionStatusType, string> = useMemo(() => ({
     [SUBSCRIPTION_STATUS.ACTIVE]: activeLabel,
     [SUBSCRIPTION_STATUS.TRIAL]: activeLabel,
     [SUBSCRIPTION_STATUS.TRIAL_CANCELED]: trialCanceledLabel ?? canceledLabel,
     [SUBSCRIPTION_STATUS.EXPIRED]: expiredLabel,
     [SUBSCRIPTION_STATUS.NONE]: noneLabel,
     [SUBSCRIPTION_STATUS.CANCELED]: canceledLabel,
-  };
+  }), [activeLabel, trialCanceledLabel, canceledLabel, expiredLabel, noneLabel]);
 
   const backgroundColor = useMemo(() => {
     const colors: Record<SubscriptionStatusType, string> = {

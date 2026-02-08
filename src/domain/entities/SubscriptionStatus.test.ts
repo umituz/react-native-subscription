@@ -1,7 +1,11 @@
+import { 
+  SUBSCRIPTION_STATUS,
+} from './SubscriptionConstants';
 import {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
   calculateDaysRemaining,
+  resolveSubscriptionStatus,
 } from './SubscriptionStatus';
 
 describe('SubscriptionStatus', () => {
@@ -16,7 +20,7 @@ describe('SubscriptionStatus', () => {
         purchasedAt: null,
         customerId: null,
         syncedAt: null,
-        status: 'none',
+        status: SUBSCRIPTION_STATUS.NONE,
       });
     });
   });
@@ -100,6 +104,46 @@ describe('SubscriptionStatus', () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 5);
       expect(calculateDaysRemaining(pastDate.toISOString())).toBe(0);
+    });
+  });
+
+  describe('resolveSubscriptionStatus', () => {
+    it('should return NONE when not premium', () => {
+      expect(resolveSubscriptionStatus({ isPremium: false })).toBe(SUBSCRIPTION_STATUS.NONE);
+    });
+
+    it('should return EXPIRED when expired', () => {
+      expect(resolveSubscriptionStatus({ isPremium: true, isExpired: true })).toBe(SUBSCRIPTION_STATUS.EXPIRED);
+    });
+
+    it('should return TRIAL when trialing and set to renew', () => {
+      expect(resolveSubscriptionStatus({
+        isPremium: true,
+        periodType: 'TRIAL',
+        willRenew: true
+      })).toBe(SUBSCRIPTION_STATUS.TRIAL);
+    });
+
+    it('should return TRIAL_CANCELED when trialing and will not renew', () => {
+      expect(resolveSubscriptionStatus({
+        isPremium: true,
+        periodType: 'TRIAL',
+        willRenew: false
+      })).toBe(SUBSCRIPTION_STATUS.TRIAL_CANCELED);
+    });
+
+    it('should return ACTIVE when premium, not expired, not trial, and set to renew', () => {
+      expect(resolveSubscriptionStatus({
+        isPremium: true,
+        willRenew: true
+      })).toBe(SUBSCRIPTION_STATUS.ACTIVE);
+    });
+
+    it('should return CANCELED when premium, not expired, not trial, and will not renew', () => {
+      expect(resolveSubscriptionStatus({
+        isPremium: true,
+        willRenew: false
+      })).toBe(SUBSCRIPTION_STATUS.CANCELED);
     });
   });
 });

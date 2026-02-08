@@ -13,7 +13,7 @@ import { configureCreditsRepository, getCreditsRepository } from "../repositorie
 import { SubscriptionManager } from "../../revenuecat/infrastructure/managers/SubscriptionManager";
 import { configureAuthProvider } from "../../presentation/hooks/useAuthAwarePurchase";
 import type { RevenueCatData } from "../../domain/types/RevenueCatData";
-import { PERIOD_TYPE, type PeriodType, type PurchaseSource } from "../../domain/entities/SubscriptionConstants";
+import { type PeriodType, type PurchaseSource } from "../../domain/entities/SubscriptionConstants";
 import type { SubscriptionInitConfig, FirebaseAuthLike } from "./SubscriptionInitializerTypes";
 
 export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } from "./SubscriptionInitializerTypes";

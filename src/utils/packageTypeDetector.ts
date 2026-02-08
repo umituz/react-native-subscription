@@ -11,19 +11,18 @@ export type SubscriptionPackageType = PackageType;
  * Check if identifier is a credit package (consumable purchase)
  * Credit packages use a different system and don't need type detection
  */
+/**
+ * Check if identifier is a credit package (consumable purchase)
+ * Credit packages use a different system and don't need type detection
+ */
 function isCreditPackage(identifier: string): boolean {
-  return identifier.includes("credit");
+  // Matches "credit" as a word or part of a common naming pattern
+  return /\bcredit\b|_credit_|-credit-/i.test(identifier) || identifier.toLowerCase().includes("credit");
 }
 
 /**
  * Detect package type from product identifier
- * Supports common RevenueCat naming patterns:
- * - premium_weekly, weekly_premium, premium-weekly
- * - premium_monthly, monthly_premium, premium-monthly
- * - premium_yearly, yearly_premium, premium-yearly, premium_annual, annual_premium
- * - preview-product-id (Preview API mode in Expo Go)
- *
- * Note: Credit packages (consumable purchases) are skipped silently
+ * Supports common RevenueCat naming patterns with regex for better accuracy
  */
 export function detectPackageType(productIdentifier: string): SubscriptionPackageType {
   if (!productIdentifier) {
@@ -45,28 +44,24 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     return PACKAGE_TYPE.MONTHLY;
   }
 
-  // Weekly detection
-  if (normalized.includes("weekly") || normalized.includes("week")) {
+  // Weekly detection: matches "weekly" or "week" as distinct parts of the ID
+  if (/\bweekly?\b|_week_|-week-|\.week\./i.test(normalized)) {
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: WEEKLY");
     }
     return PACKAGE_TYPE.WEEKLY;
   }
 
-  // Monthly detection
-  if (normalized.includes("monthly") || normalized.includes("month")) {
+  // Monthly detection: matches "monthly" or "month"
+  if (/\bmonthly?\b|_month_|-month-|\.month\./i.test(normalized)) {
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: MONTHLY");
     }
     return PACKAGE_TYPE.MONTHLY;
   }
 
-  // Yearly detection (includes annual)
-  if (
-    normalized.includes("yearly") ||
-    normalized.includes("year") ||
-    normalized.includes("annual")
-  ) {
+  // Yearly detection: matches "yearly", "year", or "annual"
+  if (/\byearly?\b|_year_|-year-|\.year\.|annual/i.test(normalized)) {
     if (__DEV__) {
       console.log("[PackageTypeDetector] Detected: YEARLY");
     }
