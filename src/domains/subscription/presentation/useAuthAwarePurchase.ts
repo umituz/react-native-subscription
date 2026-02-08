@@ -28,6 +28,18 @@ export const configureAuthProvider = (provider: PurchaseAuthProvider): void => {
   globalAuthProvider = provider;
 };
 
+/**
+ * Cleanup method to reset global auth provider state
+ * Call this when app is shutting down or auth system is being reset
+ */
+export const cleanupAuthProvider = (): void => {
+  if (__DEV__) {
+    console.log("[useAuthAwarePurchase] Cleaning up auth provider");
+  }
+  globalAuthProvider = null;
+  clearSavedPurchase();
+};
+
 const savePurchase = (pkg: PurchasesPackage, source: PurchaseSource): void => {
   savedPurchaseState = { pkg, source, timestamp: Date.now() };
 };

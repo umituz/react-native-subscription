@@ -59,6 +59,14 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     setSelectedPlanId(null);
   }, [packages]);
 
+  // Cleanup state when modal closes to prevent stale state
+  useEffect(() => {
+    if (!visible) {
+      setSelectedPlanId(null);
+      setIsLocalProcessing(false);
+    }
+  }, [visible]);
+
   // Combined processing state
   const isProcessing = isLocalProcessing || isGlobalPurchasing;
 
@@ -82,6 +90,11 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
         if (__DEV__) {
           console.log("[PaywallModal] onPurchase completed");
         }
+      }
+    } catch (error) {
+      // Error is handled by usePurchasePackage, just log for debugging
+      if (__DEV__) {
+        console.error("[PaywallModal] Purchase failed:", error);
       }
     } finally {
       setIsLocalProcessing(false);

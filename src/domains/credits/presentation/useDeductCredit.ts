@@ -42,24 +42,34 @@ export const useDeductCredit = ({
       await queryClient.cancelQueries({ queryKey: creditsQueryKeys.user(userId) });
       const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(userId));
 
-      // Skip optimistic update if insufficient credits to prevent showing 0
-      if (!previousCredits || previousCredits.credits < cost) {
-        return { previousCredits, skippedOptimistic: true };
+      // Improved optimistic update logic
+      if (!previousCredits) {
+        return { previousCredits: null, skippedOptimistic: true };
       }
+
+      // If credits are insufficient, show 0 but don't skip optimistic update
+      // This provides better UX by showing the user what will happen
+      const newCredits = Math.max(0, previousCredits.credits - cost);
 
       queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(userId), (old) => {
         if (!old) return old;
         return {
           ...old,
-          credits: old.credits - cost,
+          credits: newCredits,
           lastUpdatedAt: timezoneService.getNow()
         };
       });
-      return { previousCredits, skippedOptimistic: false };
+
+      return {
+        previousCredits,
+        skippedOptimistic: false,
+        wasInsufficient: previousCredits.credits < cost
+      };
     },
     onError: (_err, _cost, context) => {
-      // Always restore previous credits on error if we have them
-      if (userId && context?.previousCredits && !context.skippedOptimistic) {
+      // Restore previous credits on error
+      // Skip restoration if credits were insufficient (optimistic update showed 0, which is correct)
+      if (userId && context?.previousCredits && !context.skippedOptimistic && !context.wasInsufficient) {
         queryClient.setQueryData(creditsQueryKeys.user(userId), context.previousCredits);
       }
     },

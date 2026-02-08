@@ -48,8 +48,11 @@ export function useAuthSubscriptionSync(
           await initialize(userId);
           isInitializedRef.current = true;
         }
-      } catch {
-        // Prevent unhandled promise rejection from async auth callback
+      } catch (error) {
+        // Log error for debugging but don't crash the auth flow
+        if (__DEV__) {
+          console.error('[useAuthSubscriptionSync] Initialization failed:', error);
+        }
       }
 
       previousUserIdRef.current = userId;

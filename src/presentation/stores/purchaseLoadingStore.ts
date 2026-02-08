@@ -32,10 +32,22 @@ const initialState: PurchaseLoadingState = {
   purchaseSource: null,
 };
 
-export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set) => ({
+export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) => ({
   ...initialState,
 
   startPurchase: (productId, source) => {
+    const currentState = get();
+    if (currentState.isPurchasing) {
+      if (__DEV__) {
+        console.warn("[PurchaseLoadingStore] startPurchase called while purchase already in progress:", {
+          currentProductId: currentState.purchasingProductId,
+          newProductId: productId,
+          currentSource: currentState.purchaseSource,
+          newSource: source,
+        });
+      }
+      // Still update to the new purchase to recover from potential stuck state
+    }
     if (__DEV__) {
       console.log("[PurchaseLoadingStore] startPurchase:", { productId, source });
     }
@@ -47,6 +59,13 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set) => ({
   },
 
   endPurchase: () => {
+    const currentState = get();
+    if (!currentState.isPurchasing) {
+      if (__DEV__) {
+        console.warn("[PurchaseLoadingStore] endPurchase called while no purchase in progress");
+      }
+      // Reset to initial state to recover from potential stuck state
+    }
     if (__DEV__) {
       console.log("[PurchaseLoadingStore] endPurchase");
     }

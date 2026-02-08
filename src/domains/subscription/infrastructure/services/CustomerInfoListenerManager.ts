@@ -133,7 +133,15 @@ export class CustomerInfoListenerManager {
     }
 
     destroy(): void {
+        if (__DEV__) {
+            console.log('[CustomerInfoListenerManager] Destroying listener manager');
+        }
         this.removeListener();
         this.clearUserId();
+        // Reset renewal state to ensure clean state
+        this.renewalState = {
+            previousExpirationDate: null,
+            previousProductId: null,
+        };
     }
 }

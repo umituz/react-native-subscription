@@ -41,12 +41,24 @@ class SubscriptionManagerImpl {
     if (!shouldInit && existingPromise) return existingPromise;
 
     const promise = (async () => {
-        await initializeRevenueCatService(this.managerConfig!.config);
-        this.serviceInstance = getRevenueCatService();
-        if (!this.serviceInstance) return false;
-        this.packageHandler!.setService(this.serviceInstance);
-        const result = await this.serviceInstance.initialize(effectiveUserId);
-        return result.success;
+        try {
+          await initializeRevenueCatService(this.managerConfig!.config);
+          this.serviceInstance = getRevenueCatService();
+          if (!this.serviceInstance) {
+            if (__DEV__) {
+              console.error('[SubscriptionManager] Service instance not available after initialization');
+            }
+            return false;
+          }
+          this.packageHandler!.setService(this.serviceInstance);
+          const result = await this.serviceInstance.initialize(effectiveUserId);
+          return result.success;
+        } catch (error) {
+          if (__DEV__) {
+            console.error('[SubscriptionManager] Initialization failed:', error);
+          }
+          return false;
+        }
     })();
 
     this.state.initCache.setPromise(promise, effectiveUserId);

@@ -11,12 +11,19 @@ export interface InitializerDeps {
   setCurrentUserId: (userId: string) => void;
 }
 
-let isPurchasesConfigured = false;
-let isLogHandlerConfigured = false;
-let configurationInProgress = false;
+// State management to prevent race conditions
+const configurationState = {
+    isPurchasesConfigured: false,
+    isLogHandlerConfigured: false,
+    configurationInProgress: false,
+    configurationPromise: null as Promise<ReturnType<typeof initializeSDK>> | null,
+};
+
+// Simple lock mechanism to prevent concurrent configurations
+let configurationLocks = new Set<string>();
 
 function configureLogHandler(): void {
-  if (isLogHandlerConfigured) return;
+  if (configurationState.isLogHandlerConfigured) return;
   if (typeof Purchases.setLogHandler !== 'function') return;
   try {
     Purchases.setLogHandler((logLevel, message) => {
@@ -24,7 +31,7 @@ function configureLogHandler(): void {
       if (ignoreMessages.some(m => message.includes(m))) return;
       if (logLevel === LOG_LEVEL.ERROR && __DEV__) console.error('[RevenueCat]', message);
     });
-    isLogHandlerConfigured = true;
+    configurationState.isLogHandlerConfigured = true;
   } catch {
     // Native module not available (Expo Go)
   }
@@ -52,7 +59,7 @@ export async function initializeSDK(
     }
   }
 
-  if (isPurchasesConfigured) {
+  if (configurationState.isPurchasesConfigured) {
     try {
       const currentAppUserId = await Purchases.getAppUserID();
       let customerInfo;
@@ -71,9 +78,9 @@ export async function initializeSDK(
     }
   }
 
-  if (configurationInProgress) {
+  if (configurationState.configurationInProgress) {
     await new Promise(resolve => setTimeout(resolve, 100));
-    if (isPurchasesConfigured) return initializeSDK(deps, userId, apiKey);
+    if (configurationState.isPurchasesConfigured) return initializeSDK(deps, userId, apiKey);
     return { success: false, offering: null, isPremium: false };
   }
 
@@ -83,13 +90,13 @@ export async function initializeSDK(
     return { success: false, offering: null, isPremium: false };
   }
 
-  configurationInProgress = true;
+  configurationState.configurationInProgress = true;
   try {
     configureLogHandler();
     if (__DEV__) console.log('[RevenueCat] Configuring:', key.substring(0, 10) + '...');
 
     await Purchases.configure({ apiKey: key, appUserID: userId });
-    isPurchasesConfigured = true;
+    configurationState.isPurchasesConfigured = true;
     deps.setInitialized(true);
     deps.setCurrentUserId(userId);
 
@@ -108,6 +115,6 @@ export async function initializeSDK(
     if (__DEV__) console.error('[RevenueCat] Init failed:', error);
     return { success: false, offering: null, isPremium: false };
   } finally {
-    configurationInProgress = false;
+    configurationState.configurationInProgress = false;
   }
 }

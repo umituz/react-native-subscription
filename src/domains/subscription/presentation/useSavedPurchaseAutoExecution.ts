@@ -44,25 +44,14 @@ export const useSavedPurchaseAutoExecution = (
   const startPurchaseRef = useRef(startPurchase);
   const endPurchaseRef = useRef(endPurchase);
 
+  // Consolidate all ref updates into a single effect
   useEffect(() => {
     purchasePackageRef.current = purchasePackage;
-  }, [purchasePackage]);
-
-  useEffect(() => {
     onSuccessRef.current = onSuccess;
-  }, [onSuccess]);
-
-  useEffect(() => {
     onErrorRef.current = onError;
-  }, [onError]);
-
-  useEffect(() => {
     startPurchaseRef.current = startPurchase;
-  }, [startPurchase]);
-
-  useEffect(() => {
     endPurchaseRef.current = endPurchase;
-  }, [endPurchase]);
+  }, [purchasePackage, onSuccess, onError, startPurchase, endPurchase]);
 
   useEffect(() => {
     const isAuthenticated = !!userId && !isAnonymous;

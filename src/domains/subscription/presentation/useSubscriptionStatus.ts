@@ -34,7 +34,18 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       if (!userId) {
         return { isPremium: false, expirationDate: null };
       }
-      return SubscriptionManager.checkPremiumStatus();
+
+      try {
+        const result = await SubscriptionManager.checkPremiumStatus();
+        // Ensure we always return a valid object even if result is null/undefined
+        return result ?? { isPremium: false, expirationDate: null };
+      } catch (error) {
+        if (__DEV__) {
+          console.error('[useSubscriptionStatus] Failed to check premium status:', error);
+        }
+        // Return default state on error to prevent crashes
+        return { isPremium: false, expirationDate: null };
+      }
     },
     enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
     staleTime: 30 * 1000, // 30 seconds

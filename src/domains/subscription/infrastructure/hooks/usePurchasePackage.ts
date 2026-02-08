@@ -90,8 +90,42 @@ export const usePurchasePackage = () => {
           userId: userId ?? "ANONYMOUS",
         });
       }
-      const message = error instanceof Error ? error.message : "An error occurred";
-      showError("Purchase Error", message);
+
+      let title = "Purchase Error";
+      let message = "Unable to complete purchase. Please try again.";
+
+      if (error instanceof Error) {
+        // Handle RevenueCat-specific error codes
+        const errorCode = (error as any).code;
+        const errorMessage = error.message;
+
+        switch (errorCode) {
+          case "PURCHASE_CANCELLED":
+            title = "Purchase Cancelled";
+            message = "The purchase was cancelled.";
+            break;
+          case "PURCHASE_INVALID":
+            title = "Invalid Purchase";
+            message = "The purchase is invalid. Please contact support.";
+            break;
+          case "PRODUCT_ALREADY_OWNED":
+            title = "Already Owned";
+            message = "You already own this subscription. Please restore your purchase.";
+            break;
+          case "NETWORK_ERROR":
+            title = "Network Error";
+            message = "Please check your internet connection and try again.";
+            break;
+          case "INVALID_CREDENTIALS":
+            title = "Configuration Error";
+            message = "App is not configured correctly. Please contact support.";
+            break;
+          default:
+            message = errorMessage || message;
+        }
+      }
+
+      showError(title, message);
     },
   });
 };

@@ -6,8 +6,5 @@
 // Entities
 export * from "./entities/types";
 
-// Components
-export * from "./components";
-
 // Hooks
 export * from "./hooks";

@@ -108,8 +108,11 @@ export class RevenueCatService implements IRevenueCatService {
         try {
             await Purchases.logOut();
             this.stateManager.setInitialized(false);
-        } catch {
-            // Silent error handling
+        } catch (error) {
+            // Log error for debugging but don't throw - reset is cleanup operation
+            if (__DEV__) {
+                console.error('[RevenueCatService] Reset failed:', error);
+            }
         }
     }
 }
