@@ -12,7 +12,7 @@ import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from 
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";
-import { usePurchaseLoadingStore, selectIsPurchasing } from "../../../presentation/stores";
+import { usePurchaseLoadingStore, selectIsPurchasing } from "../../subscription/presentation/stores";
 
 /** Trial eligibility info per product */
 export interface TrialEligibilityInfo {

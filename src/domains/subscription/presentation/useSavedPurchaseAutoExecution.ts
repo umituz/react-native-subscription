@@ -12,7 +12,7 @@ import {
 import { getSavedPurchase, clearSavedPurchase } from "./useAuthAwarePurchase";
 import { usePremium } from "./usePremium";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
-import { usePurchaseLoadingStore } from "../../../presentation/stores";
+import { usePurchaseLoadingStore } from "./stores";
 
 export interface UseSavedPurchaseAutoExecutionParams {
   onSuccess?: () => void;

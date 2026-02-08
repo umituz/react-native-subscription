@@ -5,7 +5,7 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
-import { detectPackageType, type SubscriptionPackageType } from "../../../../utils/packageTypeDetector";
+import { detectPackageType } from "../../../../utils/packageTypeDetector";
 
 export interface RenewalState {
   previousExpirationDate: string | null;

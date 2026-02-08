@@ -21,6 +21,8 @@ export interface PurchaseResult {
 export interface RestoreResult {
     success: boolean;
     productId: string | null;
+    isPremium?: boolean;
+    customerInfo?: CustomerInfo;
 }
 
 export interface IRevenueCatService {

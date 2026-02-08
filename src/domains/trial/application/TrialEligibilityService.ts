@@ -1,4 +1,4 @@
-import type { TrialEligibilityResult, DeviceTrialRecord } from "./TrialTypes";
+import type { TrialEligibilityResult, DeviceTrialRecord } from "../core/TrialTypes";
 
 export class TrialEligibilityService {
   static check(

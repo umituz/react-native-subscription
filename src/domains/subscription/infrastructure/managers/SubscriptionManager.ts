@@ -97,12 +97,8 @@ class SubscriptionManagerImpl {
     const userId = this.state.initCache.getCurrentUserId();
     if (!userId) return { isPremium: false, expirationDate: null };
 
-    try {
-      const customerInfo = await this.serviceInstance?.getCustomerInfo();
-      if (customerInfo) return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
-    } catch (error) {
-      throw error;
-    }
+    const customerInfo = await this.serviceInstance?.getCustomerInfo();
+    if (customerInfo) return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
     return { isPremium: false, expirationDate: null };
   }
 

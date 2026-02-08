@@ -3,7 +3,7 @@
  * Type definitions for subscription detail screen and components
  */
 
-import type { SubscriptionStatusType } from "../../domains/subscription/core/SubscriptionStatus";
+import type { SubscriptionStatusType } from "../../core/SubscriptionStatus";
 import type { CreditInfo } from "../components/details/PremiumDetailsCardTypes";
 
 export type { SubscriptionStatusType, CreditInfo };
@@ -16,6 +16,8 @@ export interface SubscriptionDetailTranslations {
   statusExpired: string;
   statusInactive: string;
   statusCanceled: string;
+  /** Free status label */
+  statusFree: string;
   /** Trial status label (defaults to statusActive if not provided) */
   statusTrial?: string;
   /** Trial canceled status label (defaults to statusCanceled if not provided) */
@@ -109,7 +111,7 @@ export interface SubscriptionHeaderProps {
     | "expiresLabel"
     | "purchasedLabel"
     | "lifetimeLabel"
-  >;
+  > & { statusFree: string };
 }
 
 /** Props for credits list component */

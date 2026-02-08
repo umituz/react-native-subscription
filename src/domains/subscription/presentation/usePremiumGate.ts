@@ -27,7 +27,7 @@
  * ```
  */
 
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
 import { paywallControl } from "./usePaywallVisibility";
 

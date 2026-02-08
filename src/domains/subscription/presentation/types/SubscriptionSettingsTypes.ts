@@ -3,7 +3,7 @@
  * Type definitions for subscription settings configuration
  */
 
-import type { SubscriptionStatusType } from "../../domains/subscription/core/SubscriptionConstants";
+import type { SubscriptionStatusType } from "../../core/SubscriptionConstants";
 import type {
   SubscriptionDetailConfig,
   UpgradePromptConfig,

@@ -7,21 +7,21 @@ import { useMemo, useCallback } from "react";
 import { useCredits } from "../../credits/presentation/useCredits";
 import { usePaywallVisibility } from "./usePaywallVisibility";
 import { calculateDaysRemaining } from "../core/SubscriptionStatus";
-import { formatDate } from "../../../presentation/utils/subscriptionDateUtils";
+import { formatDate } from "./utils/subscriptionDateUtils";
 import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
 import { getCreditsConfig } from "../../credits/infrastructure/CreditsRepositoryProvider";
 import type {
   SubscriptionSettingsConfig,
   SubscriptionStatusType,
   UseSubscriptionSettingsConfigParams,
-} from "../../../presentation/types/SubscriptionSettingsTypes";
+} from "./types/SubscriptionSettingsTypes";
 
 export type {
   SubscriptionSettingsConfig,
   SubscriptionSettingsItemConfig,
   SubscriptionSettingsTranslations,
   UseSubscriptionSettingsConfigParams,
-} from "../../../presentation/types/SubscriptionSettingsTypes";
+} from "./types/SubscriptionSettingsTypes";
 
 export const useSubscriptionSettingsConfig = (
   params: Omit<UseSubscriptionSettingsConfigParams, 'userId'>
@@ -95,6 +95,7 @@ export const useSubscriptionSettingsConfig = (
         statusExpired: translations.statusExpired,
         statusInactive: translations.statusInactive,
         statusCanceled: translations.statusCanceled,
+        statusFree: translations.statusInactive,
         expiresLabel: translations.expiresLabel,
         purchasedLabel: translations.purchasedLabel,
         lifetimeLabel: translations.lifetimeLabel,

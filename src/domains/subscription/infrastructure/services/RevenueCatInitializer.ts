@@ -19,8 +19,7 @@ const configurationState = {
     configurationPromise: null as Promise<ReturnType<typeof initializeSDK>> | null,
 };
 
-// Simple lock mechanism to prevent concurrent configurations
-let configurationLocks = new Set<string>();
+// Simple lock mechanism to prevent concurrent configurations (implementation deferred)
 
 function configureLogHandler(): void {
   if (configurationState.isLogHandlerConfigured) return;

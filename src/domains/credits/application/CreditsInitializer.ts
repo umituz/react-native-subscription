@@ -1,13 +1,14 @@
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import {
+  getFirestore,
+} from "@umituz/react-native-firebase";
+import {
   runTransaction,
   serverTimestamp,
-  Timestamp,
   type Transaction,
   type DocumentReference,
-  type Firestore,
-} from "@umituz/react-native-firebase";
+} from "firebase/firestore";
 import type { CreditsConfig } from "../core/Credits";
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
@@ -17,12 +18,15 @@ import { creditAllocationContext } from "./credit-strategies/CreditAllocationCon
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
 
 export async function initializeCreditsTransaction(
-    db: Firestore,
+    db: ReturnType<typeof getFirestore>,
     creditsRef: DocumentReference,
     config: CreditsConfig,
     purchaseId?: string,
     metadata?: InitializeCreditsMetadata
 ): Promise<InitializationResult> {
+    if (!db) {
+        throw new Error("Firestore instance is not available");
+    }
     return runTransaction(db, async (transaction: Transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
         const now = serverTimestamp();
@@ -72,7 +76,7 @@ export async function initializeCreditsTransaction(
 
         const isNewPurchaseOrRenewal = purchaseId?.startsWith("purchase_") || purchaseId?.startsWith("renewal_");
         if (isNewPurchaseOrRenewal) creditsData.lastPurchaseAt = now;
-        if (metadata?.expirationDate) creditsData.expirationDate = Timestamp.fromDate(new Date(metadata.expirationDate));
+        if (metadata?.expirationDate) creditsData.expirationDate = serverTimestamp();
         if (metadata?.willRenew !== undefined) creditsData.willRenew = metadata.willRenew;
         if (metadata?.originalTransactionId) creditsData.originalTransactionId = metadata.originalTransactionId;
         if (metadata?.productId) {

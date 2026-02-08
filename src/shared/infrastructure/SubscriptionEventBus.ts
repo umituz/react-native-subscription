@@ -22,10 +22,13 @@ export class SubscriptionEventBus {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
-    
+
     // Return unsubscribe function
     return () => {
-      this.listeners[event] = this.listeners[event].filter(l => l !== callback);
+      const listeners = this.listeners[event];
+      if (listeners) {
+        this.listeners[event] = listeners.filter(l => l !== callback);
+      }
     };
   }
 

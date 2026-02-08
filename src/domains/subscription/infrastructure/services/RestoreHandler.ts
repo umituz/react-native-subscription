@@ -15,14 +15,16 @@ export async function handleRestore(deps: RestoreHandlerDeps, userId: string): P
 
   try {
     const customerInfo = await Purchases.restorePurchases();
-    const isPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
+    const entitlement = customerInfo.entitlements.active[deps.config.entitlementIdentifier];
+    const isPremium = !!entitlement;
+    const productId = entitlement?.productIdentifier ?? null;
 
     if (isPremium) {
       await syncPremiumStatus(deps.config, userId, customerInfo);
     }
     await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
 
-    return { success: true, isPremium, customerInfo };
+    return { success: true, isPremium, productId, customerInfo };
   } catch (error) {
     throw new RevenueCatRestoreError(getErrorMessage(error, "Restore failed"));
   }

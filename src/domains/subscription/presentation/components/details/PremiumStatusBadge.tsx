@@ -6,10 +6,12 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import { 
-  SUBSCRIPTION_STATUS, 
-  type SubscriptionStatusType 
-} from "../../../domains/subscription/core/SubscriptionConstants";
+import {
+  SUBSCRIPTION_STATUS,
+  type SubscriptionStatusType
+} from "../../../core/SubscriptionConstants";
+
+export type { SubscriptionStatusType };
 
 export interface PremiumStatusBadgeProps {
   status: SubscriptionStatusType;

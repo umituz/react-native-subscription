@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { View, TouchableOpacity, TextInput } from "react-native";
 import { AtomicText, BaseModal, useAppDesignTokens } from "@umituz/react-native-design-system";
-import { usePaywallFeedback } from "../../hooks/feedback/usePaywallFeedback";
+import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
 
 const FEEDBACK_OPTION_IDS = [
