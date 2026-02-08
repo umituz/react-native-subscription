@@ -14,7 +14,6 @@ export interface CreditInfo {
 
 export interface PremiumDetailsTranslations {
   title: string;
-  freeDescription?: string;
   statusLabel: string;
   expiresLabel: string;
   purchasedLabel: string;
@@ -25,7 +24,7 @@ export interface PremiumDetailsTranslations {
   lifetimeLabel?: string;
   statusActive: string;
   statusExpired: string;
-  statusFree: string;
+  statusInactive: string;
   statusCanceled: string;
 }
 

@@ -43,24 +43,12 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
             status={statusType}
             activeLabel={translations.statusActive}
             expiredLabel={translations.statusExpired}
-            noneLabel={translations.statusFree}
+            noneLabel={translations.statusInactive}
             canceledLabel={translations.statusCanceled}
           />
         </View>
       )}
 
-      {!isPremium && !showCredits && (
-        <View style={styles.freeUserHeader}>
-          <View style={styles.freeUserTextContainer}>
-            <AtomicText type="headlineSmall" style={{ color: tokens.colors.textPrimary, fontWeight: "700" }}>
-              {translations.title}
-            </AtomicText>
-            <AtomicText type="bodyMedium" style={{ color: tokens.colors.textSecondary }}>
-              {translations.freeDescription}
-            </AtomicText>
-          </View>
-        </View>
-      )}
 
       {isPremium && (
         <View style={styles.detailsSection}>

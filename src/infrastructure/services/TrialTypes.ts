@@ -6,7 +6,7 @@
 /** Trial constants */
 export const TRIAL_CONFIG = {
   DURATION_DAYS: 3,
-  CREDITS: 5,
+  CREDITS: 0,
 } as const;
 
 /** Device trial record in Firestore */

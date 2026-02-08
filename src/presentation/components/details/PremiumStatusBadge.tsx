@@ -16,12 +16,8 @@ export interface PremiumStatusBadgeProps {
   expiredLabel: string;
   noneLabel: string;
   canceledLabel: string;
-  /** Label for trial status (defaults to activeLabel if not provided) */
-  trialLabel?: string;
   /** Label for trial_canceled status (defaults to canceledLabel if not provided) */
   trialCanceledLabel?: string;
-  /** Label for free credits status (defaults to noneLabel if not provided) */
-  freeLabel?: string;
 }
 
 export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
@@ -30,20 +26,17 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   expiredLabel,
   noneLabel,
   canceledLabel,
-  trialLabel,
   trialCanceledLabel,
-  freeLabel,
 }) => {
   const tokens = useAppDesignTokens();
 
   const labels: Record<SubscriptionStatusType, string> = {
     active: activeLabel,
-    trial: trialLabel ?? activeLabel,
+    trial: activeLabel,
     trial_canceled: trialCanceledLabel ?? canceledLabel,
     expired: expiredLabel,
     none: noneLabel,
     canceled: canceledLabel,
-    free: freeLabel ?? noneLabel,
   };
 
   const backgroundColor = useMemo(() => {
@@ -54,7 +47,6 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
       expired: tokens.colors.error,
       none: tokens.colors.textTertiary,
       canceled: tokens.colors.warning,
-      free: tokens.colors.info ?? tokens.colors.primary, // Blue for free credits
     };
     return colors[status];
   }, [status, tokens.colors]);

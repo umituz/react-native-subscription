@@ -7,7 +7,6 @@ export const SUBSCRIPTION_STATUS = {
   EXPIRED: 'expired',
   CANCELED: 'canceled',
   NONE: 'none',
-  FREE: 'free',
 } as const;
 
 /** RevenueCat period type constants */

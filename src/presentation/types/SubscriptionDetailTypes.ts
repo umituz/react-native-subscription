@@ -14,7 +14,7 @@ export interface SubscriptionDetailTranslations {
   statusLabel: string;
   statusActive: string;
   statusExpired: string;
-  statusFree: string;
+  statusInactive: string;
   statusCanceled: string;
   /** Trial status label (defaults to statusActive if not provided) */
   statusTrial?: string;
@@ -102,7 +102,7 @@ export interface SubscriptionHeaderProps {
     | "statusLabel"
     | "statusActive"
     | "statusExpired"
-    | "statusFree"
+    | "statusInactive"
     | "statusCanceled"
     | "statusTrial"
     | "statusTrialCanceled"

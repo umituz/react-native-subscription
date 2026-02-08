@@ -99,12 +99,6 @@ export const initializeSubscription = async (config: SubscriptionInitConfig): Pr
   ) => {
     if (__DEV__) console.log('[SubscriptionInitializer] onPremiumStatusChanged:', { userId, isPremium, productId, willRenew, periodType });
     try {
-      // If not premium and no productId, this is a free user - don't overwrite free credits
-      if (!isPremium && !productId) {
-        if (__DEV__) console.log('[SubscriptionInitializer] Free user detected, preserving free credits');
-        return;
-      }
-
       // If premium became false, check if actually expired or just canceled
       if (!isPremium && productId) {
         const isActuallyExpired = !expiresAt || new Date(expiresAt) < new Date();
