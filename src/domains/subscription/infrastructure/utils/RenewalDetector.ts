@@ -5,7 +5,7 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
-import { detectPackageType, type SubscriptionPackageType } from "../../../utils/packageTypeDetector";
+import { detectPackageType, type SubscriptionPackageType } from "../../../../utils/packageTypeDetector";
 
 export interface RenewalState {
   previousExpirationDate: string | null;
@@ -22,7 +22,7 @@ export interface RenewalDetectionResult {
   newExpirationDate: string | null;
 }
 
-const PACKAGE_TIER_ORDER: Record<SubscriptionPackageType, number> = {
+const PACKAGE_TIER_ORDER: Record<string, number> = {
   weekly: 1,
   monthly: 2,
   yearly: 3,

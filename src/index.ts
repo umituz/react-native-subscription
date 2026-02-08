@@ -59,6 +59,7 @@ export * from "./presentation/components/details/PremiumStatusBadge";
 export * from "./presentation/components/sections/SubscriptionSection";
 export * from "./presentation/components/feedback/PaywallFeedbackModal";
 export * from "./presentation/screens/SubscriptionDetailScreen";
+export * from "./domains/paywall/components/PaywallContainer";
 
 export type {
   CreditType,
