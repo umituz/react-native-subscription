@@ -4,7 +4,7 @@
  * Core logic for determining user tier and premium status
  */
 
-import type { UserTierInfo } from './types';
+import { USER_TIER, type UserTierInfo } from './types';
 
 
 export function getUserTierInfo(
@@ -14,7 +14,7 @@ export function getUserTierInfo(
 ): UserTierInfo {
   if (isAnonymous || userId === null) {
     return {
-      tier: 'anonymous',
+      tier: USER_TIER.ANONYMOUS,
       isPremium: false,
       isAnonymous: true,
       isAuthenticated: false,
@@ -23,7 +23,7 @@ export function getUserTierInfo(
   }
 
   return {
-    tier: isPremium ? 'premium' : 'freemium',
+    tier: isPremium ? USER_TIER.PREMIUM : USER_TIER.FREEMIUM,
     isPremium,
     isAnonymous: false,
     isAuthenticated: true,

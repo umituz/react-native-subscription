@@ -3,6 +3,18 @@
  * Centralized source of truth for subscription-related enums and types.
  */
 
+/** User tier constants */
+export const USER_TIER = {
+  ANONYMOUS: 'anonymous',
+  FREEMIUM: 'freemium',
+  PREMIUM: 'premium',
+} as const;
+
+export type UserTierType = (typeof USER_TIER)[keyof typeof USER_TIER];
+
+/** Default entitlement identifier */
+export const DEFAULT_ENTITLEMENT_ID = 'premium';
+
 /** Subscription status constants */
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',

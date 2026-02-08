@@ -54,11 +54,11 @@ export {
 export * from "./presentation/hooks";
 
 // Presentation Layer - Components
-export * from "./presentation/components/details/PremiumDetailsCard";
-export * from "./presentation/components/details/PremiumStatusBadge";
-export * from "./presentation/components/sections/SubscriptionSection";
-export * from "./presentation/components/feedback/PaywallFeedbackModal";
-export * from "./presentation/screens/SubscriptionDetailScreen";
+export * from "./domains/subscription/presentation/components/details/PremiumDetailsCard";
+export * from "./domains/subscription/presentation/components/details/PremiumStatusBadge";
+export * from "./domains/subscription/presentation/components/sections/SubscriptionSection";
+export * from "./domains/subscription/presentation/components/feedback/PaywallFeedbackModal";
+export * from "./domains/subscription/presentation/screens/SubscriptionDetailScreen";
 export * from "./domains/paywall/components/PaywallContainer";
 
 export type {

@@ -4,7 +4,10 @@
  * Type definitions for user tier system
  */
 
-export type UserTier = 'anonymous' | 'freemium' | 'premium';
+import { USER_TIER, type UserTierType } from '../domains/subscription/core/SubscriptionConstants';
+
+export type UserTier = UserTierType;
+export { USER_TIER };
 
 export interface UserTierInfo {
   /** User tier classification */

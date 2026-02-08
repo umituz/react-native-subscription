@@ -4,10 +4,10 @@
  * Type guards and validation functions for user tier system
  */
 
-import type { UserTier, UserTierInfo } from './types';
+import { USER_TIER, type UserTier, type UserTierInfo } from './types';
 
 export function isValidUserTier(value: unknown): value is UserTier {
-  return value === 'anonymous' || value === 'freemium' || value === 'premium';
+  return value === USER_TIER.ANONYMOUS || value === USER_TIER.FREEMIUM || value === USER_TIER.PREMIUM;
 }
 
 export function isUserTierInfo(value: unknown): value is UserTierInfo {

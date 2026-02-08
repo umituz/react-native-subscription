@@ -4,6 +4,7 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
+import { DEFAULT_ENTITLEMENT_ID } from "./SubscriptionConstants";
 
 /**
  * RevenueCat Entitlement Info
@@ -35,7 +36,7 @@ export interface RevenueCatPurchaseErrorInfo extends Error {
  */
 export function getPremiumEntitlement(
   customerInfo: CustomerInfo,
-  entitlementIdentifier: string = 'premium'
+  entitlementIdentifier: string = DEFAULT_ENTITLEMENT_ID
 ): RevenueCatEntitlement | null {
   const entitlement = customerInfo.entitlements.active[entitlementIdentifier];
   if (!entitlement) {
