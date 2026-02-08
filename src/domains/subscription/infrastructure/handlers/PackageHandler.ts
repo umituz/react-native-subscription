@@ -4,7 +4,7 @@
  */
 
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
-import type { IRevenueCatService } from "../../application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import { getPremiumEntitlement } from "../../domain/types/RevenueCatTypes";
 import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
 

@@ -8,7 +8,7 @@ import { useAuth } from "@umituz/react-native-auth";
 import {
   submitPaywallFeedback,
   submitSettingsFeedback,
-} from "../../../infrastructure/services/FeedbackService";
+} from "../../../shared/application/FeedbackService";
 
 export interface UsePaywallFeedbackSubmitOptions {
   onSuccess?: () => void;

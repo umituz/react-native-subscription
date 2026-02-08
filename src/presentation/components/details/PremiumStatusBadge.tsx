@@ -9,9 +9,7 @@ import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-syst
 import { 
   SUBSCRIPTION_STATUS, 
   type SubscriptionStatusType 
-} from "../../../domain/entities/SubscriptionConstants";
-
-export type { SubscriptionStatusType };
+} from "../../../domains/subscription/core/SubscriptionConstants";
 
 export interface PremiumStatusBadgeProps {
   status: SubscriptionStatusType;

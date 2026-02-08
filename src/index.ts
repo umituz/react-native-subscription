@@ -2,22 +2,20 @@
  * React Native Subscription - Public API
  */
 
-export * from "./domains/wallet";
-export * from "./domains/paywall";
-export * from "./domains/config";
-
-// Domain Layer - Constants & Types
-export * from "./domain/entities/SubscriptionConstants";
+// Domain Layer - Constants & Types (Now in domains/subscription/core)
+export * from "./domains/subscription/core/SubscriptionConstants";
 export {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
   resolveSubscriptionStatus,
-} from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionStatus, StatusResolverInput } from "./domain/entities/SubscriptionStatus";
-export type { SubscriptionConfig } from "./domain/value-objects/SubscriptionConfig";
-export type { ISubscriptionRepository } from "./application/ports/ISubscriptionRepository";
+} from "./domains/subscription/core/SubscriptionStatus";
+export type { SubscriptionStatus, StatusResolverInput } from "./domains/subscription/core/SubscriptionStatus";
 
-// Result Pattern (Functional Error Handling)
+// Application Layer - Ports
+export type { ISubscriptionRepository } from "./shared/application/ports/ISubscriptionRepository";
+export type { IRevenueCatService } from "./shared/application/ports/IRevenueCatService";
+
+// Result Pattern (Now in shared/utils)
 export {
   success,
   failure,
@@ -30,39 +28,29 @@ export {
   tryCatch,
   tryCatchSync,
   combine,
-} from "./domain/value-objects/Result";
-export type { Result, Success, Failure } from "./domain/value-objects/Result";
+} from "./shared/utils/Result";
+export type { Result, Success, Failure } from "./shared/utils/Result";
 
-// Infrastructure Layer
-export { SubscriptionService, initializeSubscriptionService } from "./infrastructure/services/SubscriptionService";
-export {
-  submitFeedback,
-  submitPaywallFeedback,
-  submitSettingsFeedback,
-  type FeedbackData,
-  type FeedbackSubmitResult,
-} from "./infrastructure/services/FeedbackService";
-export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./infrastructure/services/SubscriptionInitializer";
-export {
+// Infrastructure Layer (Services & Repositories)
+export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./domains/subscription/application/SubscriptionInitializer";
+export { 
   getDeviceId,
   checkTrialEligibility,
   recordTrialStart,
   recordTrialEnd,
   recordTrialConversion,
-  TRIAL_CONFIG,
-  type DeviceTrialRecord,
-  type TrialEligibilityResult,
-} from "./infrastructure/services/TrialService";
-export { CreditsRepository, createCreditsRepository } from "./infrastructure/repositories/CreditsRepository";
-export { configureCreditsRepository, getCreditsRepository, getCreditsConfig, resetCreditsRepository, isCreditsRepositoryConfigured } from "./infrastructure/repositories/CreditsRepositoryProvider";
-export {
-  getSavedPurchase,
-  clearSavedPurchase,
-  configureAuthProvider,
-  type PurchaseAuthProvider,
-} from "./presentation/hooks/useAuthAwarePurchase";
+  type TrialEligibilityResult 
+} from "./domains/trial/application/TrialService";
 
-// Presentation Layer - Hooks
+export { CreditsRepository } from "./domains/credits/infrastructure/CreditsRepository";
+export { 
+  configureCreditsRepository, 
+  getCreditsRepository, 
+  getCreditsConfig, 
+  isCreditsRepositoryConfigured 
+} from "./domains/credits/infrastructure/CreditsRepositoryProvider";
+
+// Presentation Layer - Hooks (Point to the bridge)
 export * from "./presentation/hooks";
 
 // Presentation Layer - Components
@@ -70,12 +58,7 @@ export * from "./presentation/components/details/PremiumDetailsCard";
 export * from "./presentation/components/details/PremiumStatusBadge";
 export * from "./presentation/components/sections/SubscriptionSection";
 export * from "./presentation/components/feedback/PaywallFeedbackModal";
-export * from "./presentation/components/overlay";
 export * from "./presentation/screens/SubscriptionDetailScreen";
-export * from "./presentation/types/SubscriptionDetailTypes";
-
-// Presentation Layer - Stores
-export * from "./presentation/stores";
 
 export type {
   CreditType,
@@ -83,26 +66,12 @@ export type {
   CreditsConfig,
   CreditsResult,
   DeductCreditsResult,
-  CreditAllocation,
-  PackageAllocationMap,
-} from "./domain/entities/Credits";
-export { DEFAULT_CREDITS_CONFIG } from "./domain/entities/Credits";
-export { InsufficientCreditsError } from "./domain/errors/InsufficientCreditsError";
+} from "./domains/credits/core/Credits";
+
+export { DEFAULT_CREDITS_CONFIG } from "./domains/credits/core/Credits";
 
 // Utils
 export * from "./utils";
-
-// RevenueCat
-export * from "./revenuecat";
-
-// App Service Helpers (for configureAppServices)
-export {
-  createCreditService,
-  createPaywallService,
-  type CreditServiceConfig,
-  type ICreditService,
-  type IPaywallService,
-} from "./infrastructure/services/app-service-helpers";
 
 // Init Module Factory
 export {

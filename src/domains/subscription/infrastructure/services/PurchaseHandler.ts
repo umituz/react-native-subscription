@@ -1,5 +1,5 @@
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
-import type { PurchaseResult } from "../../application/ports/IRevenueCatService";
+import type { PurchaseResult } from "../../../../shared/application/ports/IRevenueCatService";
 import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../domain/errors/RevenueCatError";
 import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
 import { isUserCancelledError, getErrorMessage } from "../../domain/types/RevenueCatTypes";

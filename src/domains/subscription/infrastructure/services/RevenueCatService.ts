@@ -14,8 +14,8 @@ import type {
     InitializeResult,
     PurchaseResult,
     RestoreResult,
-} from "../../application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../domain/value-objects/RevenueCatConfig";
+} from "../../../../shared/application/ports/IRevenueCatService";
+import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
 import { initializeSDK } from "./RevenueCatInitializer";
 import { fetchOfferings } from "./OfferingsFetcher";

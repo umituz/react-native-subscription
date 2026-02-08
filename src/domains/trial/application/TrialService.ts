@@ -7,6 +7,7 @@ import { PersistentDeviceIdService } from "@umituz/react-native-design-system";
 import { DeviceTrialRepository } from "../infrastructure/DeviceTrialRepository";
 import { TrialEligibilityService } from "./TrialEligibilityService";
 import type { TrialEligibilityResult } from "../core/TrialTypes";
+export type { TrialEligibilityResult };
 
 const repository = new DeviceTrialRepository();
 
