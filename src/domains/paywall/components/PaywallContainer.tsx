@@ -49,9 +49,25 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
   });
 
   // Check trial eligibility only if trialConfig is enabled
+  // Use ref to track if we've already checked for these packages to avoid redundant calls
+  const checkedPackagesRef = React.useRef<string[]>([]);
+
   useEffect(() => {
     if (!trialConfig?.enabled) return;
     if (packages.length === 0) return;
+    if (isLoading) return; // Wait for packages to fully load
+
+    // Get current package identifiers
+    const currentPackageIds = packages.map((pkg) => pkg.product.identifier);
+    const sortedIds = [...currentPackageIds].sort().join(",");
+
+    // Skip if we've already checked these exact packages
+    if (checkedPackagesRef.current.join(",") === sortedIds) {
+      return;
+    }
+
+    // Update ref
+    checkedPackagesRef.current = currentPackageIds;
 
     // Get all actual product IDs from packages
     const allProductIds = packages.map((pkg) => pkg.product.identifier);
@@ -72,7 +88,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     if (productIdsToCheck.length > 0) {
       checkEligibility(productIdsToCheck);
     }
-  }, [packages, checkEligibility, trialConfig?.enabled, trialConfig?.eligibleProductIds]);
+  }, [packages, isLoading, checkEligibility, trialConfig?.enabled, trialConfig?.eligibleProductIds]);
 
   // Convert eligibility map to format expected by PaywallModal
   // Only process if trial is enabled

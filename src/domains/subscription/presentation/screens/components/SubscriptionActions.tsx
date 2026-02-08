@@ -6,7 +6,12 @@
 import React, { useMemo } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
-import type { SubscriptionActionsProps } from "../../types/SubscriptionDetailTypes";
+
+export interface SubscriptionActionsProps {
+  isPremium: boolean;
+  upgradeButtonLabel?: string;
+  onUpgrade?: () => void;
+}
 
 export const SubscriptionActions: React.FC<SubscriptionActionsProps> = ({
   isPremium,

@@ -28,6 +28,11 @@ export class SubscriptionEventBus {
       const listeners = this.listeners[event];
       if (listeners) {
         this.listeners[event] = listeners.filter(l => l !== callback);
+
+        // Clean up empty event arrays to prevent memory leak
+        if (this.listeners[event].length === 0) {
+          delete this.listeners[event];
+        }
       }
     };
   }
@@ -41,6 +46,28 @@ export class SubscriptionEventBus {
         if (__DEV__) console.error(`[SubscriptionEventBus] Error in listener for ${event}:`, error);
       }
     });
+  }
+
+  /**
+   * Clear all listeners for a specific event or all events
+   * Useful for cleanup during testing or app state reset
+   */
+  clear(event?: string): void {
+    if (event) {
+      delete this.listeners[event];
+    } else {
+      this.listeners = {};
+    }
+  }
+
+  /**
+   * Get listener count for debugging
+   */
+  getListenerCount(event?: string): number {
+    if (event) {
+      return this.listeners[event]?.length ?? 0;
+    }
+    return Object.values(this.listeners).reduce((total, arr) => total + arr.length, 0);
   }
 }
 

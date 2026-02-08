@@ -7,9 +7,17 @@
 import React, { useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
-import type { DevTestSectionProps } from "../../types/SubscriptionDetailTypes";
 
-export type { DevTestActions, DevTestSectionProps } from "../../types/SubscriptionDetailTypes";
+export interface DevTestActions {
+  onTestRenewal: () => void;
+  onCheckCredits: () => void;
+  onTestDuplicate: () => void;
+}
+
+export interface DevTestSectionProps {
+  actions: DevTestActions;
+  title?: string;
+}
 
 /** Dev test button translations */
 export interface DevTestTranslations {

@@ -11,22 +11,61 @@ import {
     ScreenLayout,
 } from "@umituz/react-native-design-system";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
-import { CreditsList } from "./components/CreditsList";
-import { UpgradePrompt } from "./components/UpgradePrompt";
-import { DevTestSection } from "./components/DevTestSection";
-import type { SubscriptionDetailScreenProps } from "../types/SubscriptionDetailTypes";
+import { CreditsList, type CreditItem } from "./components/CreditsList";
+import { UpgradePrompt, type Benefit } from "./components/UpgradePrompt";
+import { DevTestSection, type DevTestActions } from "./components/DevTestSection";
 
-export type {
-  SubscriptionDisplayFlags,
-  SubscriptionDetailTranslations,
-  SubscriptionDetailConfig,
-  SubscriptionDetailScreenProps,
-  DevTestActions,
-  DevToolsConfig,
-  UpgradeBenefit,
-  UpgradePromptConfig,
-  UpgradePromptProps,
-} from "../types/SubscriptionDetailTypes";
+export interface SubscriptionDisplayFlags {
+  showHeader: boolean;
+  showCredits: boolean;
+  showUpgradePrompt: boolean;
+  showExpirationDate: boolean;
+}
+
+export interface SubscriptionDetailTranslations {
+  title: string;
+  statusActive: string;
+  statusExpired: string;
+  statusFree: string;
+  statusCanceled: string;
+  statusLabel: string;
+  lifetimeLabel: string;
+  expiresLabel: string;
+  purchasedLabel: string;
+  usageTitle?: string;
+  creditsTitle: string;
+  creditsResetInfo?: string;
+  remainingLabel?: string;
+  upgradeButton: string;
+}
+
+export interface DevToolsConfig {
+  actions: DevTestActions;
+  title?: string;
+}
+
+export interface UpgradePromptConfig {
+  title: string;
+  subtitle?: string;
+  benefits?: readonly Benefit[];
+}
+
+export interface SubscriptionDetailConfig {
+  display: SubscriptionDisplayFlags;
+  statusType: "active" | "expired" | "none" | "canceled";
+  isLifetime: boolean;
+  expirationDate?: string;
+  purchaseDate?: string;
+  daysRemaining?: number | null;
+  credits?: readonly CreditItem[];
+  translations: SubscriptionDetailTranslations;
+  upgradePrompt?: UpgradePromptConfig & { onUpgrade?: () => void };
+  devTools?: DevToolsConfig;
+}
+
+export interface SubscriptionDetailScreenProps {
+  config: SubscriptionDetailConfig;
+}
 
 export const SubscriptionDetailScreen: React.FC<
   SubscriptionDetailScreenProps
@@ -98,7 +137,7 @@ export const SubscriptionDetailScreen: React.FC<
             subtitle={config.upgradePrompt.subtitle}
             benefits={config.upgradePrompt.benefits}
             upgradeButtonLabel={config.translations.upgradeButton}
-            onUpgrade={config.onUpgrade}
+            onUpgrade={config.upgradePrompt.onUpgrade ?? (() => {})}
           />
         )}
       </View>

@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
-import type { PurchaseSource } from "../../credits/core/Credits";
+import type { PurchaseSource } from "../core/SubscriptionConstants";
 
 export interface PurchaseAuthProvider {
   isAuthenticated: () => boolean;

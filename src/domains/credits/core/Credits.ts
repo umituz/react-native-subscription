@@ -6,6 +6,7 @@
  */
 
 import type { SubscriptionPackageType } from "../../../utils/packageTypeDetector";
+// Types imported from SubscriptionConstants are used directly in UserCredits interface
 import type {
   SubscriptionStatusType,
   PeriodType,
@@ -14,15 +15,6 @@ import type {
   PurchaseSource,
   PurchaseType
 } from "../../subscription/core/SubscriptionConstants";
-
-export type {
-  SubscriptionStatusType,
-  PeriodType,
-  PackageType,
-  Platform,
-  PurchaseSource,
-  PurchaseType
-};
 
 export type CreditType = "text" | "image";
 
@@ -67,10 +59,10 @@ export interface CreditAllocation {
   credits: number;
 }
 
-export type PackageAllocationMap = Record<
+export type PackageAllocationMap = Partial<Record<
   Exclude<SubscriptionPackageType, "unknown">,
   CreditAllocation
->;
+>>;
 
 export interface CreditsConfig {
   collectionName: string;

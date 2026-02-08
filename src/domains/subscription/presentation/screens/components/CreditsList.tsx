@@ -7,7 +7,20 @@ import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { CreditRow } from "../../components/details/CreditRow";
-import type { CreditsListProps } from "../../types/SubscriptionDetailTypes";
+
+export interface CreditItem {
+  id: string;
+  label: string;
+  current: number;
+  total: number;
+}
+
+export interface CreditsListProps {
+  credits: readonly CreditItem[];
+  title?: string;
+  description?: string;
+  remainingLabel?: string;
+}
 
 export const CreditsList: React.FC<CreditsListProps> = ({
   credits,

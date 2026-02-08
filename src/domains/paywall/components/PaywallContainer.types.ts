@@ -5,7 +5,8 @@
 
 import type { ImageSourcePropType } from "react-native";
 import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities/types";
-import type { PurchaseSource, PackageAllocationMap } from "../../credits/core/Credits";
+import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
+import type { PackageAllocationMap } from "../../credits/core/Credits";
 
 /**
  * Trial display configuration

@@ -10,7 +10,19 @@ import {
     AtomicText,
     AtomicIcon,
 } from "@umituz/react-native-design-system";
-import type { UpgradePromptProps } from "../../types/SubscriptionDetailTypes";
+
+export interface Benefit {
+  icon?: string;
+  text: string;
+}
+
+export interface UpgradePromptProps {
+  title: string;
+  subtitle?: string;
+  benefits?: readonly Benefit[];
+  upgradeButtonLabel: string;
+  onUpgrade: () => void;
+}
 
 export const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   title,

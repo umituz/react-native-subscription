@@ -8,7 +8,26 @@ import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { PremiumStatusBadge } from "../../components/details/PremiumStatusBadge";
 import { DetailRow } from "../../components/details/DetailRow";
-import type { SubscriptionHeaderProps } from "../../types/SubscriptionDetailTypes";
+
+export interface SubscriptionHeaderProps {
+  statusType: "active" | "expired" | "none" | "canceled";
+  showExpirationDate: boolean;
+  isLifetime: boolean;
+  expirationDate?: string;
+  purchaseDate?: string;
+  daysRemaining?: number | null;
+  translations: {
+    title: string;
+    statusActive: string;
+    statusExpired: string;
+    statusFree: string;
+    statusCanceled: string;
+    statusLabel: string;
+    lifetimeLabel: string;
+    expiresLabel: string;
+    purchasedLabel: string;
+  };
+}
 
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   statusType,

@@ -11,6 +11,8 @@ export class InitializationCache {
     private initializationInProgress = false;
     // Track which userId the promise is for (separate from currentUserId which is set after completion)
     private promiseUserId: string | null = null;
+    // Track promise completion state to avoid returning failed promises
+    private promiseCompleted = true;
 
     /**
      * Atomically check if reinitialization is needed AND reserve the slot
@@ -22,17 +24,24 @@ export class InitializationCache {
             return { shouldInit: false, existingPromise: this.initPromise };
         }
 
-        // If already initialized for this user and promise resolved successfully, return it
-        if (this.initPromise && this.currentUserId === userId && !this.initializationInProgress) {
+        // If already initialized for this user and promise completed successfully, return it
+        // Only return cached promise if it completed AND it's for the same user
+        if (this.initPromise && this.currentUserId === userId && !this.initializationInProgress && this.promiseCompleted) {
             return { shouldInit: false, existingPromise: this.initPromise };
         }
 
-        // Different user or no initialization - need to reinitialize
-        // Atomically set the flag
-        this.initializationInProgress = true;
-        this.promiseUserId = userId;
+        // Different user, no initialization, or failed promise - need to reinitialize
+        // Atomically set the flag and clear previous state if needed
+        if (!this.initializationInProgress) {
+            this.initializationInProgress = true;
+            this.promiseUserId = userId;
+            this.promiseCompleted = false;
+            return { shouldInit: true, existingPromise: null };
+        }
 
-        return { shouldInit: true, existingPromise: null };
+        // If we reach here, initialization is in progress for a different user
+        // Wait for current initialization to complete
+        return { shouldInit: false, existingPromise: this.initPromise };
     }
 
     setPromise(promise: Promise<boolean>, userId: string): void {
@@ -45,6 +54,7 @@ export class InitializationCache {
                 if (result && this.promiseUserId === userId) {
                     this.currentUserId = userId;
                 }
+                this.promiseCompleted = true;
                 return result;
             })
             .catch(() => {
@@ -52,7 +62,9 @@ export class InitializationCache {
                 if (this.promiseUserId === userId) {
                     this.initPromise = null;
                     this.promiseUserId = null;
+                    this.currentUserId = null; // Clear user on failure
                 }
+                this.promiseCompleted = true;
             })
             .finally(() => {
                 // Always release the mutex
@@ -71,5 +83,6 @@ export class InitializationCache {
         this.currentUserId = null;
         this.initializationInProgress = false;
         this.promiseUserId = null;
+        this.promiseCompleted = true;
     }
 }

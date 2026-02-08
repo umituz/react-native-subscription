@@ -5,7 +5,7 @@
 
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
-import type { PurchaseSource } from "../../../credits/core/Credits";
+import type { PurchaseSource } from "../../../subscription/core/SubscriptionConstants";
 import { getPremiumEntitlement } from "../../core/RevenueCatTypes";
 
 export async function syncPremiumStatus(

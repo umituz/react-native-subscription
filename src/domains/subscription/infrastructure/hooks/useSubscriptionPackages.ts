@@ -12,8 +12,6 @@ import {
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import {
   SUBSCRIPTION_QUERY_KEYS,
-  STALE_TIME,
-  GC_TIME,
 } from "./subscriptionQueryKeys";
 
 /**
@@ -41,11 +39,7 @@ export const useSubscriptionPackages = () => {
 
       return SubscriptionManager.getPackages();
     },
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
     enabled: isConfigured,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true, // Refetch when app becomes active
-    refetchOnReconnect: true, // Refetch when network reconnects
+
   });
 };

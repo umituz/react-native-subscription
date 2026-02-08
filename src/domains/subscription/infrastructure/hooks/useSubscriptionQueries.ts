@@ -6,8 +6,6 @@
 
 export {
   SUBSCRIPTION_QUERY_KEYS,
-  STALE_TIME,
-  GC_TIME,
 } from "./subscriptionQueryKeys";
 export { useInitializeSubscription } from "./useInitializeSubscription";
 export { useSubscriptionPackages } from "./useSubscriptionPackages";

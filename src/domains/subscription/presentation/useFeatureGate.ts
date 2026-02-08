@@ -135,9 +135,9 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[useFeatureGate] requireFeature", {
           isAuthenticated,
-          hasSubscription,
+          hasSubscription: hasSubscriptionRef.current,
           creditBalance: creditBalanceRef.current,
-          requiredCredits,
+          requiredCredits: requiredCreditsRef.current,
           isCreditsLoaded,
         });
       }
@@ -155,25 +155,29 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
         return;
       }
 
-      if (hasSubscription) {
+      // Use ref values to avoid stale closure
+      const currentHasSubscription = hasSubscriptionRef.current;
+      const currentBalance = creditBalanceRef.current;
+      const currentRequiredCredits = requiredCreditsRef.current;
+
+      if (currentHasSubscription) {
         action();
         return;
       }
 
-      const currentBalance = creditBalanceRef.current;
-      if (currentBalance < requiredCredits) {
+      if (currentBalance < currentRequiredCredits) {
         if (typeof __DEV__ !== "undefined" && __DEV__) {
           console.log("[useFeatureGate] No credits, showing paywall");
         }
         pendingActionRef.current = action;
         isWaitingForPurchaseRef.current = true;
-        onShowPaywall(requiredCredits);
+        onShowPaywallRef.current(currentRequiredCredits);
         return;
       }
 
       action();
     },
-    [isAuthenticated, hasSubscription, requiredCredits, onShowAuthModal, onShowPaywall, isCreditsLoaded]
+    [isAuthenticated, onShowAuthModal, isCreditsLoaded]
   );
 
   const hasCredits = creditBalance >= requiredCredits;

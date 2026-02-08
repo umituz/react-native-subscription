@@ -25,21 +25,41 @@ export class PackageHandler {
 
   async fetchPackages(): Promise<PurchasesPackage[]> {
     if (!this.service.isInitialized()) {
-      throw new Error("Service not initialized");
+      throw new Error("Service not initialized. Please initialize before fetching packages.");
     }
 
-    const offering = await this.service.fetchOfferings();
+    try {
+      const offering = await this.service.fetchOfferings();
 
-    if (!offering) {
-      throw new Error("No offerings available");
+      if (!offering) {
+        if (__DEV__) {
+          console.warn("[PackageHandler] No offerings available from RevenueCat");
+        }
+        // Return empty array instead of throwing - allows graceful degradation
+        return [];
+      }
+
+      const packages = offering.availablePackages;
+      if (!packages || packages.length === 0) {
+        if (__DEV__) {
+          console.warn("[PackageHandler] No packages available in offering");
+        }
+        // Return empty array instead of throwing - allows graceful degradation
+        return [];
+      }
+
+      return packages;
+    } catch (error) {
+      if (__DEV__) {
+        console.error("[PackageHandler] Failed to fetch packages:", error);
+      }
+      // Re-throw with more context
+      throw new Error(
+        `Failed to fetch subscription packages. ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
-
-    const packages = offering.availablePackages;
-    if (!packages) {
-      throw new Error("No packages available in offering");
-    }
-
-    return packages;
   }
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {

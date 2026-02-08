@@ -48,11 +48,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       }
     },
     enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
-    staleTime: 30 * 1000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnMount: "always",
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+
   });
 
   return {

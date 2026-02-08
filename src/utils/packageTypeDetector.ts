@@ -11,10 +11,6 @@ export type SubscriptionPackageType = PackageType;
  * Check if identifier is a credit package (consumable purchase)
  * Credit packages use a different system and don't need type detection
  */
-/**
- * Check if identifier is a credit package (consumable purchase)
- * Credit packages use a different system and don't need type detection
- */
 export function isCreditPackage(identifier: string): boolean {
   if (!identifier) return false;
   // Matches "credit" as a word or part of a common naming pattern
