@@ -4,24 +4,24 @@
  */
 
 import { useMemo, useCallback } from "react";
-import { useCredits } from "./useCredits";
+import { useCredits } from "../../credits/presentation/useCredits";
 import { usePaywallVisibility } from "./usePaywallVisibility";
-import { calculateDaysRemaining } from "../../domain/entities/SubscriptionStatus";
-import { formatDate } from "../utils/subscriptionDateUtils";
+import { calculateDaysRemaining } from "../core/SubscriptionStatus";
+import { formatDate } from "../../../presentation/utils/subscriptionDateUtils";
 import { useCreditsArray, getSubscriptionStatusType } from "./useSubscriptionSettingsConfig.utils";
-import { getCreditsConfig } from "../../infrastructure/repositories/CreditsRepositoryProvider";
+import { getCreditsConfig } from "../../credits/infrastructure/CreditsRepositoryProvider";
 import type {
   SubscriptionSettingsConfig,
   SubscriptionStatusType,
   UseSubscriptionSettingsConfigParams,
-} from "../types/SubscriptionSettingsTypes";
+} from "../../../presentation/types/SubscriptionSettingsTypes";
 
 export type {
   SubscriptionSettingsConfig,
   SubscriptionSettingsItemConfig,
   SubscriptionSettingsTranslations,
   UseSubscriptionSettingsConfigParams,
-} from "../types/SubscriptionSettingsTypes";
+} from "../../../presentation/types/SubscriptionSettingsTypes";
 
 export const useSubscriptionSettingsConfig = (
   params: Omit<UseSubscriptionSettingsConfigParams, 'userId'>

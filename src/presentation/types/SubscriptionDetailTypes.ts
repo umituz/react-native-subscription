@@ -3,7 +3,7 @@
  * Type definitions for subscription detail screen and components
  */
 
-import type { SubscriptionStatusType } from "../../domain/entities/SubscriptionStatus";
+import type { SubscriptionStatusType } from "../../domains/subscription/core/SubscriptionStatus";
 import type { CreditInfo } from "../components/details/PremiumDetailsCardTypes";
 
 export type { SubscriptionStatusType, CreditInfo };

@@ -5,7 +5,7 @@
  * Designed to be used across hundreds of apps with configurable limits.
  */
 
-import type { SubscriptionPackageType } from "../../utils/packageTypeDetector";
+import type { SubscriptionPackageType } from "../../../utils/packageTypeDetector";
 import type { 
   SubscriptionStatusType, 
   PeriodType, 
@@ -13,7 +13,7 @@ import type {
   Platform, 
   PurchaseSource, 
   PurchaseType 
-} from "./SubscriptionConstants";
+} from "../../subscription/core/SubscriptionConstants";
 
 export type { 
   SubscriptionStatusType, 

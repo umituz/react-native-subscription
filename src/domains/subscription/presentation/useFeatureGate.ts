@@ -113,20 +113,22 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   useEffect(() => {
     const prevBalance = prevCreditBalanceRef.current ?? 0;
     const creditsIncreased = creditBalance > prevBalance;
+    const subscriptionAcquired = hasSubscription && !hasSubscriptionRef.current;
 
-    if (isWaitingForPurchaseRef.current && creditsIncreased && pendingActionRef.current) {
+    if (isWaitingForPurchaseRef.current && (creditsIncreased || subscriptionAcquired) && pendingActionRef.current) {
       const action = pendingActionRef.current;
       pendingActionRef.current = null;
       isWaitingForPurchaseRef.current = false;
 
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useFeatureGate] Credits increased, executing pending action");
+        console.log("[useFeatureGate] Access acquired (credits or subscription), executing pending action");
       }
       action();
     }
 
     prevCreditBalanceRef.current = creditBalance;
-  }, [creditBalance]);
+    hasSubscriptionRef.current = hasSubscription;
+  }, [creditBalance, hasSubscription]);
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>) => {

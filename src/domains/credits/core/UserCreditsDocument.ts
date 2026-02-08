@@ -5,7 +5,7 @@ import type {
   PeriodType,
   PackageType,
   Platform
-} from "../../domain/entities/SubscriptionConstants";
+} from "../../subscription/core/SubscriptionConstants";
 
 export type { 
   PurchaseSource, 
