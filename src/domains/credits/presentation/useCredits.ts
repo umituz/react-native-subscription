@@ -15,6 +15,7 @@ import {
   getCreditsConfig,
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryProvider";
+import { calculateCreditPercentage, canAffordCost } from "../utils/creditCalculations";
 
 export const creditsQueryKeys = {
   all: ["credits"] as const,
@@ -48,7 +49,9 @@ function deriveLoadStatus(
 export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
   const isConfigured = isCreditsRepositoryConfigured();
-  const config = getCreditsConfig();
+  
+  // Only access config if configured to avoid throwing errors
+  const config = isConfigured ? getCreditsConfig() : null;
   const queryEnabled = !!userId && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
@@ -61,24 +64,6 @@ export const useCredits = (): UseCreditsResult => {
 
       if (!result.success) {
         throw new Error(result.error?.message || "Failed to fetch credits");
-      }
-
-      // If subscription is expired, immediately return 0 credits
-      // to prevent any window where expired user could deduct
-      if (result.data?.status === "expired") {
-        // Sync to Firestore in background
-        repository.syncExpiredStatus(userId).catch((syncError) => {
-          if (typeof __DEV__ !== "undefined" && __DEV__) {
-            console.warn("[useCredits] Background sync failed:", syncError);
-          }
-        });
-
-        // Return expired data with 0 credits immediately
-        return {
-          ...result.data,
-          credits: 0,
-          isPremium: false,
-        };
       }
 
       return result.data || null;
@@ -111,12 +96,13 @@ export const useCredits = (): UseCreditsResult => {
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
-    const percent = credits ? Math.round((credits.credits / config.creditLimit) * 100) : 0;
+    const limit = config?.creditLimit ?? 0;
+    const percent = calculateCreditPercentage(credits?.credits, limit);
     return { hasCredits: has, creditsPercent: percent };
-  }, [credits, config.creditLimit]);
+  }, [credits, config?.creditLimit]);
 
   const canAfford = useCallback(
-    (cost: number): boolean => (credits?.credits ?? 0) >= cost,
+    (cost: number): boolean => canAffordCost(credits?.credits, cost),
     [credits]
   );
 

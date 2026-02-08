@@ -5,18 +5,18 @@
  */
 
 import type { PremiumStatusFetcher } from './types';
-import { isGuest } from './authUtils';
+
 
 /**
  * Get isPremium value with centralized logic
  */
 export function getIsPremium(
-  isGuestFlag: boolean,
+  isAnonymous: boolean,
   userId: string | null,
   isPremiumOrFetcher: boolean | PremiumStatusFetcher,
 ): Promise<boolean> {
-  // Guest users NEVER have premium
-  if (isGuest(isGuestFlag, userId)) return Promise.resolve(false);
+  // Anonymous users NEVER have premium
+  if (isAnonymous || userId === null) return Promise.resolve(false);
 
   // Sync mode: return the provided isPremium value
   if (typeof isPremiumOrFetcher === 'boolean') return Promise.resolve(isPremiumOrFetcher);

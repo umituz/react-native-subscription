@@ -5,18 +5,18 @@
  */
 
 import type { UserTierInfo } from './types';
-import { isGuest } from './authUtils';
+
 
 export function getUserTierInfo(
-  isGuestFlag: boolean,
+  isAnonymous: boolean,
   userId: string | null,
   isPremium: boolean,
 ): UserTierInfo {
-  if (isGuest(isGuestFlag, userId)) {
+  if (isAnonymous || userId === null) {
     return {
-      tier: 'guest',
+      tier: 'anonymous',
       isPremium: false,
-      isGuest: true,
+      isAnonymous: true,
       isAuthenticated: false,
       userId: null,
     };
@@ -25,17 +25,17 @@ export function getUserTierInfo(
   return {
     tier: isPremium ? 'premium' : 'freemium',
     isPremium,
-    isGuest: false,
+    isAnonymous: false,
     isAuthenticated: true,
     userId,
   };
 }
 
 export function checkPremiumAccess(
-  isGuestFlag: boolean,
+  isAnonymous: boolean,
   userId: string | null,
   isPremium: boolean,
 ): boolean {
-  if (isGuest(isGuestFlag, userId)) return false;
+  if (isAnonymous || userId === null) return false;
   return isPremium;
 }

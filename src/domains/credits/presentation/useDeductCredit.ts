@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from "@umituz/react-native-design-system"
 import type { UserCredits } from "../core/Credits";
 import { getCreditsRepository } from "../infrastructure/CreditsRepositoryProvider";
 import { creditsQueryKeys } from "./useCredits";
+import { calculateRemainingCredits } from "../utils/creditCalculations";
 
 import { timezoneService } from "@umituz/react-native-design-system";
 
@@ -42,14 +43,12 @@ export const useDeductCredit = ({
       await queryClient.cancelQueries({ queryKey: creditsQueryKeys.user(userId) });
       const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(userId));
 
-      // Improved optimistic update logic
       if (!previousCredits) {
         return { previousCredits: null, skippedOptimistic: true };
       }
 
-      // If credits are insufficient, show 0 but don't skip optimistic update
-      // This provides better UX by showing the user what will happen
-      const newCredits = Math.max(0, previousCredits.credits - cost);
+      // Calculate new credits using utility
+      const newCredits = calculateRemainingCredits(previousCredits.credits, cost);
 
       queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(userId), (old) => {
         if (!old) return old;
@@ -67,10 +66,10 @@ export const useDeductCredit = ({
       };
     },
     onError: (_err, _cost, context) => {
-      // Restore previous credits on error
-      // Skip restoration if credits were insufficient (optimistic update showed 0, which is correct)
-      if (userId && context?.previousCredits && !context.skippedOptimistic && !context.wasInsufficient) {
-        queryClient.setQueryData(creditsQueryKeys.user(userId), context.previousCredits);
+      // Always restore previous credits on error to prevent UI desync
+      // Use optional chaining to be safe
+      if (userId && context?.previousCredits && !context.skippedOptimistic) {
+         queryClient.setQueryData(creditsQueryKeys.user(userId), context.previousCredits);
       }
     },
     onSuccess: () => {

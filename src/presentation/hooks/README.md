@@ -103,7 +103,7 @@ All hooks follow consistent patterns:
 - **ALWAYS** handle loading and error states
 - **NEVER** trust client-side state for security
 - **MUST** implement error boundaries
-- **ALWAYS** test with various user states (guest, free, premium)
+- **ALWAYS** test with various user states (anonymous, free, premium)
 
 ## AI Agent Guidelines
 

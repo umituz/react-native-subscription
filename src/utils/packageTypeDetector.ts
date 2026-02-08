@@ -16,8 +16,10 @@ export type SubscriptionPackageType = PackageType;
  * Credit packages use a different system and don't need type detection
  */
 export function isCreditPackage(identifier: string): boolean {
+  if (!identifier) return false;
   // Matches "credit" as a word or part of a common naming pattern
-  return /\bcredit\b|_credit_|-credit-/i.test(identifier) || identifier.toLowerCase().includes("credit");
+  // More strict to avoid false positives (e.g. "accredited")
+  return /(?:^|[._-])credit(?:$|[._-])/i.test(identifier);
 }
 
 /**
@@ -36,36 +38,24 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     return PACKAGE_TYPE.UNKNOWN;
   }
 
-  // Preview API mode (Expo Go testing)
-  if (normalized.includes("preview")) {
-    if (__DEV__) {
-      console.log("[PackageTypeDetector] Detected: PREVIEW (monthly)");
-    }
-    return PACKAGE_TYPE.MONTHLY;
-  }
-
   // Weekly detection: matches "weekly" or "week" as distinct parts of the ID
   if (/\bweekly?\b|_week_|-week-|\.week\./i.test(normalized)) {
-    if (__DEV__) {
-      console.log("[PackageTypeDetector] Detected: WEEKLY");
-    }
     return PACKAGE_TYPE.WEEKLY;
   }
 
   // Monthly detection: matches "monthly" or "month"
   if (/\bmonthly?\b|_month_|-month-|\.month\./i.test(normalized)) {
-    if (__DEV__) {
-      console.log("[PackageTypeDetector] Detected: MONTHLY");
-    }
     return PACKAGE_TYPE.MONTHLY;
   }
 
   // Yearly detection: matches "yearly", "year", or "annual"
   if (/\byearly?\b|_year_|-year-|\.year\.|annual/i.test(normalized)) {
-    if (__DEV__) {
-      console.log("[PackageTypeDetector] Detected: YEARLY");
-    }
     return PACKAGE_TYPE.YEARLY;
+  }
+  
+  // Lifetime detection: matches "lifetime"
+  if (/\blifetime\b|_lifetime_|-lifetime-|\.lifetime\./i.test(normalized)) {
+      return PACKAGE_TYPE.LIFETIME;
   }
 
   if (__DEV__) {

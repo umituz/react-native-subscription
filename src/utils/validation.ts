@@ -7,7 +7,7 @@
 import type { UserTier, UserTierInfo } from './types';
 
 export function isValidUserTier(value: unknown): value is UserTier {
-  return value === 'guest' || value === 'freemium' || value === 'premium';
+  return value === 'anonymous' || value === 'freemium' || value === 'premium';
 }
 
 export function isUserTierInfo(value: unknown): value is UserTierInfo {
@@ -16,7 +16,7 @@ export function isUserTierInfo(value: unknown): value is UserTierInfo {
   return (
     isValidUserTier(obj.tier) &&
     typeof obj.isPremium === 'boolean' &&
-    typeof obj.isGuest === 'boolean' &&
+    typeof obj.isAnonymous === 'boolean' &&
     typeof obj.isAuthenticated === 'boolean' &&
     (obj.userId === null || typeof obj.userId === 'string')
   );

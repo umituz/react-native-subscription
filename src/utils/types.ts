@@ -4,7 +4,7 @@
  * Type definitions for user tier system
  */
 
-export type UserTier = 'guest' | 'freemium' | 'premium';
+export type UserTier = 'anonymous' | 'freemium' | 'premium';
 
 export interface UserTierInfo {
   /** User tier classification */
@@ -13,13 +13,13 @@ export interface UserTierInfo {
   /** Whether user has premium access */
   isPremium: boolean;
 
-  /** Whether user is a guest (not authenticated) */
-  isGuest: boolean;
+  /** Whether user is anonymous (not authenticated) */
+  isAnonymous: boolean;
 
   /** Whether user is authenticated */
   isAuthenticated: boolean;
 
-  /** User ID (null for guests) */
+  /** User ID (null for anonymous users) */
   userId: string | null;
 }
 

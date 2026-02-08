@@ -40,7 +40,7 @@ Hook for checking and managing premium subscription status.
 
 - **NEVER** use for security decisions (server-side validation required)
 - **NEVER** assume instant data availability (always check loading state)
-- **DO NOT** use for guest users without proper handling
+- **DO NOT** use for anonymous users without proper handling
 
 ### CRITICAL SAFETY
 
@@ -67,7 +67,7 @@ Hook for checking and managing premium subscription status.
 - [ ] Provide upgrade path for free users
 - [ ] Test with premium user
 - [ ] Test with free user
-- [ ] Test with guest user
+- [ ] Test with anonymous user
 - [ ] Test offline scenario
 
 ### Common Patterns
