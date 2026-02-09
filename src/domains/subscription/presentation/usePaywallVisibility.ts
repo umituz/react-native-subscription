@@ -30,7 +30,7 @@ const setPaywallState = (visible: boolean, source?: PurchaseSource): void => {
 };
 
 /**
- * Direct paywall control for non-React contexts (e.g., appInitializer)
+ * Direct paywall control for non-React services (e.g., appInitializer)
  */
 export const paywallControl = {
   open: (source?: PurchaseSource) => setPaywallState(true, source),

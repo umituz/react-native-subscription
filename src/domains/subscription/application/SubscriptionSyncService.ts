@@ -1,7 +1,7 @@
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatData } from "../core/RevenueCatData";
 import { type PeriodType, type PurchaseSource, PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
-import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryProvider";
+import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
@@ -69,32 +69,56 @@ export class SubscriptionSyncService {
     periodType?: PeriodType
   ) {
     try {
+      // Handle subscription expiration explicitly
       if (!isPremium && productId) {
         await getCreditsRepository().syncExpiredStatus(userId);
         subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
         return;
       }
 
-      // If productId is missing, we can't initialize credits fully, 
-      // but if isPremium is true, we should have it.
-      // Fallback to 'unknown' if missing, but this might throw in CreditLimitCalculator.
-      const validProductId = productId ?? 'unknown_product';
+      // If not premium and no product, this is a freemium user.
+      // We only want to run initializeCredits for them if it's their first time,
+      // which initializeCredits handles, but we should avoid doing it on every sync.
+      if (!isPremium && !productId) {
+        // Option 1: Just skip if they are already known non-premium (handled by repository check)
+        // For now, let's just use a more stable sync ID to allow the repository to skip if possible
+        const stableSyncId = `init_sync_${userId}`;
+        
+        await getCreditsRepository().initializeCredits(
+          userId, 
+          stableSyncId, 
+          'no_subscription', 
+          PURCHASE_SOURCE.SETTINGS, 
+          { 
+            isPremium: false, 
+            expirationDate: null, 
+            willRenew: false, 
+            periodType: null, 
+            originalTransactionId: null 
+          },
+          PURCHASE_TYPE.INITIAL
+        );
+        
+        subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
+        return;
+      }
 
+      // Standard status sync for premium users
       const revenueCatData: RevenueCatData = { 
         expirationDate: expiresAt ?? null, 
         willRenew: willRenew ?? false, 
         isPremium, 
-        periodType: periodType ?? null, // Fix undefined vs null
-        originalTransactionId: null // Initialize with null as we might not have it here
+        periodType: periodType ?? null,
+        originalTransactionId: null 
       };
       
       await getCreditsRepository().initializeCredits(
         userId, 
         `status_sync_${Date.now()}`, 
-        validProductId, 
+        productId ?? 'no_subscription', 
         PURCHASE_SOURCE.SETTINGS, 
         revenueCatData,
-        PURCHASE_TYPE.INITIAL // Status sync treated as Initial or Update
+        PURCHASE_TYPE.INITIAL
       );
       
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);

@@ -2,9 +2,10 @@
  * Paywall Modal
  */
 
-import React, { useState, useCallback, useEffect } from "react";
-import { View, ScrollView, TouchableOpacity, Linking, type ImageSourcePropType } from "react-native";
-import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system";
+import React, { useCallback, useEffect } from "react";
+import { View, TouchableOpacity, Linking, type ImageSourcePropType } from "react-native";
+import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner, useSafeAreaInsets } from "@umituz/react-native-design-system";
+import { ScreenLayout } from "../../../shared/presentation";
 import { Image } from "expo-image";
 import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
@@ -12,7 +13,7 @@ import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from 
 import { paywallModalStyles as styles } from "./PaywallModal.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";
-import { usePurchaseLoadingStore, selectIsPurchasing } from "../../subscription/presentation/stores";
+import { usePaywallActions } from "../hooks/usePaywallActions";
 
 /** Trial eligibility info per product */
 export interface TrialEligibilityInfo {
@@ -47,60 +48,28 @@ export interface PaywallModalProps {
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   const { visible, onClose, translations, packages = [], features = [], isLoading = false, legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText } = props;
   const tokens = useAppDesignTokens();
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-  const [isLocalProcessing, setIsLocalProcessing] = useState(false);
-
-  // Global purchase loading state (for auto-execution after auth)
-  const isGlobalPurchasing = usePurchaseLoadingStore(selectIsPurchasing);
-  const { startPurchase, endPurchase } = usePurchaseLoadingStore();
+  const insets = useSafeAreaInsets();
+  
+  const {
+    selectedPlanId,
+    setSelectedPlanId,
+    isProcessing,
+    handlePurchase,
+    handleRestore,
+    resetState,
+  } = usePaywallActions({ packages, onPurchase, onRestore });
 
   // Reset selected plan when packages change
   useEffect(() => {
     setSelectedPlanId(null);
-  }, [packages]);
+  }, [packages, setSelectedPlanId]);
 
   // Cleanup state when modal closes to prevent stale state
   useEffect(() => {
     if (!visible) {
-      setSelectedPlanId(null);
-      setIsLocalProcessing(false);
+      resetState();
     }
-  }, [visible]);
-
-  // Combined processing state
-  const isProcessing = isLocalProcessing || isGlobalPurchasing;
-
-  const handlePurchase = useCallback(async () => {
-    if (!selectedPlanId || !onPurchase) return;
-
-    setIsLocalProcessing(true);
-    startPurchase(selectedPlanId, "manual");
-
-    try {
-      const pkg = packages.find((p) => p.product.identifier === selectedPlanId);
-      if (pkg) {
-        await onPurchase(pkg);
-      }
-    } catch (error) {
-      if (__DEV__) {
-        console.error("[PaywallModal] Purchase failed:", error);
-      }
-    } finally {
-      setIsLocalProcessing(false);
-      endPurchase();
-    }
-  }, [selectedPlanId, packages, onPurchase, startPurchase, endPurchase]);
-
-  const handleRestore = useCallback(async () => {
-    if (!onRestore || isProcessing) return;
-
-    setIsLocalProcessing(true);
-    try {
-      await onRestore();
-    } finally {
-      setIsLocalProcessing(false);
-    }
-  }, [onRestore, isProcessing]);
+  }, [visible, resetState]);
 
   const handleLegalUrl = useCallback(async (url: string | undefined) => {
     if (!url) return;
@@ -110,11 +79,18 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   return (
     <BaseModal visible={visible} onClose={onClose} contentStyle={styles.modalContent}>
       <View style={[styles.container, { backgroundColor: tokens.colors.surface }]}>
-        <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: tokens.colors.surfaceSecondary }]} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity 
+          onPress={onClose} 
+          style={[
+            styles.closeBtn, 
+            { backgroundColor: tokens.colors.surfaceSecondary, top: Math.max(insets.top, 12) }
+          ]} 
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <AtomicIcon name="close-outline" size="md" customColor={tokens.colors.textPrimary} />
         </TouchableOpacity>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <ScreenLayout scrollable={true} edges={["bottom"]} backgroundColor="transparent" contentContainerStyle={styles.scroll}>
           {heroImage && (
             <View style={styles.heroContainer}>
               <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={0} />
@@ -171,7 +147,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
           </TouchableOpacity>
 
           <PaywallFooter translations={translations} legalUrls={legalUrls} isProcessing={isProcessing} onRestore={onRestore ? handleRestore : undefined} onLegalClick={handleLegalUrl} />
-        </ScrollView>
+        </ScreenLayout>
       </View>
     </BaseModal>
   );

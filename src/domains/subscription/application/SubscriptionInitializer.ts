@@ -7,7 +7,7 @@
  */
 
 import { Platform } from "react-native";
-import { configureCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryProvider";
+import { configureCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { configureAuthProvider } from "../presentation/useAuthAwarePurchase";
 import { SubscriptionSyncService } from "./SubscriptionSyncService";

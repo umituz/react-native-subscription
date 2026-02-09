@@ -6,7 +6,7 @@
 import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import type { UserCredits } from "../core/Credits";
-import { getCreditsRepository } from "../infrastructure/CreditsRepositoryProvider";
+import { getCreditsRepository } from "../infrastructure/CreditsRepositoryManager";
 import { creditsQueryKeys } from "./useCredits";
 import { calculateRemainingCredits } from "../utils/creditCalculations";
 
@@ -65,11 +65,11 @@ export const useDeductCredit = ({
         wasInsufficient: previousCredits.credits < cost
       };
     },
-    onError: (_err, _cost, context) => {
+    onError: (_err, _cost, mutationData) => {
       // Always restore previous credits on error to prevent UI desync
       // Use optional chaining to be safe
-      if (userId && context?.previousCredits && !context.skippedOptimistic) {
-         queryClient.setQueryData(creditsQueryKeys.user(userId), context.previousCredits);
+      if (userId && mutationData?.previousCredits && !mutationData.skippedOptimistic) {
+         queryClient.setQueryData(creditsQueryKeys.user(userId), mutationData.previousCredits);
       }
     },
     onSuccess: () => {

@@ -6,7 +6,7 @@
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
-export interface LogContext {
+export interface LogMetadata {
   [key: string]: unknown;
 }
 
@@ -57,54 +57,54 @@ class SubscriptionLogger {
     return `[${category}] ${message}`;
   }
 
-  debug(category: LogCategory, message: string, context?: LogContext): void {
+  debug(category: LogCategory, message: string, metadata?: LogMetadata): void {
     if (!this.shouldLog(category)) return;
-    console.log(this.formatMessage(category, message), context ?? "");
+    console.log(this.formatMessage(category, message), metadata ?? "");
   }
 
-  info(category: LogCategory, message: string, context?: LogContext): void {
+  info(category: LogCategory, message: string, metadata?: LogMetadata): void {
     if (!this.shouldLog(category)) return;
-    console.log(this.formatMessage(category, message), context ?? "");
+    console.log(this.formatMessage(category, message), metadata ?? "");
   }
 
-  warn(category: LogCategory, message: string, context?: LogContext): void {
+  warn(category: LogCategory, message: string, metadata?: LogMetadata): void {
     if (!this.shouldLog(category)) return;
-    console.warn(this.formatMessage(category, message), context ?? "");
+    console.warn(this.formatMessage(category, message), metadata ?? "");
   }
 
-  error(category: LogCategory, message: string, error?: unknown, context?: LogContext): void {
+  error(category: LogCategory, message: string, error?: unknown, metadata?: LogMetadata): void {
     if (!this.shouldLog(category)) return;
-    console.error(this.formatMessage(category, message), { error, ...context });
+    console.error(this.formatMessage(category, message), { error, ...metadata });
   }
 
   /** Log purchase flow events */
-  purchase(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.PURCHASE, message, context);
+  purchase(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.PURCHASE, message, metadata);
   }
 
   /** Log credits-related events */
-  credits(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.CREDITS, message, context);
+  credits(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.CREDITS, message, metadata);
   }
 
   /** Log trial-related events */
-  trial(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.TRIAL, message, context);
+  trial(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.TRIAL, message, metadata);
   }
 
   /** Log RevenueCat SDK events */
-  revenueCat(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.REVENUECAT, message, context);
+  revenueCat(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.REVENUECAT, message, metadata);
   }
 
   /** Log feature gate events */
-  featureGate(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.FEATURE_GATE, message, context);
+  featureGate(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.FEATURE_GATE, message, metadata);
   }
 
   /** Log sync operations */
-  sync(message: string, context?: LogContext): void {
-    this.debug(LOG_CATEGORY.SYNC, message, context);
+  sync(message: string, metadata?: LogMetadata): void {
+    this.debug(LOG_CATEGORY.SYNC, message, metadata);
   }
 }
 

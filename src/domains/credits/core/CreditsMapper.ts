@@ -3,17 +3,12 @@ import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionS
 import type { PeriodType, SubscriptionStatusType } from "../../subscription/core/SubscriptionConstants";
 import type { UserCreditsDocumentRead } from "./UserCreditsDocument";
 
+import { toSafeDate } from "../../../utils/dateUtils";
+
 /** Maps Firestore document to domain entity with expiration validation */
 export class CreditsMapper {
   static toEntity(doc: UserCreditsDocumentRead): UserCredits {
-    const safeDate = (ts: any): Date | null => {
-        if (!ts) return null;
-        if (typeof ts.toDate === "function") return ts.toDate();
-        if (ts instanceof Date) return ts;
-        return null;
-    };
-
-    const expirationDate = safeDate(doc.expirationDate);
+    const expirationDate = toSafeDate(doc.expirationDate);
     const periodType = doc.periodType;
 
     // Validate isPremium against expirationDate (real-time check)
@@ -25,10 +20,10 @@ export class CreditsMapper {
       status,
 
       // Dates
-      purchasedAt: safeDate(doc.purchasedAt) ?? new Date(),
+      purchasedAt: toSafeDate(doc.purchasedAt) ?? new Date(),
       expirationDate,
-      lastUpdatedAt: safeDate(doc.lastUpdatedAt) ?? new Date(),
-      lastPurchaseAt: safeDate(doc.lastPurchaseAt),
+      lastUpdatedAt: toSafeDate(doc.lastUpdatedAt) ?? new Date(),
+      lastPurchaseAt: toSafeDate(doc.lastPurchaseAt),
 
       // RevenueCat details
       willRenew: doc.willRenew,
@@ -39,8 +34,8 @@ export class CreditsMapper {
       // Trial fields
       periodType,
       isTrialing: doc.isTrialing,
-      trialStartDate: safeDate(doc.trialStartDate),
-      trialEndDate: safeDate(doc.trialEndDate),
+      trialStartDate: toSafeDate(doc.trialStartDate),
+      trialEndDate: toSafeDate(doc.trialEndDate),
       trialCredits: doc.trialCredits,
       convertedFromTrial: doc.convertedFromTrial,
 

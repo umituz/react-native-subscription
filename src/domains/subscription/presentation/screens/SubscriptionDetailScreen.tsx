@@ -8,8 +8,8 @@ import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import {
     useAppDesignTokens,
-    ScreenLayout,
 } from "@umituz/react-native-design-system";
+import { ScreenLayout } from "../../../../shared/presentation";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList, type CreditItem } from "./components/CreditsList";
 import { UpgradePrompt, type Benefit } from "./components/UpgradePrompt";

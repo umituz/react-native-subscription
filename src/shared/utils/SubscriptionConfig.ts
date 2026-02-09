@@ -11,5 +11,5 @@ export interface SubscriptionConfig {
     entitlements?: string[];
     debugMode?: boolean;
     onStatusChanged?: (userId: string, status: SubscriptionStatus) => Promise<void> | void;
-    onError?: (error: Error, context: string) => Promise<void> | void;
+    onError?: (error: Error, operation: string) => Promise<void> | void;
 }

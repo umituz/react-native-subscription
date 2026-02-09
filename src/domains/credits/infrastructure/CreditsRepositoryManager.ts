@@ -1,7 +1,7 @@
 /**
- * Credits Repository Provider
+ * Credits Repository Manager
  * Module-level singleton for credits repository configuration
- * Replaces Context API with a simpler, testable approach
+ * Provides a clean, testable approach for repository access
  */
 
 import type { CreditsConfig } from "../core/Credits";

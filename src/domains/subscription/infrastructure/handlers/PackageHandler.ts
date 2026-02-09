@@ -44,7 +44,7 @@ export class PackageHandler {
 
       return packages;
     } catch (error) {
-      // Re-throw with more context
+      // Re-throw with more detail
       throw new Error(
         `Failed to fetch subscription packages. ${
           error instanceof Error ? error.message : "Unknown error"

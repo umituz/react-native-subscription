@@ -4,9 +4,9 @@ import { TrialCreditStrategy } from "./TrialCreditStrategy";
 import { StandardPurchaseCreditStrategy } from "./StandardPurchaseCreditStrategy";
 
 /**
- * Strategy Context to coordinate credit allocation logic using the Strategy Pattern.
+ * Orchestrator to coordinate credit allocation logic using the Strategy Pattern.
  */
-export class CreditAllocationContext {
+export class CreditAllocationOrchestrator {
     private strategies: ICreditStrategy[] = [
         new SyncCreditStrategy(),
         new TrialCreditStrategy(),
@@ -25,11 +25,11 @@ export class CreditAllocationContext {
         }
 
         if (__DEV__) {
-            console.log(`[CreditAllocationContext] Using strategy: ${strategy.constructor.name}`);
+            console.log(`[CreditAllocationOrchestrator] Using strategy: ${strategy.constructor.name}`);
         }
 
         return strategy.execute(params);
     }
 }
 
-export const creditAllocationContext = new CreditAllocationContext();
+export const creditAllocationOrchestrator = new CreditAllocationOrchestrator();

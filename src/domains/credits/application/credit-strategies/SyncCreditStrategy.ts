@@ -6,7 +6,7 @@ import { ICreditStrategy, type CreditAllocationParams } from "./ICreditStrategy"
  */
 export class SyncCreditStrategy implements ICreditStrategy {
     canHandle(params: CreditAllocationParams): boolean {
-        return params.isStatusSync && params.existingData?.isPremium === true && params.isSubscriptionActive;
+        return params.isStatusSync;
     }
 
     execute(params: CreditAllocationParams): number {

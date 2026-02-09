@@ -14,7 +14,7 @@ import {
   getCreditsRepository,
   getCreditsConfig,
   isCreditsRepositoryConfigured,
-} from "../infrastructure/CreditsRepositoryProvider";
+} from "../infrastructure/CreditsRepositoryManager";
 import { calculateCreditPercentage, canAffordCost } from "../utils/creditCalculations";
 
 export const creditsQueryKeys = {

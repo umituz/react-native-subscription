@@ -48,7 +48,7 @@ export {
   getCreditsRepository, 
   getCreditsConfig, 
   isCreditsRepositoryConfigured 
-} from "./domains/credits/infrastructure/CreditsRepositoryProvider";
+} from "./domains/credits/infrastructure/CreditsRepositoryManager";
 
 // Presentation Layer - Hooks (Point to the bridge)
 export * from "./presentation/hooks";

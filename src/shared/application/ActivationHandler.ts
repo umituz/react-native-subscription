@@ -9,7 +9,7 @@ export interface ActivationHandlerConfig {
     userId: string,
     status: SubscriptionStatus
   ) => Promise<void> | void;
-  onError?: (error: Error, context: string) => Promise<void> | void;
+  onError?: (error: Error, operation: string) => Promise<void> | void;
 }
 
 /**
@@ -85,15 +85,15 @@ async function notifyStatusChange(
  * Safe error handler - wraps error callbacks to prevent secondary failures
  */
 export async function safeHandleError(
-  onError: ((error: Error, context: string) => Promise<void> | void) | undefined,
+  onError: ((error: Error, operation: string) => Promise<void> | void) | undefined,
   error: unknown,
-  context: string
+  operation: string
 ): Promise<void> {
   if (!onError) return;
 
   try {
     const err = error instanceof Error ? error : new Error("Unknown error");
-    await onError(err, context);
+    await onError(err, operation);
   } catch {
     // Ignore callback errors
   }
@@ -102,7 +102,7 @@ export async function safeHandleError(
 async function handleError(
   config: ActivationHandlerConfig,
   error: unknown,
-  context: string
+  operation: string
 ): Promise<void> {
-  await safeHandleError(config.onError, error, `ActivationHandler.${context}`);
+  await safeHandleError(config.onError, error, `ActivationHandler.${operation}`);
 }

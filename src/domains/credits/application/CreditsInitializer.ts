@@ -1,5 +1,3 @@
-import { Platform } from "react-native";
-import Constants from "expo-constants";
 import {
   getFirestore,
 } from "@umituz/react-native-firebase";
@@ -14,7 +12,8 @@ import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
 import { CreditLimitCalculator } from "./CreditLimitCalculator";
 import { PurchaseMetadataGenerator } from "./PurchaseMetadataGenerator";
-import { creditAllocationContext } from "./credit-strategies/CreditAllocationContext";
+import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocationOrchestrator";
+import { getAppVersion, validatePlatform, isPast } from "../../../utils";
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
 
 export async function initializeCreditsTransaction(
@@ -40,7 +39,7 @@ export async function initializeCreditsTransaction(
                 status: "none",
                 processedPurchases: [],
                 purchaseHistory: [],
-                platform: Platform.OS as any,
+                platform: validatePlatform() as any,
                 lastUpdatedAt: now,
                 purchasedAt: now,
                 expirationDate: null,
@@ -68,15 +67,8 @@ export async function initializeCreditsTransaction(
 
         const creditLimit = CreditLimitCalculator.calculate(metadata.productId, config);
 
-        const platform = Platform.OS;
-        if (platform !== "ios" && platform !== "android") {
-            throw new Error(`Invalid platform: ${platform}`);
-        }
-
-        const appVersion = Constants.expoConfig?.version;
-        if (!appVersion) {
-            throw new Error("appVersion is required in expoConfig");
-        }
+        const platform = validatePlatform();
+        const appVersion = getAppVersion();
 
         const { purchaseHistory } = PurchaseMetadataGenerator.generate({
             productId: metadata.productId,
@@ -91,7 +83,7 @@ export async function initializeCreditsTransaction(
 
         let isExpired = false;
         if (metadata.expirationDate) {
-            isExpired = new Date(metadata.expirationDate).getTime() < Date.now();
+            isExpired = isPast(metadata.expirationDate);
         }
 
         const status = resolveSubscriptionStatus({
@@ -104,7 +96,7 @@ export async function initializeCreditsTransaction(
         const isStatusSync = purchaseId.startsWith("status_sync_");
         const isSubscriptionActive = isPremium && !isExpired;
 
-        const newCredits = creditAllocationContext.allocate({
+        const newCredits = creditAllocationOrchestrator.allocate({
             status,
             isStatusSync,
             existingData,
@@ -149,6 +141,24 @@ export async function initializeCreditsTransaction(
 
         creditsData.productId = metadata.productId;
         creditsData.platform = platform;
+
+        // Skip write if it's a status sync and data hasn't changed to save costs
+        if (isStatusSync && existingData) {
+            const hasChanged = 
+                existingData.isPremium !== creditsData.isPremium ||
+                existingData.status !== creditsData.status ||
+                existingData.credits !== creditsData.credits ||
+                existingData.creditLimit !== creditsData.creditLimit ||
+                existingData.productId !== creditsData.productId;
+
+            if (!hasChanged) {
+                return {
+                    credits: existingData.credits,
+                    alreadyProcessed: true,
+                    finalData: existingData
+                };
+            }
+        }
 
         transaction.set(creditsRef, creditsData, { merge: true });
 

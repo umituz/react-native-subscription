@@ -9,13 +9,15 @@
 import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import {
-    useSafeAreaInsets,
     useAppDesignTokens,
     AtomicText,
     AtomicIcon,
     AtomicSpinner,
-    ScreenLayout,
 } from "@umituz/react-native-design-system";
+import { ScreenLayout } from "../../../../shared/presentation";
+import { useNavigation } from "@react-navigation/native";
+import { useWallet } from "../hooks/useWallet";
+import { getWalletConfig } from "../../infrastructure/config/walletConfig";
 import {
     BalanceCard,
     type BalanceCardTranslations,
@@ -24,7 +26,6 @@ import {
     TransactionList,
     type TransactionListTranslations,
 } from "../components/TransactionList";
-import type { CreditLog } from "../../domain/types/transaction.types";
 
 export interface WalletScreenTranslations
   extends BalanceCardTranslations,
@@ -32,58 +33,72 @@ export interface WalletScreenTranslations
   screenTitle: string;
 }
 
-export interface WalletScreenConfig {
-  balance: number;
-  balanceLoading: boolean;
-  transactions: CreditLog[];
-  transactionsLoading: boolean;
-  translations: WalletScreenTranslations;
+export interface WalletScreenProps {
+  /** Translations (overrides global config) */
+  translations?: WalletScreenTranslations;
+  /** Override onBack handler (default: navigation.goBack) */
   onBack?: () => void;
+  /** Custom date formatter */
   dateFormatter?: (timestamp: number) => string;
-  maxTransactionHeight?: number;
-  balanceIconName?: string;
+  /** Footer component */
   footer?: React.ReactNode;
 }
 
-export interface WalletScreenProps {
-  config: WalletScreenConfig;
-}
-
-export const WalletScreen: React.FC<WalletScreenProps> = ({ config }) => {
+export const WalletScreen: React.FC<WalletScreenProps> = ({ 
+  translations,
+  onBack,
+  dateFormatter,
+  footer,
+}) => {
   const tokens = useAppDesignTokens();
-  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const config = getWalletConfig();
+
+  const {
+    balance,
+    balanceLoading,
+    transactions,
+    transactionsLoading,
+  } = useWallet({
+    transactionConfig: {
+      collectionName: config.transactionCollection,
+      useUserSubcollection: config.useUserSubcollection,
+    },
+    transactionLimit: config.transactionLimit,
+  });
+
+  const activeTranslations = translations ?? config.translations;
+  const handleBack = onBack ?? (() => navigation.goBack());
 
   const renderHeader = () => (
-    <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-      {config.onBack && (
-        <TouchableOpacity
-          onPress={config.onBack}
-          style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <AtomicIcon
-            name="arrow-left"
-            size="lg"
-            customColor={tokens.colors.textPrimary}
-          />
-        </TouchableOpacity>
-      )}
+    <View style={[styles.header, { paddingTop: 12 }]}>
+      <TouchableOpacity
+        onPress={handleBack}
+        style={styles.backButton}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
+        <AtomicIcon
+          name="arrow-left"
+          size="lg"
+          customColor={tokens.colors.textPrimary}
+        />
+      </TouchableOpacity>
       <AtomicText
         type="titleLarge"
         style={{ color: tokens.colors.textPrimary, fontWeight: "700" }}
       >
-        {config.translations.screenTitle}
+        {activeTranslations.screenTitle}
       </AtomicText>
     </View>
   );
 
   const renderBalance = () => {
-    if (config.balanceLoading) {
+    if (balanceLoading) {
       return (
         <AtomicSpinner
           size="xl"
           color="primary"
-          text={config.translations.loading}
+          text={activeTranslations.loading}
           fullContainer
           style={styles.loadingContainer}
         />
@@ -92,8 +107,8 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ config }) => {
 
     return (
       <BalanceCard
-        balance={config.balance}
-        translations={config.translations}
+        balance={balance}
+        translations={activeTranslations}
         iconName={config.balanceIconName}
       />
     );
@@ -102,19 +117,18 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ config }) => {
   return (
     <ScreenLayout
       scrollable={true}
-      edges={["bottom"]}
+      edges={["top", "bottom"]}
       backgroundColor={tokens.colors.backgroundPrimary}
       contentContainerStyle={styles.content}
-      footer={config.footer}
+      footer={footer}
     >
       {renderHeader()}
       {renderBalance()}
       <TransactionList
-        transactions={config.transactions}
-        loading={config.transactionsLoading}
-        translations={config.translations}
-        maxHeight={config.maxTransactionHeight}
-        dateFormatter={config.dateFormatter}
+        transactions={transactions}
+        loading={transactionsLoading}
+        translations={activeTranslations}
+        dateFormatter={dateFormatter}
       />
     </ScreenLayout>
   );

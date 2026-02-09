@@ -119,11 +119,5 @@ export {
 export {
   WalletScreen,
   type WalletScreenProps,
-  type WalletScreenConfig,
   type WalletScreenTranslations,
 } from "./presentation/screens/WalletScreen";
-
-export {
-  WalletScreenContainer,
-  type WalletScreenContainerProps,
-} from "./presentation/screens/WalletScreenContainer";

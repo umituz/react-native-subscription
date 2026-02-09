@@ -45,7 +45,7 @@ export interface PaywallContainerProps {
   /** Callback when purchase succeeds */
   readonly onPurchaseSuccess?: () => void;
   /** Callback when purchase fails */
-  readonly onPurchaseError?: (error: string) => void;
+  readonly onPurchaseError?: (error: Error | string) => void;
   /** Callback when auth is required (for anonymous users) */
   readonly onAuthRequired?: () => void;
   /** Visibility override */
