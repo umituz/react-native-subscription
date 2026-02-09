@@ -43,6 +43,7 @@ export class SubscriptionEventBus {
       try {
         callback(data);
       } catch {
+        // Prevent one faulty listener from breaking other listeners
       }
     });
   }

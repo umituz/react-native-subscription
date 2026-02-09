@@ -31,6 +31,7 @@ function configureLogHandler(): void {
     });
     configurationState.isLogHandlerConfigured = true;
   } catch {
+    // Failing to set log handler should not block initialization
   }
 }
 

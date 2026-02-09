@@ -66,6 +66,7 @@ export class CustomerInfoListenerManager {
                         customerInfo
                     );
                 } catch {
+                    // Silently fail listener callbacks to prevent crashing the main listener
                 }
             }
 
@@ -80,6 +81,7 @@ export class CustomerInfoListenerManager {
                         customerInfo
                     );
                 } catch {
+                    // Silently fail listener callbacks to prevent crashing the main listener
                 }
             }
 
@@ -91,6 +93,7 @@ export class CustomerInfoListenerManager {
                 try {
                     await syncPremiumStatus(config, this.currentUserId, customerInfo);
                 } catch {
+                    // Silently fail listener callbacks to prevent crashing the main listener
                 }
             }
         };

@@ -31,6 +31,7 @@ export class SubscriptionSyncService {
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, { userId, productId });
     } catch {
+      // Ignored to prevent background sync errors from disrupting user experience
     }
   }
 
@@ -54,6 +55,7 @@ export class SubscriptionSyncService {
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });
     } catch {
+      // Ignored to prevent background sync errors from disrupting user experience
     }
   }
 
@@ -121,6 +123,7 @@ export class SubscriptionSyncService {
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, { userId, isPremium });
     } catch {
+      // Ignored to prevent background sync errors from disrupting user experience
     }
   }
 }

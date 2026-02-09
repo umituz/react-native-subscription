@@ -84,15 +84,11 @@ export const useAuthAwarePurchase = (
       return false;
     }
 
-    try {
-      const result = await purchasePackage(saved.pkg);
-      if (result) {
-        authPurchaseStateManager.clearSavedPurchase();
-      }
-      return result;
-    } catch (error) {
-      throw error;
+    const result = await purchasePackage(saved.pkg);
+    if (result) {
+      authPurchaseStateManager.clearSavedPurchase();
     }
+    return result;
   }, [purchasePackage]);
 
   return {

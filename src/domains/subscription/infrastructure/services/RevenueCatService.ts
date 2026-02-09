@@ -109,6 +109,7 @@ export class RevenueCatService implements IRevenueCatService {
             await Purchases.logOut();
             this.stateManager.setInitialized(false);
         } catch {
+            // Silently fail during logout to allow cleanup to complete
         }
     }
 }
