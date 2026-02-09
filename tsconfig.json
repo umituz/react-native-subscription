@@ -11,33 +11,6 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "baseUrl": "./",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@domains/*": [
-        "src/domains/*"
-      ],
-      "@domain/*": [
-        "src/domain/*"
-      ],
-      "@presentation/*": [
-        "src/presentation/*"
-      ],
-      "@infrastructure/*": [
-        "src/infrastructure/*"
-      ],
-      "@application/*": [
-        "src/application/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ],
-      "@revenuecat/*": [
-        "src/revenuecat/*"
-      ]
-    },
     /* Emit */
     "declaration": true,
     "declarationMap": true,
