@@ -13,7 +13,7 @@ import type { RevenueCatData } from "../../subscription/core/RevenueCatData";
 import { DeductCreditsCommand } from "../application/DeductCreditsCommand";
 import { CreditLimitCalculator } from "../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
-import { updateDoc } from "firebase/firestore";
+import { setDoc } from "firebase/firestore";
 
 export class CreditsRepository extends BaseRepository {
   private deductCommand: DeductCreditsCommand;
@@ -102,12 +102,12 @@ export class CreditsRepository extends BaseRepository {
     if (!db) throw new Error("Firestore instance is not available");
 
     const ref = this.getRef(db, userId);
-    await updateDoc(ref, {
+    await setDoc(ref, {
       isPremium: false,
       status: "expired",
       willRenew: false,
       expirationDate: new Date().toISOString()
-    });
+    }, { merge: true });
   }
 }
 

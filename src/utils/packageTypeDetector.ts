@@ -54,7 +54,7 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
       return PACKAGE_TYPE.LIFETIME;
   }
 
-  if (__DEV__) {
+  if (__DEV__ && productIdentifier !== 'unknown_product') {
     console.warn("[PackageTypeDetector] Unknown package type for:", productIdentifier);
   }
 

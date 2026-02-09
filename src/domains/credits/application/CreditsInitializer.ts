@@ -33,11 +33,30 @@ export async function initializeCreditsTransaction(
         const now = serverTimestamp();
         const existingData = creditsDoc.exists()
             ? creditsDoc.data() as UserCreditsDocumentRead
-            : null;
-
-        if (!existingData) {
-            throw new Error("Credits document does not exist");
-        }
+            : {
+                credits: 0,
+                creditLimit: 0,
+                isPremium: false,
+                status: "none",
+                processedPurchases: [],
+                purchaseHistory: [],
+                platform: Platform.OS as any,
+                lastUpdatedAt: now,
+                purchasedAt: now,
+                expirationDate: null,
+                lastPurchaseAt: null,
+                willRenew: false,
+                productId: null,
+                packageType: null,
+                originalTransactionId: null,
+                appVersion: null,
+                periodType: null,
+                isTrialing: false,
+                trialStartDate: null,
+                trialEndDate: null,
+                trialCredits: 0,
+                convertedFromTrial: false,
+            } as any;
 
         if (existingData.processedPurchases.includes(purchaseId)) {
             return {

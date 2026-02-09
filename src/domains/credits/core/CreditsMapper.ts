@@ -6,7 +6,14 @@ import type { UserCreditsDocumentRead } from "./UserCreditsDocument";
 /** Maps Firestore document to domain entity with expiration validation */
 export class CreditsMapper {
   static toEntity(doc: UserCreditsDocumentRead): UserCredits {
-    const expirationDate = doc.expirationDate ? doc.expirationDate.toDate() : null;
+    const safeDate = (ts: any): Date | null => {
+        if (!ts) return null;
+        if (typeof ts.toDate === "function") return ts.toDate();
+        if (ts instanceof Date) return ts;
+        return null;
+    };
+
+    const expirationDate = safeDate(doc.expirationDate);
     const periodType = doc.periodType;
 
     // Validate isPremium against expirationDate (real-time check)
@@ -18,10 +25,10 @@ export class CreditsMapper {
       status,
 
       // Dates
-      purchasedAt: doc.purchasedAt.toDate(),
+      purchasedAt: safeDate(doc.purchasedAt) ?? new Date(),
       expirationDate,
-      lastUpdatedAt: doc.lastUpdatedAt.toDate(),
-      lastPurchaseAt: doc.lastPurchaseAt ? doc.lastPurchaseAt.toDate() : null,
+      lastUpdatedAt: safeDate(doc.lastUpdatedAt) ?? new Date(),
+      lastPurchaseAt: safeDate(doc.lastPurchaseAt),
 
       // RevenueCat details
       willRenew: doc.willRenew,
@@ -32,8 +39,8 @@ export class CreditsMapper {
       // Trial fields
       periodType,
       isTrialing: doc.isTrialing,
-      trialStartDate: doc.trialStartDate ? doc.trialStartDate.toDate() : null,
-      trialEndDate: doc.trialEndDate ? doc.trialEndDate.toDate() : null,
+      trialStartDate: safeDate(doc.trialStartDate),
+      trialEndDate: safeDate(doc.trialEndDate),
       trialCredits: doc.trialCredits,
       convertedFromTrial: doc.convertedFromTrial,
 
