@@ -69,14 +69,6 @@ export function useTransactionHistory({
 
   const transactions = data ?? [];
 
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[useTransactionHistory] State", {
-      userId: userId?.slice(0, 8),
-      isLoading,
-      count: transactions.length,
-    });
-  }
-
   return {
     transactions,
     isLoading,

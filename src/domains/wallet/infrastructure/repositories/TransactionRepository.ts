@@ -118,7 +118,7 @@ export class TransactionRepository extends BaseRepository {
           createdAt: Date.now(),
         },
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: {

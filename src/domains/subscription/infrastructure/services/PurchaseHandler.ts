@@ -29,8 +29,6 @@ export async function handlePurchase(
   const entitlementIdentifier = deps.config.entitlementIdentifier;
 
   try {
-    if (__DEV__) console.log('[Purchase] Starting:', pkg.product.identifier);
-
     const { customerInfo } = await Purchases.purchasePackage(pkg);
     const savedPurchase = getSavedPurchase();
     const source = savedPurchase?.source;

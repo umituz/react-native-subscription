@@ -5,24 +5,16 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Purchases, {
-  type IntroEligibility,
-  INTRO_ELIGIBILITY_STATUS,
-} from "react-native-purchases";
-import { getRevenueCatService } from "../../infrastructure/services/RevenueCatService";
+import { getRevenueCatService } from "../services/RevenueCatService";
+import {
+  checkTrialEligibility,
+  createFallbackEligibilityMap,
+  hasAnyEligibleTrial,
+  type ProductTrialEligibility,
+  type TrialEligibilityMap,
+} from "../utils/trialEligibilityUtils";
 
-/** Trial eligibility info for a single product */
-export interface ProductTrialEligibility {
-  /** Product identifier */
-  productId: string;
-  /** Whether eligible for introductory offer (free trial) */
-  eligible: boolean;
-  /** Trial duration in days (if available from product) */
-  trialDurationDays?: number;
-}
-
-/** Map of product ID to eligibility */
-export type TrialEligibilityMap = Record<string, ProductTrialEligibility>;
+export type { ProductTrialEligibility, TrialEligibilityMap };
 
 export interface UseRevenueCatTrialEligibilityResult {
   /** Map of product IDs to their trial eligibility */
@@ -37,17 +29,6 @@ export interface UseRevenueCatTrialEligibilityResult {
   getProductEligibility: (productId: string) => ProductTrialEligibility | null;
 }
 
-/** Cache duration in milliseconds (5 minutes) */
-const CACHE_DURATION_MS = 5 * 60 * 1000;
-
-/** Cached eligibility result */
-interface CachedEligibility {
-  data: TrialEligibilityMap;
-  timestamp: number;
-}
-
-let eligibilityCache: CachedEligibility | null = null;
-
 /**
  * Hook to check trial eligibility via RevenueCat
  * Uses Apple's introductory offer eligibility system
@@ -56,6 +37,7 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
   const [eligibilityMap, setEligibilityMap] = useState<TrialEligibilityMap>({});
   const [isLoading, setIsLoading] = useState(false);
   const isMountedRef = useRef(true);
+  const currentRequestRef = useRef<number | null>(null);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -69,69 +51,29 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
       return;
     }
 
-    // Check cache validity
-    if (
-      eligibilityCache &&
-      Date.now() - eligibilityCache.timestamp < CACHE_DURATION_MS
-    ) {
-      const allCached = productIds.every(
-        (id) => eligibilityCache?.data[id] !== undefined
-      );
-      if (allCached && isMountedRef.current) {
-        setEligibilityMap(eligibilityCache.data);
-        return;
-      }
-    }
-
     const service = getRevenueCatService();
     if (!service || !service.isInitialized()) {
       return;
     }
 
+    const requestId = Date.now();
+    currentRequestRef.current = requestId;
     setIsLoading(true);
 
     try {
-      const eligibilities: Record<string, IntroEligibility> =
-        await Purchases.checkTrialOrIntroductoryPriceEligibility(productIds);
+      const newMap = await checkTrialEligibility(productIds);
 
-      const newMap: TrialEligibilityMap = {};
-
-      for (const productId of productIds) {
-        const eligibility = eligibilities[productId];
-        const isEligible =
-          eligibility?.status === INTRO_ELIGIBILITY_STATUS.INTRO_ELIGIBILITY_STATUS_ELIGIBLE;
-
-        newMap[productId] = {
-          productId,
-          eligible: isEligible,
-          trialDurationDays: 7, // Default to 7 days as configured in App Store Connect
-        };
-      }
-
-      // Update cache
-      eligibilityCache = {
-        data: { ...eligibilityCache?.data, ...newMap },
-        timestamp: Date.now(),
-      };
-
-      if (isMountedRef.current) {
+      if (isMountedRef.current && currentRequestRef.current === requestId) {
         setEligibilityMap((prev) => ({ ...prev, ...newMap }));
       }
     } catch {
-      // On error, default to eligible (better UX)
-      const fallbackMap: TrialEligibilityMap = {};
-      for (const productId of productIds) {
-        fallbackMap[productId] = {
-          productId,
-          eligible: true,
-          trialDurationDays: 7,
-        };
-      }
-      if (isMountedRef.current) {
+      const fallbackMap = createFallbackEligibilityMap(productIds);
+
+      if (isMountedRef.current && currentRequestRef.current === requestId) {
         setEligibilityMap((prev) => ({ ...prev, ...fallbackMap }));
       }
     } finally {
-      if (isMountedRef.current) {
+      if (isMountedRef.current && currentRequestRef.current === requestId) {
         setIsLoading(false);
       }
     }
@@ -144,9 +86,7 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
     [eligibilityMap]
   );
 
-  const hasEligibleTrial = Object.values(eligibilityMap).some(
-    (e) => e.eligible
-  );
+  const hasEligibleTrial = hasAnyEligibleTrial(eligibilityMap);
 
   return {
     eligibilityMap,
@@ -157,9 +97,3 @@ export function useRevenueCatTrialEligibility(): UseRevenueCatTrialEligibilityRe
   };
 }
 
-/**
- * Clear eligibility cache (useful for testing)
- */
-export function clearTrialEligibilityCache(): void {
-  eligibilityCache = null;
-}

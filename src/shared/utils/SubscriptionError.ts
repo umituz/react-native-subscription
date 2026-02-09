@@ -3,55 +3,45 @@
  * Custom error class for subscription-related errors
  */
 
-export class SubscriptionError extends Error {
-    public readonly code: string;
+import { BaseError } from "./BaseError";
 
-    constructor(message: string, code: string = 'SUBSCRIPTION_ERROR') {
-        super(message);
+export class SubscriptionError extends BaseError {
+    constructor(message: string, code: string = 'SUBSCRIPTION_ERROR', cause?: Error) {
+        super(message, code, cause);
         this.name = 'SubscriptionError';
-        this.code = code;
-        Object.setPrototypeOf(this, SubscriptionError.prototype);
     }
 
-    static notFound(message: string = 'Subscription not found'): SubscriptionError {
-        return new SubscriptionError(message, 'SUBSCRIPTION_NOT_FOUND');
+    static notFound(message: string = 'Subscription not found', cause?: Error): SubscriptionError {
+        return new SubscriptionError(message, 'SUBSCRIPTION_NOT_FOUND', cause);
     }
 
-    static expired(message: string = 'Subscription has expired'): SubscriptionError {
-        return new SubscriptionError(message, 'SUBSCRIPTION_EXPIRED');
+    static expired(message: string = 'Subscription has expired', cause?: Error): SubscriptionError {
+        return new SubscriptionError(message, 'SUBSCRIPTION_EXPIRED', cause);
     }
 
-    static purchaseFailed(message: string = 'Purchase failed'): SubscriptionError {
-        return new SubscriptionError(message, 'PURCHASE_FAILED');
+    static purchaseFailed(message: string = 'Purchase failed', cause?: Error): SubscriptionError {
+        return new SubscriptionError(message, 'PURCHASE_FAILED', cause);
     }
 
-    static restoreFailed(message: string = 'Restore failed'): SubscriptionError {
-        return new SubscriptionError(message, 'RESTORE_FAILED');
+    static restoreFailed(message: string = 'Restore failed', cause?: Error): SubscriptionError {
+        return new SubscriptionError(message, 'RESTORE_FAILED', cause);
     }
 
-    static networkError(message: string = 'Network error'): SubscriptionError {
-        return new SubscriptionError(message, 'NETWORK_ERROR');
+    static networkError(message: string = 'Network error', cause?: Error): SubscriptionError {
+        return new SubscriptionError(message, 'NETWORK_ERROR', cause);
     }
 }
 
-export class SubscriptionRepositoryError extends Error {
-    public readonly code: string;
-
-    constructor(message: string, code: string = 'REPOSITORY_ERROR') {
-        super(message);
+export class SubscriptionRepositoryError extends BaseError {
+    constructor(message: string, code: string = 'REPOSITORY_ERROR', cause?: Error) {
+        super(message, code, cause);
         this.name = 'SubscriptionRepositoryError';
-        this.code = code;
-        Object.setPrototypeOf(this, SubscriptionRepositoryError.prototype);
     }
 }
 
-export class SubscriptionValidationError extends Error {
-    public readonly code: string;
-
-    constructor(message: string, code: string = 'VALIDATION_ERROR') {
-        super(message);
+export class SubscriptionValidationError extends BaseError {
+    constructor(message: string, code: string = 'VALIDATION_ERROR', cause?: Error) {
+        super(message, code, cause);
         this.name = 'SubscriptionValidationError';
-        this.code = code;
-        Object.setPrototypeOf(this, SubscriptionValidationError.prototype);
     }
 }

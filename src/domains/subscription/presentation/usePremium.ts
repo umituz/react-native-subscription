@@ -47,16 +47,10 @@ export const usePremium = (): UsePremiumResult => {
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[usePremium] handlePurchase:", pkg.product.identifier);
-      }
       try {
         const result = await purchaseMutation.mutateAsync(pkg);
         return result.success;
-      } catch (error) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.error("[usePremium] Purchase failed:", error);
-        }
+      } catch {
         return false;
       }
     },
@@ -67,10 +61,7 @@ export const usePremium = (): UsePremiumResult => {
     try {
       const result = await restoreMutation.mutateAsync();
       return result.success;
-    } catch (error) {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.error("[usePremium] Restore failed:", error);
-      }
+    } catch {
       return false;
     }
   }, [restoreMutation]);

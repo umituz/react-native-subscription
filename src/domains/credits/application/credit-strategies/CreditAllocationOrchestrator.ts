@@ -18,14 +18,9 @@ export class CreditAllocationOrchestrator {
      */
     allocate(params: CreditAllocationParams): number {
         const strategy = this.strategies.find(s => s.canHandle(params));
-        
-        if (!strategy) {
-            // Should theoretically never happen due to StandardPurchaseCreditStrategy fallback
-            return params.creditLimit;
-        }
 
-        if (__DEV__) {
-            console.log(`[CreditAllocationOrchestrator] Using strategy: ${strategy.constructor.name}`);
+        if (!strategy) {
+            return params.creditLimit;
         }
 
         return strategy.execute(params);

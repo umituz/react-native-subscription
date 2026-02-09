@@ -114,6 +114,22 @@ export function tryCatchSync<T>(
     return failure(mappedError);
   }
 }
+export function tryCatchSync<T>(
+  fn: () => T,
+  errorMapper?: (error: unknown) => Error
+): Result<T, Error> {
+  try {
+    const data = fn();
+    return success(data);
+  } catch {
+    const mappedError = errorMapper
+      ? errorMapper(error)
+      : error instanceof Error
+        ? error
+        : new Error(String(error));
+    return failure(mappedError);
+  }
+}
 
 /** Combine multiple results into one */
 export function combine<T, E>(results: Result<T, E>[]): Result<T[], E> {

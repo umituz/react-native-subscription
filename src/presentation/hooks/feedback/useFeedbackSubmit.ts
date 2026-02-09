@@ -27,13 +27,6 @@ export function usePaywallFeedbackSubmit(
 
   const submit = useCallback(
     async (reason: string) => {
-      if (__DEV__) {
-        console.log("[usePaywallFeedbackSubmit] Submitting:", {
-          userId: user?.uid?.slice(0, 8),
-          reason: reason.slice(0, 20),
-        });
-      }
-
       try {
         const result = await submitPaywallFeedback(
           user?.uid ?? null,
@@ -81,13 +74,6 @@ export function useSettingsFeedbackSubmit(
 
   const submit = useCallback(
     async (data: SettingsFeedbackData) => {
-      if (__DEV__) {
-        console.log("[useSettingsFeedbackSubmit] Submitting:", {
-          userId: user?.uid?.slice(0, 8),
-          type: data.type,
-        });
-      }
-
       try {
         const result = await submitSettingsFeedback(
           user?.uid ?? null,

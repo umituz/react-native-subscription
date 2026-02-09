@@ -15,24 +15,22 @@ export class SubscriptionSyncService {
   async handlePurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-      const purchaseId = revenueCatData.originalTransactionId 
+      const purchaseId = revenueCatData.originalTransactionId
         ? `purchase_${revenueCatData.originalTransactionId}`
         : `purchase_${productId}_${Date.now()}`;
 
       await getCreditsRepository().initializeCredits(
-        userId, 
-        purchaseId, 
-        productId, 
-        source ?? PURCHASE_SOURCE.SETTINGS, // Default to settings if source unknown
+        userId,
+        purchaseId,
+        productId,
+        source ?? PURCHASE_SOURCE.SETTINGS,
         revenueCatData,
-        PURCHASE_TYPE.INITIAL // Default to INITIAL
+        PURCHASE_TYPE.INITIAL
       );
-      
-      // Notify listeners via Event Bus
+
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, { userId, productId });
-    } catch (error) {
-      if (__DEV__) console.error('[SubscriptionSyncService] Credits init failed:', error);
+    } catch {
     }
   }
 
@@ -40,23 +38,22 @@ export class SubscriptionSyncService {
     try {
       const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
       revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
-      const purchaseId = revenueCatData.originalTransactionId 
+      const purchaseId = revenueCatData.originalTransactionId
         ? `renewal_${revenueCatData.originalTransactionId}_${newExpirationDate}`
         : `renewal_${productId}_${Date.now()}`;
 
       await getCreditsRepository().initializeCredits(
-        userId, 
-        purchaseId, 
-        productId, 
-        PURCHASE_SOURCE.RENEWAL, 
+        userId,
+        purchaseId,
+        productId,
+        PURCHASE_SOURCE.RENEWAL,
         revenueCatData,
         PURCHASE_TYPE.RENEWAL
       );
-      
+
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });
-    } catch (error) {
-      if (__DEV__) console.error('[SubscriptionSyncService] Renewal credits init failed:', error);
+    } catch {
     }
   }
 
@@ -123,8 +120,7 @@ export class SubscriptionSyncService {
       
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, { userId, isPremium });
-    } catch (error) {
-      if (__DEV__) console.error('[SubscriptionSyncService] Premium status sync failed:', error);
+    } catch {
     }
   }
 }

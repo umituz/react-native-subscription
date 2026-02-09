@@ -58,21 +58,8 @@ export class ProductMetadataService {
     try {
       const data = await this.fetchFromFirebase();
       this.cache = { data, timestamp: Date.now() };
-
-      if (__DEV__) {
-        console.log(
-          "[ProductMetadataService] Loaded:",
-          data.length,
-          "products"
-        );
-      }
-
       return data;
     } catch (error) {
-      if (__DEV__) {
-        console.error("[ProductMetadataService] Fetch error:", error);
-      }
-
       if (this.cache) {
         return this.cache.data;
       }

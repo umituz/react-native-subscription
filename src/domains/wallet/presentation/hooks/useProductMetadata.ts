@@ -72,16 +72,6 @@ export function useProductMetadata({
   const creditsPackages = products.filter((p) => p.type === "credits");
   const subscriptionPackages = products.filter((p) => p.type === "subscription");
 
-  if (__DEV__) {
-    console.log("[useProductMetadata] State", {
-      enabled,
-      isLoading,
-      count: products.length,
-      credits: creditsPackages.length,
-      subscriptions: subscriptionPackages.length,
-    });
-  }
-
   return {
     products,
     isLoading,

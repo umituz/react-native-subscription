@@ -18,8 +18,7 @@ export async function checkTrialEligibility(userId?: string, deviceId?: string):
     const id = deviceId || await getDeviceId();
     const record = await repository.getRecord(id);
     return TrialEligibilityService.check(userId, id, record);
-  } catch (error) {
-    if (__DEV__) console.error("[TrialService] Eligibility check error:", error);
+  } catch {
     return { eligible: false, reason: "error" };
   }
 }
@@ -34,8 +33,7 @@ export async function recordTrialStart(userId: string, deviceId?: string): Promi
       lastUserId: userId,
       userIds: arrayUnion(userId) as any,
     });
-  } catch (error) {
-    if (__DEV__) console.error("[TrialService] Record trial error:", error);
+  } catch {
     return false;
   }
 }
@@ -48,8 +46,7 @@ export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
       trialInProgress: false,
       trialEndedAt: serverTimestamp() as any,
     });
-  } catch (error) {
-    if (__DEV__) console.error("[TrialService] Record trial end error:", error);
+  } catch {
     return false;
   }
 }
@@ -62,8 +59,7 @@ export async function recordTrialConversion(deviceId?: string): Promise<boolean>
       trialInProgress: false,
       trialConvertedAt: serverTimestamp() as any,
     });
-  } catch (error) {
-    if (__DEV__) console.error("[TrialService] Record conversion error:", error);
+  } catch {
     return false;
   }
 }

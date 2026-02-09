@@ -7,59 +7,24 @@ import { useCallback } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
+import { authPurchaseStateManager } from "../infrastructure/utils/authPurchaseState";
 
-export interface PurchaseAuthProvider {
-  isAuthenticated: () => boolean;
-  showAuthModal: () => void;
-}
+export type { PurchaseAuthProvider } from "../infrastructure/utils/authPurchaseState";
 
-let globalAuthProvider: PurchaseAuthProvider | null = null;
-
-interface SavedPurchaseState {
-  pkg: PurchasesPackage;
-  source: PurchaseSource;
-  timestamp: number;
-}
-
-const SAVED_PURCHASE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
-let savedPurchaseState: SavedPurchaseState | null = null;
-
-export const configureAuthProvider = (provider: PurchaseAuthProvider): void => {
-  globalAuthProvider = provider;
+export const configureAuthProvider = (provider: import("../infrastructure/utils/authPurchaseState").PurchaseAuthProvider): void => {
+  authPurchaseStateManager.configure(provider);
 };
 
-/**
- * Cleanup method to reset global auth provider state
- * Call this when app is shutting down or auth system is being reset
- */
 export const cleanupAuthProvider = (): void => {
-  if (__DEV__) {
-    console.log("[useAuthAwarePurchase] Cleaning up auth provider");
-  }
-  globalAuthProvider = null;
-  clearSavedPurchase();
-};
-
-const savePurchase = (pkg: PurchasesPackage, source: PurchaseSource): void => {
-  savedPurchaseState = { pkg, source, timestamp: Date.now() };
+  authPurchaseStateManager.cleanup();
 };
 
 export const getSavedPurchase = (): { pkg: PurchasesPackage; source: PurchaseSource } | null => {
-  if (!savedPurchaseState) {
-    return null;
-  }
-
-  const isExpired = Date.now() - savedPurchaseState.timestamp > SAVED_PURCHASE_EXPIRY_MS;
-  if (isExpired) {
-    savedPurchaseState = null;
-    return null;
-  }
-
-  return { pkg: savedPurchaseState.pkg, source: savedPurchaseState.source };
+  return authPurchaseStateManager.getSavedPurchase();
 };
 
 export const clearSavedPurchase = (): void => {
-  savedPurchaseState = null;
+  authPurchaseStateManager.clearSavedPurchase();
 };
 
 export interface UseAuthAwarePurchaseParams {
@@ -79,25 +44,17 @@ export const useAuthAwarePurchase = (
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[useAuthAwarePurchase] handlePurchase:", {
-          productId: pkg.product.identifier,
-          hasAuthProvider: !!globalAuthProvider,
-        });
-      }
+      const authProvider = authPurchaseStateManager.getProvider();
 
-      if (!globalAuthProvider) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.error("[useAuthAwarePurchase] Auth provider not configured");
-        }
+      if (!authProvider) {
         return false;
       }
 
-      const isAuth = globalAuthProvider.isAuthenticated();
+      const isAuth = authProvider.isAuthenticated();
 
       if (!isAuth) {
-        savePurchase(pkg, source || params?.source || "settings");
-        globalAuthProvider.showAuthModal();
+        authPurchaseStateManager.savePurchase(pkg, source || params?.source || "settings");
+        authProvider.showAuthModal();
         return false;
       }
 
@@ -107,12 +64,14 @@ export const useAuthAwarePurchase = (
   );
 
   const handleRestore = useCallback(async (): Promise<boolean> => {
-    if (!globalAuthProvider) {
+    const authProvider = authPurchaseStateManager.getProvider();
+
+    if (!authProvider) {
       return false;
     }
 
-    if (!globalAuthProvider.isAuthenticated()) {
-      globalAuthProvider.showAuthModal();
+    if (!authProvider.isAuthenticated()) {
+      authProvider.showAuthModal();
       return false;
     }
 
@@ -120,27 +79,18 @@ export const useAuthAwarePurchase = (
   }, [restorePurchase]);
 
   const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
-    const saved = getSavedPurchase();
+    const saved = authPurchaseStateManager.getSavedPurchase();
     if (!saved) {
       return false;
     }
 
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[useAuthAwarePurchase] Executing saved purchase:", saved.pkg.product.identifier);
-    }
-
     try {
       const result = await purchasePackage(saved.pkg);
-      // Only clear after successful purchase
       if (result) {
-        clearSavedPurchase();
+        authPurchaseStateManager.clearSavedPurchase();
       }
       return result;
     } catch (error) {
-      // Don't clear on error - allow retry
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.error("[useAuthAwarePurchase] Saved purchase failed:", error);
-      }
       throw error;
     }
   }, [purchasePackage]);

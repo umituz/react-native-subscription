@@ -60,9 +60,6 @@ export function usePaywallActions({
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseError?.(err);
-      if (__DEV__) {
-        console.error("[usePaywallActions] Purchase failed:", err);
-      }
     } finally {
       setIsLocalProcessing(false);
       endPurchase();

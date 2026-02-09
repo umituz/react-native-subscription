@@ -35,10 +35,7 @@ export async function syncPremiumStatus(
         } else {
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
-    } catch (error) {
-        if (__DEV__) {
-            console.error('[PremiumStatusSyncer] syncPremiumStatus failed:', error);
-        }
+    } catch {
     }
 }
 
@@ -55,10 +52,7 @@ export async function notifyPurchaseCompleted(
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source);
-    } catch (error) {
-        if (__DEV__) {
-            console.error('[PremiumStatusSyncer] onPurchaseCompleted callback failed:', error);
-        }
+    } catch {
     }
 }
 
@@ -74,9 +68,6 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch (error) {
-        if (__DEV__) {
-            console.error('[PremiumStatusSyncer] notifyRestoreCompleted failed:', error);
-        }
+    } catch {
     }
 }

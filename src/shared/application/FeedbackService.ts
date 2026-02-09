@@ -32,30 +32,16 @@ export async function submitFeedback(
   const db = getFirestore();
 
   if (!db) {
-    if (__DEV__) {
-      console.warn("[FeedbackService] Firestore not available");
-    }
     return { success: false, error: new Error("Firestore not available") };
   }
 
   if (!data.userId) {
-    if (__DEV__) {
-      console.warn("[FeedbackService] User ID is required for feedback");
-    }
     return { success: false, error: new Error("User ID is required") };
   }
 
   try {
-    if (__DEV__) {
-      console.log("[FeedbackService] Submitting feedback:", {
-        type: data.type,
-        userId: data.userId?.slice(0, 8),
-      });
-    }
-
     const now = new Date().toISOString();
 
-    // Store under users/{userId}/feedback
     const userDocRef = doc(db, "users", data.userId);
     const feedbackCollectionRef = collection(userDocRef, "feedback");
 
@@ -70,15 +56,8 @@ export async function submitFeedback(
       updatedAt: now,
     });
 
-    if (__DEV__) {
-      console.log("[FeedbackService] Feedback submitted successfully");
-    }
-
     return { success: true };
   } catch (error) {
-    if (__DEV__) {
-      console.error("[FeedbackService] Submit error:", error);
-    }
     return {
       success: false,
       error: error instanceof Error ? error : new Error("Unknown error"),

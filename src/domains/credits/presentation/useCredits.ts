@@ -81,10 +81,9 @@ export const useCredits = (): UseCreditsResult => {
   // Observer Pattern: Listen for credit updates
   useEffect(() => {
     if (!userId) return;
-    
+
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {
-        if (__DEV__) console.log("[useCredits] Event received: CREDITS_UPDATED, refetching...");
         queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
       }
     });

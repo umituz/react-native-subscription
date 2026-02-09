@@ -42,8 +42,7 @@ export class SubscriptionEventBus {
     this.listeners[event].forEach(callback => {
       try {
         callback(data);
-      } catch (error) {
-        if (__DEV__) console.error(`[SubscriptionEventBus] Error in listener for ${event}:`, error);
+      } catch {
       }
     });
   }

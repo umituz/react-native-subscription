@@ -18,15 +18,12 @@ export function createSubscriptionInitModule(config: SubscriptionInitModuleConfi
       try {
         const apiKey = getApiKey();
         if (!apiKey) {
-          if (__DEV__) console.log('[SubscriptionInit] No API key - skipping');
           return true;
         }
 
         await initializeSubscription({ apiKey, ...subscriptionConfig });
-        if (__DEV__) console.log('[SubscriptionInit] Initialized');
         return true;
-      } catch (error) {
-        if (__DEV__) console.error('[SubscriptionInit] Error:', error);
+      } catch {
         return false;
       }
     },

@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
-import { View, TouchableOpacity, TextInput } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { AtomicText, BaseModal, useAppDesignTokens } from "@umituz/react-native-design-system";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
+import { FeedbackOption } from "./FeedbackOption";
 
 const FEEDBACK_OPTION_IDS = [
     "too_expensive",
@@ -69,77 +70,18 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
                         const isSelected = selectedReason === optionId;
                         const isOther = optionId === "other";
                         const showInput = isSelected && isOther;
-                        const displayText = translations.reasons[optionId];
-                        
-                        // Dynamic styles for the container
-                        const containerStyle = {
-                            marginBottom: tokens.spacing.sm,
-                            backgroundColor: tokens.colors.surfaceVariant,
-                            borderRadius: tokens.borderRadius.md,
-                            overflow: 'hidden' as const, // Ensure children don't bleed out
-                        };
 
                         return (
-                            <View key={optionId} style={containerStyle}>
-                                <TouchableOpacity
-                                    style={{
-                                        borderBottomWidth: showInput ? 1 : 0,
-                                        borderBottomColor: tokens.colors.surface, // Subtle separator
-                                        paddingVertical: tokens.spacing.md,
-                                        paddingHorizontal: tokens.spacing.md,
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                    }}
-                                    onPress={() => selectReason(optionId)}
-                                    activeOpacity={0.7}
-                                >
-                                    <AtomicText
-                                        type="bodyMedium"
-                                        style={[
-                                            styles.optionText,
-                                            isSelected && { color: tokens.colors.primary, fontWeight: '600' },
-                                        ]}
-                                    >
-                                        {displayText}
-                                    </AtomicText>
-
-                                    <View
-                                        style={[
-                                            styles.radioButton,
-                                            isSelected && styles.radioButtonSelected,
-                                        ]}
-                                    >
-                                        {isSelected && (
-                                            <View style={styles.radioButtonInner} />
-                                        )}
-                                    </View>
-                                </TouchableOpacity>
-
-                                {showInput && (
-                                    <View style={[styles.inputContainer, { backgroundColor: 'transparent', marginTop: 0, padding: tokens.spacing.sm }]}>
-                                        <TextInput
-                                            style={[
-                                                styles.textInput, 
-                                                { 
-                                                    minHeight: 80, 
-                                                    textAlignVertical: 'top',
-                                                    backgroundColor: tokens.colors.surface, // Slightly different background for input
-                                                    borderRadius: tokens.borderRadius.sm,
-                                                    padding: tokens.spacing.sm,
-                                                }
-                                            ]}
-                                            placeholder={translations.otherPlaceholder}
-                                            placeholderTextColor={tokens.colors.textTertiary}
-                                            multiline
-                                            maxLength={200}
-                                            value={otherText}
-                                            onChangeText={setOtherText}
-                                            autoFocus
-                                        />
-                                    </View>
-                                )}
-                            </View>
+                            <FeedbackOption
+                                key={optionId}
+                                isSelected={isSelected}
+                                text={translations.reasons[optionId]}
+                                showInput={showInput}
+                                placeholder={translations.otherPlaceholder}
+                                inputValue={otherText}
+                                onSelect={() => selectReason(optionId)}
+                                onChangeText={setOtherText}
+                            />
                         );
                     })}
                 </View>
@@ -158,5 +100,8 @@ export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.m
         </BaseModal>
     );
 });
+
+PaywallFeedbackModal.displayName = "PaywallFeedbackModal";
+
 
 

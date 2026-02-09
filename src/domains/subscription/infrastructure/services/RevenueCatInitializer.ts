@@ -1,4 +1,4 @@
-import Purchases, { LOG_LEVEL, type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
+import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
@@ -25,14 +25,12 @@ function configureLogHandler(): void {
   if (configurationState.isLogHandlerConfigured) return;
   if (typeof Purchases.setLogHandler !== 'function') return;
   try {
-    Purchases.setLogHandler((logLevel, message) => {
+    Purchases.setLogHandler((_logLevel, message) => {
       const ignoreMessages = ['Purchase was cancelled', 'AppTransaction', "Couldn't find previous transactions"];
       if (ignoreMessages.some(m => message.includes(m))) return;
-      if (logLevel === LOG_LEVEL.ERROR && __DEV__) console.error('[RevenueCat]', message);
     });
     configurationState.isLogHandlerConfigured = true;
   } catch {
-    // Native module not available (Expo Go)
   }
 }
 
