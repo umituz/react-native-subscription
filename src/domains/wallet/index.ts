@@ -118,6 +118,10 @@ export {
 // Screens
 export {
   WalletScreen,
-  type WalletScreenProps,
-  type WalletScreenTranslations,
 } from "./presentation/screens/WalletScreen";
+
+export type {
+  WalletScreenProps,
+  WalletScreenTranslations,
+} from "./presentation/screens/WalletScreen.types";
+

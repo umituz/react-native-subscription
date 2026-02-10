@@ -5,7 +5,8 @@
  * Set once at app init, used by WalletScreen automatically.
  */
 
-import type { WalletScreenTranslations } from "../../presentation/screens/WalletScreen";
+import type { WalletScreenTranslations } from "../../presentation/screens/WalletScreen.types";
+
 
 export interface WalletConfiguration {
   translations: WalletScreenTranslations;

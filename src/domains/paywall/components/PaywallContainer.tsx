@@ -9,7 +9,9 @@ import { usePaywallVisibility } from "../../subscription/presentation/usePaywall
 import { useSubscriptionPackages } from "../../subscription/infrastructure/hooks/useSubscriptionPackages";
 import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure/hooks/useRevenueCatTrialEligibility";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
-import { PaywallModal, type TrialEligibilityInfo } from "./PaywallModal";
+import { PaywallModal } from "./PaywallModal";
+import type { TrialEligibilityInfo } from "./PaywallModal.types";
+
 import { usePaywallActions } from "../hooks/usePaywallActions";
 import { useAuthAwarePurchase } from "../../subscription/presentation/useAuthAwarePurchase";
 import type { PaywallContainerProps } from "./PaywallContainer.types";

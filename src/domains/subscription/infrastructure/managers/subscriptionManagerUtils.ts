@@ -3,7 +3,8 @@
  * Validation and helper functions for SubscriptionManager
  */
 
-import type { SubscriptionManagerConfig } from "./SubscriptionManager";
+import type { SubscriptionManagerConfig } from "./SubscriptionManager.types";
+
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
 
