@@ -1,33 +1,28 @@
 /**
  * Credit Calculation Utilities
  * Centralized logic for credit mathematical operations
+ * Uses shared number utilities for consistency
  */
+
+import { calculateCreditPercentage as calcPct, canAfford as canAffordCheck, calculateRemaining } from "../../../shared/utils/numberUtils";
 
 export const calculateCreditPercentage = (
   currentCredits: number | null | undefined,
   creditLimit: number
 ): number => {
-  if (currentCredits === null || currentCredits === undefined || creditLimit <= 0) {
-    return 0;
-  }
-  
-  const percent = Math.round((currentCredits / creditLimit) * 100);
-  return Math.min(Math.max(percent, 0), 100); // Clamp between 0-100
+  return calcPct(currentCredits, creditLimit);
 };
 
 export const canAffordCost = (
   currentCredits: number | null | undefined,
   cost: number
 ): boolean => {
-  if (currentCredits === null || currentCredits === undefined) {
-    return false;
-  }
-  return currentCredits >= cost;
+  return canAffordCheck(currentCredits, cost);
 };
 
 export const calculateRemainingCredits = (
   currentCredits: number,
   cost: number
 ): number => {
-  return Math.max(0, currentCredits - cost);
+  return calculateRemaining(currentCredits, cost);
 };

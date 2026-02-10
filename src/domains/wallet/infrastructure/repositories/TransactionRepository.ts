@@ -6,7 +6,6 @@
  */
 
 import {
-    collection,
     getDocs,
     addDoc,
     query,
@@ -14,10 +13,9 @@ import {
     orderBy,
     limit as firestoreLimit,
     serverTimestamp,
-    type Firestore,
     type QueryConstraint,
 } from "firebase/firestore";
-import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
+import { BaseRepository } from "@umituz/react-native-firebase";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
@@ -26,6 +24,7 @@ import type {
   TransactionReason,
 } from "../../domain/types/transaction.types";
 import { TransactionMapper } from "../../domain/mappers/TransactionMapper";
+import { requireFirestore, buildCollectionRef, type CollectionConfig, mapErrorToResult } from "../../../../shared/infrastructure/firestore";
 
 export class TransactionRepository extends BaseRepository {
   private config: TransactionRepositoryConfig;
@@ -35,25 +34,23 @@ export class TransactionRepository extends BaseRepository {
     this.config = config;
   }
 
-  private getCollectionRef(db: Firestore, userId: string) {
-    if (this.config.useUserSubcollection) {
-      return collection(db, "users", userId, this.config.collectionName);
-    }
-    return collection(db, this.config.collectionName);
+  private getCollectionConfig(): CollectionConfig {
+    return {
+      collectionName: this.config.collectionName,
+      useUserSubcollection: this.config.useUserSubcollection ?? false,
+    };
+  }
+
+  private getCollectionRef(db: any, userId: string) {
+    const config = this.getCollectionConfig();
+    return buildCollectionRef(db, userId, config);
   }
 
   async getTransactions(
     options: TransactionQueryOptions
   ): Promise<TransactionResult> {
-    const db = getFirestore();
-    if (!db) {
-      return {
-        success: false,
-        error: { message: "Database not available", code: "DB_NOT_AVAILABLE" },
-      };
-    }
-
     try {
+      const db = requireFirestore();
       const colRef = this.getCollectionRef(db, options.userId);
       const constraints: QueryConstraint[] = [];
 
@@ -67,20 +64,13 @@ export class TransactionRepository extends BaseRepository {
       const q = query(colRef, ...constraints);
       const snapshot = await getDocs(q);
 
-      const transactions: CreditLog[] = snapshot.docs.map((docSnap) => 
+      const transactions: CreditLog[] = snapshot.docs.map((docSnap) =>
         TransactionMapper.toEntity(docSnap, options.userId)
       );
 
       return { success: true, data: transactions };
     } catch (error) {
-      return {
-        success: false,
-        error: {
-          message:
-            error instanceof Error ? error.message : "Failed to get logs",
-          code: "FETCH_FAILED",
-        },
-      };
+      return mapErrorToResult(error);
     }
   }
 
@@ -90,15 +80,8 @@ export class TransactionRepository extends BaseRepository {
     reason: TransactionReason,
     metadata?: Partial<CreditLog>
   ): Promise<TransactionResult<CreditLog>> {
-    const db = getFirestore();
-    if (!db) {
-      return {
-        success: false,
-        error: { message: "Database not available", code: "DB_NOT_AVAILABLE" },
-      };
-    }
-
     try {
+      const db = requireFirestore();
       const colRef = this.getCollectionRef(db, userId);
       const docData = {
         ...TransactionMapper.toFirestore(userId, change, reason, metadata),
@@ -119,14 +102,7 @@ export class TransactionRepository extends BaseRepository {
         },
       };
     } catch (error) {
-      return {
-        success: false,
-        error: {
-          message:
-            error instanceof Error ? error.message : "Failed to add log",
-          code: "ADD_FAILED",
-        },
-      };
+      return mapErrorToResult<CreditLog>(error);
     }
   }
 }

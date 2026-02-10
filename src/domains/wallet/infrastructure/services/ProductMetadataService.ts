@@ -6,7 +6,7 @@
  */
 
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { getFirestore } from "@umituz/react-native-firebase";
+import { requireFirestore } from "../../../../shared/infrastructure";
 import type {
   ProductMetadata,
   ProductMetadataConfig,
@@ -35,11 +35,7 @@ export class ProductMetadataService {
   }
 
   private async fetchFromFirebase(): Promise<ProductMetadata[]> {
-    const db = getFirestore();
-    if (!db) {
-      throw new Error("Firestore not initialized");
-    }
-
+    const db = requireFirestore();
     const colRef = collection(db, this.config.collectionName);
     const q = query(colRef, orderBy("order", "asc"));
     const snapshot = await getDocs(q);

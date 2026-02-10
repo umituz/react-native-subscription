@@ -3,6 +3,8 @@
  * Shared types used across multiple domains
  */
 
+import type { Platform as SubscriptionPlatform } from "../../domains/subscription/core/SubscriptionConstants";
+
 /**
  * Purchase result from any purchase operation
  */
@@ -57,9 +59,12 @@ export interface TransactionMetadata {
 /**
  * Platform information
  */
-export type Platform = 'ios' | 'android';
+export type Platform = SubscriptionPlatform;
 
 /**
  * Purchase source tracking
  */
 export type PurchaseSource = 'settings' | 'paywall' | 'upgrade_prompt' | 'auto-execution' | 'manual';
+
+// Re-export from SubscriptionConstants to maintain compatibility
+export { PLATFORM, PURCHASE_SOURCE, type Platform as SubscriptionPlatformType, type PurchaseSource as PurchaseSourceType } from "../../domains/subscription/core/SubscriptionConstants";

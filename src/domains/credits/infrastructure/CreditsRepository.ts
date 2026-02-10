@@ -3,8 +3,8 @@
  * Optimized to use Design Patterns: Command, Observer, and Strategy.
  */
 
-import { doc, getDoc, type Firestore } from "firebase/firestore";
-import { BaseRepository, getFirestore } from "@umituz/react-native-firebase";
+import { getDoc, setDoc, type Firestore } from "firebase/firestore";
+import { BaseRepository } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../application/CreditsInitializer";
@@ -13,7 +13,7 @@ import type { RevenueCatData } from "../../subscription/core/RevenueCatData";
 import { DeductCreditsCommand } from "../application/DeductCreditsCommand";
 import { CreditLimitCalculator } from "../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
-import { setDoc } from "firebase/firestore";
+import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
 
 export class CreditsRepository extends BaseRepository {
   private deductCommand: DeductCreditsCommand;
@@ -23,19 +23,22 @@ export class CreditsRepository extends BaseRepository {
     this.deductCommand = new DeductCreditsCommand((db, uid) => this.getRef(db, uid));
   }
 
+  private getCollectionConfig(): CollectionConfig {
+    return {
+      collectionName: "credits",
+      useUserSubcollection: this.config.useUserSubcollection,
+    };
+  }
+
   private getRef(db: Firestore, userId: string) {
-    return this.config.useUserSubcollection
-      ? doc(db, "users", userId, "credits", "balance")
-      : doc(db, this.config.collectionName, userId);
+    const config = this.getCollectionConfig();
+    return buildDocRef(db, userId, "balance", config);
   }
 
   async getCredits(userId: string): Promise<CreditsResult> {
-    const db = getFirestore();
-    if (!db) {
-      throw new Error("Firestore instance is not available");
-    }
-
+    const db = requireFirestore();
     const snap = await getDoc(this.getRef(db, userId));
+
     if (!snap.exists()) {
       return { success: true, data: null, error: null };
     }
@@ -52,11 +55,7 @@ export class CreditsRepository extends BaseRepository {
     revenueCatData: RevenueCatData,
     type: PurchaseType = PURCHASE_TYPE.INITIAL
   ): Promise<CreditsResult> {
-    const db = getFirestore();
-    if (!db) {
-      throw new Error("Firestore instance is not available");
-    }
-
+    const db = requireFirestore();
     const creditLimit = CreditLimitCalculator.calculate(productId, this.config);
     const cfg = { ...this.config, creditLimit };
 
@@ -98,9 +97,7 @@ export class CreditsRepository extends BaseRepository {
   }
 
   async syncExpiredStatus(userId: string): Promise<void> {
-    const db = getFirestore();
-    if (!db) throw new Error("Firestore instance is not available");
-
+    const db = requireFirestore();
     const ref = this.getRef(db, userId);
     await setDoc(ref, {
       isPremium: false,
