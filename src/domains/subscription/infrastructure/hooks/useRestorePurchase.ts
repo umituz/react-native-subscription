@@ -12,6 +12,7 @@ import {
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
+import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
 import { creditsQueryKeys } from "../../../credits/presentation/useCredits";
 
 interface RestoreResult {
@@ -43,6 +44,9 @@ export const useRestorePurchase = () => {
           queryKey: SUBSCRIPTION_QUERY_KEYS.packages,
         });
         if (userId) {
+          queryClient.invalidateQueries({
+            queryKey: subscriptionStatusQueryKeys.user(userId),
+          });
           queryClient.invalidateQueries({
             queryKey: creditsQueryKeys.user(userId),
           });
