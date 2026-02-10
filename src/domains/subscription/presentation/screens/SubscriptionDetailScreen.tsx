@@ -122,6 +122,7 @@ export const SubscriptionDetailScreen: React.FC<
             expirationDate={config.expirationDate}
             purchaseDate={config.purchaseDate}
             daysRemaining={config.daysRemaining}
+            hideTitle={!!config.onClose}
             translations={config.translations}
           />
         )}

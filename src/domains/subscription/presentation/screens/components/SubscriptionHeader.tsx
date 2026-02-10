@@ -16,6 +16,7 @@ export interface SubscriptionHeaderProps {
   expirationDate?: string;
   purchaseDate?: string;
   daysRemaining?: number | null;
+  hideTitle?: boolean;
   translations: {
     title: string;
     statusActive: string;
@@ -36,6 +37,7 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   expirationDate,
   purchaseDate,
   daysRemaining,
+  hideTitle,
   translations,
 }) => {
   const tokens = useAppDesignTokens();
@@ -87,14 +89,16 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <AtomicText
-            type="headlineSmall"
-            style={[styles.title, { color: tokens.colors.textPrimary }]}
-          >
-            {translations.title}
-          </AtomicText>
-        </View>
+        {!hideTitle && (
+          <View style={styles.titleContainer}>
+            <AtomicText
+              type="headlineSmall"
+              style={[styles.title, { color: tokens.colors.textPrimary }]}
+            >
+              {translations.title}
+            </AtomicText>
+          </View>
+        )}
         <PremiumStatusBadge
           status={statusType}
           activeLabel={translations.statusActive}
