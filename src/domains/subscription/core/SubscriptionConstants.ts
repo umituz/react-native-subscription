@@ -1,9 +1,3 @@
-/**
- * Subscription Constants and Types
- * Centralized source of truth for subscription-related enums and types.
- */
-
-/** User tier constants */
 export const USER_TIER = {
   ANONYMOUS: 'anonymous',
   FREEMIUM: 'freemium',
@@ -12,10 +6,8 @@ export const USER_TIER = {
 
 export type UserTierType = (typeof USER_TIER)[keyof typeof USER_TIER];
 
-/** Default entitlement identifier */
 export const DEFAULT_ENTITLEMENT_ID = 'premium';
 
-/** Subscription status constants */
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',
   TRIAL: 'trial',
@@ -27,7 +19,6 @@ export const SUBSCRIPTION_STATUS = {
 
 export type SubscriptionStatusType = (typeof SUBSCRIPTION_STATUS)[keyof typeof SUBSCRIPTION_STATUS];
 
-/** RevenueCat period type constants */
 export const PERIOD_TYPE = {
   NORMAL: 'NORMAL',
   INTRO: 'INTRO',
@@ -36,7 +27,6 @@ export const PERIOD_TYPE = {
 
 export type PeriodType = (typeof PERIOD_TYPE)[keyof typeof PERIOD_TYPE];
 
-/** Subscription package type constants */
 export const PACKAGE_TYPE = {
   WEEKLY: 'weekly',
   MONTHLY: 'monthly',
@@ -47,7 +37,6 @@ export const PACKAGE_TYPE = {
 
 export type PackageType = (typeof PACKAGE_TYPE)[keyof typeof PACKAGE_TYPE];
 
-/** Platform constants */
 export const PLATFORM = {
   IOS: 'ios',
   ANDROID: 'android',
@@ -55,7 +44,6 @@ export const PLATFORM = {
 
 export type Platform = (typeof PLATFORM)[keyof typeof PLATFORM];
 
-/** Purchase source constants */
 export const PURCHASE_SOURCE = {
   ONBOARDING: 'onboarding',
   SETTINGS: 'settings',
@@ -68,7 +56,6 @@ export const PURCHASE_SOURCE = {
 
 export type PurchaseSource = (typeof PURCHASE_SOURCE)[keyof typeof PURCHASE_SOURCE];
 
-/** Purchase type constants */
 export const PURCHASE_TYPE = {
   INITIAL: 'initial',
   RENEWAL: 'renewal',
@@ -77,3 +64,4 @@ export const PURCHASE_TYPE = {
 } as const;
 
 export type PurchaseType = (typeof PURCHASE_TYPE)[keyof typeof PURCHASE_TYPE];
+

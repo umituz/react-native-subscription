@@ -1,14 +1,7 @@
-/**
- * Subscription Manager
- * Facade for subscription operations. Coordinates state and operations.
- */
-
 import type { PurchasesPackage } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import { initializeRevenueCatService, getRevenueCatService } from "../services/RevenueCatService";
 import { PackageHandler } from "../handlers/PackageHandler";
-import type { PremiumStatus, RestoreResultInfo } from "../handlers/PackageHandler";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
 import {
     ensureConfigured,
@@ -17,11 +10,12 @@ import {
     ensureServiceAvailable,
 } from "./subscriptionManagerUtils";
 
-export interface SubscriptionManagerConfig {
-  config: RevenueCatConfig;
-  apiKey: string;
-  getAnonymousUserId: () => Promise<string>;
-}
+import type { 
+    SubscriptionManagerConfig, 
+    PremiumStatus, 
+    RestoreResultInfo 
+} from "./SubscriptionManager.types";
+
 
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
@@ -142,4 +136,4 @@ class SubscriptionManagerImpl {
 }
 
 export const SubscriptionManager = new SubscriptionManagerImpl();
-export type { PremiumStatus };
+

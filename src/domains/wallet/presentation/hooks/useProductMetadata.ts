@@ -1,10 +1,3 @@
-/**
- * useProductMetadata Hook
- *
- * TanStack Query hook for fetching product metadata.
- * Generic and reusable - uses config from ProductMetadataService.
- */
-
 import { useQuery } from "@umituz/react-native-design-system";
 import { useMemo } from "react";
 import type {
@@ -13,11 +6,6 @@ import type {
   ProductType,
 } from "../../domain/types/wallet.types";
 import { ProductMetadataService } from "../../infrastructure/services/ProductMetadataService";
-
-const CACHE_CONFIG = {
-  staleTime: 5 * 60 * 1000, // 5 minutes
-  gcTime: 30 * 60 * 1000, // 30 minutes
-};
 
 export const productMetadataQueryKeys = {
   all: ["productMetadata"] as const,
@@ -44,7 +32,6 @@ export function useProductMetadata({
   type,
   enabled = true,
 }: UseProductMetadataParams): UseProductMetadataResult {
-  // Memoize service to prevent recreation on every render
   const service = useMemo(
     () => new ProductMetadataService(config),
     [config]
@@ -54,7 +41,7 @@ export function useProductMetadata({
     ? productMetadataQueryKeys.byType(type)
     : productMetadataQueryKeys.all;
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, status, error, refetch } = useQuery({
     queryKey,
     queryFn: async () => {
       if (type) {
@@ -63,11 +50,10 @@ export function useProductMetadata({
       return service.getAll();
     },
     enabled,
-    staleTime: CACHE_CONFIG.staleTime,
-    gcTime: CACHE_CONFIG.gcTime,
   });
 
   const products = data ?? [];
+  const isLoading = status === "pending";
 
   const creditsPackages = products.filter((p) => p.type === "credits");
   const subscriptionPackages = products.filter((p) => p.type === "subscription");
@@ -81,3 +67,4 @@ export function useProductMetadata({
     subscriptionPackages,
   };
 }
+

@@ -1,13 +1,5 @@
-/**
- * usePremium Hook
- *
- * Complete subscription management.
- * Auth info automatically read from @umituz/react-native-auth.
- */
-
 import { useCallback } from 'react';
 import type { PurchasesPackage } from 'react-native-purchases';
-import type { UserCredits } from '../../credits/core/Credits';
 import { useCredits } from '../../credits/presentation/useCredits';
 import { useSubscriptionStatus } from './useSubscriptionStatus';
 import {
@@ -17,21 +9,10 @@ import {
 } from '../infrastructure/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
 
-export interface UsePremiumResult {
-  isPremium: boolean;
-  isLoading: boolean;
-  packages: PurchasesPackage[];
-  credits: UserCredits | null;
-  showPaywall: boolean;
-  isSyncing: boolean;
-  purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
-  restorePurchase: () => Promise<boolean>;
-  setShowPaywall: (show: boolean) => void;
-  closePaywall: () => void;
-  openPaywall: () => void;
-}
+import { UsePremiumResult } from './usePremium.types';
 
 export const usePremium = (): UsePremiumResult => {
+
   const { isPremium: subscriptionActive, isLoading: statusLoading } = useSubscriptionStatus();
   const { credits, isLoading: creditsLoading } = useCredits();
 
@@ -42,7 +23,7 @@ export const usePremium = (): UsePremiumResult => {
 
   const { showPaywall, setShowPaywall, closePaywall, openPaywall } = usePaywallVisibility();
  
-  const isPremium = subscriptionActive;
+  const isPremium = subscriptionActive || (credits?.isPremium ?? false);
   const isSyncing = subscriptionActive && credits !== null && !credits.isPremium;
 
   const handlePurchase = useCallback(

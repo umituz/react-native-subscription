@@ -1,10 +1,3 @@
-/**
- * useCredits Hook
- *
- * Fetches user credits with TanStack Query best practices.
- * Uses status-based state management for reliable loading detection.
- */
-
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useCallback, useMemo, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
@@ -50,7 +43,6 @@ export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
   const isConfigured = isCreditsRepositoryConfigured();
   
-  // Only access config if configured to avoid throwing errors
   const config = isConfigured ? getCreditsConfig() : null;
   const queryEnabled = !!userId && isConfigured;
 
@@ -69,8 +61,6 @@ export const useCredits = (): UseCreditsResult => {
       return result.data || null;
     },
     enabled: queryEnabled,
-    staleTime: 30 * 1000, // 30 seconds - data considered fresh
-    gcTime: 5 * 60 * 1000, // 5 minutes - keep in cache after unmount
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
@@ -78,7 +68,6 @@ export const useCredits = (): UseCreditsResult => {
 
   const queryClient = useQueryClient();
 
-  // Observer Pattern: Listen for credit updates
   useEffect(() => {
     if (!userId) return;
 
@@ -126,3 +115,4 @@ export const useHasCredits = (): boolean => {
   const { hasCredits } = useCredits();
   return hasCredits;
 };
+

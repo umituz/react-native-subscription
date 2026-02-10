@@ -1,16 +1,6 @@
-/**
- * useTransactionHistory Hook
- *
- * TanStack Query hook for fetching credit transaction history.
- * Auth info automatically read from @umituz/react-native-auth.
- */
-
 import { useQuery } from "@umituz/react-native-design-system";
 import { useMemo } from "react";
-import {
-  useAuthStore,
-  selectUserId,
-} from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
@@ -63,8 +53,6 @@ export function useTransactionHistory({
       return result.data ?? [];
     },
     enabled: !!userId,
-    staleTime: 0,
-    gcTime: 0,
   });
 
   const transactions = data ?? [];

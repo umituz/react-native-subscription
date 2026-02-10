@@ -1,34 +1,20 @@
-/**
- * useSubscriptionStatus Hook
- *
- * Checks real subscription status from RevenueCat.
- * Auth info automatically read from @umituz/react-native-auth.
- */
-
-import { useQuery } from "@umituz/react-native-design-system";
-import {
-  useAuthStore,
-  selectUserId,
-} from "@umituz/react-native-auth";
+import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
+import { useEffect } from "react";
+import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
 
 export const subscriptionStatusQueryKeys = {
   all: ["subscriptionStatus"] as const,
   user: (userId: string) => ["subscriptionStatus", userId] as const,
 };
 
-export interface SubscriptionStatusResult {
-  isPremium: boolean;
-  expirationDate: Date | null;
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
-}
-
 export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
+  const queryClient = useQueryClient();
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, status, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId ?? ""),
     queryFn: async () => {
       if (!userId) {
@@ -43,8 +29,26 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       }
     },
     enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
-
   });
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = subscriptionEventBus.on(
+      SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, 
+      (event: { userId: string; isPremium: boolean }) => {
+        if (event.userId === userId) {
+          queryClient.invalidateQueries({
+            queryKey: subscriptionStatusQueryKeys.user(userId),
+          });
+        }
+      }
+    );
+
+    return unsubscribe;
+  }, [userId, queryClient]);
+
+  const isLoading = status === "pending";
 
   return {
     isPremium: data?.isPremium ?? false,
@@ -54,3 +58,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     refetch,
   };
 };
+
+
+
+

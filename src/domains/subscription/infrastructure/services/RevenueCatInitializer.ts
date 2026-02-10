@@ -16,8 +16,9 @@ const configurationState = {
     isPurchasesConfigured: false,
     isLogHandlerConfigured: false,
     configurationInProgress: false,
-    configurationPromise: null as Promise<ReturnType<typeof initializeSDK>> | null,
+    configurationPromise: null as Promise<InitializeResult> | null,
 };
+
 
 // Simple lock mechanism to prevent concurrent configurations (implementation deferred)
 
@@ -77,9 +78,12 @@ export async function initializeSDK(
   }
 
   if (configurationState.configurationInProgress) {
+    if (configurationState.configurationPromise) {
+        await configurationState.configurationPromise;
+        return initializeSDK(deps, userId, apiKey);
+    }
     await new Promise(resolve => setTimeout(resolve, 100));
-    if (configurationState.isPurchasesConfigured) return initializeSDK(deps, userId, apiKey);
-    return { success: false, offering: null, isPremium: false };
+    return initializeSDK(deps, userId, apiKey);
   }
 
   const key = apiKey || resolveApiKey(deps.config);
@@ -87,6 +91,11 @@ export async function initializeSDK(
     return { success: false, offering: null, isPremium: false };
   }
 
+  let resolveInProgress: (value: InitializeResult) => void;
+  configurationState.configurationPromise = new Promise((resolve) => {
+    resolveInProgress = resolve;
+  });
+  
   configurationState.configurationInProgress = true;
   try {
     configureLogHandler();
@@ -100,10 +109,16 @@ export async function initializeSDK(
       Purchases.getOfferings(),
     ]);
 
-    return buildSuccessResult(deps, customerInfo, offerings);
+    const result = buildSuccessResult(deps, customerInfo, offerings);
+    resolveInProgress!(result);
+    return result;
   } catch {
-    return { success: false, offering: null, isPremium: false };
+    const errorResult = { success: false, offering: null, isPremium: false };
+    resolveInProgress!(errorResult);
+    return errorResult;
   } finally {
     configurationState.configurationInProgress = false;
+    configurationState.configurationPromise = null;
   }
 }
+
