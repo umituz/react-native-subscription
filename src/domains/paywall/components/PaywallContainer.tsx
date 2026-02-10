@@ -11,6 +11,7 @@ import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal, type TrialEligibilityInfo } from "./PaywallModal";
 import { usePaywallActions } from "../hooks/usePaywallActions";
+import { useAuthAwarePurchase } from "../../subscription/presentation/useAuthAwarePurchase";
 import type { PaywallContainerProps } from "./PaywallContainer.types";
 
 export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
@@ -40,7 +41,15 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
 
   const { data: packages = [], isLoading } = useSubscriptionPackages();
   const { eligibilityMap, checkEligibility } = useRevenueCatTrialEligibility();
+  
+  const { handlePurchase: performPurchase, handleRestore: performRestore } = useAuthAwarePurchase({ 
+    source: purchaseSource 
+  });
+
   const { handlePurchase, handleRestore } = usePaywallActions({
+    packages,
+    onPurchase: performPurchase,
+    onRestore: performRestore,
     source: purchaseSource,
     onPurchaseSuccess,
     onPurchaseError,
