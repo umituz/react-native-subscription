@@ -8,7 +8,10 @@ import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import {
     useAppDesignTokens,
+    NavigationHeader,
+    AtomicIcon,
 } from "@umituz/react-native-design-system";
+import { Pressable } from "react-native";
 import { ScreenLayout } from "../../../../shared/presentation";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList, type CreditItem } from "./components/CreditsList";
@@ -55,6 +58,7 @@ export interface SubscriptionDetailConfig {
   credits?: readonly CreditItem[];
   translations: SubscriptionDetailTranslations;
   upgradePrompt?: UpgradePromptConfig;
+  onClose?: () => void;
 }
 
 export interface SubscriptionDetailScreenProps {
@@ -85,10 +89,30 @@ export const SubscriptionDetailScreen: React.FC<
   return (
     <ScreenLayout
       scrollable={true}
-      edges={["bottom"]}
+      edges={config.onClose ? ["bottom"] : ["top", "bottom"]}
       backgroundColor={tokens.colors.backgroundPrimary}
       contentContainerStyle={styles.content}
     >
+      {config.onClose && (
+        <NavigationHeader
+          title={config.translations.title}
+          rightElement={
+            <Pressable
+              onPress={config.onClose}
+              style={({ pressed }) => ({
+                width: 44,
+                height: 44,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: pressed ? tokens.colors.surfaceVariant : tokens.colors.surface,
+                borderRadius: tokens.radius.full,
+              })}
+            >
+              <AtomicIcon name="close-outline" customSize={24} color="textPrimary" />
+            </Pressable>
+          }
+        />
+      )}
       <View style={styles.cardsContainer}>
         {showHeader && (
           <SubscriptionHeader

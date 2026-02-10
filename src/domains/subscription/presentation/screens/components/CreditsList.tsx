@@ -52,6 +52,8 @@ export const CreditsList: React.FC<CreditsListProps> = ({
     [tokens]
   );
 
+  if (!credits || credits.length === 0) return null;
+
   return (
     <View style={styles.container}>
       {title && (
