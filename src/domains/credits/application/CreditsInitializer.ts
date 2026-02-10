@@ -1,6 +1,7 @@
 import type { CreditsConfig } from "../core/Credits";
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
-import { getAppVersion, validatePlatform } from "../../../utils";
+import { getAppVersion, validatePlatform } from "../../../utils/appUtils";
+
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
 import { runTransaction, type Transaction, type DocumentReference } from "firebase/firestore";
 import type { Firestore } from "firebase/firestore";

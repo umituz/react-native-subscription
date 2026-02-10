@@ -8,7 +8,8 @@ import Constants from "expo-constants";
  * Gets the current app version from Expo constants
  */
 export function getAppVersion(): string {
-  const version = Constants.expoConfig?.version ?? Constants.manifest2?.extra?.expoClient?.version;
+  const version = Constants.expoConfig?.version;
+
   if (!version) {
     throw new Error("appVersion is required in expoConfig");
   }

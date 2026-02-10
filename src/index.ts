@@ -3,6 +3,7 @@
  */
 
 // Domain Layer - Constants & Types (Now in domains/subscription/core)
+// Domain Layer - Constants & Types
 export * from "./domains/subscription/core/SubscriptionConstants";
 export {
   createDefaultSubscriptionStatus,
@@ -10,6 +11,9 @@ export {
   resolveSubscriptionStatus,
 } from "./domains/subscription/core/SubscriptionStatus";
 export type { SubscriptionStatus, StatusResolverInput } from "./domains/subscription/core/SubscriptionStatus";
+
+
+
 
 // Application Layer - Ports
 export type { ISubscriptionRepository } from "./shared/application/ports/ISubscriptionRepository";
@@ -51,7 +55,17 @@ export {
 } from "./domains/credits/infrastructure/CreditsRepositoryManager";
 
 // Presentation Layer - Hooks (Point to the bridge)
-export * from "./presentation/hooks";
+// Presentation Layer - Hooks
+export { useAuthAwarePurchase } from "./domains/subscription/presentation/useAuthAwarePurchase";
+export { useCredits } from "./domains/credits/presentation/useCredits";
+export { useDeductCredit } from "./domains/credits/presentation/useDeductCredit";
+export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
+export { usePaywallVisibility } from "./domains/subscription/presentation/usePaywallVisibility";
+export { usePremium } from "./domains/subscription/presentation/usePremium";
+export { useSubscriptionStatus } from "./domains/subscription/presentation/useSubscriptionStatus";
+export * from "./presentation/hooks/feedback/usePaywallFeedback";
+export * from "./presentation/hooks/feedback/useFeedbackSubmit";
+
 
 // Presentation Layer - Components
 export * from "./domains/subscription/presentation/components/details/PremiumDetailsCard";
@@ -71,7 +85,18 @@ export type {
 
 
 // Utils
-export * from "./utils";
+// Utils
+export * from "./utils/creditMapper";
+export * from "./utils/packagePeriodUtils";
+export * from "./utils/packageTypeDetector";
+export * from "./utils/premiumStatusUtils";
+export * from "./utils/priceUtils";
+export * from "./utils/tierUtils";
+export * from "./utils/types";
+export * from "./utils/validation";
+export * from "./utils/dateUtils";
+export * from "./utils/appUtils";
+
 
 // Init Module Factory
 export {

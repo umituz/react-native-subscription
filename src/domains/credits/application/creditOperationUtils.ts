@@ -1,7 +1,8 @@
 import { Timestamp, serverTimestamp } from "firebase/firestore";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
 import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocationOrchestrator";
-import { isPast } from "../../../utils";
+import { isPast } from "../../../utils/dateUtils";
+
 import { 
   CalculateCreditsParams, 
   BuildCreditsDataParams 
