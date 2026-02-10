@@ -58,9 +58,9 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
     () =>
       StyleSheet.create({
         badge: {
-          paddingHorizontal: tokens.spacing.sm,
+          paddingHorizontal: tokens.spacing.md,
           paddingVertical: tokens.spacing.xs,
-          borderRadius: tokens.radius.xs,
+          borderRadius: tokens.radius.full,
           backgroundColor,
         },
         badgeText: {

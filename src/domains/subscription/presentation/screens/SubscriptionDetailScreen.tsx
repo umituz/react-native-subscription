@@ -76,11 +76,7 @@ export const SubscriptionDetailScreen: React.FC<
           gap: tokens.spacing.lg,
         },
         cardsContainer: {
-          gap: tokens.spacing.lg,
-        },
-        spacer: {
-          flex: 1,
-          minHeight: tokens.spacing.xl,
+          gap: tokens.spacing.xl,
         },
       }),
     [tokens]
@@ -128,7 +124,7 @@ export const SubscriptionDetailScreen: React.FC<
         )}
       </View>
 
-      <View style={styles.spacer} />
+
     </ScreenLayout>
   );
 };
