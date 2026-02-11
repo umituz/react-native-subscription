@@ -14,8 +14,10 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
   const queryClient = useQueryClient();
 
+  const queryEnabled = !!userId && SubscriptionManager.isInitializedForUser(userId);
+
   const { data, status, error, refetch } = useQuery({
-    queryKey: subscriptionStatusQueryKeys.user(userId ?? ""),
+    queryKey: userId ? subscriptionStatusQueryKeys.user(userId) : subscriptionStatusQueryKeys.all,
     queryFn: async () => {
       if (!userId) {
         return { isPremium: false, expirationDate: null };
@@ -28,7 +30,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
         return { isPremium: false, expirationDate: null };
       }
     },
-    enabled: !!userId && SubscriptionManager.isInitializedForUser(userId),
+    enabled: queryEnabled,
   });
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import type { UserCredits } from "../core/Credits";
@@ -47,7 +47,7 @@ export const useCredits = (): UseCreditsResult => {
   const queryEnabled = !!userId && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
-    queryKey: creditsQueryKeys.user(userId ?? ""),
+    queryKey: userId ? creditsQueryKeys.user(userId) : creditsQueryKeys.all,
     queryFn: async () => {
       if (!userId || !isConfigured) return null;
 
@@ -67,18 +67,23 @@ export const useCredits = (): UseCreditsResult => {
   });
 
   const queryClient = useQueryClient();
+  const queryClientRef = useRef(queryClient);
+
+  useEffect(() => {
+    queryClientRef.current = queryClient;
+  }, [queryClient]);
 
   useEffect(() => {
     if (!userId) return;
 
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {
-        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+        queryClientRef.current.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
       }
     });
 
     return unsubscribe;
-  }, [userId, queryClient]);
+  }, [userId]);
 
   const credits = data ?? null;
 

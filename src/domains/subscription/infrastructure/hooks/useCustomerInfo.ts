@@ -14,7 +14,7 @@
  * @see https://www.revenuecat.com/docs/customers/customer-info
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Purchases, { type CustomerInfo } from "react-native-purchases";
 
 export interface UseCustomerInfoResult {
@@ -81,21 +81,23 @@ export function useCustomerInfo(): UseCustomerInfoResult {
     }
   }, []);
 
+  const listenerRef = useRef<((info: CustomerInfo) => void) | null>(null);
+
   useEffect(() => {
-    // Initial fetch
     fetchCustomerInfo();
 
-    // Listen for real-time updates (renewals, purchases, restore)
     const listener = (info: CustomerInfo) => {
       setCustomerInfo(info);
       setError(null);
     };
 
+    listenerRef.current = listener;
     Purchases.addCustomerInfoUpdateListener(listener);
 
-    // Cleanup listener on unmount
     return () => {
-      Purchases.removeCustomerInfoUpdateListener(listener);
+      if (listenerRef.current) {
+        Purchases.removeCustomerInfoUpdateListener(listenerRef.current);
+      }
     };
   }, [fetchCustomerInfo]);
 

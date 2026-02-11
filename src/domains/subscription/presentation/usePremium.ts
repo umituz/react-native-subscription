@@ -22,9 +22,14 @@ export const usePremium = (): UsePremiumResult => {
   const restoreMutation = useRestorePurchase();
 
   const { showPaywall, setShowPaywall, closePaywall, openPaywall } = usePaywallVisibility();
- 
+
   const isPremium = subscriptionActive || (credits?.isPremium ?? false);
-  const isSyncing = subscriptionActive && credits !== null && !credits.isPremium;
+  const isSyncing =
+    !statusLoading &&
+    !creditsLoading &&
+    subscriptionActive &&
+    credits !== null &&
+    !credits.isPremium;
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {

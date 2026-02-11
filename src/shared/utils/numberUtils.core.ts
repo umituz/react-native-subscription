@@ -59,7 +59,7 @@ export function calculateRemaining(current: number, cost: number): number {
  * Check if user can afford a cost
  */
 export function canAfford(balance: number | null | undefined, cost: number): boolean {
-  if (balance === null || balance === undefined) return false;
+  if (balance === null || balance === undefined || cost < 0) return false;
   return balance >= cost;
 }
 
@@ -67,7 +67,6 @@ export function canAfford(balance: number | null | undefined, cost: number): boo
  * Calculate credit percentage for UI display
  */
 export function calculateCreditPercentage(current: number | null | undefined, max: number): number {
-  if (current === null || current === undefined) return 0;
-  if (max <= 0) return 100;
+  if (current === null || current === undefined || max <= 0) return 0;
   return calculatePercentageClamped(current, max);
 }

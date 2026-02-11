@@ -66,6 +66,7 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
                   highlight={
                     daysRemaining !== null &&
                     daysRemaining !== undefined &&
+                    daysRemaining > 0 &&
                     daysRemaining <= 7
                   }
                 />
