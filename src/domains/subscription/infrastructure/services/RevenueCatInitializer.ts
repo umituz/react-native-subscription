@@ -1,39 +1,16 @@
 import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
-import { REVENUE_CAT_IGNORED_LOG_MESSAGES } from "../../core/SubscriptionDisplayConfig";
+import type { InitializerDeps } from "./RevenueCatInitializer.types";
+import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS } from "./initializerConstants";
 
-export interface InitializerDeps {
-  config: RevenueCatConfig;
-  isInitialized: () => boolean;
-  getCurrentUserId: () => string | null;
-  setInitialized: (value: boolean) => void;
-  setCurrentUserId: (userId: string) => void;
-}
+export type { InitializerDeps } from "./RevenueCatInitializer.types";
 
-// State management to prevent race conditions
 const configurationState = {
     isPurchasesConfigured: false,
-    isLogHandlerConfigured: false,
     configurationInProgress: false,
     configurationPromise: null as Promise<InitializeResult> | null,
 };
-
-
-// Simple lock mechanism to prevent concurrent configurations (implementation deferred)
-
-function configureLogHandler(): void {
-  if (configurationState.isLogHandlerConfigured) return;
-  if (typeof Purchases.setLogHandler !== 'function') return;
-  try {
-    Purchases.setLogHandler((_logLevel, message) => {
-      if (REVENUE_CAT_IGNORED_LOG_MESSAGES.some(m => message.includes(m))) return;
-    });
-    configurationState.isLogHandlerConfigured = true;
-  } catch {
-  }
-}
 
 function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: PurchasesOfferings): InitializeResult {
   const isPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
@@ -53,7 +30,7 @@ export async function initializeSDK(
       ]);
       return buildSuccessResult(deps, customerInfo, offerings);
     } catch {
-      return { success: false, offering: null, isPremium: false };
+      return FAILED_INITIALIZATION_RESULT;
     }
   }
 
@@ -72,7 +49,7 @@ export async function initializeSDK(
       const offerings = await Purchases.getOfferings();
       return buildSuccessResult(deps, customerInfo, offerings);
     } catch {
-      return { success: false, offering: null, isPremium: false };
+      return FAILED_INITIALIZATION_RESULT;
     }
   }
 
@@ -81,13 +58,13 @@ export async function initializeSDK(
         await configurationState.configurationPromise;
         return initializeSDK(deps, userId, apiKey);
     }
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
     return initializeSDK(deps, userId, apiKey);
   }
 
   const key = apiKey || resolveApiKey(deps.config);
   if (!key) {
-    return { success: false, offering: null, isPremium: false };
+    return FAILED_INITIALIZATION_RESULT;
   }
 
   let resolveInProgress: (value: InitializeResult) => void;
@@ -97,7 +74,6 @@ export async function initializeSDK(
   
   configurationState.configurationInProgress = true;
   try {
-    configureLogHandler();
     await Purchases.configure({ apiKey: key, appUserID: userId });
     configurationState.isPurchasesConfigured = true;
     deps.setInitialized(true);
@@ -112,9 +88,8 @@ export async function initializeSDK(
     resolveInProgress!(result);
     return result;
   } catch {
-    const errorResult = { success: false, offering: null, isPremium: false };
-    resolveInProgress!(errorResult);
-    return errorResult;
+    resolveInProgress!(FAILED_INITIALIZATION_RESULT);
+    return FAILED_INITIALIZATION_RESULT;
   } finally {
     configurationState.configurationInProgress = false;
     configurationState.configurationPromise = null;

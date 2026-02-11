@@ -1,21 +1,13 @@
 import type { PurchasesPackage } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
-import { initializeRevenueCatService, getRevenueCatService } from "../services/RevenueCatService";
-import { PackageHandler } from "../handlers/PackageHandler";
+import type { PackageHandler } from "../handlers/PackageHandler";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
-import {
-    ensureConfigured,
-    getCurrentUserIdOrThrow,
-    getOrCreateService,
-    ensureServiceAvailable,
-} from "./subscriptionManagerUtils";
-
-import type { 
-    SubscriptionManagerConfig, 
-    PremiumStatus, 
-    RestoreResultInfo 
-} from "./SubscriptionManager.types";
-
+import { ensureConfigured, ensureServiceAvailable } from "./subscriptionManagerUtils";
+import type { SubscriptionManagerConfig, PremiumStatus, RestoreResultInfo } from "./SubscriptionManager.types";
+import { createPackageHandler } from "./packageHandlerFactory";
+import { checkPremiumStatusFromService } from "./premiumStatusChecker";
+import { getPackagesOperation, purchasePackageOperation, restoreOperation } from "./managerOperations";
+import { performServiceInitialization } from "./initializationHandler";
 
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
@@ -29,17 +21,8 @@ class SubscriptionManagerImpl {
   }
 
   private ensurePackageHandlerInitialized(): void {
-    if (this.packageHandler) {
-      return;
-    }
-
-    ensureServiceAvailable(this.serviceInstance);
-    ensureConfigured(this.managerConfig);
-
-    this.packageHandler = new PackageHandler(
-      this.serviceInstance!,
-      this.managerConfig!.config.entitlementIdentifier
-    );
+    if (this.packageHandler) return;
+    this.packageHandler = createPackageHandler(this.serviceInstance, this.managerConfig);
   }
 
   async initialize(userId?: string): Promise<boolean> {
@@ -52,66 +35,41 @@ class SubscriptionManagerImpl {
       return existingPromise;
     }
 
-    const promise = (async () => {
-        await initializeRevenueCatService(this.managerConfig!.config);
-        this.serviceInstance = getRevenueCatService();
-
-        ensureServiceAvailable(this.serviceInstance);
-        this.ensurePackageHandlerInitialized();
-
-        const result = await this.serviceInstance!.initialize(actualUserId);
-        return result.success;
-    })();
-
+    const promise = this.performInitialization(actualUserId);
     this.state.initCache.setPromise(promise, actualUserId);
     return promise;
   }
 
-  isInitializedForUser(userId: string): boolean {
-    if (!this.serviceInstance?.isInitialized()) {
-      return false;
-    }
-
-    return this.state.initCache.getCurrentUserId() === userId;
+  private async performInitialization(userId: string): Promise<boolean> {
+    const { service, success } = await performServiceInitialization(this.managerConfig!.config, userId);
+    this.serviceInstance = service;
+    this.ensurePackageHandlerInitialized();
+    return success;
   }
 
-  async getPackages(): Promise<PurchasesPackage[]> {
-    ensureConfigured(this.managerConfig);
-    this.serviceInstance = getOrCreateService(this.serviceInstance);
-    this.ensurePackageHandlerInitialized();
+  isInitializedForUser = (userId: string): boolean =>
+    this.serviceInstance?.isInitialized() && this.state.initCache.getCurrentUserId() === userId;
 
-    return this.packageHandler!.fetchPackages();
+  async getPackages(): Promise<PurchasesPackage[]> {
+    this.ensurePackageHandlerInitialized();
+    return getPackagesOperation(this.managerConfig, this.serviceInstance, this.packageHandler!);
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
-    ensureConfigured(this.managerConfig);
-    const userId = getCurrentUserIdOrThrow(this.state);
     this.ensurePackageHandlerInitialized();
-
-    return this.packageHandler!.purchase(pkg, userId);
+    return purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
   }
 
   async restore(): Promise<RestoreResultInfo> {
-    ensureConfigured(this.managerConfig);
-    const userId = getCurrentUserIdOrThrow(this.state);
     this.ensurePackageHandlerInitialized();
-
-    return this.packageHandler!.restore(userId);
+    return restoreOperation(this.managerConfig, this.state, this.packageHandler!);
   }
 
   async checkPremiumStatus(): Promise<PremiumStatus> {
     ensureConfigured(this.managerConfig);
-    getCurrentUserIdOrThrow(this.state);
     ensureServiceAvailable(this.serviceInstance);
-
-    const customerInfo = await this.serviceInstance!.getCustomerInfo();
-
-    if (!customerInfo) {
-      throw new Error("Customer info not available");
-    }
-
     this.ensurePackageHandlerInitialized();
-    return this.packageHandler!.checkPremiumStatusFromInfo(customerInfo);
+    return checkPremiumStatusFromService(this.serviceInstance!, this.packageHandler!);
   }
 
   async reset(): Promise<void> {
@@ -121,13 +79,9 @@ class SubscriptionManagerImpl {
     this.packageHandler = null;
   }
 
-  isConfigured(): boolean {
-    return this.managerConfig !== null;
-  }
+  isConfigured = (): boolean => this.managerConfig !== null;
 
-  isInitialized(): boolean {
-    return this.serviceInstance?.isInitialized() ?? false;
-  }
+  isInitialized = (): boolean => this.serviceInstance?.isInitialized() ?? false;
 
   getEntitlementId(): string {
     ensureConfigured(this.managerConfig);
