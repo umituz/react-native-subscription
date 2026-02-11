@@ -4,6 +4,8 @@ import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
+import { createUserQueryKey } from "../../../shared/utils/queryKeyFactory";
+import { isAuthenticated } from "../utils/authGuards";
 
 export const subscriptionStatusQueryKeys = {
   all: ["subscriptionStatus"] as const,
@@ -14,12 +16,16 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
   const queryClient = useQueryClient();
 
-  const queryEnabled = !!userId && SubscriptionManager.isInitializedForUser(userId);
+  const queryEnabled = isAuthenticated(userId) && SubscriptionManager.isInitializedForUser(userId);
 
   const { data, status, error, refetch } = useQuery({
-    queryKey: userId ? subscriptionStatusQueryKeys.user(userId) : subscriptionStatusQueryKeys.all,
+    queryKey: createUserQueryKey(
+      subscriptionStatusQueryKeys.all,
+      userId,
+      subscriptionStatusQueryKeys.user
+    ),
     queryFn: async () => {
-      if (!userId) {
+      if (!isAuthenticated(userId)) {
         return { isPremium: false, expirationDate: null };
       }
 
@@ -34,10 +40,10 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   });
 
   useEffect(() => {
-    if (!userId) return;
+    if (!isAuthenticated(userId)) return;
 
     const unsubscribe = subscriptionEventBus.on(
-      SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, 
+      SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED,
       (event: { userId: string; isPremium: boolean }) => {
         if (event.userId === userId) {
           queryClient.invalidateQueries({

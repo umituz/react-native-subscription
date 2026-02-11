@@ -9,6 +9,8 @@ import {
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
 import { calculateCreditPercentage, canAfford as canAffordCheck } from "../../../shared/utils/numberUtils";
+import { createUserQueryKey } from "../../../shared/utils/queryKeyFactory";
+import { isAuthenticated } from "../../subscription/utils/authGuards";
 
 export const creditsQueryKeys = {
   all: ["credits"] as const,
@@ -42,14 +44,14 @@ function deriveLoadStatus(
 export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
   const isConfigured = isCreditsRepositoryConfigured();
-  
+
   const config = isConfigured ? getCreditsConfig() : null;
-  const queryEnabled = !!userId && isConfigured;
+  const queryEnabled = isAuthenticated(userId) && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
-    queryKey: userId ? creditsQueryKeys.user(userId) : creditsQueryKeys.all,
+    queryKey: createUserQueryKey(creditsQueryKeys.all, userId, creditsQueryKeys.user),
     queryFn: async () => {
-      if (!userId || !isConfigured) return null;
+      if (!isAuthenticated(userId) || !isConfigured) return null;
 
       const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
@@ -74,7 +76,7 @@ export const useCredits = (): UseCreditsResult => {
   }, [queryClient]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!isAuthenticated(userId)) return;
 
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {

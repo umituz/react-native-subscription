@@ -8,7 +8,7 @@ import {
   useRestorePurchase,
 } from '../infrastructure/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
-
+import { isPremiumSyncPending } from '../utils/syncStatus';
 import { UsePremiumResult } from './usePremium.types';
 
 export const usePremium = (): UsePremiumResult => {
@@ -24,12 +24,12 @@ export const usePremium = (): UsePremiumResult => {
   const { showPaywall, setShowPaywall, closePaywall, openPaywall } = usePaywallVisibility();
 
   const isPremium = subscriptionActive || (credits?.isPremium ?? false);
-  const isSyncing =
-    !statusLoading &&
-    !creditsLoading &&
-    subscriptionActive &&
-    credits !== null &&
-    !credits.isPremium;
+  const isSyncing = isPremiumSyncPending({
+    statusLoading,
+    creditsLoading,
+    subscriptionActive,
+    credits,
+  });
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage): Promise<boolean> => {
