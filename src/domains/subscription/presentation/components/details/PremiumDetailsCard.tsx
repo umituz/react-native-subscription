@@ -28,7 +28,7 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
   onUpgrade,
 }) => {
   const tokens = useAppDesignTokens();
-  const showCredits = credits && credits.length > 0;
+  const showCredits = isPremium && credits && credits.length > 0;
 
   return (
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
