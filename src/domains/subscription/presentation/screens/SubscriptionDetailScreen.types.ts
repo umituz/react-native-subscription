@@ -29,6 +29,13 @@ export interface UpgradePromptConfig {
   onUpgrade?: () => void;
 }
 
+export interface CreditInfo {
+  id: string;
+  label: string;
+  current: number;
+  total: number;
+}
+
 export interface SubscriptionDetailConfig {
   display: SubscriptionDisplayFlags;
   statusType: "active" | "expired" | "none" | "canceled";
@@ -36,7 +43,7 @@ export interface SubscriptionDetailConfig {
   expirationDate?: string;
   purchaseDate?: string;
   daysRemaining?: number | null;
-  credits?: readonly any[];
+  credits?: readonly CreditInfo[];
   translations: SubscriptionDetailTranslations;
   upgradePrompt?: UpgradePromptConfig;
   onClose?: () => void;

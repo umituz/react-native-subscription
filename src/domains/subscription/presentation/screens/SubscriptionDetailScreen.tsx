@@ -55,7 +55,7 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
         )}
         {showCredits && config.credits && (
           <CreditsList
-            credits={config.credits as any}
+            credits={config.credits}
             title={config.translations.usageTitle || config.translations.creditsTitle}
             description={config.translations.creditsResetInfo}
             remainingLabel={config.translations.remainingLabel}

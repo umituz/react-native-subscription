@@ -40,8 +40,8 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ title, subtitle, b
       </View>
       {benefits && benefits.length > 0 && (
         <View style={styles.benefitsCard}>
-          {benefits.map((benefit, index) => (
-            <View key={index} style={styles.benefitItem}>
+          {benefits.map((benefit) => (
+            <View key={benefit.text} style={styles.benefitItem}>
               <View style={styles.benefitIconWrapper}>
                 <AtomicIcon name={benefit.icon || "checkmark-circle-outline"} customSize={16} color="primary" />
               </View>
