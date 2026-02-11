@@ -10,6 +10,13 @@ export class SyncCreditStrategy implements ICreditStrategy {
     }
 
     execute(params: CreditAllocationParams): number {
-        return params.existingData?.credits ?? params.creditLimit;
+        const hasExistingCredits = params.existingData?.credits != null && params.existingData.credits > 0;
+        const hasExistingDocument = params.existingData?.processedPurchases?.length > 0;
+
+        if (params.isSubscriptionActive && !hasExistingDocument) {
+            return params.creditLimit;
+        }
+
+        return hasExistingCredits ? params.existingData.credits : params.creditLimit;
     }
 }
