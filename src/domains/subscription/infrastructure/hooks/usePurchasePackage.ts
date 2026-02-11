@@ -69,7 +69,7 @@ export const usePurchasePackage = () => {
 
       if (error instanceof Error) {
         // Handle RevenueCat-specific error codes
-        const errorCode = (error as any).code;
+        const errorCode = 'code' in error ? (error as { code?: string }).code : undefined;
         const errorMessage = error.message;
 
         switch (errorCode) {
