@@ -88,6 +88,7 @@ export * from "./utils/types";
 export * from "./utils/validation";
 export * from "./utils/dateUtils";
 export * from "./utils/appUtils";
+export * from "./shared/utils/dateConverter";
 
 // Init Module Factory
 export {

@@ -1,8 +1,9 @@
-import { Timestamp, serverTimestamp } from "firebase/firestore";
+import { serverTimestamp } from "firebase/firestore";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
 import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocationOrchestrator";
 import { isPast } from "../../../utils/dateUtils";
 import { isCreditPackage } from "../../../utils/packageTypeDetector";
+import { toTimestamp } from "../../../shared/utils/dateConverter";
 import { 
   CalculateCreditsParams, 
   BuildCreditsDataParams 
@@ -62,7 +63,7 @@ export function buildCreditsData({
     ...(purchaseHistory.length > 0 && { purchaseHistory }),
     ...(isPurchaseOrRenewal && { lastPurchaseAt: serverTimestamp() }),
     ...(metadata.expirationDate && {
-      expirationDate: Timestamp.fromDate(new Date(metadata.expirationDate))
+      expirationDate: toTimestamp(metadata.expirationDate)
     }),
     ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
     ...(metadata.originalTransactionId && { originalTransactionId: metadata.originalTransactionId }),
