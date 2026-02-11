@@ -1,4 +1,4 @@
-import { isDefined, isValidNumber, isNonNegative } from "../../../shared/utils/typeGuards";
+import { isValidNumber, isNonNegative } from "../../../shared/utils/typeGuards";
 
 export const isValidBalance = (balance: number | null | undefined): balance is number => {
   return isValidNumber(balance) && isNonNegative(balance);

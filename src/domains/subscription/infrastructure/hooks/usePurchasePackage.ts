@@ -15,7 +15,7 @@ import {
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
-import { creditsQueryKeys } from "../../../credits/presentation/useCredits";
+import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
 
 /** Purchase mutation result - simplified for presentation layer */
 export interface PurchaseMutationResult {

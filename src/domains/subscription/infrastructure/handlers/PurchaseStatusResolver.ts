@@ -11,11 +11,16 @@ export class PurchaseStatusResolver {
     const entitlement = getPremiumEntitlement(customerInfo, entitlementId);
 
     if (entitlement) {
+      let expirationDate: Date | null = null;
+
+      if (entitlement.expirationDate) {
+        const parsed = new Date(entitlement.expirationDate);
+        expirationDate = isNaN(parsed.getTime()) ? null : parsed;
+      }
+
       return {
         isPremium: true,
-        expirationDate: entitlement.expirationDate
-          ? new Date(entitlement.expirationDate)
-          : null,
+        expirationDate,
       };
     }
 

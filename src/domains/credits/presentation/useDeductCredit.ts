@@ -7,7 +7,7 @@ import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import type { UserCredits } from "../core/Credits";
 import { getCreditsRepository } from "../infrastructure/CreditsRepositoryManager";
-import { creditsQueryKeys } from "./useCredits";
+import { creditsQueryKeys } from "./creditsQueryKeys";
 import { calculateRemaining } from "../../../shared/utils/numberUtils";
 
 import { timezoneService } from "@umituz/react-native-design-system";
