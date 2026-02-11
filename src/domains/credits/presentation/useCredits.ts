@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useCallback, useMemo, useEffect, useRef } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
-import type { UserCredits } from "../core/Credits";
 import {
   getCreditsRepository,
   getCreditsConfig,
@@ -11,35 +10,18 @@ import {
 import { calculateCreditPercentage, canAfford as canAffordCheck } from "../../../shared/utils/numberUtils";
 import { createUserQueryKey } from "../../../shared/utils/queryKeyFactory";
 import { isAuthenticated } from "../../subscription/utils/authGuards";
+import { creditsQueryKeys } from "./creditsQueryKeys";
+import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
 
-export const creditsQueryKeys = {
-  all: ["credits"] as const,
-  user: (userId: string) => ["credits", userId] as const,
-};
-
-export type CreditsLoadStatus = "idle" | "loading" | "ready" | "error";
-
-export interface UseCreditsResult {
-  credits: UserCredits | null;
-  isLoading: boolean;
-  isCreditsLoaded: boolean;
-  loadStatus: CreditsLoadStatus;
-  error: Error | null;
-  hasCredits: boolean;
-  creditsPercent: number;
-  refetch: () => void;
-  canAfford: (cost: number) => boolean;
-}
-
-function deriveLoadStatus(
+const deriveLoadStatus = (
   queryStatus: "pending" | "error" | "success",
   queryEnabled: boolean
-): CreditsLoadStatus {
+): CreditsLoadStatus => {
   if (!queryEnabled) return "idle";
   if (queryStatus === "pending") return "loading";
   if (queryStatus === "error") return "error";
   return "ready";
-}
+};
 
 export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
@@ -122,4 +104,3 @@ export const useHasCredits = (): boolean => {
   const { hasCredits } = useCredits();
   return hasCredits;
 };
-

@@ -1,0 +1,1 @@
+export const TRANSACTION_LIST_MAX_HEIGHT = 400;
