@@ -2,6 +2,7 @@ import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-nat
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
+import { REVENUE_CAT_IGNORED_LOG_MESSAGES } from "../../core/SubscriptionDisplayConfig";
 
 export interface InitializerDeps {
   config: RevenueCatConfig;
@@ -27,12 +28,10 @@ function configureLogHandler(): void {
   if (typeof Purchases.setLogHandler !== 'function') return;
   try {
     Purchases.setLogHandler((_logLevel, message) => {
-      const ignoreMessages = ['Purchase was cancelled', 'AppTransaction', "Couldn't find previous transactions"];
-      if (ignoreMessages.some(m => message.includes(m))) return;
+      if (REVENUE_CAT_IGNORED_LOG_MESSAGES.some(m => message.includes(m))) return;
     });
     configurationState.isLogHandlerConfigured = true;
   } catch {
-    // Failing to set log handler should not block initialization
   }
 }
 
