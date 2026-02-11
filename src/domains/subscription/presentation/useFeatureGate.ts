@@ -1,30 +1,10 @@
-/**
- * useFeatureGate Hook
- * Unified feature gate: Auth → Subscription → Credits
- * Uses ref pattern to avoid stale closure issues.
- * Event-driven approach - no polling, no waiting.
- */
-
 import { useCallback, useRef, useEffect } from "react";
+import type { UseFeatureGateParams, UseFeatureGateResult } from "./useFeatureGate.types";
+import { DEFAULT_REQUIRED_CREDITS, shouldExecuteAuthAction, shouldExecutePurchaseAction } from "./featureGateHelpers";
+import { useSyncedRefs } from "./featureGateRefs";
+import { executeFeatureAction } from "./featureGateActions";
 
-export interface UseFeatureGateParams {
-  readonly isAuthenticated: boolean;
-  readonly onShowAuthModal: (pendingCallback: () => void | Promise<void>) => void;
-  readonly hasSubscription?: boolean;
-  readonly creditBalance: number;
-  readonly requiredCredits?: number;
-  readonly onShowPaywall: (requiredCredits?: number) => void;
-  readonly isCreditsLoaded?: boolean;
-}
-
-export interface UseFeatureGateResult {
-  readonly requireFeature: (action: () => void | Promise<void>) => void;
-  readonly isAuthenticated: boolean;
-  readonly hasSubscription: boolean;
-  readonly hasCredits: boolean;
-  readonly creditBalance: number;
-  readonly canAccess: boolean;
-}
+export type { UseFeatureGateParams, UseFeatureGateResult } from "./useFeatureGate.types";
 
 export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResult {
   const {
@@ -32,7 +12,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     onShowAuthModal,
     hasSubscription = false,
     creditBalance,
-    requiredCredits = 1,
+    requiredCredits = DEFAULT_REQUIRED_CREDITS,
     onShowPaywall,
     isCreditsLoaded = true,
   } = params;
@@ -42,52 +22,41 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   const isWaitingForPurchaseRef = useRef(false);
   const isWaitingForAuthCreditsRef = useRef(false);
 
-  const creditBalanceRef = useRef(creditBalance);
-  const hasSubscriptionRef = useRef(hasSubscription);
-  const onShowPaywallRef = useRef(onShowPaywall);
-  const requiredCreditsRef = useRef(requiredCredits);
+  const { creditBalanceRef, hasSubscriptionRef, onShowPaywallRef, requiredCreditsRef } = useSyncedRefs(creditBalance, hasSubscription, onShowPaywall, requiredCredits);
 
   useEffect(() => {
-    creditBalanceRef.current = creditBalance;
-  }, [creditBalance]);
-
-  useEffect(() => {
-    hasSubscriptionRef.current = hasSubscription;
-  }, [hasSubscription]);
-
-  useEffect(() => {
-    onShowPaywallRef.current = onShowPaywall;
-  }, [onShowPaywall]);
-
-  useEffect(() => {
-    requiredCreditsRef.current = requiredCredits;
-  }, [requiredCredits]);
-
-  useEffect(() => {
-    if (!isWaitingForAuthCreditsRef.current || !isCreditsLoaded || !pendingActionRef.current) {
-      return;
-    }
-
-    isWaitingForAuthCreditsRef.current = false;
-
-    if (hasSubscription || creditBalance >= requiredCredits) {
-      const action = pendingActionRef.current;
+    if (shouldExecuteAuthAction(
+      isWaitingForAuthCreditsRef.current,
+      isCreditsLoaded,
+      !!pendingActionRef.current,
+      hasSubscription,
+      creditBalance,
+      requiredCredits
+    )) {
+      isWaitingForAuthCreditsRef.current = false;
+      const action = pendingActionRef.current!;
       pendingActionRef.current = null;
       action();
       return;
     }
 
-    isWaitingForPurchaseRef.current = true;
-    onShowPaywall(requiredCredits);
+    if (isWaitingForAuthCreditsRef.current && isCreditsLoaded && pendingActionRef.current) {
+      isWaitingForAuthCreditsRef.current = false;
+      isWaitingForPurchaseRef.current = true;
+      onShowPaywall(requiredCredits);
+    }
   }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywall]);
 
   useEffect(() => {
-    const prevBalance = prevCreditBalanceRef.current ?? 0;
-    const creditsIncreased = creditBalance > prevBalance;
-    const subscriptionAcquired = hasSubscription && !hasSubscriptionRef.current;
-
-    if (isWaitingForPurchaseRef.current && (creditsIncreased || subscriptionAcquired) && pendingActionRef.current) {
-      const action = pendingActionRef.current;
+    if (shouldExecutePurchaseAction(
+      isWaitingForPurchaseRef.current,
+      creditBalance,
+      prevCreditBalanceRef.current ?? 0,
+      hasSubscription,
+      hasSubscriptionRef.current,
+      !!pendingActionRef.current
+    )) {
+      const action = pendingActionRef.current!;
       pendingActionRef.current = null;
       isWaitingForPurchaseRef.current = false;
       action();
@@ -99,45 +68,28 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>) => {
-      if (!isAuthenticated) {
-        const postAuthAction = () => {
-          pendingActionRef.current = action;
-          isWaitingForAuthCreditsRef.current = true;
-        };
-        onShowAuthModal(postAuthAction);
-        return;
-      }
-
-      // Use ref values to avoid stale closure
-      const currentHasSubscription = hasSubscriptionRef.current;
-      const currentBalance = creditBalanceRef.current;
-      const currentRequiredCredits = requiredCreditsRef.current;
-
-      if (currentHasSubscription) {
-        action();
-        return;
-      }
-
-      if (currentBalance < currentRequiredCredits) {
-        pendingActionRef.current = action;
-        isWaitingForPurchaseRef.current = true;
-        onShowPaywallRef.current(currentRequiredCredits);
-        return;
-      }
-
-      action();
+      executeFeatureAction(
+        action,
+        isAuthenticated,
+        onShowAuthModal,
+        hasSubscriptionRef,
+        creditBalanceRef,
+        requiredCreditsRef,
+        onShowPaywallRef,
+        pendingActionRef,
+        isWaitingForAuthCreditsRef,
+        isWaitingForPurchaseRef
+      );
     },
-    [isAuthenticated, onShowAuthModal]
+    [isAuthenticated, onShowAuthModal, hasSubscriptionRef, creditBalanceRef, requiredCreditsRef, onShowPaywallRef]
   );
-
-  const hasCredits = creditBalance >= requiredCredits;
 
   return {
     requireFeature,
     isAuthenticated,
     hasSubscription,
-    hasCredits,
+    hasCredits: creditBalance >= requiredCredits,
     creditBalance,
-    canAccess: isAuthenticated && (hasSubscription || hasCredits),
+    canAccess: isAuthenticated && (hasSubscription || creditBalance >= requiredCredits),
   };
 }

@@ -1,0 +1,1 @@
+export const EXPIRING_SOON_THRESHOLD_DAYS = 7;
