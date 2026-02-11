@@ -2,25 +2,27 @@ import { Timestamp, serverTimestamp } from "firebase/firestore";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
 import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocationOrchestrator";
 import { isPast } from "../../../utils/dateUtils";
-
+import { isCreditPackage } from "../../../utils/packageTypeDetector";
 import { 
   CalculateCreditsParams, 
   BuildCreditsDataParams 
 } from "./creditOperationUtils.types";
+import { PURCHASE_ID_PREFIXES } from "../core/CreditsConstants";
+
 
 export function calculateNewCredits({ metadata, existingData, creditLimit, purchaseId }: CalculateCreditsParams): number {
-  const isPremium = metadata.isPremium;
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
+  const isPremium = metadata.isPremium;
   const status = resolveSubscriptionStatus({
     isPremium,
     willRenew: metadata.willRenew ?? false,
     isExpired,
     periodType: metadata.periodType ?? undefined,
   });
-  const isStatusSync = purchaseId.startsWith("status_sync_");
+
   return creditAllocationOrchestrator.allocate({
     status,
-    isStatusSync,
+    isStatusSync: purchaseId.startsWith(PURCHASE_ID_PREFIXES.STATUS_SYNC),
     existingData,
     creditLimit,
     isSubscriptionActive: isPremium && !isExpired,
@@ -31,8 +33,13 @@ export function calculateNewCredits({ metadata, existingData, creditLimit, purch
 export function buildCreditsData({
   existingData, newCredits, creditLimit, purchaseId, metadata, purchaseHistory, platform
 }: BuildCreditsDataParams): Record<string, any> {
-  const isPremium = metadata.isPremium;
+  const isConsumable = isCreditPackage(metadata.productId ?? "");
+  const isPremium = isConsumable ? (existingData?.isPremium ?? metadata.isPremium) : metadata.isPremium;
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
+  const resolvedCreditLimit = isConsumable 
+    ? (existingData?.creditLimit || creditLimit) 
+    : creditLimit;
+
   const status = resolveSubscriptionStatus({
     isPremium,
     willRenew: metadata.willRenew ?? false,
@@ -40,24 +47,24 @@ export function buildCreditsData({
     periodType: metadata.periodType ?? undefined,
   });
 
-  const creditsData: Record<string, any> = {
+  const isPurchaseOrRenewal = purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) || 
+                              purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL);
+
+  return {
     isPremium,
     status,
     credits: newCredits,
-    creditLimit,
+    creditLimit: resolvedCreditLimit,
     lastUpdatedAt: serverTimestamp(),
     processedPurchases: [...(existingData?.processedPurchases ?? []), purchaseId].slice(-50),
     productId: metadata.productId,
     platform,
+    ...(purchaseHistory.length > 0 && { purchaseHistory }),
+    ...(isPurchaseOrRenewal && { lastPurchaseAt: serverTimestamp() }),
+    ...(metadata.expirationDate && { expirationDate: Timestamp.fromDate(new Date(metadata.expirationDate)) }),
+    ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
+    ...(metadata.originalTransactionId && { originalTransactionId: metadata.originalTransactionId }),
   };
-
-  if (purchaseHistory.length > 0) creditsData.purchaseHistory = purchaseHistory;
-  if (purchaseId.startsWith("purchase_") || purchaseId.startsWith("renewal_")) creditsData.lastPurchaseAt = serverTimestamp();
-  if (metadata.expirationDate) creditsData.expirationDate = Timestamp.fromDate(new Date(metadata.expirationDate));
-  if (metadata.willRenew !== undefined) creditsData.willRenew = metadata.willRenew;
-  if (metadata.originalTransactionId) creditsData.originalTransactionId = metadata.originalTransactionId;
-
-  return creditsData;
 }
 
 export function shouldSkipStatusSyncWrite(
@@ -65,12 +72,11 @@ export function shouldSkipStatusSyncWrite(
   existingData: any,
   newCreditsData: Record<string, any>
 ): boolean {
-  if (!purchaseId.startsWith("status_sync_")) return false;
-  return (
-    existingData.isPremium === newCreditsData.isPremium &&
+  if (!purchaseId.startsWith(PURCHASE_ID_PREFIXES.STATUS_SYNC)) return false;
+  
+  return existingData.isPremium === newCreditsData.isPremium &&
     existingData.status === newCreditsData.status &&
     existingData.credits === newCreditsData.credits &&
     existingData.creditLimit === newCreditsData.creditLimit &&
-    existingData.productId === newCreditsData.productId
-  );
+    existingData.productId === newCreditsData.productId;
 }

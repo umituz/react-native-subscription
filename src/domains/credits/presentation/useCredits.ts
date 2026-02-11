@@ -8,7 +8,7 @@ import {
   getCreditsConfig,
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
-import { calculateCreditPercentage, canAffordCost } from "../utils/creditCalculations";
+import { calculateCreditPercentage, canAfford as canAffordCheck } from "../../../shared/utils/numberUtils";
 
 export const creditsQueryKeys = {
   all: ["credits"] as const,
@@ -90,7 +90,7 @@ export const useCredits = (): UseCreditsResult => {
   }, [credits, config?.creditLimit]);
 
   const canAfford = useCallback(
-    (cost: number): boolean => canAffordCost(credits?.credits, cost),
+    (cost: number): boolean => canAffordCheck(credits?.credits, cost),
     [credits]
   );
 

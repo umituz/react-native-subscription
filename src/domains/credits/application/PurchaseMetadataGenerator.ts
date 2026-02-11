@@ -6,48 +6,42 @@ import type {
   PurchaseSource
 } from "../core/UserCreditsDocument";
 import { detectPackageType } from "../../../utils/packageTypeDetector";
+import { PACKAGE_TYPE, PURCHASE_TYPE, type Platform } from "../../subscription/core/SubscriptionConstants";
 
 export interface MetadataGeneratorConfig {
   productId: string;
   source: PurchaseSource;
   type: PurchaseType;
   creditLimit: number;
-  platform: "ios" | "android";
+  platform: Platform;
   appVersion: string;
 }
 
-export class PurchaseMetadataGenerator {
-  static generate(
-    config: MetadataGeneratorConfig,
-    existingData: UserCreditsDocumentRead
-  ): { purchaseType: PurchaseType; purchaseHistory: PurchaseMetadata[] } {
-    const { productId, source, type, creditLimit, platform, appVersion } = config;
+export function generatePurchaseMetadata(
+  config: MetadataGeneratorConfig,
+  existingData: UserCreditsDocumentRead
+): { purchaseType: PurchaseType; purchaseHistory: PurchaseMetadata[] } {
+  const { productId, source, type, creditLimit, platform, appVersion } = config;
 
-    const packageType = detectPackageType(productId);
-    let purchaseType: PurchaseType = type;
+  const packageType = detectPackageType(productId);
+  let purchaseType: PurchaseType = type;
 
-    if (packageType !== "unknown") {
-      const oldLimit = existingData.creditLimit;
-      if (creditLimit > oldLimit) {
-        purchaseType = "upgrade";
-      } else if (creditLimit < oldLimit) {
-        purchaseType = "downgrade";
-      }
-    }
-
-    const newMetadata: PurchaseMetadata = {
-      productId,
-      packageType,
-      creditLimit,
-      source,
-      type: purchaseType,
-      platform,
-      appVersion,
-      timestamp: Timestamp.fromDate(new Date()),
-    };
-
-    const purchaseHistory = [...existingData.purchaseHistory, newMetadata].slice(-10);
-
-    return { purchaseType, purchaseHistory };
+  if (packageType !== PACKAGE_TYPE.UNKNOWN && creditLimit > existingData.creditLimit) {
+    purchaseType = PURCHASE_TYPE.UPGRADE;
   }
+
+  const newMetadata: PurchaseMetadata = {
+    productId,
+    packageType,
+    creditLimit,
+    source,
+    type: purchaseType,
+    platform,
+    appVersion,
+    timestamp: Timestamp.fromDate(new Date()),
+  };
+
+  const purchaseHistory = [...existingData.purchaseHistory, newMetadata].slice(-10);
+
+  return { purchaseType, purchaseHistory };
 }

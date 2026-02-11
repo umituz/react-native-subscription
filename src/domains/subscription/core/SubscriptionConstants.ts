@@ -60,8 +60,8 @@ export const PURCHASE_TYPE = {
   INITIAL: 'initial',
   RENEWAL: 'renewal',
   UPGRADE: 'upgrade',
-  DOWNGRADE: 'downgrade',
 } as const;
 
 export type PurchaseType = (typeof PURCHASE_TYPE)[keyof typeof PURCHASE_TYPE];
+
 

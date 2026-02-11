@@ -1,5 +1,6 @@
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import type { InitializeCreditsMetadata } from "../../subscription/application/SubscriptionInitializerTypes";
+import type { Platform } from "../../subscription/core/SubscriptionConstants";
 
 export interface CalculateCreditsParams {
   metadata: InitializeCreditsMetadata;
@@ -15,5 +16,5 @@ export interface BuildCreditsDataParams {
   purchaseId: string;
   metadata: InitializeCreditsMetadata;
   purchaseHistory: any[];
-  platform: "ios" | "android";
+  platform: Platform;
 }

@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from "@umituz/react-native-design-system"
 import type { UserCredits } from "../core/Credits";
 import { getCreditsRepository } from "../infrastructure/CreditsRepositoryManager";
 import { creditsQueryKeys } from "./useCredits";
-import { calculateRemainingCredits } from "../utils/creditCalculations";
+import { calculateRemaining } from "../../../shared/utils/numberUtils";
 
 import { timezoneService } from "@umituz/react-native-design-system";
 
@@ -48,7 +48,7 @@ export const useDeductCredit = ({
       }
 
       // Calculate new credits using utility
-      const newCredits = calculateRemainingCredits(previousCredits.credits, cost);
+      const newCredits = calculateRemaining(previousCredits.credits, cost);
 
       queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(userId), (old) => {
         if (!old) return old;

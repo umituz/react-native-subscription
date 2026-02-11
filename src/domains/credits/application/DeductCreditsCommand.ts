@@ -1,70 +1,57 @@
-import { runTransaction, serverTimestamp, type Firestore, type Transaction, type DocumentReference } from "firebase/firestore";
-import { getFirestore } from "@umituz/react-native-firebase";
+import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "firebase/firestore";
 import type { DeductCreditsResult } from "../core/Credits";
+import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
-export interface IDeductCreditsCommand {
-  execute(userId: string, cost: number): Promise<DeductCreditsResult>;
-}
-
 /**
- * Command for deducting credits.
+ * Deducts credits from a user's balance.
  * Encapsulates the domain rules and transaction logic for credit usage.
  */
-export class DeductCreditsCommand implements IDeductCreditsCommand {
-  constructor(
-    private getCreditsRef: (db: Firestore, userId: string) => DocumentReference
-  ) {}
+export async function deductCreditsOperation(
+  db: Firestore,
+  creditsRef: DocumentReference,
+  cost: number,
+  userId: string
+): Promise<DeductCreditsResult> {
+  try {
+    const remaining = await runTransaction(db, async (tx: Transaction) => {
+      const docSnap = await tx.get(creditsRef);
 
-  async execute(userId: string, cost: number): Promise<DeductCreditsResult> {
-    const db = getFirestore();
-    if (!db) {
-      return {
-        success: false,
-        remainingCredits: null,
-        error: { message: "No DB", code: "ERR" }
-      };
-    }
+      if (!docSnap.exists()) {
+        throw new Error(CREDIT_ERROR_CODES.NO_CREDITS);
+      }
 
-    try {
-      const remaining = await runTransaction(db, async (tx: Transaction) => {
-        const ref = this.getCreditsRef(db, userId);
-        const docSnap = await tx.get(ref);
+      const current = docSnap.data().credits as number;
+      if (current < cost) {
+        throw new Error(CREDIT_ERROR_CODES.CREDITS_EXHAUSTED);
+      }
 
-        if (!docSnap.exists()) {
-          throw new Error("NO_CREDITS");
-        }
-
-        const current = docSnap.data().credits as number;
-        if (current < cost) {
-          throw new Error("CREDITS_EXHAUSTED");
-        }
-
-        const updated = current - cost;
-        tx.update(ref, {
-          credits: updated,
-          lastUpdatedAt: serverTimestamp()
-        });
-
-        return updated;
+      const updated = current - cost;
+      tx.update(creditsRef, {
+        credits: updated,
+        lastUpdatedAt: serverTimestamp()
       });
 
-      // Emit event via EventBus (Observer Pattern)
-      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
+      return updated;
+    });
 
-      return {
-        success: true,
-        remainingCredits: remaining,
-        error: null
-      };
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      const code = message === "NO_CREDITS" || message === "CREDITS_EXHAUSTED" ? message : "DEDUCT_ERR";
-      return {
-        success: false,
-        remainingCredits: null,
-        error: { message, code }
-      };
-    }
+    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
+
+    return {
+      success: true,
+      remainingCredits: remaining,
+      error: null
+    };
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    const code = (message === CREDIT_ERROR_CODES.NO_CREDITS || message === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED) 
+      ? message 
+      : CREDIT_ERROR_CODES.DEDUCT_ERR;
+
+    return {
+      success: false,
+      remainingCredits: null,
+      error: { message, code }
+    };
   }
 }

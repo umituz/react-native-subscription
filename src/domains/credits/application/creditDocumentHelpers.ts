@@ -5,13 +5,14 @@
 
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { serverTimestamp, type DocumentSnapshot } from "firebase/firestore";
+import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
 
 /**
  * Get existing credit document or create default
  */
 export function getCreditDocumentOrDefault(
     creditsDoc: DocumentSnapshot,
-    platform: "ios" | "android"
+    platform: Platform
 ): UserCreditsDocumentRead {
     if (creditsDoc.exists()) {
         return creditsDoc.data() as UserCreditsDocumentRead;
@@ -23,7 +24,7 @@ export function getCreditDocumentOrDefault(
         credits: 0,
         creditLimit: 0,
         isPremium: false,
-        status: "none",
+        status: SUBSCRIPTION_STATUS.NONE,
         processedPurchases: [],
         purchaseHistory: [],
         platform,
@@ -42,6 +43,8 @@ export function getCreditDocumentOrDefault(
         trialEndDate: null,
         trialCredits: 0,
         convertedFromTrial: false,
+        purchaseSource: null,
+        purchaseType: null,
     } as any;
 }
 

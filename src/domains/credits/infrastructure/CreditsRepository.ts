@@ -1,36 +1,33 @@
-/**
- * Credits Repository
- * Optimized to use Design Patterns: Command, Observer, and Strategy.
- */
-
-import { getDoc, setDoc, type Firestore } from "firebase/firestore";
+import { getDoc, setDoc, type Firestore, type DocumentReference } from "firebase/firestore";
 import { BaseRepository } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../application/CreditsInitializer";
-import { CreditsMapper } from "../core/CreditsMapper";
+import { mapCreditsDocumentToEntity } from "../core/CreditsMapper";
 import type { RevenueCatData } from "../../subscription/core/RevenueCatData";
-import { DeductCreditsCommand } from "../application/DeductCreditsCommand";
-import { CreditLimitCalculator } from "../application/CreditLimitCalculator";
+import { deductCreditsOperation } from "../application/DeductCreditsCommand";
+import { calculateCreditLimit } from "../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
+import { SUBSCRIPTION_STATUS } from "../../subscription/core/SubscriptionConstants";
 
+/**
+ * Credits Repository
+ * Provides domain-specific database operations for credits system.
+ */
 export class CreditsRepository extends BaseRepository {
-  private deductCommand: DeductCreditsCommand;
-
   constructor(private config: CreditsConfig) {
     super();
-    this.deductCommand = new DeductCreditsCommand((db, uid) => this.getRef(db, uid));
   }
 
   private getCollectionConfig(): CollectionConfig {
     return {
-      collectionName: "credits",
+      collectionName: this.config.collectionName,
       useUserSubcollection: this.config.useUserSubcollection,
     };
   }
 
-  private getRef(db: Firestore, userId: string) {
+  private getRef(db: Firestore, userId: string): DocumentReference {
     const config = this.getCollectionConfig();
     return buildDocRef(db, userId, "balance", config);
   }
@@ -43,7 +40,7 @@ export class CreditsRepository extends BaseRepository {
       return { success: true, data: null, error: null };
     }
 
-    const entity = CreditsMapper.toEntity(snap.data() as UserCreditsDocumentRead);
+    const entity = mapCreditsDocumentToEntity(snap.data() as UserCreditsDocumentRead);
     return { success: true, data: entity, error: null };
   }
 
@@ -56,7 +53,7 @@ export class CreditsRepository extends BaseRepository {
     type: PurchaseType = PURCHASE_TYPE.INITIAL
   ): Promise<CreditsResult> {
     const db = requireFirestore();
-    const creditLimit = CreditLimitCalculator.calculate(productId, this.config);
+    const creditLimit = calculateCreditLimit(productId, this.config);
     const cfg = { ...this.config, creditLimit };
 
     const result = await initializeCreditsTransaction(
@@ -78,16 +75,17 @@ export class CreditsRepository extends BaseRepository {
 
     return {
       success: true,
-      data: result.finalData ? CreditsMapper.toEntity(result.finalData) : null,
+      data: result.finalData ? mapCreditsDocumentToEntity(result.finalData) : null,
       error: null,
     };
   }
 
   /**
-   * Delegates to DeductCreditsCommand (Command Pattern)
+   * Deducts credits using atomic transaction logic.
    */
   async deductCredit(userId: string, cost: number): Promise<DeductCreditsResult> {
-    return this.deductCommand.execute(userId, cost);
+    const db = requireFirestore();
+    return deductCreditsOperation(db, this.getRef(db, userId), cost, userId);
   }
 
   async hasCredits(userId: string, cost: number): Promise<boolean> {
@@ -101,7 +99,7 @@ export class CreditsRepository extends BaseRepository {
     const ref = this.getRef(db, userId);
     await setDoc(ref, {
       isPremium: false,
-      status: "expired",
+      status: SUBSCRIPTION_STATUS.EXPIRED,
       willRenew: false,
       expirationDate: new Date().toISOString()
     }, { merge: true });
