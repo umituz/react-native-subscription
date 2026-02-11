@@ -56,27 +56,48 @@ export class CreditsRepository extends BaseRepository {
     const creditLimit = calculateCreditLimit(productId, this.config);
     const cfg = { ...this.config, creditLimit };
 
-    const result = await initializeCreditsTransaction(
-      db,
-      this.getRef(db, userId),
-      cfg,
-      purchaseId,
-      {
-        productId,
-        source,
-        expirationDate: revenueCatData.expirationDate,
-        willRenew: revenueCatData.willRenew,
-        originalTransactionId: revenueCatData.originalTransactionId,
-        isPremium: revenueCatData.isPremium,
-        periodType: revenueCatData.periodType,
-        type,
+    const maxRetries = 3;
+    let lastError: any;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const result = await initializeCreditsTransaction(
+          db,
+          this.getRef(db, userId),
+          cfg,
+          purchaseId,
+          {
+            productId,
+            source,
+            expirationDate: revenueCatData.expirationDate,
+            willRenew: revenueCatData.willRenew,
+            originalTransactionId: revenueCatData.originalTransactionId,
+            isPremium: revenueCatData.isPremium,
+            periodType: revenueCatData.periodType,
+            type,
+          }
+        );
+
+        return {
+          success: true,
+          data: result.finalData ? mapCreditsDocumentToEntity(result.finalData) : null,
+          error: null,
+        };
+      } catch (error: any) {
+        lastError = error;
+        const isAlreadyExists = error?.code === 'already-exists' || error?.message?.includes('already-exists');
+        if (isAlreadyExists && attempt < maxRetries - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+          continue;
+        }
+        break;
       }
-    );
+    }
 
     return {
-      success: true,
-      data: result.finalData ? mapCreditsDocumentToEntity(result.finalData) : null,
-      error: null,
+      success: false,
+      data: null,
+      error: lastError?.message || 'Unknown error during credit initialization',
     };
   }
 
