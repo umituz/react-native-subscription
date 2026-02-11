@@ -1,0 +1,3 @@
+export const FEEDBACK_INPUT_MAX_LENGTH = 200;
+export const FEEDBACK_INPUT_MIN_HEIGHT = 80;
+export const FEEDBACK_OPTION_OPACITY = 0.7;
