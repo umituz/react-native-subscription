@@ -31,7 +31,7 @@ export function usePaywallActions({
   const [isLocalProcessing, setIsLocalProcessing] = useState(false);
 
   const { startPurchase, endPurchase } = usePurchaseLoadingStore();
-  const isGlobalPurchasing = usePurchaseLoadingStore((state) => state.isPurchasing);
+  const isGlobalPurchasing = usePurchaseLoadingStore((state) => state.isPurchasing());
 
   const isProcessing = isLocalProcessing || isGlobalPurchasing;
 
@@ -62,7 +62,7 @@ export function usePaywallActions({
       onPurchaseError?.(err);
     } finally {
       setIsLocalProcessing(false);
-      endPurchase();
+      endPurchase(planId);
     }
   }, [selectedPlanId, packages, onPurchase, isProcessing, startPurchase, endPurchase, onPurchaseSuccess, onPurchaseError, onAuthRequired, onClose]);
 

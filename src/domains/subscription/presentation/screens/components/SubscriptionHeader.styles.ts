@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
-import type { AppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens } from "@umituz/react-native-design-system";
 
-export const createSubscriptionHeaderStyles = (tokens: AppDesignTokens) =>
+export const createSubscriptionHeaderStyles = (tokens: ReturnType<typeof useAppDesignTokens>) =>
   StyleSheet.create({
     container: {
       borderRadius: tokens.radius.lg,

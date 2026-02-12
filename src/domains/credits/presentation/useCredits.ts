@@ -8,7 +8,6 @@ import {
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
 import { calculateCreditPercentage, canAfford as canAffordCheck } from "../../../shared/utils/numberUtils";
-import { createUserQueryKey } from "../../../shared/utils/queryKeyFactory";
 import { isAuthenticated } from "../../subscription/utils/authGuards";
 import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
@@ -31,7 +30,7 @@ export const useCredits = (): UseCreditsResult => {
   const queryEnabled = isAuthenticated(userId) && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
-    queryKey: createUserQueryKey(creditsQueryKeys.all, userId, creditsQueryKeys.user),
+    queryKey: creditsQueryKeys.user(userId),
     queryFn: async () => {
       if (!isAuthenticated(userId) || !isConfigured) return null;
 

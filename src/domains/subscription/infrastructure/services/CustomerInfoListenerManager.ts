@@ -23,15 +23,24 @@ export class CustomerInfoListenerManager {
         previousProductId: null,
     };
 
-    setUserId(userId: string): void {
-        // Reset renewal state when user changes to prevent state leak between users
-        if (this.currentUserId && this.currentUserId !== userId) {
+    setUserId(userId: string, config: RevenueCatConfig): void {
+        const wasUserChange = this.currentUserId && this.currentUserId !== userId;
+
+        // Clean up old listener and reset state when user changes
+        if (wasUserChange) {
+            this.removeListener();
             this.renewalState = {
                 previousExpirationDate: null,
                 previousProductId: null,
             };
         }
+
         this.currentUserId = userId;
+
+        // Setup new listener for new user or if no listener exists
+        if (wasUserChange || !this.listener) {
+            this.setupListener(config);
+        }
     }
 
     clearUserId(): void {
@@ -65,8 +74,13 @@ export class CustomerInfoListenerManager {
                         renewalResult.newExpirationDate!,
                         customerInfo
                     );
-                } catch {
-                    // Silently fail listener callbacks to prevent crashing the main listener
+                } catch (error) {
+                    console.error('[CustomerInfoListener] Renewal callback failed', {
+                        userId: this.currentUserId,
+                        productId: renewalResult.productId,
+                        error
+                    });
+                    // Swallow error to prevent listener crash
                 }
             }
 
@@ -80,8 +94,14 @@ export class CustomerInfoListenerManager {
                         renewalResult.isUpgrade,
                         customerInfo
                     );
-                } catch {
-                    // Silently fail listener callbacks to prevent crashing the main listener
+                } catch (error) {
+                    console.error('[CustomerInfoListener] Plan change callback failed', {
+                        userId: this.currentUserId,
+                        productId: renewalResult.productId,
+                        previousProductId: renewalResult.previousProductId,
+                        error
+                    });
+                    // Swallow error to prevent listener crash
                 }
             }
 
@@ -92,8 +112,12 @@ export class CustomerInfoListenerManager {
             if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
                 try {
                     await syncPremiumStatus(config, this.currentUserId, customerInfo);
-                } catch {
-                    // Silently fail listener callbacks to prevent crashing the main listener
+                } catch (error) {
+                    console.error('[CustomerInfoListener] Premium status sync failed', {
+                        userId: this.currentUserId,
+                        error
+                    });
+                    // Swallow error to prevent listener crash
                 }
             }
         };

@@ -48,7 +48,7 @@ class SubscriptionManagerImpl {
   }
 
   isInitializedForUser = (userId: string): boolean =>
-    this.serviceInstance?.isInitialized() && this.state.initCache.getCurrentUserId() === userId;
+    !!(this.serviceInstance?.isInitialized() && this.state.initCache.getCurrentUserId() === userId);
 
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensurePackageHandlerInitialized();

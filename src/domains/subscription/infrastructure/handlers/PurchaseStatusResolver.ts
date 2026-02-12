@@ -22,11 +22,6 @@ export class PurchaseStatusResolver {
     const entitlement = getPremiumEntitlement(customerInfo, entitlementId);
 
     if (entitlement) {
-      // Get the active subscription from customerInfo
-      const activeSubscriptions = customerInfo.activeSubscriptions || [];
-      const productId = entitlement.productIdentifier;
-      const subscription = productId ? customerInfo.allPurchasedProductIdentifiers.includes(productId) : null;
-
       return {
         isPremium: true,
         expirationDate: toDate(entitlement.expirationDate),
@@ -37,8 +32,8 @@ export class PurchaseStatusResolver {
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
         isSandbox: entitlement.isSandbox || false,
         periodType: entitlement.periodType || null,
-        store: entitlement.store || null,
-        gracePeriodExpiresDate: toDate(entitlement.gracePeriodExpiresDate) || null,
+        store: null, // Store info not available in entitlement type
+        gracePeriodExpiresDate: null, // Grace period not available in entitlement type
         unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) || null,
       };
     }

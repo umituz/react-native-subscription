@@ -37,8 +37,8 @@ export function buildCreditsData({
   const isConsumable = isCreditPackage(metadata.productId ?? "");
   const isPremium = isConsumable ? (existingData?.isPremium ?? metadata.isPremium) : metadata.isPremium;
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
-  const resolvedCreditLimit = isConsumable 
-    ? (existingData?.creditLimit || creditLimit) 
+  const resolvedCreditLimit = isConsumable
+    ? (existingData?.creditLimit ?? creditLimit)
     : creditLimit;
 
   const status = resolveSubscriptionStatus({

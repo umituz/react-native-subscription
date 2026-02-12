@@ -26,9 +26,15 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
   const tokens = useAppDesignTokens();
   const showCredits = isPremium && credits && credits.length > 0;
 
+  // Map trial and trial_canceled statuses for display
+  const displayStatusType: "active" | "expired" | "none" | "canceled" =
+    statusType === "trial" ? "active" :
+    statusType === "trial_canceled" ? "canceled" :
+    statusType;
+
   return (
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
-      {(isPremium || showCredits) && <PremiumDetailsCardHeader statusType={statusType} translations={translations} />}
+      {(isPremium || showCredits) && <PremiumDetailsCardHeader statusType={displayStatusType} translations={translations} />}
 
 
       {isPremium && (

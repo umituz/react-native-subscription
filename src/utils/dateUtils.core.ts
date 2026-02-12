@@ -6,7 +6,10 @@
 export type DateLike = Date | string | number;
 
 /**
- * Checks if a date is in the past
+ * Checks if a date is in the past (strictly before now)
+ * @param date - The date to check
+ * @returns true if date < now, false if date >= now
+ * @note A date exactly equal to Date.now() returns false (not past)
  */
 export function isPast(date: DateLike): boolean {
   const d = new Date(date);
@@ -14,11 +17,27 @@ export function isPast(date: DateLike): boolean {
 }
 
 /**
- * Checks if a date is in the future
+ * Checks if a date is in the future (strictly after now)
+ * @param date - The date to check
+ * @returns true if date > now, false if date <= now
+ * @note A date exactly equal to Date.now() returns false (not future)
  */
 export function isFuture(date: DateLike): boolean {
   const d = new Date(date);
   return d.getTime() > Date.now();
+}
+
+/**
+ * Checks if a date is approximately now (within margin)
+ * Useful for handling edge cases where isPast/isFuture might flicker
+ * @param date - The date to check
+ * @param marginMs - Margin in milliseconds (default: 1000ms)
+ * @returns true if date is within margin of Date.now()
+ */
+export function isNow(date: DateLike, marginMs: number = 1000): boolean {
+  const d = new Date(date);
+  const diff = Math.abs(d.getTime() - Date.now());
+  return diff <= marginMs;
 }
 
 /**

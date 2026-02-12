@@ -64,6 +64,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
     prevCreditBalanceRef.current = creditBalance;
     hasSubscriptionRef.current = hasSubscription;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditBalance, hasSubscription]);
 
   const requireFeature = useCallback(

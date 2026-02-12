@@ -38,19 +38,22 @@ export const useDeductCredit = ({
       return repository.deductCredit(userId, cost);
     },
     onMutate: async (cost: number) => {
-      if (!userId) return { previousCredits: null, skippedOptimistic: true };
+      if (!userId) return { previousCredits: null, skippedOptimistic: true, capturedUserId: null };
 
-      await queryClient.cancelQueries({ queryKey: creditsQueryKeys.user(userId) });
-      const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(userId));
+      // Capture userId at mutation start to prevent cross-user contamination
+      const capturedUserId = userId;
+
+      await queryClient.cancelQueries({ queryKey: creditsQueryKeys.user(capturedUserId) });
+      const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(capturedUserId));
 
       if (!previousCredits) {
-        return { previousCredits: null, skippedOptimistic: true };
+        return { previousCredits: null, skippedOptimistic: true, capturedUserId };
       }
 
       // Calculate new credits using utility
       const newCredits = calculateRemaining(previousCredits.credits, cost);
 
-      queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(userId), (old) => {
+      queryClient.setQueryData<UserCredits | null>(creditsQueryKeys.user(capturedUserId), (old) => {
         if (!old) return old;
         return {
           ...old,
@@ -62,14 +65,15 @@ export const useDeductCredit = ({
       return {
         previousCredits,
         skippedOptimistic: false,
-        wasInsufficient: previousCredits.credits < cost
+        wasInsufficient: previousCredits.credits < cost,
+        capturedUserId
       };
     },
     onError: (_err, _cost, mutationData) => {
       // Always restore previous credits on error to prevent UI desync
-      // Use optional chaining to be safe
-      if (userId && mutationData?.previousCredits && !mutationData.skippedOptimistic) {
-         queryClient.setQueryData(creditsQueryKeys.user(userId), mutationData.previousCredits);
+      // Use captured userId to prevent rollback on wrong user
+      if (mutationData?.capturedUserId && mutationData?.previousCredits && !mutationData.skippedOptimistic) {
+         queryClient.setQueryData(creditsQueryKeys.user(mutationData.capturedUserId), mutationData.previousCredits);
       }
     },
     onSuccess: () => {

@@ -52,25 +52,19 @@ export class SubscriptionSyncProcessor {
     willRenew?: boolean,
     periodType?: PeriodType
   ) {
-    const repository = getCreditsRepository();
-
-    if (!isPremium && !productId) {
-      const currentCredits = await repository.getCredits(userId);
-      if (currentCredits.success && currentCredits.data?.isPremium) {
-        return;
-      }
-    }
-
+    // Expired subscription case
     if (!isPremium && productId) {
       await handleExpiredSubscription(userId);
       return;
     }
 
+    // Free user case
     if (!isPremium && !productId) {
       await handleFreeUserInitialization(userId);
       return;
     }
 
+    // Premium user case
     await handlePremiumStatusSync(
       userId,
       isPremium,

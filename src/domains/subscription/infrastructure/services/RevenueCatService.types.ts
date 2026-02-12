@@ -49,8 +49,7 @@ export class RevenueCatService implements IRevenueCatService {
         const result = await initializeSDK(this.getSDKParams(), userId, apiKey);
 
         if (result.success) {
-            this.listenerManager.setUserId(userId);
-            this.listenerManager.setupListener(this.stateManager.getConfig());
+            this.listenerManager.setUserId(userId, this.stateManager.getConfig());
         }
 
         return result;
@@ -82,6 +81,7 @@ export class RevenueCatService implements IRevenueCatService {
             await Purchases.logOut();
             this.stateManager.setInitialized(false);
         } catch {
+            // Ignore logout errors during reset
         }
     }
 }

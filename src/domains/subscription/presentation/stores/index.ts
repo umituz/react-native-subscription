@@ -5,7 +5,7 @@
 export {
   usePurchaseLoadingStore,
   selectIsPurchasing,
-  selectPurchasingProductId,
+  selectIsProductPurchasing,
   selectPurchaseSource,
   type PurchaseLoadingState,
   type PurchaseLoadingActions,
