@@ -2,25 +2,24 @@ import type { CreditsConfig } from "../core/Credits";
 import { getAppVersion, validatePlatform } from "../../../utils/appUtils";
 
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
-import { runTransaction, type Transaction, type DocumentReference, type Firestore } from "firebase/firestore";
+import { runTransaction, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData, shouldSkipStatusSyncWrite } from "./creditOperationUtils";
 import { calculateCreditLimit } from "./CreditLimitCalculator";
 import { generatePurchaseMetadata } from "./PurchaseMetadataGenerator";
 
 export async function initializeCreditsTransaction(
-    db: Firestore,
+    _db: Firestore,
     creditsRef: DocumentReference,
     config: CreditsConfig,
     purchaseId: string,
     metadata: InitializeCreditsMetadata
 ): Promise<InitializationResult> {
-    if (!db) throw new Error("Firestore instance is not available");
 
     const platform = validatePlatform();
     const appVersion = getAppVersion();
 
-    return runTransaction(db, async (transaction: Transaction) => {
+    return runTransaction(async (transaction: Transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
         const existingData = getCreditDocumentOrDefault(creditsDoc, platform);
 

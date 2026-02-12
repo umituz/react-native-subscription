@@ -1,4 +1,4 @@
-import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "firebase/firestore";
+import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
@@ -8,13 +8,13 @@ import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infra
  * Encapsulates the domain rules and transaction logic for credit usage.
  */
 export async function deductCreditsOperation(
-  db: Firestore,
+  _db: Firestore,
   creditsRef: DocumentReference,
   cost: number,
   userId: string
 ): Promise<DeductCreditsResult> {
   try {
-    const remaining = await runTransaction(db, async (tx: Transaction) => {
+    const remaining = await runTransaction(async (tx: Transaction) => {
       const docSnap = await tx.get(creditsRef);
 
       if (!docSnap.exists()) {

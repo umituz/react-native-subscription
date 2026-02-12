@@ -2,7 +2,8 @@
  * Trial Service - Facade for device-based trial tracking
  */
 
-import { arrayUnion, serverTimestamp } from "firebase/firestore";
+import { arrayUnion } from "firebase/firestore";
+import { serverTimestamp } from "@umituz/react-native-firebase";
 import { PersistentDeviceIdService } from "@umituz/react-native-design-system";
 import { DeviceTrialRepository } from "../infrastructure/DeviceTrialRepository";
 import { TrialEligibilityService } from "./TrialEligibilityService";

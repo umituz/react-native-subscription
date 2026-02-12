@@ -3,14 +3,13 @@
  * Shared utilities for building Firestore collection and document references
  */
 
+import { collection, doc } from "firebase/firestore";
 import {
-  collection,
-  doc,
+  getFirestore,
   type CollectionReference,
   type DocumentReference,
   type Firestore,
-} from "firebase/firestore";
-import { getFirestore } from "@umituz/react-native-firebase";
+} from "@umituz/react-native-firebase";
 
 export interface CollectionConfig {
   collectionName: string;

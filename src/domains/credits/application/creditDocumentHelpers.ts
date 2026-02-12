@@ -4,7 +4,7 @@
  */
 
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
-import { serverTimestamp, type DocumentSnapshot } from "firebase/firestore";
+import { serverTimestamp, type DocumentSnapshot } from "@umituz/react-native-firebase";
 import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
 
 /**

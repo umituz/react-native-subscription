@@ -1,4 +1,4 @@
-import { serverTimestamp } from "firebase/firestore";
+import { serverTimestamp } from "@umituz/react-native-firebase";
 import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
 import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocationOrchestrator";
 import { isPast } from "../../../utils/dateUtils";

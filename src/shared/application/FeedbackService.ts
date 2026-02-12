@@ -4,8 +4,8 @@
  * Feedback is stored under users/{userId}/feedback/{feedbackId}
  */
 
-import { getFirestore } from "@umituz/react-native-firebase";
 import { collection, addDoc, doc } from "firebase/firestore";
+import { getFirestore } from "@umituz/react-native-firebase";
 
 export interface FeedbackData {
   userId: string | null;

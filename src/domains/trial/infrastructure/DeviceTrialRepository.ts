@@ -1,5 +1,5 @@
-import { doc, getDoc, setDoc, serverTimestamp, type Firestore } from "firebase/firestore";
-import { getFirestore } from "@umituz/react-native-firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, serverTimestamp, type Firestore } from "@umituz/react-native-firebase";
 import type { DeviceTrialRecord } from "../core/TrialTypes";
 
 const DEVICE_TRIALS_COLLECTION = "device_trials";
