@@ -53,6 +53,7 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
             translations={config.translations}
             willRenew={config.willRenew}
             productIdentifier={config.productIdentifier}
+            productName={config.productName}
             periodType={config.periodType}
             store={config.store}
             originalPurchaseDate={config.originalPurchaseDate}

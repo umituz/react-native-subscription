@@ -60,6 +60,7 @@ export interface SubscriptionDetailConfig {
   // Additional RevenueCat subscription details
   willRenew?: boolean | null;
   productIdentifier?: string | null;
+  productName?: string | null;
   periodType?: string | null;
   store?: string | null;
   originalPurchaseDate?: string | null;

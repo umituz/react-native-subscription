@@ -19,7 +19,6 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   hideTitle,
   translations,
   willRenew,
-  productIdentifier,
   periodType,
   store,
   originalPurchaseDate,
@@ -59,7 +58,6 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
         translations={translations}
         styles={styles}
         willRenew={willRenew}
-        productIdentifier={productIdentifier}
         periodType={periodType}
         store={store}
         originalPurchaseDate={originalPurchaseDate}

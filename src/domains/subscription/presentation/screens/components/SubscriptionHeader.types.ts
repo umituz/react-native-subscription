@@ -28,7 +28,6 @@ export interface SubscriptionHeaderProps {
   };
   // Additional RevenueCat subscription details
   willRenew?: boolean | null;
-  productIdentifier?: string | null;
   periodType?: string | null;
   store?: string | null;
   originalPurchaseDate?: string | null;

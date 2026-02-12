@@ -58,6 +58,7 @@ export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGa
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
 export { usePremium } from "./domains/subscription/presentation/usePremium";
 export { useSubscriptionStatus } from "./domains/subscription/presentation/useSubscriptionStatus";
+export * from "./domains/subscription/presentation/useSubscriptionStatus.types";
 export * from "./presentation/hooks/feedback/usePaywallFeedback";
 export * from "./presentation/hooks/feedback/useFeedbackSubmit";
 

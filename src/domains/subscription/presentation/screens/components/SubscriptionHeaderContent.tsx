@@ -12,7 +12,6 @@ interface SubscriptionHeaderContentProps {
   translations: SubscriptionHeaderProps["translations"];
   styles: any;
   willRenew?: boolean | null;
-  productIdentifier?: string | null;
   periodType?: string | null;
   store?: string | null;
   originalPurchaseDate?: string | null;
@@ -30,7 +29,6 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   translations,
   styles,
   willRenew,
-  productIdentifier,
   periodType,
   store,
   originalPurchaseDate,
@@ -78,19 +76,10 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
             valueStyle={styles.value}
           />
         )}
-        {productIdentifier && translations.productLabel && (
-          <DetailRow
-            label={translations.productLabel}
-            value={productIdentifier}
-            style={styles.row}
-            labelStyle={styles.label}
-            valueStyle={styles.value}
-          />
-        )}
         {periodType && translations.periodTypeLabel && (
           <DetailRow
             label={translations.periodTypeLabel}
-            value={periodType}
+            value={periodType === "NORMAL" ? "Standard" : periodType}
             style={styles.row}
             labelStyle={styles.label}
             valueStyle={styles.value}
