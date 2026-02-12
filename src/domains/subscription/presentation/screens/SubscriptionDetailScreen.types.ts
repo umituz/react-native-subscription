@@ -20,6 +20,16 @@ export interface SubscriptionDetailTranslations {
   creditsResetInfo?: string;
   remainingLabel?: string;
   upgradeButton: string;
+  // Additional subscription details
+  willRenewLabel?: string;
+  productLabel?: string;
+  planTypeLabel?: string;
+  periodTypeLabel?: string;
+  storeLabel?: string;
+  originalPurchaseDateLabel?: string;
+  latestPurchaseDateLabel?: string;
+  billingIssuesLabel?: string;
+  sandboxLabel?: string;
 }
 
 export interface UpgradePromptConfig {
@@ -47,6 +57,15 @@ export interface SubscriptionDetailConfig {
   translations: SubscriptionDetailTranslations;
   upgradePrompt?: UpgradePromptConfig;
   onClose?: () => void;
+  // Additional RevenueCat subscription details
+  willRenew?: boolean | null;
+  productIdentifier?: string | null;
+  periodType?: string | null;
+  store?: string | null;
+  originalPurchaseDate?: string | null;
+  latestPurchaseDate?: string | null;
+  billingIssuesDetected?: boolean;
+  isSandbox?: boolean;
 }
 
 export interface SubscriptionDetailScreenProps {

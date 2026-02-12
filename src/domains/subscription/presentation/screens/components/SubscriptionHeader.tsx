@@ -18,6 +18,14 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   daysRemaining,
   hideTitle,
   translations,
+  willRenew,
+  productIdentifier,
+  periodType,
+  store,
+  originalPurchaseDate,
+  latestPurchaseDate,
+  billingIssuesDetected,
+  isSandbox,
 }) => {
   const tokens = useAppDesignTokens();
   const showExpiring = daysRemaining !== null && daysRemaining !== undefined && daysRemaining <= EXPIRING_SOON_THRESHOLD_DAYS;
@@ -50,6 +58,14 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
         showExpiring={showExpiring}
         translations={translations}
         styles={styles}
+        willRenew={willRenew}
+        productIdentifier={productIdentifier}
+        periodType={periodType}
+        store={store}
+        originalPurchaseDate={originalPurchaseDate}
+        latestPurchaseDate={latestPurchaseDate}
+        billingIssuesDetected={billingIssuesDetected}
+        isSandbox={isSandbox}
       />
     </View>
   );

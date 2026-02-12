@@ -16,5 +16,23 @@ export interface SubscriptionHeaderProps {
     lifetimeLabel: string;
     expiresLabel: string;
     purchasedLabel: string;
+    willRenewLabel?: string;
+    productLabel?: string;
+    planTypeLabel?: string;
+    periodTypeLabel?: string;
+    storeLabel?: string;
+    originalPurchaseDateLabel?: string;
+    latestPurchaseDateLabel?: string;
+    billingIssuesLabel?: string;
+    sandboxLabel?: string;
   };
+  // Additional RevenueCat subscription details
+  willRenew?: boolean | null;
+  productIdentifier?: string | null;
+  periodType?: string | null;
+  store?: string | null;
+  originalPurchaseDate?: string | null;
+  latestPurchaseDate?: string | null;
+  billingIssuesDetected?: boolean;
+  isSandbox?: boolean;
 }

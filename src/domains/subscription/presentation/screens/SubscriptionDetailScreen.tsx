@@ -51,6 +51,14 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
             daysRemaining={config.daysRemaining}
             hideTitle={!!config.onClose}
             translations={config.translations}
+            willRenew={config.willRenew}
+            productIdentifier={config.productIdentifier}
+            periodType={config.periodType}
+            store={config.store}
+            originalPurchaseDate={config.originalPurchaseDate}
+            latestPurchaseDate={config.latestPurchaseDate}
+            billingIssuesDetected={config.billingIssuesDetected}
+            isSandbox={config.isSandbox}
           />
         )}
         {showCredits && config.credits && (

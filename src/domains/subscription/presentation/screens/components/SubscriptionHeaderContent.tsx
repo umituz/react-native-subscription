@@ -11,6 +11,14 @@ interface SubscriptionHeaderContentProps {
   showExpiring: boolean;
   translations: SubscriptionHeaderProps["translations"];
   styles: any;
+  willRenew?: boolean | null;
+  productIdentifier?: string | null;
+  periodType?: string | null;
+  store?: string | null;
+  originalPurchaseDate?: string | null;
+  latestPurchaseDate?: string | null;
+  billingIssuesDetected?: boolean;
+  isSandbox?: boolean;
 }
 
 export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps> = ({
@@ -21,6 +29,14 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   showExpiring,
   translations,
   styles,
+  willRenew,
+  productIdentifier,
+  periodType,
+  store,
+  originalPurchaseDate,
+  latestPurchaseDate,
+  billingIssuesDetected,
+  isSandbox,
 }) => (
   <View style={styles.details}>
     {isLifetime ? (
@@ -47,6 +63,80 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
           <DetailRow
             label={translations.purchasedLabel}
             value={purchaseDate}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {willRenew !== null && willRenew !== undefined && translations.willRenewLabel && (
+          <DetailRow
+            label={translations.willRenewLabel}
+            value={willRenew ? "Yes" : "No"}
+            highlight={!willRenew}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {productIdentifier && translations.productLabel && (
+          <DetailRow
+            label={translations.productLabel}
+            value={productIdentifier}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {periodType && translations.periodTypeLabel && (
+          <DetailRow
+            label={translations.periodTypeLabel}
+            value={periodType}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {store && translations.storeLabel && (
+          <DetailRow
+            label={translations.storeLabel}
+            value={store}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {originalPurchaseDate && translations.originalPurchaseDateLabel && (
+          <DetailRow
+            label={translations.originalPurchaseDateLabel}
+            value={originalPurchaseDate}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {latestPurchaseDate && translations.latestPurchaseDateLabel && (
+          <DetailRow
+            label={translations.latestPurchaseDateLabel}
+            value={latestPurchaseDate}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {billingIssuesDetected && translations.billingIssuesLabel && (
+          <DetailRow
+            label={translations.billingIssuesLabel}
+            value="Detected"
+            highlight={true}
+            style={styles.row}
+            labelStyle={styles.label}
+            valueStyle={styles.value}
+          />
+        )}
+        {isSandbox && translations.sandboxLabel && (
+          <DetailRow
+            label={translations.sandboxLabel}
+            value="Test Mode"
             style={styles.row}
             labelStyle={styles.label}
             valueStyle={styles.value}
