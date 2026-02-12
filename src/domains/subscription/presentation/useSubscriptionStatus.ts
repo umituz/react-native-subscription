@@ -25,30 +25,15 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       subscriptionStatusQueryKeys.user
     ),
     queryFn: async () => {
-      const defaultStatus = {
-        isPremium: false,
-        expirationDate: null,
-        willRenew: false,
-        productIdentifier: null,
-        originalPurchaseDate: null,
-        latestPurchaseDate: null,
-        billingIssuesDetected: false,
-        isSandbox: false,
-        periodType: null,
-        store: null,
-        gracePeriodExpiresDate: null,
-        unsubscribeDetectedAt: null,
-      };
-
       if (!isAuthenticated(userId)) {
-        return defaultStatus;
+        return null;
       }
 
       try {
         const result = await SubscriptionManager.checkPremiumStatus();
-        return result ?? defaultStatus;
+        return result;
       } catch {
-        return defaultStatus;
+        return null;
       }
     },
     enabled: queryEnabled,
@@ -74,18 +59,18 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const isLoading = status === "pending";
 
   return {
-    isPremium: data?.isPremium ?? false,
-    expirationDate: data?.expirationDate ?? null,
-    willRenew: data?.willRenew ?? false,
-    productIdentifier: data?.productIdentifier ?? null,
-    originalPurchaseDate: data?.originalPurchaseDate ?? null,
-    latestPurchaseDate: data?.latestPurchaseDate ?? null,
-    billingIssuesDetected: data?.billingIssuesDetected ?? false,
-    isSandbox: data?.isSandbox ?? false,
-    periodType: data?.periodType ?? null,
-    store: data?.store ?? null,
-    gracePeriodExpiresDate: data?.gracePeriodExpiresDate ?? null,
-    unsubscribeDetectedAt: data?.unsubscribeDetectedAt ?? null,
+    isPremium: data?.isPremium || false,
+    expirationDate: data?.expirationDate || null,
+    willRenew: data?.willRenew || false,
+    productIdentifier: data?.productIdentifier || null,
+    originalPurchaseDate: data?.originalPurchaseDate || null,
+    latestPurchaseDate: data?.latestPurchaseDate || null,
+    billingIssuesDetected: data?.billingIssuesDetected || false,
+    isSandbox: data?.isSandbox || false,
+    periodType: data?.periodType || null,
+    store: data?.store || null,
+    gracePeriodExpiresDate: data?.gracePeriodExpiresDate || null,
+    unsubscribeDetectedAt: data?.unsubscribeDetectedAt || null,
     isLoading,
     error: error as Error | null,
     refetch,
