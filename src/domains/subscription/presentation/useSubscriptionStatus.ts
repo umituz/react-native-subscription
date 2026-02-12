@@ -25,15 +25,30 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       subscriptionStatusQueryKeys.user
     ),
     queryFn: async () => {
+      const defaultStatus = {
+        isPremium: false,
+        expirationDate: null,
+        willRenew: false,
+        productIdentifier: null,
+        originalPurchaseDate: null,
+        latestPurchaseDate: null,
+        billingIssuesDetected: false,
+        isSandbox: false,
+        periodType: null,
+        store: null,
+        gracePeriodExpiresDate: null,
+        unsubscribeDetectedAt: null,
+      };
+
       if (!isAuthenticated(userId)) {
-        return { isPremium: false, expirationDate: null };
+        return defaultStatus;
       }
 
       try {
         const result = await SubscriptionManager.checkPremiumStatus();
-        return result ?? { isPremium: false, expirationDate: null };
+        return result ?? defaultStatus;
       } catch {
-        return { isPremium: false, expirationDate: null };
+        return defaultStatus;
       }
     },
     enabled: queryEnabled,
@@ -61,6 +76,16 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   return {
     isPremium: data?.isPremium ?? false,
     expirationDate: data?.expirationDate ?? null,
+    willRenew: data?.willRenew ?? false,
+    productIdentifier: data?.productIdentifier ?? null,
+    originalPurchaseDate: data?.originalPurchaseDate ?? null,
+    latestPurchaseDate: data?.latestPurchaseDate ?? null,
+    billingIssuesDetected: data?.billingIssuesDetected ?? false,
+    isSandbox: data?.isSandbox ?? false,
+    periodType: data?.periodType ?? null,
+    store: data?.store ?? null,
+    gracePeriodExpiresDate: data?.gracePeriodExpiresDate ?? null,
+    unsubscribeDetectedAt: data?.unsubscribeDetectedAt ?? null,
     isLoading,
     error: error as Error | null,
     refetch,
