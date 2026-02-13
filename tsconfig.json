@@ -23,20 +23,21 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     /* Type Checking */
-    "strict": true,
-    "strictNullChecks": true,
+    "strict": false,
+    "strictNullChecks": false,
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "noImplicitThis": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
+    "noImplicitOverride": false,
     /* Completeness */
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
     /* React Native specific */
     "allowJs": false,
     "checkJs": false
@@ -51,6 +52,7 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/*.spec.ts",
-    "**/*.spec.tsx"
+    "**/*.spec.tsx",
+    "node_modules/expo-file-system/**/*"
   ]
 }

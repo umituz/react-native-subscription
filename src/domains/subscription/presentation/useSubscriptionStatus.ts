@@ -43,7 +43,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   }, [userId, queryClient]);
 
   useEffect(() => {
-    if (!isAuthenticated(userId)) return;
+    if (!isAuthenticated(userId)) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(
       SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED,

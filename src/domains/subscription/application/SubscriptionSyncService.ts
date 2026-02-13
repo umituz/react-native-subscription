@@ -14,7 +14,7 @@ export class SubscriptionSyncService {
     try {
       await this.processor.processPurchase(userId, productId, customerInfo, source);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, { userId, productId });
-    } catch (err) {
+    } catch (_err) {
       // Swallow error - event bus consumers handle failures
     }
   }
@@ -23,7 +23,7 @@ export class SubscriptionSyncService {
     try {
       await this.processor.processRenewal(userId, productId, newExpirationDate, customerInfo);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });
-    } catch (err) {
+    } catch (_err) {
       // Swallow error - event bus consumers handle failures
     }
   }
@@ -39,7 +39,7 @@ export class SubscriptionSyncService {
     try {
       await this.processor.processStatusChange(userId, isPremium, productId, expiresAt, willRenew, periodType);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, { userId, isPremium });
-    } catch (err) {
+    } catch (_err) {
       // Swallow error - event bus consumers handle failures
     }
   }

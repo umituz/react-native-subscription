@@ -17,7 +17,7 @@ import { SUBSCRIPTION_STATUS } from "../../subscription/core/SubscriptionConstan
  */
 export class CreditsRepository extends BaseRepository {
   constructor(private config: CreditsConfig) {
-    super();
+    super(config.collectionName);
   }
 
   private getCollectionConfig(): CollectionConfig {

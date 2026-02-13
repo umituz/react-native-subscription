@@ -30,7 +30,7 @@ export class TransactionRepository extends BaseRepository {
   private config: TransactionRepositoryConfig;
 
   constructor(config: TransactionRepositoryConfig) {
-    super();
+    super(config.collectionName);
     this.config = config;
   }
 

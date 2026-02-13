@@ -35,7 +35,7 @@ export async function syncPremiumStatus(
         } else {
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
-    } catch (error) {
+    } catch (_error) {
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }
@@ -53,7 +53,7 @@ export async function notifyPurchaseCompleted(
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source);
-    } catch (error) {
+    } catch (_error) {
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }
@@ -70,7 +70,7 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch (error) {
+    } catch (_error) {
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }

@@ -47,7 +47,7 @@ export const useDeductCredit = ({
       const previousCredits = queryClient.getQueryData<UserCredits>(creditsQueryKeys.user(capturedUserId));
 
       if (!previousCredits) {
-        return { previousCredits: null, skippedOptimistic: true, capturedUserId };
+        return { previousCredits: null as UserCredits | null, skippedOptimistic: true, capturedUserId };
       }
 
       // Calculate new credits using utility

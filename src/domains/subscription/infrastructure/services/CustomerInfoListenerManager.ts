@@ -74,7 +74,7 @@ export class CustomerInfoListenerManager {
                         renewalResult.newExpirationDate!,
                         customerInfo
                     );
-                } catch (error) {
+                } catch (_error) {
                     // Swallow error to prevent listener crash
                 }
             }
@@ -89,7 +89,7 @@ export class CustomerInfoListenerManager {
                         renewalResult.isUpgrade,
                         customerInfo
                     );
-                } catch (error) {
+                } catch (_error) {
                     // Swallow error to prevent listener crash
                 }
             }
@@ -101,7 +101,7 @@ export class CustomerInfoListenerManager {
             if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
                 try {
                     await syncPremiumStatus(config, this.currentUserId, customerInfo);
-                } catch (error) {
+                } catch (_error) {
                     // Swallow error to prevent listener crash
                 }
             }
