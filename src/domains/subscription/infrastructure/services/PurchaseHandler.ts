@@ -1,10 +1,22 @@
 import Purchases, { type PurchasesPackage } from "react-native-purchases";
 import type { PurchaseResult } from "../../../../shared/application/ports/IRevenueCatService";
-import { RevenueCatPurchaseError, RevenueCatInitializationError } from "../../core/RevenueCatError";
+import {
+  RevenueCatPurchaseError,
+  RevenueCatInitializationError,
+  RevenueCatNetworkError,
+} from "../../core/RevenueCatError";
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
-import { isUserCancelledError, getErrorMessage } from "../../core/RevenueCatTypes";
+import {
+  isUserCancelledError,
+  isNetworkError,
+  isAlreadyPurchasedError,
+  isInvalidCredentialsError,
+  getErrorMessage,
+  getErrorCode,
+} from "../../core/RevenueCatTypes";
 import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../presentation/useAuthAwarePurchase";
+import { handleRestore } from "./RestoreHandler";
 
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
@@ -53,10 +65,70 @@ export async function handlePurchase(
     clearSavedPurchase();
     return { success: true, isPremium: false, customerInfo, productId: pkg.product.identifier };
   } catch (error) {
+    // User cancelled - not an error, just return false
     if (isUserCancelledError(error)) {
       return { success: false, isPremium: false, productId: pkg.product.identifier };
     }
+
+    // Already purchased - auto-restore (RevenueCat best practice)
+    if (isAlreadyPurchasedError(error)) {
+      try {
+        const restoreResult = await handleRestore(deps, userId);
+        if (restoreResult.success && restoreResult.isPremium) {
+          // Restore succeeded, notify and return success
+          await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, restoreResult.customerInfo, getSavedPurchase()?.source);
+          clearSavedPurchase();
+          return {
+            success: true,
+            isPremium: true,
+            customerInfo: restoreResult.customerInfo,
+            productId: restoreResult.productId || pkg.product.identifier,
+          };
+        }
+      } catch (_restoreError) {
+        // Restore failed, throw original error
+        throw new RevenueCatPurchaseError(
+          "You already own this subscription, but restore failed. Please try restoring purchases manually.",
+          pkg.product.identifier,
+          error instanceof Error ? error : undefined
+        );
+      }
+      // Restore succeeded but no premium - throw original error
+      throw new RevenueCatPurchaseError(
+        "You already own this subscription, but it could not be activated.",
+        pkg.product.identifier,
+        error instanceof Error ? error : undefined
+      );
+    }
+
+    // Network error - throw specific error type
+    if (isNetworkError(error)) {
+      throw new RevenueCatNetworkError(
+        "Network error during purchase. Please check your internet connection and try again.",
+        error instanceof Error ? error : undefined
+      );
+    }
+
+    // Invalid credentials - configuration error
+    if (isInvalidCredentialsError(error)) {
+      throw new RevenueCatPurchaseError(
+        "App configuration error. Please contact support.",
+        pkg.product.identifier,
+        error instanceof Error ? error : undefined
+      );
+    }
+
+    // Generic error with code
+    const errorCode = getErrorCode(error);
     const errorMessage = getErrorMessage(error, "Purchase failed");
-    throw new RevenueCatPurchaseError(errorMessage, pkg.product.identifier);
+    const enhancedMessage = errorCode
+      ? `${errorMessage} (Code: ${errorCode})`
+      : errorMessage;
+
+    throw new RevenueCatPurchaseError(
+      enhancedMessage,
+      pkg.product.identifier,
+      error instanceof Error ? error : undefined
+    );
   }
 }

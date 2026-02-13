@@ -1,8 +1,17 @@
 import Purchases from "react-native-purchases";
 import type { RestoreResult } from "../../../../shared/application/ports/IRevenueCatService";
-import { RevenueCatRestoreError, RevenueCatInitializationError } from "../../core/RevenueCatError";
+import {
+  RevenueCatRestoreError,
+  RevenueCatInitializationError,
+  RevenueCatNetworkError,
+} from "../../core/RevenueCatError";
 import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
-import { getErrorMessage } from "../../core/RevenueCatTypes";
+import {
+  getErrorMessage,
+  getErrorCode,
+  isNetworkError,
+  isInvalidCredentialsError,
+} from "../../core/RevenueCatTypes";
 import { syncPremiumStatus, notifyRestoreCompleted } from "../utils/PremiumStatusSyncer";
 
 export interface RestoreHandlerDeps {
@@ -26,6 +35,32 @@ export async function handleRestore(deps: RestoreHandlerDeps, userId: string): P
 
     return { success: true, isPremium, productId, customerInfo };
   } catch (error) {
-    throw new RevenueCatRestoreError(getErrorMessage(error, "Restore failed"));
+    // Network error - throw specific error type
+    if (isNetworkError(error)) {
+      throw new RevenueCatNetworkError(
+        "Network error during restore. Please check your internet connection and try again.",
+        error instanceof Error ? error : undefined
+      );
+    }
+
+    // Invalid credentials - configuration error
+    if (isInvalidCredentialsError(error)) {
+      throw new RevenueCatRestoreError(
+        "App configuration error. Please contact support.",
+        error instanceof Error ? error : undefined
+      );
+    }
+
+    // Generic error with code
+    const errorCode = getErrorCode(error);
+    const errorMessage = getErrorMessage(error, "Restore failed");
+    const enhancedMessage = errorCode
+      ? `${errorMessage} (Code: ${errorCode})`
+      : errorMessage;
+
+    throw new RevenueCatRestoreError(
+      enhancedMessage,
+      error instanceof Error ? error : undefined
+    );
   }
 }

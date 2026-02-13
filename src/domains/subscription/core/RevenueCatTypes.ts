@@ -41,6 +41,8 @@ export interface RevenueCatEntitlement {
 export interface RevenueCatPurchaseErrorInfo extends Error {
   userCancelled?: boolean;
   code?: string;
+  readableErrorCode?: string;
+  underlyingErrorMessage?: string;
 }
 
 /**
@@ -73,21 +75,65 @@ export function getPremiumEntitlement(
  * Type guard for RevenueCat purchase error
  */
 function isRevenueCatPurchaseError(error: unknown): error is RevenueCatPurchaseErrorInfo {
-  return error instanceof Error && "userCancelled" in error;
+  return error instanceof Error && ("userCancelled" in error || "code" in error);
+}
+
+/**
+ * Extract error code from RevenueCat error
+ */
+export function getErrorCode(error: unknown): string | null {
+  if (!isRevenueCatPurchaseError(error)) {
+    return null;
+  }
+  return error.code || error.readableErrorCode || null;
 }
 
 /**
  * Check if error is a user cancellation
+ * Checks both userCancelled flag and PURCHASE_CANCELLED_ERROR code
  */
 export function isUserCancelledError(error: unknown): boolean {
   if (!isRevenueCatPurchaseError(error)) {
     return false;
   }
-  return error.userCancelled === true;
+
+  // Check userCancelled flag
+  if (error.userCancelled === true) {
+    return true;
+  }
+
+  // Check error code
+  const code = getErrorCode(error);
+  return code === "PURCHASE_CANCELLED_ERROR" || code === "1";
+}
+
+/**
+ * Check if error is a network error
+ */
+export function isNetworkError(error: unknown): boolean {
+  const code = getErrorCode(error);
+  return code === "NETWORK_ERROR" || code === "7";
+}
+
+/**
+ * Check if error is already purchased
+ */
+export function isAlreadyPurchasedError(error: unknown): boolean {
+  const code = getErrorCode(error);
+  return code === "PRODUCT_ALREADY_PURCHASED_ERROR" || code === "6";
+}
+
+/**
+ * Check if error is invalid credentials
+ */
+export function isInvalidCredentialsError(error: unknown): boolean {
+  const code = getErrorCode(error);
+  return code === "INVALID_CREDENTIALS_ERROR" || code === "9";
 }
 
 /**
  * Extract error message safely
+ * Returns user-friendly message if available, otherwise raw error message
  */
 export function getErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
