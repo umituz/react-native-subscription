@@ -70,6 +70,11 @@ export function buildCreditsData({
     ...(metadata.unsubscribeDetectedAt && {
       canceledAt: toTimestamp(metadata.unsubscribeDetectedAt)
     }),
+    ...(metadata.billingIssueDetectedAt && {
+      billingIssueDetectedAt: toTimestamp(metadata.billingIssueDetectedAt)
+    }),
+    ...(metadata.store && { store: metadata.store }),
+    ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
   };
 }
 

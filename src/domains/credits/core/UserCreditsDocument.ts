@@ -4,14 +4,18 @@ import type {
   SubscriptionStatusType,
   PeriodType,
   PackageType,
-  Platform
+  Platform,
+  Store,
+  OwnershipType
 } from "../../subscription/core/SubscriptionConstants";
 
 export type {
   PurchaseSource,
   PurchaseType,
   SubscriptionStatusType,
-  PeriodType
+  PeriodType,
+  Store,
+  OwnershipType
 };
 
 export interface FirestoreTimestamp {
@@ -41,12 +45,15 @@ export interface UserCreditsDocumentRead {
     lastUpdatedAt: FirestoreTimestamp;
     lastPurchaseAt: FirestoreTimestamp | null;
     canceledAt: FirestoreTimestamp | null;
+    billingIssueDetectedAt: FirestoreTimestamp | null;
 
     // RevenueCat subscription details
     willRenew: boolean | null;
     productId: string | null;
     packageType: PackageType | null;
     originalTransactionId: string | null;
+    store: Store | null;
+    ownershipType: OwnershipType | null;
 
     // Trial fields
     periodType: PeriodType | null;

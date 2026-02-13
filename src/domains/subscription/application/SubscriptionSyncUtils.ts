@@ -5,7 +5,7 @@ import { type PeriodType } from "../core/SubscriptionStatus";
 export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId: string): RevenueCatData => {
   const entitlement = customerInfo.entitlements.active[entitlementId]
     ?? customerInfo.entitlements.all[entitlementId];
-    
+
   return {
     expirationDate: entitlement?.expirationDate ?? customerInfo.latestExpirationDate ?? null,
     willRenew: entitlement?.willRenew ?? false,
@@ -13,5 +13,8 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
     periodType: (entitlement?.periodType as PeriodType) ?? null,
     isPremium: !!customerInfo.entitlements.active[entitlementId],
     unsubscribeDetectedAt: entitlement?.unsubscribeDetectedAt ?? null,
+    billingIssueDetectedAt: entitlement?.billingIssueDetectedAt ?? null,
+    store: entitlement?.store ?? null,
+    ownershipType: entitlement?.ownershipType ?? null,
   };
 };

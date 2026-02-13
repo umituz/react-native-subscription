@@ -9,4 +9,7 @@ export const DEFAULT_FREE_USER_DATA: RevenueCatData = {
   periodType: null,
   originalTransactionId: null,
   unsubscribeDetectedAt: null,
+  billingIssueDetectedAt: null,
+  store: null,
+  ownershipType: null,
 };

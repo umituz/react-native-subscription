@@ -64,4 +64,26 @@ export const PURCHASE_TYPE = {
 
 export type PurchaseType = (typeof PURCHASE_TYPE)[keyof typeof PURCHASE_TYPE];
 
+export const STORE = {
+  PLAY_STORE: 'PLAY_STORE',
+  APP_STORE: 'APP_STORE',
+  STRIPE: 'STRIPE',
+  MAC_APP_STORE: 'MAC_APP_STORE',
+  PROMOTIONAL: 'PROMOTIONAL',
+  AMAZON: 'AMAZON',
+  RC_BILLING: 'RC_BILLING',
+  EXTERNAL: 'EXTERNAL',
+  UNKNOWN_STORE: 'UNKNOWN_STORE',
+} as const;
+
+export type Store = (typeof STORE)[keyof typeof STORE];
+
+export const OWNERSHIP_TYPE = {
+  PURCHASED: 'PURCHASED',
+  FAMILY_SHARED: 'FAMILY_SHARED',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type OwnershipType = (typeof OWNERSHIP_TYPE)[keyof typeof OWNERSHIP_TYPE];
+
 

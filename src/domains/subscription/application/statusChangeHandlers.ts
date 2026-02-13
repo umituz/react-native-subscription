@@ -38,7 +38,10 @@ export const handlePremiumStatusSync = async (
     isPremium,
     periodType,
     originalTransactionId: null,
-    unsubscribeDetectedAt: null
+    unsubscribeDetectedAt: null,
+    billingIssueDetectedAt: null,
+    store: null,
+    ownershipType: null
   };
 
   const statusSyncId = generateStatusSyncId(userId, isPremium);

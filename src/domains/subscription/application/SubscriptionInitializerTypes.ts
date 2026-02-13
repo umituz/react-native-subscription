@@ -4,7 +4,7 @@
 
 import type { CreditsConfig } from "../../credits/core/Credits";
 import type { UserCreditsDocumentRead } from "../../credits/core/UserCreditsDocument";
-import type { PurchaseSource, PurchaseType } from "../core/SubscriptionConstants";
+import type { PurchaseSource, PurchaseType, Store, OwnershipType } from "../core/SubscriptionConstants";
 import type { PeriodType } from "../core/SubscriptionStatus";
 
 export interface FirebaseAuthLike {
@@ -42,6 +42,9 @@ export interface InitializeCreditsMetadata {
   isPremium: boolean;
   periodType: PeriodType | null;
   unsubscribeDetectedAt: string | null;
+  billingIssueDetectedAt: string | null;
+  store: Store | null;
+  ownershipType: OwnershipType | null;
 }
 
 export interface InitializationResult {

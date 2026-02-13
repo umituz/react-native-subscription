@@ -1,4 +1,4 @@
-import type { PeriodType } from "./SubscriptionStatus";
+import type { PeriodType, Store, OwnershipType } from "./SubscriptionConstants";
 
 /**
  * RevenueCat subscription data (Single Source of Truth)
@@ -11,4 +11,7 @@ export interface RevenueCatData {
   isPremium: boolean;
   periodType: PeriodType | null;
   unsubscribeDetectedAt: string | null;
+  billingIssueDetectedAt: string | null;
+  store: Store | null;
+  ownershipType: OwnershipType | null;
 }
