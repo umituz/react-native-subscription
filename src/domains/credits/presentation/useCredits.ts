@@ -7,7 +7,7 @@ import {
   getCreditsConfig,
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
-import { calculateCreditPercentage, canAfford as canAffordCheck } from "../../../shared/utils/numberUtils";
+import { calculateSafePercentage, canAffordAmount } from "../utils/creditValidation";
 import { isAuthenticated } from "../../subscription/utils/authGuards";
 import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
@@ -73,12 +73,12 @@ export const useCredits = (): UseCreditsResult => {
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
     const limit = config?.creditLimit ?? 0;
-    const percent = calculateCreditPercentage(credits?.credits, limit);
+    const percent = calculateSafePercentage(credits?.credits, limit);
     return { hasCredits: has, creditsPercent: percent };
   }, [credits, config?.creditLimit]);
 
   const canAfford = useCallback(
-    (cost: number): boolean => canAffordCheck(credits?.credits, cost),
+    (cost: number): boolean => canAffordAmount(credits?.credits, cost),
     [credits]
   );
 

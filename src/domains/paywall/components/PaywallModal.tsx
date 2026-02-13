@@ -21,10 +21,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
 
   const handleLegalUrl = useCallback(async (url: string | undefined) => {
     if (!url) return;
-    try { 
-      if (await Linking.canOpenURL(url)) await Linking.openURL(url); 
+    try {
+      if (await Linking.canOpenURL(url)) await Linking.openURL(url);
     } catch (err) {
-      console.error("[PaywallModal] Legal link error:", err);
+      // Silently fail - legal links are non-critical
     }
   }, []);
 

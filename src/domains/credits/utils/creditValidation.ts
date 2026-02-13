@@ -1,11 +1,11 @@
-import { isValidNumber, isNonNegative } from "../../../shared/utils/typeGuards";
+import { isValidNumber, isNonNegativeNumber } from "../../../shared/utils/validators";
 
 export const isValidBalance = (balance: number | null | undefined): balance is number => {
-  return isValidNumber(balance) && isNonNegative(balance);
+  return isValidNumber(balance) && isNonNegativeNumber(balance);
 };
 
 export const isValidCost = (cost: number): boolean => {
-  return isValidNumber(cost) && isNonNegative(cost);
+  return isValidNumber(cost) && isNonNegativeNumber(cost);
 };
 
 export const isValidMaxCredits = (max: number): boolean => {

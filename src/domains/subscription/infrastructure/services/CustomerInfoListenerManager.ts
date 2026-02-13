@@ -75,11 +75,6 @@ export class CustomerInfoListenerManager {
                         customerInfo
                     );
                 } catch (error) {
-                    console.error('[CustomerInfoListener] Renewal callback failed', {
-                        userId: this.currentUserId,
-                        productId: renewalResult.productId,
-                        error
-                    });
                     // Swallow error to prevent listener crash
                 }
             }
@@ -95,12 +90,6 @@ export class CustomerInfoListenerManager {
                         customerInfo
                     );
                 } catch (error) {
-                    console.error('[CustomerInfoListener] Plan change callback failed', {
-                        userId: this.currentUserId,
-                        productId: renewalResult.productId,
-                        previousProductId: renewalResult.previousProductId,
-                        error
-                    });
                     // Swallow error to prevent listener crash
                 }
             }
@@ -113,10 +102,6 @@ export class CustomerInfoListenerManager {
                 try {
                     await syncPremiumStatus(config, this.currentUserId, customerInfo);
                 } catch (error) {
-                    console.error('[CustomerInfoListener] Premium status sync failed', {
-                        userId: this.currentUserId,
-                        error
-                    });
                     // Swallow error to prevent listener crash
                 }
             }

@@ -1,5 +1,3 @@
-import { canAffordAmount, calculateSafePercentage } from "../../domains/credits/utils/creditValidation";
-
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -29,12 +27,4 @@ export function safeDivide(numerator: number, denominator: number): number {
 
 export function calculateRemaining(current: number, cost: number): number {
   return Math.max(0, current - cost);
-}
-
-export function canAfford(balance: number | null | undefined, cost: number): boolean {
-  return canAffordAmount(balance, cost);
-}
-
-export function calculateCreditPercentage(current: number | null | undefined, max: number): number {
-  return calculateSafePercentage(current, max);
 }

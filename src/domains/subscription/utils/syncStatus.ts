@@ -1,4 +1,4 @@
-import { isDefined } from "../../../shared/utils/typeGuards";
+import { isDefined } from "../../../shared/utils/validators";
 import type { UserCredits } from "../../credits/core/Credits";
 
 export interface SyncState {

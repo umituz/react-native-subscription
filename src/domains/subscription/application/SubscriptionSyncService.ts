@@ -15,7 +15,7 @@ export class SubscriptionSyncService {
       await this.processor.processPurchase(userId, productId, customerInfo, source);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, { userId, productId });
     } catch (err) {
-      console.error("[SubscriptionSyncService] purchase error:", err);
+      // Swallow error - event bus consumers handle failures
     }
   }
 
@@ -24,23 +24,23 @@ export class SubscriptionSyncService {
       await this.processor.processRenewal(userId, productId, newExpirationDate, customerInfo);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, { userId, productId });
     } catch (err) {
-      console.error("[SubscriptionSyncService] renewal error:", err);
+      // Swallow error - event bus consumers handle failures
     }
   }
 
   async handlePremiumStatusChanged(
-    userId: string, 
-    isPremium: boolean, 
+    userId: string,
+    isPremium: boolean,
     productId?: string,
-    expiresAt?: string, 
-    willRenew?: boolean, 
+    expiresAt?: string,
+    willRenew?: boolean,
     periodType?: PeriodType
   ) {
     try {
       await this.processor.processStatusChange(userId, isPremium, productId, expiresAt, willRenew, periodType);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, { userId, isPremium });
     } catch (err) {
-      console.error("[SubscriptionSyncService] status change error:", err);
+      // Swallow error - event bus consumers handle failures
     }
   }
 }
