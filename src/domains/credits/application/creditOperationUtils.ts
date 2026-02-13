@@ -34,7 +34,8 @@ export function calculateNewCredits({ metadata, existingData, creditLimit, purch
 export function buildCreditsData({
   existingData, newCredits, creditLimit, purchaseId, metadata, purchaseHistory, platform
 }: BuildCreditsDataParams): Record<string, any> {
-  const isConsumable = isCreditPackage(metadata.productId ?? "");
+  const productId = metadata.productId ?? null;
+  const isConsumable = productId ? isCreditPackage(productId) : false;
   const isPremium = isConsumable ? (existingData?.isPremium ?? metadata.isPremium) : metadata.isPremium;
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
   const resolvedCreditLimit = isConsumable
@@ -51,6 +52,10 @@ export function buildCreditsData({
   const isPurchaseOrRenewal = purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) || 
                               purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL);
 
+  const expirationTimestamp = metadata.expirationDate ? toTimestamp(metadata.expirationDate) : null;
+  const canceledAtTimestamp = metadata.unsubscribeDetectedAt ? toTimestamp(metadata.unsubscribeDetectedAt) : null;
+  const billingIssueTimestamp = metadata.billingIssueDetectedAt ? toTimestamp(metadata.billingIssueDetectedAt) : null;
+
   return {
     isPremium,
     status,
@@ -58,21 +63,15 @@ export function buildCreditsData({
     creditLimit: resolvedCreditLimit,
     lastUpdatedAt: serverTimestamp(),
     processedPurchases: [...(existingData?.processedPurchases ?? []), purchaseId].slice(-50),
-    productId: metadata.productId,
+    productId,
     platform,
     ...(purchaseHistory.length > 0 && { purchaseHistory }),
     ...(isPurchaseOrRenewal && { lastPurchaseAt: serverTimestamp() }),
-    ...(metadata.expirationDate && {
-      expirationDate: toTimestamp(metadata.expirationDate)
-    }),
+    ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
     ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
     ...(metadata.originalTransactionId && { originalTransactionId: metadata.originalTransactionId }),
-    ...(metadata.unsubscribeDetectedAt && {
-      canceledAt: toTimestamp(metadata.unsubscribeDetectedAt)
-    }),
-    ...(metadata.billingIssueDetectedAt && {
-      billingIssueDetectedAt: toTimestamp(metadata.billingIssueDetectedAt)
-    }),
+    ...(canceledAtTimestamp && { canceledAt: canceledAtTimestamp }),
+    ...(billingIssueTimestamp && { billingIssueDetectedAt: billingIssueTimestamp }),
     ...(metadata.store && { store: metadata.store }),
     ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
   };
@@ -84,7 +83,9 @@ export function shouldSkipStatusSyncWrite(
   newCreditsData: Record<string, any>
 ): boolean {
   if (!purchaseId.startsWith(PURCHASE_ID_PREFIXES.STATUS_SYNC)) return false;
-  
+
+  if (!existingData || !newCreditsData) return false;
+
   return existingData.isPremium === newCreditsData.isPremium &&
     existingData.status === newCreditsData.status &&
     existingData.credits === newCreditsData.credits &&

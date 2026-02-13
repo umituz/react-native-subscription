@@ -23,8 +23,10 @@ export abstract class BaseStatusHandler {
 /** Handles Expired or No-Premium cases */
 export class InactiveStatusHandler extends BaseStatusHandler {
     handle(input: StatusResolverInput): SubscriptionStatusType {
-        if (!input.isPremium || input.isExpired) {
-            return input.isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.NONE;
+        const isExpired = input.isExpired === true;
+
+        if (!input.isPremium || isExpired) {
+            return isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.NONE;
         }
         return this.nextOrFallback(input, SUBSCRIPTION_STATUS.NONE);
     }

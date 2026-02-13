@@ -89,8 +89,17 @@ export class CreditsRepository extends BaseRepository {
         };
       } catch (error: any) {
         lastError = error;
-        const isAlreadyExists = error?.code === 'already-exists' || error?.message?.includes('already-exists');
-        if (isAlreadyExists && attempt < maxRetries - 1) {
+
+        const isTransientError =
+          error?.code === 'already-exists' ||
+          error?.code === 'DEADLINE_EXCEEDED' ||
+          error?.code === 'UNAVAILABLE' ||
+          error?.code === 'RESOURCE_EXHAUSTED' ||
+          error?.message?.includes('already-exists') ||
+          error?.message?.includes('timeout') ||
+          error?.message?.includes('unavailable');
+
+        if (isTransientError && attempt < maxRetries - 1) {
           await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
           continue;
         }
@@ -98,10 +107,21 @@ export class CreditsRepository extends BaseRepository {
       }
     }
 
+    const errorMessage = lastError instanceof Error
+      ? lastError.message
+      : typeof lastError === 'string'
+        ? lastError
+        : 'Unknown error during credit initialization';
+
+    const errorCode = lastError?.code ?? 'UNKNOWN_ERROR';
+
     return {
       success: false,
       data: null,
-      error: lastError?.message || 'Unknown error during credit initialization',
+      error: {
+        message: errorMessage,
+        code: errorCode,
+      },
     };
   }
 
