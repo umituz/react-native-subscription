@@ -1,1 +1,0 @@
-export const EXPIRATION_WARNING_DAYS = 7;
