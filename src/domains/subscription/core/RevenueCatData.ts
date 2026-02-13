@@ -1,4 +1,5 @@
-import type { PeriodType, Store, OwnershipType } from "./SubscriptionConstants";
+import type { PeriodType } from "./SubscriptionConstants";
+import type { Store, OwnershipType } from "./RevenueCatTypes";
 
 /**
  * RevenueCat subscription data (Single Source of Truth)

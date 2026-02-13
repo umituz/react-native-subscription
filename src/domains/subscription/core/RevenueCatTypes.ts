@@ -3,8 +3,20 @@
  * Proper typing for RevenueCat entitlements and errors
  */
 
-import type { CustomerInfo } from "react-native-purchases";
+import type { CustomerInfo, PurchasesEntitlementInfo } from "react-native-purchases";
 import { DEFAULT_ENTITLEMENT_ID } from "./SubscriptionConstants";
+
+/**
+ * Store type extracted from RevenueCat's PurchasesEntitlementInfo
+ * Automatically stays in sync with RevenueCat SDK updates
+ */
+export type Store = PurchasesEntitlementInfo['store'];
+
+/**
+ * OwnershipType extracted from RevenueCat's PurchasesEntitlementInfo
+ * Automatically stays in sync with RevenueCat SDK updates
+ */
+export type OwnershipType = PurchasesEntitlementInfo['ownershipType'];
 
 /**
  * RevenueCat Entitlement Info

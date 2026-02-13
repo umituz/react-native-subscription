@@ -4,10 +4,9 @@ import type {
   SubscriptionStatusType,
   PeriodType,
   PackageType,
-  Platform,
-  Store,
-  OwnershipType
+  Platform
 } from "../../subscription/core/SubscriptionConstants";
+import type { Store, OwnershipType } from "../../subscription/core/RevenueCatTypes";
 
 export type {
   PurchaseSource,
