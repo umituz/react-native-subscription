@@ -4,7 +4,7 @@ import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/
 import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../application/CreditsInitializer";
 import { mapCreditsDocumentToEntity } from "../core/CreditsMapper";
-import type { RevenueCatData } from "../../subscription/core/RevenueCatData";
+import type { RevenueCatData } from "../../revenuecat/core/types";
 import { deductCreditsOperation } from "../application/DeductCreditsCommand";
 import { calculateCreditLimit } from "../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";

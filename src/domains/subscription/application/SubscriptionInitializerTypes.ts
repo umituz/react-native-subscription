@@ -5,8 +5,7 @@
 import type { CreditsConfig } from "../../credits/core/Credits";
 import type { UserCreditsDocumentRead } from "../../credits/core/UserCreditsDocument";
 import type { PurchaseSource, PurchaseType } from "../core/SubscriptionConstants";
-import type { PeriodType } from "../core/SubscriptionStatus";
-import type { Store, OwnershipType } from "../core/RevenueCatTypes";
+import type { Store, OwnershipType } from "../../revenuecat/core/types";
 
 export interface FirebaseAuthLike {
   currentUser: { uid: string; isAnonymous: boolean } | null;
@@ -41,7 +40,7 @@ export interface InitializeCreditsMetadata {
   willRenew: boolean | null;
   originalTransactionId: string | null;
   isPremium: boolean;
-  periodType: PeriodType | null;
+  periodType: string | null; // Raw value from RevenueCat SDK
   unsubscribeDetectedAt: string | null;
   billingIssueDetectedAt: string | null;
   store: Store | null;

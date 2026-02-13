@@ -4,16 +4,21 @@
  */
 
 import type { CustomerInfo, PurchasesEntitlementInfo } from "react-native-purchases";
-import { DEFAULT_ENTITLEMENT_ID } from "./SubscriptionConstants";
 
 /**
- * Store type extracted from RevenueCat's PurchasesEntitlementInfo
+ * Default entitlement identifier
+ * Can be overridden in RevenueCatConfig
+ */
+export const DEFAULT_ENTITLEMENT_ID = "premium";
+
+/**
+ * Store type - Directly from RevenueCat SDK
  * Automatically stays in sync with RevenueCat SDK updates
  */
 export type Store = PurchasesEntitlementInfo['store'];
 
 /**
- * OwnershipType extracted from RevenueCat's PurchasesEntitlementInfo
+ * OwnershipType - Directly from RevenueCat SDK
  * Automatically stays in sync with RevenueCat SDK updates
  */
 export type OwnershipType = PurchasesEntitlementInfo['ownershipType'];
@@ -132,10 +137,10 @@ export function isInvalidCredentialsError(error: unknown): boolean {
 }
 
 /**
- * Extract error message safely
- * Returns user-friendly message if available, otherwise raw error message
+ * Extract raw error message from error object
+ * For user-friendly messages, use getErrorMessageForCode from errors module
  */
-export function getErrorMessage(error: unknown, fallback: string): string {
+export function getRawErrorMessage(error: unknown, fallback: string): string {
   if (error instanceof Error) {
     return error.message;
   }

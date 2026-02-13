@@ -2,17 +2,15 @@ import type {
   PurchaseSource,
   PurchaseType,
   SubscriptionStatusType,
-  PeriodType,
   PackageType,
   Platform
 } from "../../subscription/core/SubscriptionConstants";
-import type { Store, OwnershipType } from "../../subscription/core/RevenueCatTypes";
+import type { Store, OwnershipType } from "../../revenuecat/core/types";
 
 export type {
   PurchaseSource,
   PurchaseType,
   SubscriptionStatusType,
-  PeriodType,
   Store,
   OwnershipType
 };
@@ -55,7 +53,7 @@ export interface UserCreditsDocumentRead {
     ownershipType: OwnershipType | null;
 
     // Trial fields
-    periodType: PeriodType | null;
+    periodType: string | null;
     isTrialing: boolean | null;
     trialStartDate: FirestoreTimestamp | null;
     trialEndDate: FirestoreTimestamp | null;

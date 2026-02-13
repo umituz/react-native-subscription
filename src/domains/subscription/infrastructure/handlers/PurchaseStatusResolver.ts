@@ -1,5 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
-import { getPremiumEntitlement } from "../../core/RevenueCatTypes";
+import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { toDate } from "../../../../shared/utils/dateConverter";
 
 export interface PremiumStatus {

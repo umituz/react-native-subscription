@@ -4,16 +4,16 @@ import {
   RevenueCatPurchaseError,
   RevenueCatInitializationError,
   RevenueCatNetworkError,
-} from "../../core/RevenueCatError";
-import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
+} from "../../../revenuecat/core/errors";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types";
 import {
   isUserCancelledError,
   isNetworkError,
   isAlreadyPurchasedError,
   isInvalidCredentialsError,
-  getErrorMessage,
+  getRawErrorMessage,
   getErrorCode,
-} from "../../core/RevenueCatTypes";
+} from "../../../revenuecat/core/types";
 import { syncPremiumStatus, notifyPurchaseCompleted } from "../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../presentation/useAuthAwarePurchase";
 import { handleRestore } from "./RestoreHandler";
@@ -120,7 +120,7 @@ export async function handlePurchase(
 
     // Generic error with code
     const errorCode = getErrorCode(error);
-    const errorMessage = getErrorMessage(error, "Purchase failed");
+    const errorMessage = getRawErrorMessage(error, "Purchase failed");
     const enhancedMessage = errorCode
       ? `${errorMessage} (Code: ${errorCode})`
       : errorMessage;

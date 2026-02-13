@@ -1,6 +1,5 @@
 import type { UserCredits } from "./Credits";
-import { resolveSubscriptionStatus } from "../../subscription/core/SubscriptionStatus";
-import type { PeriodType, SubscriptionStatusType } from "../../subscription/core/SubscriptionConstants";
+import { resolveSubscriptionStatus, type SubscriptionStatusType } from "../../subscription/core/SubscriptionStatus";
 import type { UserCreditsDocumentRead } from "./UserCreditsDocument";
 import { toSafeDate } from "../../../utils/dateUtils";
 
@@ -10,7 +9,7 @@ import { toSafeDate } from "../../../utils/dateUtils";
 function validateSubscription(
   doc: UserCreditsDocumentRead,
   expirationDate: Date | null,
-  periodType: PeriodType | null
+  periodType: string | null
 ): { isPremium: boolean; status: SubscriptionStatusType } {
   const isPremium = doc.isPremium;
   const willRenew = doc.willRenew ?? false;

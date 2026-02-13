@@ -5,7 +5,7 @@
 
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
-import { getPremiumEntitlement } from "../../core/RevenueCatTypes";
+import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
 
 export interface RestoreResultInfo {

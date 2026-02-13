@@ -1,4 +1,4 @@
-import type { RevenueCatData } from "../core/RevenueCatData";
+import type { RevenueCatData } from "../../revenuecat/core/types";
 import type { PeriodType } from "../core/SubscriptionConstants";
 import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";

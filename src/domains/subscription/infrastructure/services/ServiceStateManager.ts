@@ -1,4 +1,4 @@
-import type { RevenueCatConfig } from '../../core/RevenueCatConfig';
+import type { RevenueCatConfig } from '../../../revenuecat/core/types';
 
 export class ServiceStateManager {
   private isInitializedFlag = false;

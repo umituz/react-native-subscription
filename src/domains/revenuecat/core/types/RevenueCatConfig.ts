@@ -1,6 +1,9 @@
 import type { CustomerInfo } from "react-native-purchases";
-import type { PurchaseSource } from "./SubscriptionConstants";
 
+/**
+ * RevenueCat Configuration
+ * All callbacks receive data directly from RevenueCat SDK
+ */
 export interface RevenueCatConfig {
   apiKey?: string;
   entitlementIdentifier: string;
@@ -11,13 +14,13 @@ export interface RevenueCatConfig {
     productId?: string,
     expiresAt?: string,
     willRenew?: boolean,
-    periodType?: "NORMAL" | "INTRO" | "TRIAL"
+    periodType?: string // From RevenueCat SDK (NORMAL, INTRO, TRIAL)
   ) => Promise<void> | void;
   onPurchaseCompleted?: (
     userId: string,
     productId: string,
     customerInfo: CustomerInfo,
-    source?: PurchaseSource
+    source?: string // Purchase source tracking (app-specific)
   ) => Promise<void> | void;
   onRestoreCompleted?: (
     userId: string,

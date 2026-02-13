@@ -94,14 +94,23 @@ export async function initializeSDK(
     try {
       const currentAppUserId = await Purchases.getAppUserID();
       let customerInfo;
+
+      // Handle user switching
       if (currentAppUserId !== userId) {
-        const result = await Purchases.logIn(userId);
-        customerInfo = result.customerInfo;
+        if (userId) {
+          // Switch to authenticated user
+          const result = await Purchases.logIn(userId);
+          customerInfo = result.customerInfo;
+        } else {
+          // User logged out - switch to anonymous
+          customerInfo = await Purchases.logOut();
+        }
       } else {
         customerInfo = await Purchases.getCustomerInfo();
       }
+
       deps.setInitialized(true);
-      deps.setCurrentUserId(userId);
+      deps.setCurrentUserId(userId ?? null);
       const offerings = await Purchases.getOfferings();
       return buildSuccessResult(deps, customerInfo, offerings);
     } catch {
@@ -133,9 +142,11 @@ export async function initializeSDK(
   }
 
   try {
-    await Purchases.configure({ apiKey: key, appUserID: userId });
+    // Configure with null appUserID for anonymous users (generates RevenueCat anonymous ID)
+    // For authenticated users, use their userId
+    await Purchases.configure({ apiKey: key, appUserID: userId ?? null });
     deps.setInitialized(true);
-    deps.setCurrentUserId(userId);
+    deps.setCurrentUserId(userId ?? null);
 
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),

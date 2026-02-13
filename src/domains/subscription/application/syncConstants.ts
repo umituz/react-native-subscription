@@ -1,4 +1,4 @@
-import type { RevenueCatData } from "../core/RevenueCatData";
+import type { RevenueCatData } from "../../revenuecat/core/types";
 
 export const NO_SUBSCRIPTION_PRODUCT_ID = 'no_subscription';
 

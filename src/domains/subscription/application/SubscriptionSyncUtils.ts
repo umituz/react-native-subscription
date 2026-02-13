@@ -1,5 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatData } from "../core/RevenueCatData";
+import type { RevenueCatData } from "../../revenuecat/core/types";
 import { PERIOD_TYPE, type PeriodType } from "../core/SubscriptionStatus";
 
 function validatePeriodType(periodType: string | undefined): PeriodType | null {

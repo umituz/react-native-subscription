@@ -9,7 +9,6 @@ import type { SubscriptionPackageType } from "../../../utils/packageTypeDetector
 // Types imported from SubscriptionConstants are used directly in UserCredits interface
 import type {
   SubscriptionStatusType,
-  PeriodType,
   PackageType,
   Platform,
   PurchaseSource,
@@ -36,8 +35,8 @@ export interface UserCredits {
   packageType: PackageType | null;
   originalTransactionId: string | null;
 
-  // Trial fields
-  periodType: PeriodType | null;
+  // Trial fields - periodType comes from RevenueCat SDK
+  periodType: string | null;
   isTrialing: boolean | null;
   trialStartDate: Date | null;
   trialEndDate: Date | null;

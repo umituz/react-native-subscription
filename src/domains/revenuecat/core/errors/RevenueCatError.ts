@@ -3,7 +3,7 @@
  * Domain-specific error types for RevenueCat operations
  */
 
-import { BaseError } from "../../../shared/utils/BaseError";
+import { BaseError } from "../../../../shared/utils/BaseError";
 
 export class RevenueCatError extends BaseError {
     constructor(message: string, code: string = 'REVENUE_CAT_ERROR', cause?: Error) {

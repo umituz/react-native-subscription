@@ -1,4 +1,4 @@
-import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types";
 import type { PremiumStatus } from "../handlers/PurchaseStatusResolver";
 
 export interface SubscriptionManagerConfig {

@@ -26,7 +26,7 @@ export interface SubscriptionStatus {
     customerId?: string | null;
     syncedAt?: string | null;
     status?: SubscriptionStatusType;
-    periodType?: PeriodType;
+    periodType?: string; // Raw value from RevenueCat SDK (NORMAL, INTRO, TRIAL)
     isTrialing?: boolean;
 }
 
@@ -55,7 +55,7 @@ export interface StatusResolverInput {
     isPremium: boolean;
     willRenew?: boolean;
     isExpired?: boolean;
-    periodType?: PeriodType;
+    periodType?: string; // Raw value from RevenueCat SDK (NORMAL, INTRO, TRIAL)
 }
 
 // Singleton Chain Instance

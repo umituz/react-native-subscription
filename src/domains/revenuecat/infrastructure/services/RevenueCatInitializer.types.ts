@@ -1,4 +1,4 @@
-import type { RevenueCatConfig } from "../../core/RevenueCatConfig";
+import type { RevenueCatConfig } from "../../core/types";
 
 export interface InitializerDeps {
   config: RevenueCatConfig;

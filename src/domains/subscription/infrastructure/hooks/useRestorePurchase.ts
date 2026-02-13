@@ -6,18 +6,17 @@
  */
 
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
-import Purchases from "react-native-purchases";
 import { useAlert } from "@umituz/react-native-design-system";
 import {
   useAuthStore,
   selectUserId,
+  selectIsAnonymous,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
 import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
-import { ERROR_MESSAGES } from "../../core/RevenueCatConstants";
-import type { RevenueCatPurchaseErrorInfo } from "../../core/RevenueCatTypes";
+import { getErrorMessage } from "../../../revenuecat/core/errors";
 
 interface RestoreResult {
   success: boolean;
@@ -31,6 +30,7 @@ interface RestoreResult {
  */
 export const useRestorePurchase = () => {
   const userId = useAuthStore(selectUserId);
+  const isAnonymous = useAuthStore(selectIsAnonymous);
   const queryClient = useQueryClient();
   const { showSuccess, showInfo, showError } = useAlert();
 
@@ -38,6 +38,10 @@ export const useRestorePurchase = () => {
     mutationFn: async (): Promise<RestoreResult> => {
       if (!userId) {
         throw new Error("User not authenticated");
+      }
+
+      if (isAnonymous) {
+        throw new Error("Anonymous users cannot restore purchases");
       }
 
       const result = await SubscriptionManager.restore();
@@ -67,43 +71,9 @@ export const useRestorePurchase = () => {
       }
     },
     onError: (error) => {
-      let title = "Restore Error";
-      let message = "Unable to restore purchases. Please try again.";
-
-      if (error instanceof Error) {
-        // Type assertion for RevenueCat error
-        const rcError = error as RevenueCatPurchaseErrorInfo;
-        const errorCode = rcError.code || rcError.readableErrorCode;
-
-        // Get user-friendly message from constants if available
-        if (errorCode && errorCode in ERROR_MESSAGES) {
-          const errorInfo = ERROR_MESSAGES[errorCode];
-          title = errorInfo.title;
-          message = errorInfo.message;
-        } else {
-          // Fallback to specific error code checks
-          const code = errorCode;
-
-          if (code === Purchases.PURCHASES_ERROR_CODE.NETWORK_ERROR) {
-            title = "Network Error";
-            message = "Please check your internet connection and try again.";
-          } else if (code === Purchases.PURCHASES_ERROR_CODE.INVALID_CREDENTIALS_ERROR) {
-            title = "Configuration Error";
-            message = "App is not configured correctly. Please contact support.";
-          } else if (code === Purchases.PURCHASES_ERROR_CODE.UNEXPECTED_BACKEND_RESPONSE_ERROR) {
-            title = "Server Error";
-            message = "The server returned an unexpected response. Please try again later.";
-          } else if (code === Purchases.PURCHASES_ERROR_CODE.CONFIGURATION_ERROR) {
-            title = "Configuration Error";
-            message = "RevenueCat is not configured correctly. Please contact support.";
-          } else {
-            // Use error message if no specific code matched
-            message = error.message || message;
-          }
-        }
-      }
-
-      showError(title, message);
+      // Use map-based lookup - O(1) complexity
+      const errorInfo = getErrorMessage(error);
+      showError(errorInfo.title, errorInfo.message);
     },
   });
 };
