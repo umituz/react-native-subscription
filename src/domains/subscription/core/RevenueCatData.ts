@@ -9,6 +9,6 @@ export interface RevenueCatData {
   willRenew: boolean | null;
   originalTransactionId: string | null;
   isPremium: boolean;
-  /** RevenueCat period type: NORMAL, INTRO, or TRIAL */
   periodType: PeriodType | null;
+  unsubscribeDetectedAt: string | null;
 }

@@ -37,7 +37,8 @@ export const handlePremiumStatusSync = async (
     willRenew,
     isPremium,
     periodType,
-    originalTransactionId: null
+    originalTransactionId: null,
+    unsubscribeDetectedAt: null
   };
 
   const statusSyncId = generateStatusSyncId(userId, isPremium);

@@ -74,6 +74,7 @@ export class CreditsRepository extends BaseRepository {
             originalTransactionId: revenueCatData.originalTransactionId,
             isPremium: revenueCatData.isPremium,
             periodType: revenueCatData.periodType,
+            unsubscribeDetectedAt: revenueCatData.unsubscribeDetectedAt,
             type,
           }
         );

@@ -8,4 +8,5 @@ export const DEFAULT_FREE_USER_DATA: RevenueCatData = {
   willRenew: false,
   periodType: null,
   originalTransactionId: null,
+  unsubscribeDetectedAt: null,
 };

@@ -40,6 +40,7 @@ export interface UserCreditsDocumentRead {
     expirationDate: FirestoreTimestamp | null;
     lastUpdatedAt: FirestoreTimestamp;
     lastPurchaseAt: FirestoreTimestamp | null;
+    canceledAt: FirestoreTimestamp | null;
 
     // RevenueCat subscription details
     willRenew: boolean | null;

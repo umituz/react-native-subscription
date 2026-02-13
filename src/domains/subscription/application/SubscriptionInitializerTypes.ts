@@ -41,6 +41,7 @@ export interface InitializeCreditsMetadata {
   originalTransactionId: string | null;
   isPremium: boolean;
   periodType: PeriodType | null;
+  unsubscribeDetectedAt: string | null;
 }
 
 export interface InitializationResult {

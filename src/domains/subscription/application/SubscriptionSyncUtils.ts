@@ -9,8 +9,9 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
   return {
     expirationDate: entitlement?.expirationDate ?? customerInfo.latestExpirationDate ?? null,
     willRenew: entitlement?.willRenew ?? false,
-    originalTransactionId: entitlement?.originalPurchaseDate ?? customerInfo.firstSeen, 
+    originalTransactionId: entitlement?.originalPurchaseDate ?? customerInfo.firstSeen,
     periodType: (entitlement?.periodType as PeriodType) ?? null,
     isPremium: !!customerInfo.entitlements.active[entitlementId],
+    unsubscribeDetectedAt: entitlement?.unsubscribeDetectedAt ?? null,
   };
 };

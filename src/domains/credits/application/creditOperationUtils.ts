@@ -67,6 +67,9 @@ export function buildCreditsData({
     }),
     ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
     ...(metadata.originalTransactionId && { originalTransactionId: metadata.originalTransactionId }),
+    ...(metadata.unsubscribeDetectedAt && {
+      canceledAt: toTimestamp(metadata.unsubscribeDetectedAt)
+    }),
   };
 }
 
