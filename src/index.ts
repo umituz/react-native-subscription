@@ -114,3 +114,10 @@ export {
   createSubscriptionInitModule,
   type SubscriptionInitModuleConfig,
 } from './init';
+
+// Wallet Domain
+export {
+  WalletScreen as WalletScreenContainer,
+  type WalletScreenProps,
+  type WalletScreenTranslations,
+} from './domains/wallet';

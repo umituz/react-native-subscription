@@ -76,10 +76,10 @@ export const useDeductCredit = ({
          queryClient.setQueryData(creditsQueryKeys.user(mutationData.capturedUserId), mutationData.previousCredits);
       }
     },
-    onSuccess: () => {
-      // Only invalidate on success to get fresh server data
-      if (userId) {
-        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+    onSuccess: (_data, _cost, mutationData) => {
+      const targetUserId = mutationData?.capturedUserId ?? userId;
+      if (targetUserId) {
+        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(targetUserId) });
       }
     },
   });
