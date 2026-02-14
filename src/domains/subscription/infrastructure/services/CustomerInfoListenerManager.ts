@@ -1,145 +1,57 @@
-/**
- * Customer Info Listener Manager
- * Handles RevenueCat customer info update listeners with renewal detection
- */
-
-import Purchases, {
-    type CustomerInfo,
-    type CustomerInfoUpdateListener,
-} from "react-native-purchases";
+import Purchases, { type CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../../revenuecat/core/types";
-import { syncPremiumStatus } from "../utils/PremiumStatusSyncer";
-import {
-    detectRenewal,
-    updateRenewalState,
-    type RenewalState,
-} from "../utils/RenewalDetector";
+import { ListenerState } from "./listeners/ListenerState";
+import { processCustomerInfo } from "./listeners/CustomerInfoHandler";
 
 export class CustomerInfoListenerManager {
-    private listener: CustomerInfoUpdateListener | null = null;
-    private currentUserId: string | null = null;
-    private renewalState: RenewalState = {
-        previousExpirationDate: null,
-        previousProductId: null,
+  private state = new ListenerState();
+
+  setUserId(userId: string, config: RevenueCatConfig): void {
+    const wasUserChange = this.state.hasUserChanged(userId);
+
+    if (wasUserChange) {
+      this.removeListener();
+      this.state.resetRenewalState();
+    }
+
+    this.state.currentUserId = userId;
+
+    if (wasUserChange || !this.state.listener) {
+      this.setupListener(config);
+    }
+  }
+
+  clearUserId(): void {
+    this.state.currentUserId = null;
+    this.state.resetRenewalState();
+  }
+
+  setupListener(config: RevenueCatConfig): void {
+    this.removeListener();
+
+    this.state.listener = async (customerInfo: CustomerInfo) => {
+      if (!this.state.currentUserId) return;
+
+      this.state.renewalState = await processCustomerInfo(
+        customerInfo,
+        this.state.currentUserId,
+        this.state.renewalState,
+        config
+      );
     };
 
-    setUserId(userId: string, config: RevenueCatConfig): void {
-        const wasUserChange = this.currentUserId && this.currentUserId !== userId;
+    Purchases.addCustomerInfoUpdateListener(this.state.listener);
+  }
 
-        // Clean up old listener and reset state when user changes
-        if (wasUserChange) {
-            this.removeListener();
-            this.renewalState = {
-                previousExpirationDate: null,
-                previousProductId: null,
-            };
-        }
-
-        this.currentUserId = userId;
-
-        // Setup new listener for new user or if no listener exists
-        if (wasUserChange || !this.listener) {
-            this.setupListener(config);
-        }
+  removeListener(): void {
+    if (this.state.listener) {
+      Purchases.removeCustomerInfoUpdateListener(this.state.listener);
+      this.state.listener = null;
     }
+  }
 
-    clearUserId(): void {
-        this.currentUserId = null;
-        this.renewalState = {
-            previousExpirationDate: null,
-            previousProductId: null,
-        };
-    }
-
-    setupListener(config: RevenueCatConfig): void {
-        this.removeListener();
-
-        this.listener = async (customerInfo: CustomerInfo) => {
-            if (!this.currentUserId) {
-                return;
-            }
-
-            const renewalResult = detectRenewal(
-                this.renewalState,
-                customerInfo,
-                config.entitlementIdentifier
-            );
-
-            // Handle renewal (same product, extended expiration)
-            if (renewalResult.isRenewal && config.onRenewalDetected) {
-                try {
-                    await config.onRenewalDetected(
-                        this.currentUserId,
-                        renewalResult.productId!,
-                        renewalResult.newExpirationDate!,
-                        customerInfo
-                    );
-                } catch (error) {
-                    console.error('[CustomerInfoListenerManager] Renewal detection callback failed', {
-                        userId: this.currentUserId,
-                        productId: renewalResult.productId,
-                        error
-                    });
-                    // Swallow error to prevent listener crash
-                }
-            }
-
-            // Handle plan change (upgrade/downgrade)
-            if (renewalResult.isPlanChange && config.onPlanChanged) {
-                try {
-                    await config.onPlanChanged(
-                        this.currentUserId,
-                        renewalResult.productId!,
-                        renewalResult.previousProductId!,
-                        renewalResult.isUpgrade,
-                        customerInfo
-                    );
-                } catch (error) {
-                    console.error('[CustomerInfoListenerManager] Plan change callback failed', {
-                        userId: this.currentUserId,
-                        productId: renewalResult.productId,
-                        previousProductId: renewalResult.previousProductId,
-                        isUpgrade: renewalResult.isUpgrade,
-                        error
-                    });
-                    // Swallow error to prevent listener crash
-                }
-            }
-
-            this.renewalState = updateRenewalState(this.renewalState, renewalResult);
-
-            // Only sync premium status if NOT a renewal or plan change
-            // This prevents double credit initialization
-            if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
-                try {
-                    await syncPremiumStatus(config, this.currentUserId, customerInfo);
-                } catch (error) {
-                    console.error('[CustomerInfoListenerManager] Premium status sync failed', {
-                        userId: this.currentUserId,
-                        error
-                    });
-                    // Swallow error to prevent listener crash
-                }
-            }
-        };
-
-        Purchases.addCustomerInfoUpdateListener(this.listener);
-    }
-
-    removeListener(): void {
-        if (this.listener) {
-            Purchases.removeCustomerInfoUpdateListener(this.listener);
-            this.listener = null;
-        }
-    }
-
-    destroy(): void {
-        this.removeListener();
-        this.clearUserId();
-        // Reset renewal state to ensure clean state
-        this.renewalState = {
-            previousExpirationDate: null,
-            previousProductId: null,
-        };
-    }
+  destroy(): void {
+    this.removeListener();
+    this.state.reset();
+  }
 }
