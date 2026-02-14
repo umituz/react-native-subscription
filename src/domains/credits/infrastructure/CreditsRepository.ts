@@ -1,20 +1,15 @@
-import { getDoc, setDoc } from "firebase/firestore";
-import { BaseRepository, serverTimestamp, type Firestore, type DocumentReference } from "@umituz/react-native-firebase";
+import type { Firestore, DocumentReference } from "@umituz/react-native-firebase";
+import { BaseRepository } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
-import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
-import { initializeCreditsTransaction } from "../application/CreditsInitializer";
-import { mapCreditsDocumentToEntity } from "../core/CreditsMapper";
+import type { PurchaseSource } from "../core/UserCreditsDocument";
 import type { RevenueCatData } from "../../revenuecat/core/types";
 import { deductCreditsOperation } from "../application/DeductCreditsCommand";
-import { calculateCreditLimit } from "../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
-import { SUBSCRIPTION_STATUS } from "../../subscription/core/SubscriptionConstants";
+import { fetchCredits, checkHasCredits } from "./operations/CreditsFetcher";
+import { syncExpiredStatus } from "./operations/CreditsWriter";
+import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
 
-/**
- * Credits Repository
- * Provides domain-specific database operations for credits system.
- */
 export class CreditsRepository extends BaseRepository {
   constructor(private config: CreditsConfig) {
     super(config.collectionName);
@@ -34,14 +29,7 @@ export class CreditsRepository extends BaseRepository {
 
   async getCredits(userId: string): Promise<CreditsResult> {
     const db = requireFirestore();
-    const snap = await getDoc(this.getRef(db, userId));
-
-    if (!snap.exists()) {
-      return { success: true, data: null, error: null };
-    }
-
-    const entity = mapCreditsDocumentToEntity(snap.data() as UserCreditsDocumentRead);
-    return { success: true, data: entity, error: null };
+    return fetchCredits(this.getRef(db, userId));
   }
 
   async initializeCredits(
@@ -53,101 +41,32 @@ export class CreditsRepository extends BaseRepository {
     type: PurchaseType = PURCHASE_TYPE.INITIAL
   ): Promise<CreditsResult> {
     const db = requireFirestore();
-    const creditLimit = calculateCreditLimit(productId, this.config);
-    const cfg = { ...this.config, creditLimit };
-
-    const maxRetries = 3;
-    let lastError: any;
-
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const result = await initializeCreditsTransaction(
-          db,
-          this.getRef(db, userId),
-          cfg,
-          purchaseId,
-          {
-            productId,
-            source,
-            expirationDate: revenueCatData.expirationDate,
-            willRenew: revenueCatData.willRenew,
-            originalTransactionId: revenueCatData.originalTransactionId,
-            isPremium: revenueCatData.isPremium,
-            periodType: revenueCatData.periodType,
-            unsubscribeDetectedAt: revenueCatData.unsubscribeDetectedAt,
-            billingIssueDetectedAt: revenueCatData.billingIssueDetectedAt,
-            store: revenueCatData.store,
-            ownershipType: revenueCatData.ownershipType,
-            type,
-          }
-        );
-
-        return {
-          success: true,
-          data: result.finalData ? mapCreditsDocumentToEntity(result.finalData) : null,
-          error: null,
-        };
-      } catch (error: any) {
-        lastError = error;
-
-        const isTransientError =
-          error?.code === 'already-exists' ||
-          error?.code === 'DEADLINE_EXCEEDED' ||
-          error?.code === 'UNAVAILABLE' ||
-          error?.code === 'RESOURCE_EXHAUSTED' ||
-          error?.message?.includes('already-exists') ||
-          error?.message?.includes('timeout') ||
-          error?.message?.includes('unavailable');
-
-        if (isTransientError && attempt < maxRetries - 1) {
-          await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
-          continue;
-        }
-        break;
-      }
-    }
-
-    const errorMessage = lastError instanceof Error
-      ? lastError.message
-      : typeof lastError === 'string'
-        ? lastError
-        : 'Unknown error during credit initialization';
-
-    const errorCode = lastError?.code ?? 'UNKNOWN_ERROR';
-
-    return {
-      success: false,
-      data: null,
-      error: {
-        message: errorMessage,
-        code: errorCode,
-      },
-    };
+    return initializeCreditsWithRetry({
+      db,
+      ref: this.getRef(db, userId),
+      config: this.config,
+      userId,
+      purchaseId,
+      productId,
+      source,
+      revenueCatData,
+      type,
+    });
   }
 
-  /**
-   * Deducts credits using atomic transaction logic.
-   */
   async deductCredit(userId: string, cost: number): Promise<DeductCreditsResult> {
     const db = requireFirestore();
     return deductCreditsOperation(db, this.getRef(db, userId), cost, userId);
   }
 
   async hasCredits(userId: string, cost: number): Promise<boolean> {
-    const result = await this.getCredits(userId);
-    if (!result.success || !result.data) return false;
-    return result.data.credits >= cost;
+    const db = requireFirestore();
+    return checkHasCredits(this.getRef(db, userId), cost);
   }
 
   async syncExpiredStatus(userId: string): Promise<void> {
     const db = requireFirestore();
-    const ref = this.getRef(db, userId);
-    await setDoc(ref, {
-      isPremium: false,
-      status: SUBSCRIPTION_STATUS.EXPIRED,
-      willRenew: false,
-      expirationDate: serverTimestamp(),
-    }, { merge: true });
+    await syncExpiredStatus(this.getRef(db, userId));
   }
 }
 
