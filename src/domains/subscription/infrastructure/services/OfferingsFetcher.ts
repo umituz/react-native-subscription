@@ -10,7 +10,6 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
     const offerings = await Purchases.getOfferings();
     return offerings.current;
   } catch (error) {
-    console.error('[OfferingsFetcher] Failed to fetch offerings', { error });
-    return null;
+    throw new Error(`Failed to fetch offerings: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }
