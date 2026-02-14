@@ -68,6 +68,13 @@ export * from "./domains/subscription/presentation/components/details/PremiumSta
 export * from "./domains/subscription/presentation/components/sections/SubscriptionSection";
 export * from "./domains/subscription/presentation/components/feedback/PaywallFeedbackModal";
 export * from "./domains/subscription/presentation/screens/SubscriptionDetailScreen";
+export type {
+  SubscriptionDetailConfig,
+  SubscriptionDetailTranslations,
+  SubscriptionDisplayFlags,
+  UpgradePromptConfig,
+  CreditInfo,
+} from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
 export * from "./domains/paywall/components/PaywallContainer";
 
 export type {
@@ -90,6 +97,17 @@ export * from "./utils/validation";
 export * from "./utils/dateUtils";
 export * from "./utils/appUtils";
 export * from "./shared/utils/dateConverter";
+
+// Credits Query Keys
+export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKeys";
+
+// Paywall Types
+export type { PaywallTranslations, PaywallLegalUrls } from "./domains/paywall/entities/types";
+export type { TrialConfig } from "./domains/paywall/components/PaywallContainer.types";
+
+// Purchase Loading Overlay
+export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
+export type { PurchaseLoadingOverlayProps } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
 
 // Init Module Factory
 export {
