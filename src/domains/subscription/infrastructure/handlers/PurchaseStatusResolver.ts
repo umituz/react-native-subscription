@@ -25,16 +25,16 @@ export class PurchaseStatusResolver {
       return {
         isPremium: true,
         expirationDate: toDate(entitlement.expirationDate),
-        willRenew: entitlement.willRenew || false,
-        productIdentifier: entitlement.productIdentifier || null,
-        originalPurchaseDate: toDate(entitlement.originalPurchaseDate) || null,
-        latestPurchaseDate: toDate(entitlement.latestPurchaseDate) || null,
+        willRenew: entitlement.willRenew ?? false,
+        productIdentifier: entitlement.productIdentifier ?? null,
+        originalPurchaseDate: toDate(entitlement.originalPurchaseDate) ?? null,
+        latestPurchaseDate: toDate(entitlement.latestPurchaseDate) ?? null,
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
-        isSandbox: entitlement.isSandbox || false,
-        periodType: entitlement.periodType || null,
-        store: null, // Store info not available in entitlement type
-        gracePeriodExpiresDate: null, // Grace period not available in entitlement type
-        unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) || null,
+        isSandbox: entitlement.isSandbox ?? false,
+        periodType: entitlement.periodType ?? null,
+        store: null,
+        gracePeriodExpiresDate: null,
+        unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) ?? null,
       };
     }
 

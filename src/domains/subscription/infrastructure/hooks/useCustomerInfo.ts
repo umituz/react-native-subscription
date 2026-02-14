@@ -91,12 +91,14 @@ export function useCustomerInfo(): UseCustomerInfoResult {
       setError(null);
     };
 
+    // Set ref BEFORE adding listener to ensure cleanup can always find it
     listenerRef.current = listener;
     Purchases.addCustomerInfoUpdateListener(listener);
 
     return () => {
       if (listenerRef.current) {
         Purchases.removeCustomerInfoUpdateListener(listenerRef.current);
+        listenerRef.current = null;
       }
     };
   }, [fetchCustomerInfo]);

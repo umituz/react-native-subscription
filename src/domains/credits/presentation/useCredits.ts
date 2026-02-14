@@ -41,7 +41,7 @@ export const useCredits = (): UseCreditsResult => {
         throw new Error(result.error?.message || "Failed to fetch credits");
       }
 
-      return result.data || null;
+      return result.data ?? null;
     },
     enabled: queryEnabled,
     gcTime: 0,
