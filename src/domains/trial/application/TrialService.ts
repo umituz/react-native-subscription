@@ -46,7 +46,7 @@ export async function recordTrialStart(userId: string, deviceId?: string): Promi
       lastUserId: userId,
       userIds: arrayUnion(userId),
     };
-    return await repository.saveRecord(id, record);
+    return await repository.saveRecord(id, record as any);
   } catch {
     return false;
   }
@@ -60,7 +60,7 @@ export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
       trialInProgress: false,
       trialEndedAt: serverTimestamp(),
     };
-    return await repository.saveRecord(id, record);
+    return await repository.saveRecord(id, record as any);
   } catch {
     return false;
   }
@@ -74,7 +74,7 @@ export async function recordTrialConversion(deviceId?: string): Promise<boolean>
       trialInProgress: false,
       trialConvertedAt: serverTimestamp(),
     };
-    return await repository.saveRecord(id, record);
+    return await repository.saveRecord(id, record as any);
   } catch {
     return false;
   }

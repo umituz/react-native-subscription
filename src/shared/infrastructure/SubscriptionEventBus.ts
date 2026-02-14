@@ -6,7 +6,7 @@ type EventCallback<T = unknown> = (data: T) => void;
  */
 export class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
-  private listeners: Record<string, EventCallback[]> = {};
+  private listeners: Record<string, EventCallback<any>[]> = {};
 
   private constructor() {}
 

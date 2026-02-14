@@ -4,11 +4,11 @@ import { creditAllocationOrchestrator } from "./credit-strategies/CreditAllocati
 import { isPast } from "../../../utils/dateUtils";
 import { isCreditPackage } from "../../../utils/packageTypeDetector";
 import { toTimestamp } from "../../../shared/utils/dateConverter";
-import { 
-  CalculateCreditsParams, 
-  BuildCreditsDataParams 
+import {
+  CalculateCreditsParams,
+  BuildCreditsDataParams
 } from "./creditOperationUtils.types";
-import { PURCHASE_ID_PREFIXES } from "../core/CreditsConstants";
+import { PURCHASE_ID_PREFIXES, PROCESSED_PURCHASES_WINDOW } from "../core/CreditsConstants";
 
 
 export function calculateNewCredits({ metadata, existingData, creditLimit, purchaseId }: CalculateCreditsParams): number {
@@ -62,7 +62,7 @@ export function buildCreditsData({
     credits: newCredits,
     creditLimit: resolvedCreditLimit,
     lastUpdatedAt: serverTimestamp(),
-    processedPurchases: [...(existingData?.processedPurchases ?? []), purchaseId].slice(-50),
+    processedPurchases: [...(existingData?.processedPurchases ?? []), purchaseId].slice(-PROCESSED_PURCHASES_WINDOW),
     productId,
     platform,
     ...(purchaseHistory.length > 0 && { purchaseHistory }),

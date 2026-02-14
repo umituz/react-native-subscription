@@ -13,6 +13,16 @@ export class TrialEligibilityService {
     const { hasUsedTrial, trialInProgress, userIds = [] } = record;
 
     if (userId && userIds.includes(userId)) {
+      // Detect corrupted state: user in list but flags say trial not used
+      if (!hasUsedTrial && !trialInProgress) {
+        console.warn('[TrialEligibilityService] Corrupted trial state detected', {
+          userId,
+          deviceId,
+          hasUsedTrial,
+          trialInProgress,
+          userIdsCount: userIds.length
+        });
+      }
       return { eligible: false, reason: "user_already_used", deviceId };
     }
 

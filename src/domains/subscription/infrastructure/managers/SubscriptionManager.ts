@@ -2,7 +2,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import type { PackageHandler } from "../handlers/PackageHandler";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
-import { ensureConfigured, ensureServiceAvailable } from "./subscriptionManagerUtils";
+import { ensureServiceAvailable } from "./subscriptionManagerUtils";
 import type { SubscriptionManagerConfig, PremiumStatus, RestoreResultInfo } from "./SubscriptionManager.types";
 import { createPackageHandler } from "./packageHandlerFactory";
 import { checkPremiumStatusFromService } from "./premiumStatusChecker";
@@ -20,7 +20,7 @@ class SubscriptionManagerImpl {
     this.state.userIdProvider.configure(config.getAnonymousUserId);
   }
 
-  private ensureConfigured(): asserts this is { managerConfig: SubscriptionManagerConfig } {
+  private ensureConfigured(): void {
     if (!this.managerConfig) {
       throw new Error('[SubscriptionManager] Not configured. Call configure() first.');
     }

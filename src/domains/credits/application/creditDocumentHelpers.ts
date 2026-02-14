@@ -6,6 +6,7 @@
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { serverTimestamp, type DocumentSnapshot } from "@umituz/react-native-firebase";
 import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
+import { PROCESSED_PURCHASES_WINDOW } from "../core/CreditsConstants";
 
 /**
  * Get existing credit document or create default
@@ -18,7 +19,7 @@ export function getCreditDocumentOrDefault(
         return creditsDoc.data() as UserCreditsDocumentRead;
     }
 
-    const now = serverTimestamp();
+    const now = serverTimestamp() as any; // FieldValue for Firestore write
 
     const defaultDocument: UserCreditsDocumentRead = {
         credits: 0,
@@ -32,10 +33,14 @@ export function getCreditDocumentOrDefault(
         purchasedAt: now,
         expirationDate: null,
         lastPurchaseAt: null,
+        canceledAt: null,
+        billingIssueDetectedAt: null,
         willRenew: false,
         productId: null,
         packageType: null,
         originalTransactionId: null,
+        store: null,
+        ownershipType: null,
         appVersion: null,
         periodType: null,
         isTrialing: false,
@@ -52,12 +57,12 @@ export function getCreditDocumentOrDefault(
 
 /**
  * Add purchase ID to processed purchases list
- * Maintains last 50 purchases
+ * Maintains last N purchases (default: PROCESSED_PURCHASES_WINDOW)
  */
 export function addProcessedPurchase(
     existing: string[],
     purchaseId: string,
-    limit: number = 50
+    limit: number = PROCESSED_PURCHASES_WINDOW
 ): string[] {
     return [...existing, purchaseId].slice(-limit);
 }
