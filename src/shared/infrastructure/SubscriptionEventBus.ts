@@ -42,8 +42,8 @@ export class SubscriptionEventBus {
     this.listeners[event].forEach(callback => {
       try {
         callback(data);
-      } catch {
-        // Prevent one faulty listener from breaking other listeners
+      } catch (error) {
+        console.error('[SubscriptionEventBus] Listener error for event:', event, { error });
       }
     });
   }

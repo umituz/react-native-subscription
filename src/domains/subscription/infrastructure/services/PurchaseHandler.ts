@@ -125,6 +125,13 @@ export async function handlePurchase(
       ? `${errorMessage} (Code: ${errorCode})`
       : errorMessage;
 
+    console.error('[PurchaseHandler] Purchase failed', {
+      productId: pkg.product.identifier,
+      userId,
+      errorCode,
+      error,
+    });
+
     throw new RevenueCatPurchaseError(
       enhancedMessage,
       pkg.product.identifier,

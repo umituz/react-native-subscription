@@ -40,35 +40,41 @@ export class InitializationCache {
         }
 
         // If we reach here, initialization is in progress for a different user
-        // Wait for current initialization to complete
-        return { shouldInit: false, existingPromise: this.initPromise };
+        // Don't return another user's promise - caller should retry
+        return { shouldInit: false, existingPromise: null };
     }
 
     setPromise(promise: Promise<boolean>, userId: string): void {
         this.initPromise = promise;
         this.promiseUserId = userId;
 
+        // Capture userId to prevent stale reference after catch clears promiseUserId
+        const targetUserId = userId;
+
         // Chain to mark completion and set currentUserId only on success
         promise
             .then((result) => {
-                if (result && this.promiseUserId === userId) {
-                    this.currentUserId = userId;
+                if (result && this.promiseUserId === targetUserId) {
+                    this.currentUserId = targetUserId;
                 }
                 this.promiseCompleted = true;
                 return result;
             })
-            .catch(() => {
+            .catch((error) => {
                 // On failure, clear the promise so retry is possible
-                if (this.promiseUserId === userId) {
+                if (this.promiseUserId === targetUserId) {
                     this.initPromise = null;
                     this.promiseUserId = null;
-                    this.currentUserId = null; // Clear user on failure
+                    this.currentUserId = null;
                 }
                 this.promiseCompleted = true;
+                console.error('[InitializationCache] Initialization failed', { userId: targetUserId, error });
+                // Re-throw so callers awaiting the promise see the error
+                throw error;
             })
             .finally(() => {
                 // Always release the mutex
-                if (this.promiseUserId === userId) {
+                if (this.promiseUserId === targetUserId) {
                     this.initializationInProgress = false;
                 }
             });

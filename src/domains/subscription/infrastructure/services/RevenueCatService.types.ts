@@ -80,8 +80,8 @@ export class RevenueCatService implements IRevenueCatService {
         try {
             await Purchases.logOut();
             this.stateManager.setInitialized(false);
-        } catch {
-            // Ignore logout errors during reset
+        } catch (error) {
+            console.error('[RevenueCatService] Logout failed during reset', { error });
         }
     }
 }

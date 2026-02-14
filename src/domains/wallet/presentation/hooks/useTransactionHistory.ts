@@ -53,6 +53,11 @@ export function useTransactionHistory({
       return result.data ?? [];
     },
     enabled: !!userId,
+    gcTime: 0,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 
   const transactions = data ?? [];

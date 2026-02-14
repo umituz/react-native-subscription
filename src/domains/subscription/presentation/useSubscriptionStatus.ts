@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
@@ -33,13 +33,24 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       }
     },
     enabled: queryEnabled,
+    gcTime: 0,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 
-  // Clear cache on logout to prevent stale data
+  // Track previous userId to clear stale cache on logout/user switch
+  const prevUserIdRef = useRef(userId);
+
   useEffect(() => {
-    if (!isAuthenticated(userId)) {
+    const prevUserId = prevUserIdRef.current;
+    prevUserIdRef.current = userId;
+
+    // Clear previous user's cache when userId changes (logout or user switch)
+    if (prevUserId !== userId && isAuthenticated(prevUserId)) {
       queryClient.removeQueries({
-        queryKey: subscriptionStatusQueryKeys.user(userId)
+        queryKey: subscriptionStatusQueryKeys.user(prevUserId),
       });
     }
   }, [userId, queryClient]);

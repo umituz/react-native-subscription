@@ -40,6 +40,10 @@ export const useSubscriptionPackages = () => {
       return SubscriptionManager.getPackages();
     },
     enabled: isConfigured,
-
+    gcTime: 0,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 };

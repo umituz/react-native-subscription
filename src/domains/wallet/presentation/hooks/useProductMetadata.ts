@@ -50,6 +50,11 @@ export function useProductMetadata({
       return service.getAll();
     },
     enabled,
+    gcTime: 0,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 
   const products = data ?? [];

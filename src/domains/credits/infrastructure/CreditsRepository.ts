@@ -1,5 +1,5 @@
 import { getDoc, setDoc } from "firebase/firestore";
-import { BaseRepository, type Firestore, type DocumentReference } from "@umituz/react-native-firebase";
+import { BaseRepository, serverTimestamp, type Firestore, type DocumentReference } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { UserCreditsDocumentRead, PurchaseSource } from "../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../application/CreditsInitializer";
@@ -146,7 +146,7 @@ export class CreditsRepository extends BaseRepository {
       isPremium: false,
       status: SUBSCRIPTION_STATUS.EXPIRED,
       willRenew: false,
-      expirationDate: new Date().toISOString()
+      expirationDate: serverTimestamp(),
     }, { merge: true });
   }
 }

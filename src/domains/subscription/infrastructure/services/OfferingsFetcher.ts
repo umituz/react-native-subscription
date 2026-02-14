@@ -9,7 +9,8 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
   try {
     const offerings = await Purchases.getOfferings();
     return offerings.current;
-  } catch {
+  } catch (error) {
+    console.error('[OfferingsFetcher] Failed to fetch offerings', { error });
     return null;
   }
 }
