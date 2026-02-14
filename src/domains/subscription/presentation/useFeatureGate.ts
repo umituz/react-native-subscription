@@ -22,7 +22,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   const isWaitingForPurchaseRef = useRef(false);
   const isWaitingForAuthCreditsRef = useRef(false);
 
-  const { creditBalanceRef, hasSubscriptionRef, onShowPaywallRef, requiredCreditsRef } = useSyncedRefs(creditBalance, hasSubscription, onShowPaywall, requiredCredits);
+  const { creditBalanceRef, hasSubscriptionRef, onShowPaywallRef, requiredCreditsRef, isCreditsLoadedRef } = useSyncedRefs(creditBalance, hasSubscription, onShowPaywall, requiredCredits, isCreditsLoaded);
 
   useEffect(() => {
     if (shouldExecuteAuthAction(
@@ -79,10 +79,11 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
         onShowPaywallRef,
         pendingActionRef,
         isWaitingForAuthCreditsRef,
-        isWaitingForPurchaseRef
+        isWaitingForPurchaseRef,
+        isCreditsLoadedRef
       );
     },
-    [isAuthenticated, onShowAuthModal, hasSubscriptionRef, creditBalanceRef, requiredCreditsRef, onShowPaywallRef]
+    [isAuthenticated, onShowAuthModal, hasSubscriptionRef, creditBalanceRef, requiredCreditsRef, onShowPaywallRef, isCreditsLoadedRef]
   );
 
   return {

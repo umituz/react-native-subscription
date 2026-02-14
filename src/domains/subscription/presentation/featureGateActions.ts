@@ -10,10 +10,23 @@ export const executeFeatureAction = (
   onShowPaywallRef: MutableRefObject<(requiredCredits?: number) => void>,
   pendingActionRef: MutableRefObject<(() => void | Promise<void>) | null>,
   isWaitingForAuthCreditsRef: MutableRefObject<boolean>,
-  isWaitingForPurchaseRef: MutableRefObject<boolean>
+  isWaitingForPurchaseRef: MutableRefObject<boolean>,
+  isCreditsLoadedRef: MutableRefObject<boolean>
 ): void => {
   if (!isAuthenticated) {
     const postAuthAction = () => {
+      if (hasSubscriptionRef.current || creditBalanceRef.current >= requiredCreditsRef.current) {
+        action();
+        return;
+      }
+
+      if (isCreditsLoadedRef.current) {
+        pendingActionRef.current = action;
+        isWaitingForPurchaseRef.current = true;
+        onShowPaywallRef.current(requiredCreditsRef.current);
+        return;
+      }
+
       pendingActionRef.current = action;
       isWaitingForAuthCreditsRef.current = true;
     };
