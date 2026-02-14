@@ -44,11 +44,11 @@ export const useCredits = (): UseCreditsResult => {
       return result.data ?? null;
     },
     enabled: queryEnabled,
-    gcTime: 0,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
-    refetchOnReconnect: "always",
+    gcTime: 10 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 
   const queryClient = useQueryClient();

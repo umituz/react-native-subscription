@@ -75,7 +75,6 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       onClose={handleClose}
       translations={translations}
       packages={packages}
-      isLoading={isLoading}
       legalUrls={legalUrls}
       features={features ? [...features] : undefined}
       heroImage={heroImage}

@@ -13,7 +13,6 @@ export interface PaywallModalProps {
   translations: PaywallTranslations;
   packages?: PurchasesPackage[];
   features?: SubscriptionFeature[];
-  isLoading?: boolean;
   legalUrls?: PaywallLegalUrls;
   bestValueIdentifier?: string;
   creditAmounts?: Record<string, number>;

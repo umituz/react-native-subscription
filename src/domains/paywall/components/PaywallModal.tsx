@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { View, TouchableOpacity, Linking } from "react-native";
-import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner, useSafeAreaInsets } from "@umituz/react-native-design-system";
+import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, useSafeAreaInsets } from "@umituz/react-native-design-system";
 import { ScreenLayout } from "../../../shared/presentation";
 import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
@@ -11,7 +11,7 @@ import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallModalProps } from "./PaywallModal.types";
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
-  const { visible, onClose, translations, packages = [], features = [], isLoading = false, legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText } = props;
+  const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText } = props;
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
   const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({ packages, onPurchase, onRestore });
@@ -42,19 +42,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
             {translations.subtitle && <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>{translations.subtitle}</AtomicText>}
           </View>
           <PaywallFeatures features={features} />
-          {isLoading ? (
-            <View style={styles.loading}><AtomicSpinner size="lg" color="primary" text={translations.loadingText} /></View>
-          ) : (
-            <View style={styles.plans}>
-              {packages.map((pkg) => {
-                const pid = pkg.product.identifier;
-                const hasTrial = trialEligibility[pid]?.eligible ?? false;
-                return (
-                  <PlanCard key={pid} pkg={pkg} isSelected={selectedPlanId === pid} onSelect={() => setSelectedPlanId(pid)} badge={pid === bestValueIdentifier ? translations.bestValueBadgeText : undefined} creditAmount={creditAmounts?.[pid]} creditsLabel={creditsLabel} hasFreeTrial={hasTrial} trialSubtitleText={hasTrial ? trialSubtitleText : undefined} />
-                );
-              })}
-            </View>
-          )}
+          <View style={styles.plans}>
+            {packages.map((pkg) => {
+              const pid = pkg.product.identifier;
+              const hasTrial = trialEligibility[pid]?.eligible ?? false;
+              return (
+                <PlanCard key={pid} pkg={pkg} isSelected={selectedPlanId === pid} onSelect={() => setSelectedPlanId(pid)} badge={pid === bestValueIdentifier ? translations.bestValueBadgeText : undefined} creditAmount={creditAmounts?.[pid]} creditsLabel={creditsLabel} hasFreeTrial={hasTrial} trialSubtitleText={hasTrial ? trialSubtitleText : undefined} />
+              );
+            })}
+          </View>
           <TouchableOpacity onPress={handlePurchase} disabled={!selectedPlanId || isProcessing} style={[styles.cta, { backgroundColor: tokens.colors.primary }, (!selectedPlanId || isProcessing) && styles.ctaDisabled]} activeOpacity={0.8}>
             <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>{isProcessing ? translations.processingText : translations.purchaseButtonText}</AtomicText>
           </TouchableOpacity>

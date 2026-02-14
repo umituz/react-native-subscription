@@ -15,14 +15,19 @@ export const subscriptionStatusQueryKeys = {
 export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
   const queryClient = useQueryClient();
+  const isConfigured = SubscriptionManager.isConfigured();
 
-  const queryEnabled = isAuthenticated(userId) && SubscriptionManager.isInitializedForUser(userId);
+  const queryEnabled = isAuthenticated(userId) && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId),
     queryFn: async () => {
       if (!isAuthenticated(userId)) {
         return null;
+      }
+
+      if (!SubscriptionManager.isInitializedForUser(userId)) {
+        await SubscriptionManager.initialize(userId);
       }
 
       try {

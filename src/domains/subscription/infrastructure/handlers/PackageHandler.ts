@@ -8,6 +8,8 @@ import type { IRevenueCatService } from "../../../../shared/application/ports/IR
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
 
+declare const __DEV__: boolean;
+
 export interface RestoreResultInfo {
   success: boolean;
   productId: string | null;
@@ -31,19 +33,41 @@ export class PackageHandler {
     try {
       const offering = await this.service.fetchOfferings();
 
+      if (__DEV__) {
+        console.log('[PackageHandler] fetchOfferings result:', {
+          hasOffering: !!offering,
+          offeringId: offering?.identifier,
+          packagesCount: offering?.availablePackages?.length,
+        });
+      }
+
       if (!offering) {
-        // Return empty array instead of throwing - allows graceful degradation
+        if (__DEV__) {
+          console.warn('[PackageHandler] No offering returned, returning empty array');
+        }
         return [];
       }
 
       const packages = offering.availablePackages;
       if (!packages || packages.length === 0) {
-        // Return empty array instead of throwing - allows graceful degradation
+        if (__DEV__) {
+          console.warn('[PackageHandler] Offering has no packages, returning empty array');
+        }
         return [];
+      }
+
+      if (__DEV__) {
+        console.log('[PackageHandler] Returning packages:', {
+          count: packages.length,
+          packageIds: packages.map(p => p.product.identifier),
+        });
       }
 
       return packages;
     } catch (error) {
+      if (__DEV__) {
+        console.error('[PackageHandler] Error fetching packages:', error);
+      }
       throw new Error(
         `Failed to fetch subscription packages. ${
           error instanceof Error ? error.message : "Unknown error"
