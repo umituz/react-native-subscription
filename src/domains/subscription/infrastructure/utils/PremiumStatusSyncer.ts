@@ -35,7 +35,13 @@ export async function syncPremiumStatus(
         } else {
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
-    } catch (_error) {
+    } catch (error) {
+        console.error('[PremiumStatusSyncer] Premium status change callback failed', {
+            userId,
+            isPremium: !!premiumEntitlement,
+            productId: premiumEntitlement?.productIdentifier,
+            error
+        });
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }
@@ -53,7 +59,13 @@ export async function notifyPurchaseCompleted(
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source);
-    } catch (_error) {
+    } catch (error) {
+        console.error('[PremiumStatusSyncer] Purchase completion callback failed', {
+            userId,
+            productId,
+            source,
+            error
+        });
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }
@@ -70,7 +82,12 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch (_error) {
+    } catch (error) {
+        console.error('[PremiumStatusSyncer] Restore completion callback failed', {
+            userId,
+            isPremium,
+            error
+        });
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }

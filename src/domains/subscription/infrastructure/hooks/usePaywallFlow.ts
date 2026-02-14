@@ -30,8 +30,13 @@ export const usePaywallFlow = (options: UsePaywallFlowOptions = {}): UsePaywallF
   // Load persisted state
   useEffect(() => {
     const loadPersistedState = async () => {
-      const value = await getString(PAYWALL_SHOWN_KEY, '');
-      setPaywallShown(value === 'true');
+      try {
+        const value = await getString(PAYWALL_SHOWN_KEY, '');
+        setPaywallShown(value === 'true');
+      } catch (error) {
+        console.error('[usePaywallFlow] Failed to load paywall state', error);
+        setPaywallShown(false); // Safe default
+      }
     };
 
     loadPersistedState();

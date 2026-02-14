@@ -20,7 +20,7 @@ export function getCreditDocumentOrDefault(
 
     const now = serverTimestamp();
 
-    return {
+    const defaultDocument: UserCreditsDocumentRead = {
         credits: 0,
         creditLimit: 0,
         isPremium: false,
@@ -45,7 +45,9 @@ export function getCreditDocumentOrDefault(
         convertedFromTrial: false,
         purchaseSource: null,
         purchaseType: null,
-    } as any;
+    };
+
+    return defaultDocument;
 }
 
 /**

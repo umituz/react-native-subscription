@@ -16,3 +16,9 @@ export const PURCHASE_ID_PREFIXES = {
   PURCHASE: 'purchase_',
   RENEWAL: 'renewal_',
 } as const;
+
+/**
+ * Processed Purchases Array Window Size
+ * Maintains last N purchases to prevent reprocessing
+ */
+export const PROCESSED_PURCHASES_WINDOW = 50;

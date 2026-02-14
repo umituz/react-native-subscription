@@ -2,13 +2,25 @@
  * Trial Service - Facade for device-based trial tracking
  */
 
-import { arrayUnion } from "firebase/firestore";
+import { arrayUnion, type FieldValue } from "firebase/firestore";
 import { serverTimestamp } from "@umituz/react-native-firebase";
 import { PersistentDeviceIdService } from "@umituz/react-native-design-system";
 import { DeviceTrialRepository } from "../infrastructure/DeviceTrialRepository";
 import { TrialEligibilityService } from "./TrialEligibilityService";
 import type { TrialEligibilityResult } from "../core/TrialTypes";
 export type { TrialEligibilityResult };
+
+// Type for Firestore write operations with FieldValue
+interface TrialRecordWrite {
+  deviceId?: string;
+  hasUsedTrial?: boolean;
+  trialInProgress?: boolean;
+  trialStartedAt?: FieldValue;
+  trialEndedAt?: FieldValue;
+  trialConvertedAt?: FieldValue;
+  lastUserId?: string;
+  userIds?: FieldValue;
+}
 
 const repository = new DeviceTrialRepository();
 
@@ -27,13 +39,14 @@ export async function checkTrialEligibility(userId?: string, deviceId?: string):
 export async function recordTrialStart(userId: string, deviceId?: string): Promise<boolean> {
   try {
     const id = deviceId || await getDeviceId();
-    return await repository.saveRecord(id, {
+    const record: TrialRecordWrite = {
       deviceId: id,
       trialInProgress: true,
-      trialStartedAt: serverTimestamp() as any,
+      trialStartedAt: serverTimestamp(),
       lastUserId: userId,
-      userIds: arrayUnion(userId) as any,
-    });
+      userIds: arrayUnion(userId),
+    };
+    return await repository.saveRecord(id, record);
   } catch {
     return false;
   }
@@ -42,11 +55,12 @@ export async function recordTrialStart(userId: string, deviceId?: string): Promi
 export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
   try {
     const id = deviceId || await getDeviceId();
-    return await repository.saveRecord(id, {
+    const record: TrialRecordWrite = {
       hasUsedTrial: true,
       trialInProgress: false,
-      trialEndedAt: serverTimestamp() as any,
-    });
+      trialEndedAt: serverTimestamp(),
+    };
+    return await repository.saveRecord(id, record);
   } catch {
     return false;
   }
@@ -55,11 +69,12 @@ export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
 export async function recordTrialConversion(deviceId?: string): Promise<boolean> {
   try {
     const id = deviceId || await getDeviceId();
-    return await repository.saveRecord(id, {
+    const record: TrialRecordWrite = {
       hasUsedTrial: true,
       trialInProgress: false,
-      trialConvertedAt: serverTimestamp() as any,
-    });
+      trialConvertedAt: serverTimestamp(),
+    };
+    return await repository.saveRecord(id, record);
   } catch {
     return false;
   }

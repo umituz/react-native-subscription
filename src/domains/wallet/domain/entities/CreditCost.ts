@@ -35,7 +35,8 @@ export function createCreditCostEntity(
       return costs[operation] * pricePerCredit;
     },
     getCustomCost: (operation: string): number => {
-      return (costs as unknown as Record<string, number>)[operation] ?? 0;
+      const costsRecord: Record<string, number> = costs;
+      return costsRecord[operation] ?? 0;
     },
   };
 }

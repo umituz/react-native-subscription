@@ -1,4 +1,4 @@
-import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
+import type { UserCreditsDocumentRead, PurchaseMetadata } from "../core/UserCreditsDocument";
 import type { InitializeCreditsMetadata } from "../../subscription/application/SubscriptionInitializerTypes";
 import type { Platform } from "../../subscription/core/SubscriptionConstants";
 
@@ -15,6 +15,6 @@ export interface BuildCreditsDataParams {
   creditLimit: number;
   purchaseId: string;
   metadata: InitializeCreditsMetadata;
-  purchaseHistory: any[];
+  purchaseHistory: PurchaseMetadata[];
   platform: Platform;
 }

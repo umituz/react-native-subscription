@@ -2,7 +2,7 @@ import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-nat
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import { resolveApiKey } from "../utils/ApiKeyResolver";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
-import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS } from "./initializerConstants";
+import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS, MAX_INIT_RETRIES } from "./initializerConstants";
 
 export type { InitializerDeps } from "./RevenueCatInitializer.types";
 
@@ -85,7 +85,11 @@ export async function initializeSDK(
         Purchases.getOfferings(),
       ]);
       return buildSuccessResult(deps, customerInfo, offerings);
-    } catch {
+    } catch (error) {
+      console.error('[RevenueCatInitializer] Failed to fetch customer info/offerings for initialized user', {
+        userId,
+        error
+      });
       return FAILED_INITIALIZATION_RESULT;
     }
   }
@@ -113,17 +117,34 @@ export async function initializeSDK(
       deps.setCurrentUserId(userId ?? null);
       const offerings = await Purchases.getOfferings();
       return buildSuccessResult(deps, customerInfo, offerings);
-    } catch {
+    } catch (error) {
+      console.error('[RevenueCatInitializer] Failed during user switch or fetch', {
+        userId,
+        currentAppUserId: await Purchases.getAppUserID().catch(() => 'unknown'),
+        error
+      });
       return FAILED_INITIALIZATION_RESULT;
     }
   }
 
+  // Wait for ongoing configuration with retry limit
   if (configState.isConfiguring) {
-    if (configState.configurationPromise) {
-      await configState.configurationPromise;
-      return initializeSDK(deps, userId, apiKey);
+    let retryCount = 0;
+    while (configState.isConfiguring && retryCount < MAX_INIT_RETRIES) {
+      if (configState.configurationPromise) {
+        await configState.configurationPromise;
+      } else {
+        await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
+      }
+      retryCount++;
     }
-    await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
+
+    if (configState.isConfiguring) {
+      console.error('[RevenueCatInitializer] Max retry attempts reached', { userId });
+      return FAILED_INITIALIZATION_RESULT;
+    }
+
+    // Configuration completed, try again
     return initializeSDK(deps, userId, apiKey);
   }
 
@@ -135,7 +156,11 @@ export async function initializeSDK(
   let resolveConfig: (value: InitializeResult) => void;
   try {
     resolveConfig = configState.startConfiguration();
-  } catch {
+  } catch (error) {
+    console.error('[RevenueCatInitializer] Failed to start configuration', {
+      userId,
+      error
+    });
     // Configuration already in progress, wait and retry
     await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
     return initializeSDK(deps, userId, apiKey);
@@ -157,7 +182,12 @@ export async function initializeSDK(
     configState.completeConfiguration(true);
     resolveConfig(result);
     return result;
-  } catch {
+  } catch (error) {
+    console.error('[RevenueCatInitializer] SDK configuration failed', {
+      userId,
+      apiKey: apiKey ? 'provided' : 'from config',
+      error
+    });
     configState.completeConfiguration(false);
     resolveConfig(FAILED_INITIALIZATION_RESULT);
     return FAILED_INITIALIZATION_RESULT;

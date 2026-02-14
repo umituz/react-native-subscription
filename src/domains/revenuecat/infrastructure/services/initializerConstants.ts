@@ -7,3 +7,4 @@ export const FAILED_INITIALIZATION_RESULT: InitializeResult = {
 };
 
 export const CONFIGURATION_RETRY_DELAY_MS = 100;
+export const MAX_INIT_RETRIES = 5;

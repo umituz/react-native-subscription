@@ -20,15 +20,21 @@ class SubscriptionManagerImpl {
     this.state.userIdProvider.configure(config.getAnonymousUserId);
   }
 
+  private ensureConfigured(): asserts this is { managerConfig: SubscriptionManagerConfig } {
+    if (!this.managerConfig) {
+      throw new Error('[SubscriptionManager] Not configured. Call configure() first.');
+    }
+  }
+
   private ensurePackageHandlerInitialized(): void {
     if (this.packageHandler) return;
     this.packageHandler = createPackageHandler(this.serviceInstance, this.managerConfig);
   }
 
   async initialize(userId?: string): Promise<boolean> {
-    ensureConfigured(this.managerConfig);
+    this.ensureConfigured();
 
-    const actualUserId = userId ?? (await this.managerConfig!.getAnonymousUserId());
+    const actualUserId = userId ?? (await this.managerConfig.getAnonymousUserId());
     const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(actualUserId);
 
     if (!shouldInit && existingPromise) {
@@ -41,7 +47,8 @@ class SubscriptionManagerImpl {
   }
 
   private async performInitialization(userId: string): Promise<boolean> {
-    const { service, success } = await performServiceInitialization(this.managerConfig!.config, userId);
+    this.ensureConfigured();
+    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
     this.serviceInstance = service;
     this.ensurePackageHandlerInitialized();
     return success;
@@ -51,22 +58,25 @@ class SubscriptionManagerImpl {
     !!(this.serviceInstance?.isInitialized() && this.state.initCache.getCurrentUserId() === userId);
 
   async getPackages(): Promise<PurchasesPackage[]> {
+    this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
     return getPackagesOperation(this.managerConfig, this.serviceInstance, this.packageHandler!);
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+    this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
     return purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
   }
 
   async restore(): Promise<RestoreResultInfo> {
+    this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
     return restoreOperation(this.managerConfig, this.state, this.packageHandler!);
   }
 
   async checkPremiumStatus(): Promise<PremiumStatus> {
-    ensureConfigured(this.managerConfig);
+    this.ensureConfigured();
     ensureServiceAvailable(this.serviceInstance);
     this.ensurePackageHandlerInitialized();
     return checkPremiumStatusFromService(this.serviceInstance!, this.packageHandler!);
@@ -84,8 +94,8 @@ class SubscriptionManagerImpl {
   isInitialized = (): boolean => this.serviceInstance?.isInitialized() ?? false;
 
   getEntitlementId(): string {
-    ensureConfigured(this.managerConfig);
-    return this.managerConfig!.config.entitlementIdentifier;
+    this.ensureConfigured();
+    return this.managerConfig.config.entitlementIdentifier;
   }
 }
 

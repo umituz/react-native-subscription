@@ -38,7 +38,9 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   // Clear cache on logout to prevent stale data
   useEffect(() => {
     if (!isAuthenticated(userId)) {
-      queryClient.setQueryData(subscriptionStatusQueryKeys.user(userId), null);
+      queryClient.removeQueries({
+        queryKey: subscriptionStatusQueryKeys.user(userId)
+      });
     }
   }, [userId, queryClient]);
 

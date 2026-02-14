@@ -27,13 +27,13 @@ export function calculateNewCredits({ metadata, existingData, creditLimit, purch
     existingData,
     creditLimit,
     isSubscriptionActive: isPremium && !isExpired,
-    productId: metadata.productId,
+    productId: metadata.productId ?? null,
   });
 }
 
 export function buildCreditsData({
   existingData, newCredits, creditLimit, purchaseId, metadata, purchaseHistory, platform
-}: BuildCreditsDataParams): Record<string, any> {
+}: BuildCreditsDataParams): Record<string, unknown> {
   const productId = metadata.productId ?? null;
   const isConsumable = productId ? isCreditPackage(productId) : false;
   const isPremium = isConsumable ? (existingData?.isPremium ?? metadata.isPremium) : metadata.isPremium;

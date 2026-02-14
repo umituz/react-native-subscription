@@ -16,7 +16,7 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
   return {
     expirationDate: entitlement?.expirationDate ?? customerInfo.latestExpirationDate ?? null,
     willRenew: entitlement?.willRenew ?? false,
-    originalTransactionId: entitlement?.originalPurchaseDate ?? customerInfo.originalPurchaseDate ?? customerInfo.firstSeen,
+    originalTransactionId: customerInfo.originalAppUserId ?? null,
     periodType: validatePeriodType(entitlement?.periodType),
     isPremium: !!customerInfo.entitlements.active[entitlementId],
     unsubscribeDetectedAt: entitlement?.unsubscribeDetectedAt ?? null,

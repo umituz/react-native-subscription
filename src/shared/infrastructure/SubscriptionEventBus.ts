@@ -1,4 +1,4 @@
-type EventCallback<T = any> = (data: T) => void;
+type EventCallback<T = unknown> = (data: T) => void;
 
 /**
  * Simple EventBus Implementation
