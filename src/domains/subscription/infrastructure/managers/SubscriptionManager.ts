@@ -34,7 +34,7 @@ class SubscriptionManagerImpl {
   async initialize(userId?: string): Promise<boolean> {
     this.ensureConfigured();
 
-    const actualUserId = userId ?? (await this.managerConfig.getAnonymousUserId());
+    const actualUserId = userId ?? (await this.managerConfig.getAnonymousUserId()) ?? '';
     const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(actualUserId);
 
     if (!shouldInit && existingPromise) {
@@ -49,7 +49,7 @@ class SubscriptionManagerImpl {
   private async performInitialization(userId: string): Promise<boolean> {
     this.ensureConfigured();
     const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
-    this.serviceInstance = service;
+    this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
     return success;
   }
@@ -95,7 +95,7 @@ class SubscriptionManagerImpl {
 
   getEntitlementId(): string {
     this.ensureConfigured();
-    return this.managerConfig.config.entitlementIdentifier;
+    return this.managerConfig.config.entitlementIdentifier ?? '';
   }
 }
 

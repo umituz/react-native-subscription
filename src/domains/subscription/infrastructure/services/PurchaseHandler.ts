@@ -76,7 +76,9 @@ export async function handlePurchase(
         const restoreResult = await handleRestore(deps, userId);
         if (restoreResult.success && restoreResult.isPremium) {
           // Restore succeeded, notify and return success
-          await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, restoreResult.customerInfo, getSavedPurchase()?.source);
+          if (restoreResult.customerInfo) {
+            await notifyPurchaseCompleted(deps.config, userId, pkg.product.identifier, restoreResult.customerInfo, getSavedPurchase()?.source);
+          }
           clearSavedPurchase();
           return {
             success: true,
