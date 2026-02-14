@@ -34,21 +34,30 @@ class SubscriptionManagerImpl {
   async initialize(userId?: string): Promise<boolean> {
     this.ensureConfigured();
 
-    const actualUserId = userId ?? (await this.managerConfig.getAnonymousUserId()) ?? '';
-    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(actualUserId);
+    let actualUserId: string | null = null;
+
+    if (userId && userId.length > 0) {
+      actualUserId = userId;
+    } else {
+      const anonymousId = await this.managerConfig.getAnonymousUserId();
+      actualUserId = (anonymousId && anonymousId.length > 0) ? anonymousId : null;
+    }
+
+    const cacheKey = actualUserId ?? '__anonymous__';
+    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(cacheKey);
 
     if (!shouldInit && existingPromise) {
       return existingPromise;
     }
 
     const promise = this.performInitialization(actualUserId);
-    this.state.initCache.setPromise(promise, actualUserId);
+    this.state.initCache.setPromise(promise, cacheKey);
     return promise;
   }
 
-  private async performInitialization(userId: string): Promise<boolean> {
+  private async performInitialization(userId: string | null): Promise<boolean> {
     this.ensureConfigured();
-    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
+    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId ?? '');
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
     return success;
