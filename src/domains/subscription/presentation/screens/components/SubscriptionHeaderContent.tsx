@@ -2,21 +2,9 @@ import React from "react";
 import { View } from "react-native";
 import { DetailRow } from "../../components/details/DetailRow";
 import type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
+import { formatPackageTypeForDisplay } from "../../../../subscription/utils/packageTypeFormatter";
 
 declare const __DEV__: boolean;
-
-function formatSubscriptionPeriod(packageType: string | null | undefined, periodType: string | null | undefined): string {
-  if (packageType) {
-    const formatted = packageType.toLowerCase().replace(/_/g, ' ');
-    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-  }
-
-  if (periodType === "NORMAL") {
-    return "Standard";
-  }
-
-  return periodType || "Unknown";
-}
 
 interface SubscriptionHeaderContentProps {
   isLifetime: boolean;
@@ -93,10 +81,10 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
             valueStyle={styles.value}
           />
         )}
-        {(packageType || periodType) && translations.periodTypeLabel && (
+        {packageType && translations.periodTypeLabel && (
           <DetailRow
             label={translations.periodTypeLabel}
-            value={formatSubscriptionPeriod(packageType, periodType)}
+            value={formatPackageTypeForDisplay(packageType)}
             style={styles.row}
             labelStyle={styles.label}
             valueStyle={styles.value}
