@@ -1,10 +1,12 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
 import { isAuthenticated } from "../utils/authGuards";
+import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
+import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 
 export const subscriptionStatusQueryKeys = {
   all: ["subscriptionStatus"] as const,
@@ -38,27 +40,11 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       }
     },
     enabled: queryEnabled,
-    gcTime: 0,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
-    refetchOnReconnect: "always",
+    ...NO_CACHE_QUERY_CONFIG,
   });
 
-  // Track previous userId to clear stale cache on logout/user switch
-  const prevUserIdRef = useRef(userId);
-
-  useEffect(() => {
-    const prevUserId = prevUserIdRef.current;
-    prevUserIdRef.current = userId;
-
-    // Clear previous user's cache when userId changes (logout or user switch)
-    if (prevUserId !== userId && isAuthenticated(prevUserId)) {
-      queryClient.removeQueries({
-        queryKey: subscriptionStatusQueryKeys.user(prevUserId),
-      });
-    }
-  }, [userId, queryClient]);
+  // Clean up previous user's cache on logout/user switch
+  usePreviousUserCleanup(userId, queryClient, subscriptionStatusQueryKeys.user);
 
   useEffect(() => {
     if (!isAuthenticated(userId)) return undefined;

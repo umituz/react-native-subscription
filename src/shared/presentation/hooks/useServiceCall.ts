@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { normalizeError } from "../../utils/errorUtils";
 
 export interface ServiceCallState<T> {
   data: T | null;
@@ -54,7 +55,7 @@ export function useServiceCall<T>(
       setState({ data, isLoading: false, error: null });
       onSuccessRef.current?.(data);
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error("Service call failed");
+      const errorObj = normalizeError(error, "Service call failed");
       setState({ data: null, isLoading: false, error: errorObj });
       onErrorRef.current?.(errorObj);
     } finally {

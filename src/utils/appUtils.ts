@@ -5,6 +5,12 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 
 /**
+ * Development mode flag
+ * Safe check for __DEV__ that works in all environments
+ */
+export const IS_DEV_MODE = typeof __DEV__ !== "undefined" && __DEV__;
+
+/**
  * Gets the current app version from Expo constants
  */
 export function getAppVersion(): string {

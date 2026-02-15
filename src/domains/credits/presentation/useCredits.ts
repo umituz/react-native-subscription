@@ -1,7 +1,9 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useCallback, useMemo, useEffect, useRef } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
+import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 import {
   getCreditsRepository,
   getCreditsConfig,
@@ -44,29 +46,13 @@ export const useCredits = (): UseCreditsResult => {
       return result.data ?? null;
     },
     enabled: queryEnabled,
-    gcTime: 0,
-    staleTime: 0,
-    refetchOnMount: "always",
-    refetchOnWindowFocus: "always",
-    refetchOnReconnect: "always",
+    ...NO_CACHE_QUERY_CONFIG,
   });
 
   const queryClient = useQueryClient();
 
-  // Track previous userId to clear stale cache on logout/user switch
-  const prevUserIdRef = useRef(userId);
-
-  useEffect(() => {
-    const prevUserId = prevUserIdRef.current;
-    prevUserIdRef.current = userId;
-
-    // Clear previous user's cache when userId changes (logout or user switch)
-    if (prevUserId !== userId && isAuthenticated(prevUserId)) {
-      queryClient.removeQueries({
-        queryKey: creditsQueryKeys.user(prevUserId),
-      });
-    }
-  }, [userId, queryClient]);
+  // Clean up previous user's cache on logout/user switch
+  usePreviousUserCleanup(userId, queryClient, creditsQueryKeys.user);
 
   useEffect(() => {
     if (!isAuthenticated(userId)) return undefined;

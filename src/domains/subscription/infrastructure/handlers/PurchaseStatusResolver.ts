@@ -32,15 +32,15 @@ export class PurchaseStatusResolver {
         expirationDate: toDate(entitlement.expirationDate),
         willRenew: entitlement.willRenew ?? false,
         productIdentifier,
-        originalPurchaseDate: toDate(entitlement.originalPurchaseDate) ?? null,
-        latestPurchaseDate: toDate(entitlement.latestPurchaseDate) ?? null,
+        originalPurchaseDate: toDate(entitlement.originalPurchaseDate),
+        latestPurchaseDate: toDate(entitlement.latestPurchaseDate),
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
         isSandbox: entitlement.isSandbox ?? false,
         periodType: entitlement.periodType ?? null,
         packageType: detectedPackageType,
         store: null,
         gracePeriodExpiresDate: null,
-        unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) ?? null,
+        unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt),
       };
     }
 

@@ -6,6 +6,7 @@
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
+import { requireAuthentication } from "../../utils/authGuards";
 
 /**
  * Initialize subscription with RevenueCat
@@ -15,10 +16,7 @@ export const useInitializeSubscription = (userId: string | undefined) => {
 
   return useMutation({
     mutationFn: async () => {
-      if (!userId) {
-        throw new Error("User not authenticated");
-      }
-
+      requireAuthentication(userId);
       return SubscriptionManager.initialize(userId);
     },
     onSuccess: () => {
