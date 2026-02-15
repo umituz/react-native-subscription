@@ -5,7 +5,7 @@ import type {
   CreditLog,
   TransactionRepositoryConfig,
 } from "../../domain/types/transaction.types";
-import { TransactionRepository } from "../../infrastructure/repositories/TransactionRepository";
+import { TransactionRepository } from "../../infrastructure/repositories/transaction";
 
 export const transactionQueryKeys = {
   all: ["transactions"] as const,

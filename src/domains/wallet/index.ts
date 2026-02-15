@@ -64,7 +64,7 @@ export {
 export {
   TransactionRepository,
   createTransactionRepository,
-} from "./infrastructure/repositories/TransactionRepository";
+} from "./infrastructure/repositories/transaction";
 
 // Services
 export {
@@ -73,7 +73,7 @@ export {
   configureProductMetadataService,
   getProductMetadataService,
   resetProductMetadataService,
-} from "./infrastructure/services/ProductMetadataService";
+} from "./infrastructure/services/product-metadata";
 
 // Hooks
 export {

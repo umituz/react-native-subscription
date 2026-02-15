@@ -32,7 +32,7 @@ export {
 export type { Result, Success, Failure } from "./shared/utils/Result";
 
 // Infrastructure Layer (Services & Repositories)
-export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./domains/subscription/application/SubscriptionInitializer";
+export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./domains/subscription/application/initializer";
 export { 
   getDeviceId,
   checkTrialEligibility,
@@ -53,7 +53,7 @@ export {
 // Presentation Layer - Hooks
 export { useAuthAwarePurchase } from "./domains/subscription/presentation/useAuthAwarePurchase";
 export { useCredits } from "./domains/credits/presentation/useCredits";
-export { useDeductCredit } from "./domains/credits/presentation/useDeductCredit";
+export { useDeductCredit } from "./domains/credits/presentation/deduct-credit";
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
 export { usePremium } from "./domains/subscription/presentation/usePremium";

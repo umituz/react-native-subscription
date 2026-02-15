@@ -5,7 +5,7 @@ import type {
   ProductMetadataConfig,
   ProductType,
 } from "../../domain/types/wallet.types";
-import { ProductMetadataService } from "../../infrastructure/services/ProductMetadataService";
+import { ProductMetadataService } from "../../infrastructure/services/product-metadata";
 
 export const productMetadataQueryKeys = {
   all: ["productMetadata"] as const,

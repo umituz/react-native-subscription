@@ -1,6 +1,6 @@
 import type { Firestore, DocumentReference } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult } from "../../core/Credits";
-import type { UserCreditsDocumentRead, PurchaseSource } from "../../core/UserCreditsDocument";
+import type { PurchaseSource } from "../../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../../application/CreditsInitializer";
 import { mapCreditsDocumentToEntity } from "../../core/CreditsMapper";
 import type { RevenueCatData } from "../../../revenuecat/core/types";
