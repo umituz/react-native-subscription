@@ -2,6 +2,7 @@ import Purchases, { type CustomerInfo } from "react-native-purchases";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
+import { syncPremiumStatus } from "../../../subscription/infrastructure/utils/PremiumStatusSyncer";
 
 declare const __DEV__: boolean;
 
@@ -118,14 +119,17 @@ export async function handleInitialConfiguration(
       Purchases.getOfferings(),
     ]);
 
+    const currentUserId = await Purchases.getAppUserID();
+
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      const currentUserId = await Purchases.getAppUserID();
       console.log('[UserSwitchHandler] ✅ Initial configuration completed:', {
         revenueCatUserId: currentUserId,
         activeEntitlements: Object.keys(customerInfo.entitlements.active),
         offeringsCount: offerings.all ? Object.keys(offerings.all).length : 0,
       });
     }
+
+    await syncPremiumStatus(deps.config, currentUserId, customerInfo);
 
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
