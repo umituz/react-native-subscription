@@ -1,31 +1,31 @@
 export const DEFAULT_REQUIRED_CREDITS = 1;
 
-export const shouldExecuteAuthAction = (
+export function canExecuteAuthAction(
   isWaitingForAuthCredits: boolean,
   isCreditsLoaded: boolean,
   hasPendingAction: boolean,
   hasSubscription: boolean,
   creditBalance: number,
   requiredCredits: number
-): boolean => {
+): boolean {
   if (!isWaitingForAuthCredits || !isCreditsLoaded || !hasPendingAction) {
     return false;
   }
   return hasSubscription || creditBalance >= requiredCredits;
-};
+}
 
-export const shouldExecutePurchaseAction = (
+export function canExecutePurchaseAction(
   isWaitingForPurchase: boolean,
   creditBalance: number,
   prevBalance: number,
   hasSubscription: boolean,
   prevHasSubscription: boolean,
   hasPendingAction: boolean
-): boolean => {
+): boolean {
   if (!isWaitingForPurchase || !hasPendingAction) {
     return false;
   }
   const creditsIncreased = creditBalance > prevBalance;
   const subscriptionAcquired = hasSubscription && !prevHasSubscription;
   return creditsIncreased || subscriptionAcquired;
-};
+}

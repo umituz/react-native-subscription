@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from "react";
 import type { UseFeatureGateParams, UseFeatureGateResult } from "./useFeatureGate.types";
-import { DEFAULT_REQUIRED_CREDITS, shouldExecuteAuthAction, shouldExecutePurchaseAction } from "./featureGateHelpers";
+import { DEFAULT_REQUIRED_CREDITS, canExecuteAuthAction, canExecutePurchaseAction } from "../application/featureGate/featureGateBusinessRules";
 import { useSyncedRefs } from "./featureGateRefs";
 import { executeFeatureAction } from "./featureGateActions";
 
@@ -38,7 +38,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       });
     }
 
-    const shouldExecute = shouldExecuteAuthAction(
+    const shouldExecute = canExecuteAuthAction(
       isWaitingForAuthCreditsRef.current,
       isCreditsLoaded,
       !!pendingActionRef.current,
@@ -48,7 +48,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     );
 
     if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[FeatureGate] shouldExecuteAuthAction:", shouldExecute);
+      console.log("[FeatureGate] canExecuteAuthAction:", shouldExecute);
     }
 
     if (shouldExecute) {
@@ -84,7 +84,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       });
     }
 
-    const shouldExecute = shouldExecutePurchaseAction(
+    const shouldExecute = canExecutePurchaseAction(
       isWaitingForPurchaseRef.current,
       creditBalance,
       prevCreditBalanceRef.current ?? 0,
@@ -94,7 +94,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     );
 
     if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[FeatureGate] shouldExecutePurchaseAction:", shouldExecute);
+      console.log("[FeatureGate] canExecutePurchaseAction:", shouldExecute);
     }
 
     if (shouldExecute) {

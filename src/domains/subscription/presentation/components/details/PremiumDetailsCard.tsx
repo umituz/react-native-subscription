@@ -7,7 +7,7 @@ import { styles } from "./PremiumDetailsCard.styles";
 import type { PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 import { PremiumDetailsCardHeader } from "./PremiumDetailsCardHeader";
 import { PremiumDetailsCardActions } from "./PremiumDetailsCardActions";
-import { shouldHighlightExpiration } from "./premiumDetailsHelpers";
+import { shouldHighlightExpiration } from "../../../../subscription/utils/expirationHelpers";
 
 export type { CreditInfo, PremiumDetailsTranslations, PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 
