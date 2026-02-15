@@ -1,6 +1,6 @@
 import type { QueryClient } from "@umituz/react-native-design-system";
 import { timezoneService } from "@umituz/react-native-design-system";
-import type { UserCredits } from "../../core/Credits";
+import type { UserCredits, DeductCreditsResult } from "../../core/Credits";
 import type { CreditsRepository } from "../../infrastructure/CreditsRepository";
 import { creditsQueryKeys } from "../creditsQueryKeys";
 import { calculateRemaining } from "../../../../shared/utils/numberUtils";
@@ -18,7 +18,7 @@ export function createDeductCreditMutationConfig(
   queryClient: QueryClient
 ) {
   return {
-    mutationFn: async (cost: number) => {
+    mutationFn: async (cost: number): Promise<DeductCreditsResult> => {
       if (!userId) throw new Error("User not authenticated");
       return repository.deductCredit(userId, cost);
     },
