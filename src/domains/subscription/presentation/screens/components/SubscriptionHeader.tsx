@@ -4,7 +4,7 @@ import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-syst
 import { PremiumStatusBadge } from "../../components/details/PremiumStatusBadge";
 import type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
 import { createSubscriptionHeaderStyles } from "./SubscriptionHeader.styles";
-import { EXPIRING_SOON_THRESHOLD_DAYS } from "./SubscriptionHeader.constants";
+import { EXPIRATION_WARNING_THRESHOLD_DAYS as EXPIRING_SOON_THRESHOLD_DAYS } from "../../../constants/thresholds";
 import { SubscriptionHeaderContent } from "./SubscriptionHeaderContent";
 
 export type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";

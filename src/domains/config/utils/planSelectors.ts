@@ -33,7 +33,7 @@ export const getCreditLimitForPlan = (
 ): number => {
     const plan = getPlanById(config, planId);
     if (!plan) {
-        console.warn(`[planSelectors] Plan not found: ${planId}, returning 0`);
+
         return 0;
     }
     return plan.credits;

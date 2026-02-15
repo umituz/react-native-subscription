@@ -28,8 +28,6 @@ async function executeConsumablePurchase(
   };
 }
 
-declare const __DEV__: boolean;
-
 async function executeSubscriptionPurchase(
   config: RevenueCatConfig,
   userId: string,
@@ -58,10 +56,6 @@ async function executeSubscriptionPurchase(
   }
 
   await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
-
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] Purchase flow completed successfully");
-  }
 
   return {
     success: true,

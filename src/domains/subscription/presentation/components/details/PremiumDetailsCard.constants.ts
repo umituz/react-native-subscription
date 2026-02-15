@@ -1,1 +1,0 @@
-export const DAYS_REMAINING_WARNING_THRESHOLD = 7;

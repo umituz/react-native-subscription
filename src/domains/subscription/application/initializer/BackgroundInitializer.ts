@@ -2,8 +2,6 @@ import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionM
 import { getCurrentUserId, setupAuthStateListener } from "../SubscriptionAuthListener";
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 
-declare const __DEV__: boolean;
-
 export async function startBackgroundInitialization(config: SubscriptionInitConfig): Promise<() => void> {
   const initializeInBackground = async (revenueCatUserId?: string): Promise<void> => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -18,7 +16,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   }
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[BackgroundInitializer] Starting background initialization');
+
   }
 
   const initialRevenueCatUserId = getCurrentUserId(() => auth);
@@ -36,7 +34,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     try {
       await initializeInBackground(newRevenueCatUserId);
     } catch (error) {
-      console.error('[BackgroundInitializer] Failed to reinitialize on auth change', { userId: newRevenueCatUserId, error });
+
     }
   });
 

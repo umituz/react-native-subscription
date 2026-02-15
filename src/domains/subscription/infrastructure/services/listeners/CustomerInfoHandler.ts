@@ -3,8 +3,6 @@ import type { RevenueCatConfig } from "../../../../revenuecat/core/types";
 import { syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
 import { detectRenewal, updateRenewalState, type RenewalState } from "../../utils/renewal";
 
-declare const __DEV__: boolean;
-
 async function handleRenewal(
   userId: string,
   productId: string,
@@ -17,11 +15,7 @@ async function handleRenewal(
   try {
     await onRenewalDetected(userId, productId, expirationDate, customerInfo);
   } catch (error) {
-    console.error('[CustomerInfoHandler] Renewal detection callback failed', {
-      userId,
-      productId,
-      error
-    });
+
   }
 }
 
@@ -38,13 +32,7 @@ async function handlePlanChange(
   try {
     await onPlanChanged(userId, newProductId, previousProductId, isUpgrade, customerInfo);
   } catch (error) {
-    console.error('[CustomerInfoHandler] Plan change callback failed', {
-      userId,
-      newProductId,
-      previousProductId,
-      isUpgrade,
-      error
-    });
+
   }
 }
 
@@ -56,10 +44,7 @@ async function handlePremiumStatusSync(
   try {
     await syncPremiumStatus(config, userId, customerInfo);
   } catch (error) {
-    console.error('[CustomerInfoHandler] Premium status sync failed', {
-      userId,
-      error
-    });
+
   }
 }
 
@@ -84,19 +69,7 @@ export async function processCustomerInfo(
     config.entitlementIdentifier
   );
 
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[CustomerInfoHandler] Renewal detection result:", {
-      isRenewal: renewalResult.isRenewal,
-      isPlanChange: renewalResult.isPlanChange,
-      productId: renewalResult.productId,
-      previousProductId: renewalResult.previousProductId,
-    });
-  }
-
   if (renewalResult.isRenewal) {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[CustomerInfoHandler] Handling renewal");
-    }
     await handleRenewal(
       userId,
       renewalResult.productId!,
@@ -107,9 +80,6 @@ export async function processCustomerInfo(
   }
 
   if (renewalResult.isPlanChange) {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[CustomerInfoHandler] Handling plan change");
-    }
     await handlePlanChange(
       userId,
       renewalResult.productId!,

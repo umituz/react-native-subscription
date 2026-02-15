@@ -1,7 +1,5 @@
 import type { FirebaseAuthLike } from "./SubscriptionInitializerTypes";
 
-declare const __DEV__: boolean;
-
 /**
  * Gets the current user ID from Firebase auth.
  * Returns undefined for anonymous users to let RevenueCat generate its own anonymous ID.
@@ -10,7 +8,7 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
   const auth = getAuth();
   if (!auth) {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionAuthListener] No auth available');
+
     }
     return undefined;
   }
@@ -18,7 +16,7 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
   const user = auth.currentUser;
   if (!user) {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionAuthListener] No current user');
+
     }
     return undefined;
   }
@@ -31,7 +29,7 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
   }
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[SubscriptionAuthListener] Authenticated user:', user.uid);
+
   }
 
   return user.uid;
@@ -49,13 +47,13 @@ export const setupAuthStateListener = (
   const auth = getAuth();
   if (!auth) {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionAuthListener] Cannot setup listener - no auth available');
+
     }
     return null;
   }
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[SubscriptionAuthListener] Setting up auth state listener');
+
   }
 
   return auth.onAuthStateChanged((user) => {
