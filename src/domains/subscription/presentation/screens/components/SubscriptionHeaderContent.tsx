@@ -3,6 +3,21 @@ import { View } from "react-native";
 import { DetailRow } from "../../components/details/DetailRow";
 import type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
 
+declare const __DEV__: boolean;
+
+function formatSubscriptionPeriod(packageType: string | null | undefined, periodType: string | null | undefined): string {
+  if (packageType) {
+    const formatted = packageType.toLowerCase().replace(/_/g, ' ');
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }
+
+  if (periodType === "NORMAL") {
+    return "Standard";
+  }
+
+  return periodType || "Unknown";
+}
+
 interface SubscriptionHeaderContentProps {
   isLifetime: boolean;
   showExpirationDate: boolean;
@@ -13,6 +28,7 @@ interface SubscriptionHeaderContentProps {
   styles: any;
   willRenew?: boolean | null;
   periodType?: string | null;
+  packageType?: string | null;
   store?: string | null;
   originalPurchaseDate?: string | null;
   latestPurchaseDate?: string | null;
@@ -30,6 +46,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   styles,
   willRenew,
   periodType,
+  packageType,
   store,
   originalPurchaseDate,
   latestPurchaseDate,
@@ -76,10 +93,10 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
             valueStyle={styles.value}
           />
         )}
-        {periodType && translations.periodTypeLabel && (
+        {(packageType || periodType) && translations.periodTypeLabel && (
           <DetailRow
             label={translations.periodTypeLabel}
-            value={periodType === "NORMAL" ? "Standard" : periodType}
+            value={formatSubscriptionPeriod(packageType, periodType)}
             style={styles.row}
             labelStyle={styles.label}
             valueStyle={styles.value}
@@ -122,7 +139,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
             valueStyle={styles.value}
           />
         )}
-        {isSandbox && translations.sandboxLabel && (
+        {typeof __DEV__ !== 'undefined' && __DEV__ && isSandbox && translations.sandboxLabel && (
           <DetailRow
             label={translations.sandboxLabel}
             value="Test Mode"

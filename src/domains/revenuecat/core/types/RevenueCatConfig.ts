@@ -1,4 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
+import type { PackageType } from "./RevenueCatTypes";
 
 /**
  * RevenueCat Configuration
@@ -20,7 +21,8 @@ export interface RevenueCatConfig {
     userId: string,
     productId: string,
     customerInfo: CustomerInfo,
-    source?: string // Purchase source tracking (app-specific)
+    source?: string, // Purchase source tracking (app-specific)
+    packageType?: PackageType | null // From PurchasesPackage.packageType - subscription duration (WEEKLY, MONTHLY, ANNUAL, etc.)
   ) => Promise<void> | void;
   onRestoreCompleted?: (
     userId: string,

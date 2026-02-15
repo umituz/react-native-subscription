@@ -7,6 +7,7 @@ export const DEFAULT_FREE_USER_DATA: RevenueCatData = {
   expirationDate: null,
   willRenew: false,
   periodType: null,
+  packageType: null,
   originalTransactionId: null,
   unsubscribeDetectedAt: null,
   billingIssueDetectedAt: null,

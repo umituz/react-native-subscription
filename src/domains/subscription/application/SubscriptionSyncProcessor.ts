@@ -7,6 +7,7 @@ import { emitCreditsUpdated } from "./syncEventEmitter";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
 import { handleExpiredSubscription, handleFreeUserInitialization, handlePremiumStatusSync } from "./statusChangeHandlers";
 import { NO_SUBSCRIPTION_PRODUCT_ID } from "./syncConstants";
+import type { PackageType } from "../../revenuecat/core/types";
 
 export class SubscriptionSyncProcessor {
   constructor(
@@ -21,8 +22,9 @@ export class SubscriptionSyncProcessor {
     return revenueCatUserId;
   }
 
-  async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
+  async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource, packageType?: PackageType | null) {
     const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
+    revenueCatData.packageType = packageType ?? null;
     const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
 
     const creditsUserId = await this.getCreditsUserId(userId);

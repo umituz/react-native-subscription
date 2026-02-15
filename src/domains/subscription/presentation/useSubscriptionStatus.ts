@@ -89,6 +89,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     billingIssuesDetected: data?.billingIssuesDetected ?? false,
     isSandbox: data?.isSandbox ?? false,
     periodType: data?.periodType ?? null,
+    packageType: data?.packageType ?? null,
     store: data?.store ?? null,
     gracePeriodExpiresDate: data?.gracePeriodExpiresDate ?? null,
     unsubscribeDetectedAt: data?.unsubscribeDetectedAt ?? null,

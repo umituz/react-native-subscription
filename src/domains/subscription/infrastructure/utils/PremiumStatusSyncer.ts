@@ -4,7 +4,7 @@
  */
 
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+import type { RevenueCatConfig, PackageType } from "../../../revenuecat/core/types";
 import type { PurchaseSource } from "../../../subscription/core/SubscriptionConstants";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 
@@ -88,19 +88,21 @@ export async function notifyPurchaseCompleted(
     userId: string,
     productId: string,
     customerInfo: CustomerInfo,
-    source?: PurchaseSource
+    source?: PurchaseSource,
+    packageType?: PackageType | null
 ): Promise<void> {
     if (!config.onPurchaseCompleted) {
         return;
     }
 
     try {
-        await config.onPurchaseCompleted(userId, productId, customerInfo, source);
+        await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
     } catch (error) {
         console.error('[PremiumStatusSyncer] Purchase completion callback failed', {
             userId,
             productId,
             source,
+            packageType,
             error
         });
         // Silently fail callback notifications to prevent crashing the main flow

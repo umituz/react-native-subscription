@@ -12,6 +12,7 @@ export interface PremiumStatus {
   billingIssuesDetected: boolean;
   isSandbox: boolean;
   periodType: string | null;
+  packageType: string | null;
   store: string | null;
   gracePeriodExpiresDate: Date | null;
   unsubscribeDetectedAt: Date | null;
@@ -32,6 +33,7 @@ export class PurchaseStatusResolver {
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
         isSandbox: entitlement.isSandbox ?? false,
         periodType: entitlement.periodType ?? null,
+        packageType: null,
         store: null,
         gracePeriodExpiresDate: null,
         unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) ?? null,
@@ -48,6 +50,7 @@ export class PurchaseStatusResolver {
       billingIssuesDetected: false,
       isSandbox: false,
       periodType: null,
+      packageType: null,
       store: null,
       gracePeriodExpiresDate: null,
       unsubscribeDetectedAt: null,

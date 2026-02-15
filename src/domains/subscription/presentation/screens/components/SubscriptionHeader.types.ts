@@ -31,6 +31,7 @@ export interface SubscriptionHeaderProps {
   productIdentifier?: string | null;
   productName?: string | null;
   periodType?: string | null;
+  packageType?: string | null;
   store?: string | null;
   originalPurchaseDate?: string | null;
   latestPurchaseDate?: string | null;

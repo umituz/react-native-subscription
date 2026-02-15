@@ -55,6 +55,7 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
             productIdentifier={config.productIdentifier}
             productName={config.productName}
             periodType={config.periodType}
+            packageType={config.packageType}
             store={config.store}
             originalPurchaseDate={config.originalPurchaseDate}
             latestPurchaseDate={config.latestPurchaseDate}

@@ -2,6 +2,7 @@ import type { CustomerInfo } from "react-native-purchases";
 import { type PeriodType, type PurchaseSource } from "../core/SubscriptionConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionSyncProcessor } from "./SubscriptionSyncProcessor";
+import type { PackageType } from "../../revenuecat/core/types";
 
 export class SubscriptionSyncService {
   private processor: SubscriptionSyncProcessor;
@@ -13,9 +14,9 @@ export class SubscriptionSyncService {
     this.processor = new SubscriptionSyncProcessor(entitlementId, getAnonymousUserId);
   }
 
-  async handlePurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
+  async handlePurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource, packageType?: PackageType | null) {
     try {
-      await this.processor.processPurchase(userId, productId, customerInfo, source);
+      await this.processor.processPurchase(userId, productId, customerInfo, source, packageType);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, { userId, productId });
     } catch (error) {
       console.error('[SubscriptionSyncService] Purchase processing failed', {

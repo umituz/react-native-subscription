@@ -1,6 +1,6 @@
 import Purchases, { type PurchasesPackage, type CustomerInfo } from "react-native-purchases";
 import type { PurchaseResult } from "../../../../../shared/application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../../../revenuecat/core/types";
+import type { RevenueCatConfig, PackageType } from "../../../../revenuecat/core/types";
 import { notifyPurchaseCompleted } from "../../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useAuthAwarePurchase";
 
@@ -8,7 +8,8 @@ async function executeConsumablePurchase(
   config: RevenueCatConfig,
   userId: string,
   productId: string,
-  customerInfo: CustomerInfo
+  customerInfo: CustomerInfo,
+  packageType: PackageType | null
 ): Promise<PurchaseResult> {
   const savedPurchase = getSavedPurchase();
   const source = savedPurchase?.source;
@@ -16,7 +17,7 @@ async function executeConsumablePurchase(
     clearSavedPurchase();
   }
 
-  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source);
+  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
 
   return {
     success: true,
@@ -34,7 +35,8 @@ async function executeSubscriptionPurchase(
   userId: string,
   productId: string,
   customerInfo: CustomerInfo,
-  entitlementIdentifier: string
+  entitlementIdentifier: string,
+  packageType: PackageType | null
 ): Promise<PurchaseResult> {
   const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
   const savedPurchase = getSavedPurchase();
@@ -51,10 +53,11 @@ async function executeSubscriptionPurchase(
       entitlementIdentifier,
       activeEntitlements: Object.keys(customerInfo.entitlements.active),
       source,
+      packageType,
     });
   }
 
-  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source);
+  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
 
   if (typeof __DEV__ !== "undefined" && __DEV__) {
     console.log("[PurchaseExecutor] Purchase flow completed successfully");
@@ -77,7 +80,8 @@ export async function executePurchase(
   console.log('🔵 [PurchaseExecutor] executePurchase called', {
     productId: pkg.product.identifier,
     userId,
-    isConsumable
+    isConsumable,
+    packageType: pkg.packageType
   });
 
   console.log('🚀 [PurchaseExecutor] Calling Purchases.purchasePackage (RevenueCat SDK)');
@@ -85,10 +89,11 @@ export async function executePurchase(
   console.log('✅ [PurchaseExecutor] Purchases.purchasePackage completed');
 
   const productId = pkg.product.identifier;
+  const packageType = pkg.packageType ?? null;
 
   if (isConsumable) {
     console.log('💰 [PurchaseExecutor] Processing as consumable purchase');
-    return executeConsumablePurchase(config, userId, productId, customerInfo);
+    return executeConsumablePurchase(config, userId, productId, customerInfo, packageType);
   }
 
   console.log('📅 [PurchaseExecutor] Processing as subscription purchase');
@@ -97,6 +102,7 @@ export async function executePurchase(
     userId,
     productId,
     customerInfo,
-    config.entitlementIdentifier
+    config.entitlementIdentifier,
+    packageType
   );
 }

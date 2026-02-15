@@ -50,6 +50,7 @@ export const handlePremiumStatusSync = async (
     willRenew,
     isPremium,
     periodType,
+    packageType: null,
     originalTransactionId: null,
     unsubscribeDetectedAt: null,
     billingIssueDetectedAt: null,

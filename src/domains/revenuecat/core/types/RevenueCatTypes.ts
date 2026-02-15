@@ -3,7 +3,7 @@
  * Proper typing for RevenueCat entitlements and errors
  */
 
-import type { CustomerInfo, PurchasesEntitlementInfo } from "react-native-purchases";
+import type { CustomerInfo, PurchasesEntitlementInfo, PurchasesPackage } from "react-native-purchases";
 
 /**
  * Default entitlement identifier
@@ -22,6 +22,13 @@ export type Store = PurchasesEntitlementInfo['store'];
  * Automatically stays in sync with RevenueCat SDK updates
  */
 export type OwnershipType = PurchasesEntitlementInfo['ownershipType'];
+
+/**
+ * PackageType - Directly from RevenueCat SDK
+ * Represents subscription duration (WEEKLY, MONTHLY, ANNUAL, LIFETIME, etc.)
+ * Automatically stays in sync with RevenueCat SDK updates
+ */
+export type PackageType = PurchasesPackage['packageType'];
 
 /**
  * RevenueCat Entitlement Info

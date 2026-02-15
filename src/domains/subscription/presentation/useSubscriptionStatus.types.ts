@@ -8,6 +8,7 @@ export interface SubscriptionStatusResult {
   billingIssuesDetected: boolean;
   isSandbox: boolean;
   periodType: string | null;
+  packageType: string | null;
   store: string | null;
   gracePeriodExpiresDate: Date | null;
   unsubscribeDetectedAt: Date | null;
