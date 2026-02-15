@@ -2,7 +2,7 @@
  * usePaywallActions Hook
  * Encapsulates purchase and restore flow for the paywall.
  */
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePurchaseLoadingStore } from "../../subscription/presentation/stores";
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
@@ -35,53 +35,87 @@ export function usePaywallActions({
 
   const isProcessing = isLocalProcessing || isGlobalPurchasing;
 
+  const onPurchaseRef = useRef(onPurchase);
+  const onRestoreRef = useRef(onRestore);
+  const onPurchaseSuccessRef = useRef(onPurchaseSuccess);
+  const onPurchaseErrorRef = useRef(onPurchaseError);
+  const onAuthRequiredRef = useRef(onAuthRequired);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onPurchaseRef.current = onPurchase;
+    onRestoreRef.current = onRestore;
+    onPurchaseSuccessRef.current = onPurchaseSuccess;
+    onPurchaseErrorRef.current = onPurchaseError;
+    onAuthRequiredRef.current = onAuthRequired;
+    onCloseRef.current = onClose;
+  });
+
   const handlePurchase = useCallback(async () => {
-    // If no plan selected, use the first available one as fallback or return
+    console.log('🔵 [usePaywallActions] handlePurchase called', {
+      selectedPlanId,
+      packagesCount: packages.length,
+      isProcessing,
+      hasOnPurchase: !!onPurchaseRef.current
+    });
+
     const planId = selectedPlanId || (packages.length > 0 ? packages[0]?.product.identifier : null);
-    
-    if (!planId || !onPurchase || isProcessing) {
-        if (!planId && onAuthRequired) onAuthRequired();
+
+    if (!planId || !onPurchaseRef.current || isProcessing) {
+        console.log('⚠️ [usePaywallActions] Purchase blocked', {
+          noPlanId: !planId,
+          noCallback: !onPurchaseRef.current,
+          isProcessing
+        });
+        if (!planId && onAuthRequiredRef.current) onAuthRequiredRef.current();
         return;
     }
 
+    console.log('🟢 [usePaywallActions] Starting purchase', { planId });
     setIsLocalProcessing(true);
-    // Map PurchaseSource to store's expected "manual" | "auto-execution"
     startPurchase(planId, "manual");
 
     try {
       const pkg = packages.find((p) => p.product.identifier === planId);
+      console.log('📦 [usePaywallActions] Package found:', !!pkg);
+
       if (pkg) {
-        const success = await onPurchase(pkg);
+        console.log('🚀 [usePaywallActions] Calling onPurchase callback');
+        const success = await onPurchaseRef.current(pkg);
+        console.log('✅ [usePaywallActions] onPurchase completed', { success });
+
         if (success !== false) {
-          onPurchaseSuccess?.();
-          onClose?.(); // Close on success if provided
+          onPurchaseSuccessRef.current?.();
+          onCloseRef.current?.();
         }
       }
     } catch (error) {
+      console.error('❌ [usePaywallActions] Purchase error:', error);
       const err = error instanceof Error ? error : new Error(String(error));
-      onPurchaseError?.(err);
+      onPurchaseErrorRef.current?.(err);
     } finally {
+      console.log('🏁 [usePaywallActions] Purchase flow finished');
       setIsLocalProcessing(false);
       endPurchase(planId);
     }
-  }, [selectedPlanId, packages, onPurchase, isProcessing, startPurchase, endPurchase, onPurchaseSuccess, onPurchaseError, onAuthRequired, onClose]);
+  }, [selectedPlanId, packages, isProcessing, startPurchase, endPurchase]);
 
   const handleRestore = useCallback(async () => {
-    if (!onRestore || isProcessing) return;
+    if (!onRestoreRef.current || isProcessing) return;
 
     setIsLocalProcessing(true);
     try {
-      const success = await onRestore();
+      const success = await onRestoreRef.current();
       if (success !== false) {
-        onPurchaseSuccess?.();
+        onPurchaseSuccessRef.current?.();
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
-      onPurchaseError?.(err);
+      onPurchaseErrorRef.current?.(err);
     } finally {
       setIsLocalProcessing(false);
     }
-  }, [onRestore, isProcessing, onPurchaseSuccess, onPurchaseError]);
+  }, [isProcessing]);
 
   const resetState = useCallback(() => {
     setSelectedPlanId(null);

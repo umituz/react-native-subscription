@@ -3,6 +3,8 @@ import type { RevenueCatConfig } from "../../../../revenuecat/core/types";
 import { syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
 import { detectRenewal, updateRenewalState, type RenewalState } from "../../utils/renewal";
 
+declare const __DEV__: boolean;
+
 async function handleRenewal(
   userId: string,
   productId: string,
@@ -67,13 +69,34 @@ export async function processCustomerInfo(
   renewalState: RenewalState,
   config: RevenueCatConfig
 ): Promise<RenewalState> {
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[CustomerInfoHandler] processCustomerInfo called:", {
+      userId,
+      renewalState,
+      entitlementId: config.entitlementIdentifier,
+      activeEntitlements: Object.keys(customerInfo.entitlements.active),
+    });
+  }
+
   const renewalResult = detectRenewal(
     renewalState,
     customerInfo,
     config.entitlementIdentifier
   );
 
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[CustomerInfoHandler] Renewal detection result:", {
+      isRenewal: renewalResult.isRenewal,
+      isPlanChange: renewalResult.isPlanChange,
+      productId: renewalResult.productId,
+      previousProductId: renewalResult.previousProductId,
+    });
+  }
+
   if (renewalResult.isRenewal) {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log("[CustomerInfoHandler] Handling renewal");
+    }
     await handleRenewal(
       userId,
       renewalResult.productId!,
@@ -84,6 +107,9 @@ export async function processCustomerInfo(
   }
 
   if (renewalResult.isPlanChange) {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log("[CustomerInfoHandler] Handling plan change");
+    }
     await handlePlanChange(
       userId,
       renewalResult.productId!,
@@ -95,6 +121,9 @@ export async function processCustomerInfo(
   }
 
   if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log("[CustomerInfoHandler] Handling premium status sync (new purchase or status update)");
+    }
     await handlePremiumStatusSync(config, userId, customerInfo);
   }
 

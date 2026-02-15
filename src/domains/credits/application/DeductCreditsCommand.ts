@@ -13,6 +13,17 @@ export async function deductCreditsOperation(
   cost: number,
   userId: string
 ): Promise<DeductCreditsResult> {
+  if (!userId || userId.trim().length === 0) {
+    return {
+      success: false,
+      remainingCredits: null,
+      error: {
+        message: 'Valid userId is required for credit deduction',
+        code: 'INVALID_USER'
+      }
+    };
+  }
+
   try {
     const remaining = await runTransaction(async (tx: Transaction) => {
       const docSnap = await tx.get(creditsRef);

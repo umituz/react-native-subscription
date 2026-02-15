@@ -72,7 +72,12 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
       lastError = error;
 
       if (isTransientError(error) && attempt < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100 * (attempt + 1)));
+        const baseDelay = 100;
+        const maxDelay = 5000;
+        const exponentialDelay = baseDelay * Math.pow(2, attempt);
+        const jitter = Math.random() * baseDelay;
+        const delay = Math.min(exponentialDelay + jitter, maxDelay);
+        await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
       break;

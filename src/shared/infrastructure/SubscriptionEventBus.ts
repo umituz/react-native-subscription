@@ -39,12 +39,17 @@ export class SubscriptionEventBus {
 
   emit<T>(event: string, data: T): void {
     if (!this.listeners[event]) return;
+
     this.listeners[event].forEach(callback => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error('[SubscriptionEventBus] Listener error for event:', event, { error });
-      }
+      Promise.resolve().then(() => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error('[SubscriptionEventBus] Listener error for event:', event, { error });
+        }
+      }).catch(error => {
+        console.error('[SubscriptionEventBus] Async listener error for event:', event, { error });
+      });
     });
   }
 

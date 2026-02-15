@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useCallback, useMemo, useEffect, useRef } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import {
@@ -52,23 +52,18 @@ export const useCredits = (): UseCreditsResult => {
   });
 
   const queryClient = useQueryClient();
-  const queryClientRef = useRef(queryClient);
-
-  useEffect(() => {
-    queryClientRef.current = queryClient;
-  }, [queryClient]);
 
   useEffect(() => {
     if (!isAuthenticated(userId)) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {
-        queryClientRef.current.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
       }
     });
 
     return unsubscribe;
-  }, [userId]);
+  }, [userId, queryClient]);
 
   const credits = data ?? null;
 

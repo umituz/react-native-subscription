@@ -42,8 +42,8 @@ export function detectRenewal(
     };
   }
 
-  const newExpiration = new Date(newExpirationDate);
-  const previousExpiration = new Date(state.previousExpirationDate);
+  const newExpiration = new Date(newExpirationDate).getTime();
+  const previousExpiration = new Date(state.previousExpirationDate).getTime();
   const productChanged = productId !== state.previousProductId;
   const expirationExtended = newExpiration > previousExpiration;
 

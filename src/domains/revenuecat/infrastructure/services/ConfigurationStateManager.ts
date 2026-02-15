@@ -3,7 +3,6 @@ import type { InitializeResult } from "../../../../shared/application/ports/IRev
 export class ConfigurationStateManager {
   private _isPurchasesConfigured = false;
   private _configurationPromise: Promise<InitializeResult> | null = null;
-  private _resolveConfiguration: ((value: InitializeResult) => void) | null = null;
 
   get isPurchasesConfigured(): boolean {
     return this._isPurchasesConfigured;
@@ -22,27 +21,35 @@ export class ConfigurationStateManager {
       throw new Error('Configuration already in progress');
     }
 
+    let capturedResolve: ((value: InitializeResult) => void) | null = null;
+
     this._configurationPromise = new Promise((resolve) => {
-      this._resolveConfiguration = resolve;
+      capturedResolve = resolve;
     });
 
     return (value: InitializeResult) => {
-      if (this._resolveConfiguration) {
-        this._resolveConfiguration(value);
+      if (capturedResolve) {
+        capturedResolve(value);
+        capturedResolve = null;
       }
     };
   }
 
   completeConfiguration(success: boolean): void {
     this._isPurchasesConfigured = success;
-    this._configurationPromise = null;
-    this._resolveConfiguration = null;
+
+    if (success) {
+      this._configurationPromise = null;
+    } else {
+      setTimeout(() => {
+        this._configurationPromise = null;
+      }, 1000);
+    }
   }
 
   reset(): void {
     this._isPurchasesConfigured = false;
     this._configurationPromise = null;
-    this._resolveConfiguration = null;
   }
 }
 

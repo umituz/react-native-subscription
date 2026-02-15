@@ -20,14 +20,21 @@ export const useDeductCredit = ({
     try {
       const res = await mutation.mutateAsync(cost);
       if (!res.success) {
-        if (res.error?.code === "CREDITS_EXHAUSTED") onCreditsExhausted?.();
+        if (res.error?.code === "CREDITS_EXHAUSTED") {
+          onCreditsExhausted?.();
+        }
         return false;
       }
       return true;
-    } catch {
-      return false;
+    } catch (error) {
+      console.error('[useDeductCredit] Unexpected error during credit deduction', {
+        cost,
+        userId,
+        error
+      });
+      throw error;
     }
-  }, [mutation, onCreditsExhausted]);
+  }, [mutation, onCreditsExhausted, userId]);
 
   const deductCredits = useCallback(async (cost: number): Promise<boolean> => {
     return await deductCredit(cost);

@@ -25,12 +25,12 @@ export interface PurchaseLoadingActions {
 
 export type PurchaseLoadingStore = PurchaseLoadingState & PurchaseLoadingActions;
 
-const initialState: PurchaseLoadingState = {
+const createInitialState = (): PurchaseLoadingState => ({
   activePurchases: new Map(),
-};
+});
 
 export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) => ({
-  ...initialState,
+  ...createInitialState(),
 
   startPurchase: (productId, source) => {
     set((state) => {
@@ -55,7 +55,7 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
   },
 
   reset: () => {
-    set(initialState);
+    set(createInitialState());
   },
 }));
 

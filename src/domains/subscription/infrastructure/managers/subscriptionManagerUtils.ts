@@ -22,8 +22,8 @@ export function ensureConfigured(config: SubscriptionManagerConfig | null): void
  */
 export function getCurrentUserIdOrThrow(state: SubscriptionInternalState): string {
     const userId = state.initCache.getCurrentUserId();
-    if (!userId) {
-        throw new Error("No current user found");
+    if (userId === null || userId === undefined) {
+        throw new Error("SubscriptionManager not initialized - no current user ID available");
     }
     return userId;
 }

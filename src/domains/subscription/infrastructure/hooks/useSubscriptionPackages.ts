@@ -55,10 +55,16 @@ export const useSubscriptionPackages = () => {
 
     if (prevUserId !== userId) {
       if (prevUserId) {
+        queryClient.cancelQueries({
+          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, prevUserId],
+        });
         queryClient.removeQueries({
           queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, prevUserId],
         });
       } else {
+        queryClient.cancelQueries({
+          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, "anonymous"],
+        });
         queryClient.removeQueries({
           queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, "anonymous"],
         });

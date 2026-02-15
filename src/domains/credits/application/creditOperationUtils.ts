@@ -90,5 +90,9 @@ export function shouldSkipStatusSyncWrite(
     existingData.status === newCreditsData.status &&
     existingData.credits === newCreditsData.credits &&
     existingData.creditLimit === newCreditsData.creditLimit &&
-    existingData.productId === newCreditsData.productId;
+    existingData.productId === newCreditsData.productId &&
+    existingData.willRenew === newCreditsData.willRenew &&
+    existingData.expirationDate === newCreditsData.expirationDate &&
+    existingData.canceledAt === newCreditsData.canceledAt &&
+    existingData.billingIssueDetectedAt === newCreditsData.billingIssueDetectedAt;
 }

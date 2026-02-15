@@ -48,10 +48,8 @@ export class InitializationCache {
         this.initPromise = promise;
         this.promiseUserId = userId;
 
-        // Capture userId to prevent stale reference after catch clears promiseUserId
         const targetUserId = userId;
 
-        // Chain to mark completion and set currentUserId only on success
         promise
             .then((result) => {
                 if (result && this.promiseUserId === targetUserId) {
@@ -61,7 +59,6 @@ export class InitializationCache {
                 return result;
             })
             .catch((error) => {
-                // On failure, clear the promise so retry is possible
                 if (this.promiseUserId === targetUserId) {
                     this.initPromise = null;
                     this.promiseUserId = null;
@@ -69,12 +66,10 @@ export class InitializationCache {
                 }
                 this.promiseCompleted = true;
                 console.error('[InitializationCache] Initialization failed', { userId: targetUserId, error });
-                // Re-throw so callers awaiting the promise see the error
-                throw error;
+                return false;
             })
             .finally(() => {
-                // Always release the mutex
-                if (this.promiseUserId === targetUserId) {
+                if (this.initializationInProgress) {
                     this.initializationInProgress = false;
                 }
             });

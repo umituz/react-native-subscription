@@ -17,7 +17,6 @@ class SubscriptionManagerImpl {
 
   configure(config: SubscriptionManagerConfig): void {
     this.managerConfig = config;
-    this.state.userIdProvider.configure(config.getAnonymousUserId);
   }
 
   private ensureConfigured(): void {
@@ -34,19 +33,22 @@ class SubscriptionManagerImpl {
   async initialize(userId?: string): Promise<boolean> {
     this.ensureConfigured();
 
-    let actualUserId: string | null = null;
+    const actualUserId: string = (userId && userId.length > 0) ? userId : '';
 
-    if (userId && userId.length > 0) {
-      actualUserId = userId;
-    } else {
-      const anonymousId = await this.managerConfig.getAnonymousUserId();
-      actualUserId = (anonymousId && anonymousId.length > 0) ? anonymousId : null;
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.log('[SubscriptionManager] initialize called:', {
+        providedUserId: userId,
+        actualUserId: actualUserId || '(empty - RevenueCat will generate anonymous ID)',
+      });
     }
 
-    const cacheKey = actualUserId ?? '__anonymous__';
+    const cacheKey = actualUserId || '__anonymous__';
     const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(cacheKey);
 
     if (!shouldInit && existingPromise) {
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.log('[SubscriptionManager] Using cached initialization for:', cacheKey);
+      }
       return existingPromise;
     }
 
@@ -55,11 +57,23 @@ class SubscriptionManagerImpl {
     return promise;
   }
 
-  private async performInitialization(userId: string | null): Promise<boolean> {
+  private async performInitialization(userId: string): Promise<boolean> {
     this.ensureConfigured();
-    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId ?? '');
+
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.log('[SubscriptionManager] performInitialization:', {
+        userId: userId || '(empty - anonymous)',
+      });
+    }
+
+    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
+
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.log('[SubscriptionManager] Initialization completed:', { success });
+    }
+
     return success;
   }
 
@@ -73,9 +87,20 @@ class SubscriptionManagerImpl {
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+    console.log('🔵 [SubscriptionManager] purchasePackage called', {
+      productId: pkg.product.identifier,
+      isConfigured: !!this.managerConfig,
+      hasPackageHandler: !!this.packageHandler
+    });
+
     this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
-    return purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
+
+    console.log('🚀 [SubscriptionManager] Calling purchasePackageOperation');
+    const result = await purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
+    console.log('✅ [SubscriptionManager] purchasePackageOperation completed', { result });
+
+    return result;
   }
 
   async restore(): Promise<RestoreResultInfo> {

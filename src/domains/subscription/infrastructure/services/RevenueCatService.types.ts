@@ -60,7 +60,16 @@ export class RevenueCatService implements IRevenueCatService {
     }
 
     async purchasePackage(pkg: PurchasesPackage, userId: string): Promise<PurchaseResult> {
-        return handlePurchase(this.getSDKParams(), pkg, userId);
+        console.log('🔵 [RevenueCatService] purchasePackage called', {
+            productId: pkg.product.identifier,
+            userId,
+            isInitialized: this.isInitialized()
+        });
+
+        const result = await handlePurchase(this.getSDKParams(), pkg, userId);
+        console.log('✅ [RevenueCatService] purchasePackage completed', { success: result.success });
+
+        return result;
     }
 
     async restorePurchases(userId: string): Promise<RestoreResult> {

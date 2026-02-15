@@ -8,13 +8,27 @@ import type { RevenueCatConfig } from "../../../revenuecat/core/types";
 import type { PurchaseSource } from "../../../subscription/core/SubscriptionConstants";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 
+declare const __DEV__: boolean;
+
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
     userId: string,
     customerInfo: CustomerInfo
-): Promise<void> {
+): Promise<{ success: boolean; error?: Error }> {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[PremiumStatusSyncer] syncPremiumStatus called:", {
+            userId,
+            hasCallback: !!config.onPremiumStatusChanged,
+            entitlementId: config.entitlementIdentifier,
+            activeEntitlements: Object.keys(customerInfo.entitlements.active),
+        });
+    }
+
     if (!config.onPremiumStatusChanged) {
-        return;
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.log("[PremiumStatusSyncer] No onPremiumStatusChanged callback - skipping");
+        }
+        return { success: true };
     }
 
     const premiumEntitlement = getPremiumEntitlement(
@@ -22,8 +36,21 @@ export async function syncPremiumStatus(
         config.entitlementIdentifier
     );
 
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[PremiumStatusSyncer] Premium entitlement:", {
+            found: !!premiumEntitlement,
+            productId: premiumEntitlement?.productIdentifier,
+            expirationDate: premiumEntitlement?.expirationDate,
+            willRenew: premiumEntitlement?.willRenew,
+            periodType: premiumEntitlement?.periodType,
+        });
+    }
+
     try {
         if (premiumEntitlement) {
+            if (typeof __DEV__ !== "undefined" && __DEV__) {
+                console.log("[PremiumStatusSyncer] Calling onPremiumStatusChanged with premium=true");
+            }
             await config.onPremiumStatusChanged(
                 userId,
                 true,
@@ -33,8 +60,15 @@ export async function syncPremiumStatus(
                 premiumEntitlement.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined
             );
         } else {
+            if (typeof __DEV__ !== "undefined" && __DEV__) {
+                console.log("[PremiumStatusSyncer] Calling onPremiumStatusChanged with premium=false");
+            }
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
         }
+        if (typeof __DEV__ !== "undefined" && __DEV__) {
+            console.log("[PremiumStatusSyncer] onPremiumStatusChanged completed successfully");
+        }
+        return { success: true };
     } catch (error) {
         console.error('[PremiumStatusSyncer] Premium status change callback failed', {
             userId,
@@ -42,7 +76,10 @@ export async function syncPremiumStatus(
             productId: premiumEntitlement?.productIdentifier,
             error
         });
-        // Silently fail callback notifications to prevent crashing the main flow
+        return {
+            success: false,
+            error: error instanceof Error ? error : new Error(String(error))
+        };
     }
 }
 

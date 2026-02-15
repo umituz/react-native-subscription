@@ -3,7 +3,7 @@
  * Shared hook for handling service calls with loading, error, and success states
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface ServiceCallState<T> {
   data: T | null;
@@ -36,21 +36,31 @@ export function useServiceCall<T>(
     error: null,
   });
 
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+    onCompleteRef.current = onComplete;
+  });
+
   const execute = useCallback(async () => {
     setState({ data: null, isLoading: true, error: null });
 
     try {
       const data = await serviceFn();
       setState({ data, isLoading: false, error: null });
-      onSuccess?.(data);
+      onSuccessRef.current?.(data);
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error("Service call failed");
       setState({ data: null, isLoading: false, error: errorObj });
-      onError?.(errorObj);
+      onErrorRef.current?.(errorObj);
     } finally {
-      onComplete?.();
+      onCompleteRef.current?.();
     }
-  }, [serviceFn, onSuccess, onError, onComplete]);
+  }, [serviceFn]);
 
   const reset = useCallback(() => {
     setState({ data: null, isLoading: false, error: null });

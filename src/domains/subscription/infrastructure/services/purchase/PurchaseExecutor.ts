@@ -10,9 +10,14 @@ async function executeConsumablePurchase(
   productId: string,
   customerInfo: CustomerInfo
 ): Promise<PurchaseResult> {
-  const source = getSavedPurchase()?.source;
+  const savedPurchase = getSavedPurchase();
+  const source = savedPurchase?.source;
+  if (savedPurchase) {
+    clearSavedPurchase();
+  }
+
   await notifyPurchaseCompleted(config, userId, productId, customerInfo, source);
-  clearSavedPurchase();
+
   return {
     success: true,
     isPremium: false,
@@ -22,6 +27,8 @@ async function executeConsumablePurchase(
   };
 }
 
+declare const __DEV__: boolean;
+
 async function executeSubscriptionPurchase(
   config: RevenueCatConfig,
   userId: string,
@@ -30,14 +37,34 @@ async function executeSubscriptionPurchase(
   entitlementIdentifier: string
 ): Promise<PurchaseResult> {
   const isPremium = !!customerInfo.entitlements.active[entitlementIdentifier];
-  const source = getSavedPurchase()?.source;
+  const savedPurchase = getSavedPurchase();
+  const source = savedPurchase?.source;
+  if (savedPurchase) {
+    clearSavedPurchase();
+  }
 
-  if (isPremium) {
-    await syncPremiumStatus(config, userId, customerInfo);
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseExecutor] executeSubscriptionPurchase:", {
+      userId,
+      productId,
+      isPremium,
+      entitlementIdentifier,
+      activeEntitlements: Object.keys(customerInfo.entitlements.active),
+      source,
+    });
+  }
+
+  await syncPremiumStatus(config, userId, customerInfo);
+
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseExecutor] syncPremiumStatus completed");
   }
 
   await notifyPurchaseCompleted(config, userId, productId, customerInfo, source);
-  clearSavedPurchase();
+
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseExecutor] Purchase flow completed successfully");
+  }
 
   return {
     success: true,
@@ -53,13 +80,24 @@ export async function executePurchase(
   pkg: PurchasesPackage,
   isConsumable: boolean
 ): Promise<PurchaseResult> {
+  console.log('🔵 [PurchaseExecutor] executePurchase called', {
+    productId: pkg.product.identifier,
+    userId,
+    isConsumable
+  });
+
+  console.log('🚀 [PurchaseExecutor] Calling Purchases.purchasePackage (RevenueCat SDK)');
   const { customerInfo } = await Purchases.purchasePackage(pkg);
+  console.log('✅ [PurchaseExecutor] Purchases.purchasePackage completed');
+
   const productId = pkg.product.identifier;
 
   if (isConsumable) {
+    console.log('💰 [PurchaseExecutor] Processing as consumable purchase');
     return executeConsumablePurchase(config, userId, productId, customerInfo);
   }
 
+  console.log('📅 [PurchaseExecutor] Processing as subscription purchase');
   return executeSubscriptionPurchase(
     config,
     userId,

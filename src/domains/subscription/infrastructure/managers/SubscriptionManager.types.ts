@@ -4,7 +4,6 @@ import type { PremiumStatus } from "../handlers/PurchaseStatusResolver";
 export interface SubscriptionManagerConfig {
   config: RevenueCatConfig;
   apiKey: string;
-  getAnonymousUserId: () => Promise<string>;
 }
 
 export type { PremiumStatus };
