@@ -14,7 +14,7 @@ export const executeFeatureAction = (
   isWaitingForAuthCreditsRef: MutableRefObject<boolean>,
   isWaitingForPurchaseRef: MutableRefObject<boolean>,
   isCreditsLoadedRef: MutableRefObject<boolean>
-): void => {
+): boolean => {
   if (typeof __DEV__ !== "undefined" && __DEV__) {
     console.log("[FeatureGate] executeFeatureAction called:", {
       isAuthenticated,
@@ -58,7 +58,7 @@ export const executeFeatureAction = (
       isWaitingForAuthCreditsRef.current = true;
     };
     onShowAuthModal(postAuthAction);
-    return;
+    return false;
   }
 
   if (hasSubscriptionRef.current) {
@@ -66,7 +66,7 @@ export const executeFeatureAction = (
       console.log("[FeatureGate] User has subscription, executing action");
     }
     action();
-    return;
+    return true;
   }
 
   if (creditBalanceRef.current < requiredCreditsRef.current) {
@@ -76,11 +76,12 @@ export const executeFeatureAction = (
     pendingActionRef.current = action;
     isWaitingForPurchaseRef.current = true;
     onShowPaywallRef.current(requiredCreditsRef.current);
-    return;
+    return false;
   }
 
   if (typeof __DEV__ !== "undefined" && __DEV__) {
     console.log("[FeatureGate] User has enough credits, executing action");
   }
   action();
+  return true;
 };

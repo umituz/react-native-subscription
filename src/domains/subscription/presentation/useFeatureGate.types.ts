@@ -9,7 +9,7 @@ export interface UseFeatureGateParams {
 }
 
 export interface UseFeatureGateResult {
-  readonly requireFeature: (action: () => void | Promise<void>) => void;
+  readonly requireFeature: (action: () => void | Promise<void>) => boolean;
   readonly isAuthenticated: boolean;
   readonly hasSubscription: boolean;
   readonly hasCredits: boolean;

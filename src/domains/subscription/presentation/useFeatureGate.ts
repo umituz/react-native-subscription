@@ -113,8 +113,8 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   }, [creditBalance, hasSubscription]);
 
   const requireFeature = useCallback(
-    (action: () => void | Promise<void>) => {
-      executeFeatureAction(
+    (action: () => void | Promise<void>): boolean => {
+      return executeFeatureAction(
         action,
         isAuthenticated,
         onShowAuthModal,
