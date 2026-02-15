@@ -9,14 +9,26 @@ import { handleExpiredSubscription, handleFreeUserInitialization, handlePremiumS
 import { NO_SUBSCRIPTION_PRODUCT_ID } from "./syncConstants";
 
 export class SubscriptionSyncProcessor {
-  constructor(private entitlementId: string) {}
+  constructor(
+    private entitlementId: string,
+    private getAnonymousUserId: () => Promise<string>
+  ) {}
+
+  private async getCreditsUserId(revenueCatUserId: string): Promise<string> {
+    if (!revenueCatUserId || revenueCatUserId.length === 0) {
+      return this.getAnonymousUserId();
+    }
+    return revenueCatUserId;
+  }
 
   async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
     const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
     const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
 
+    const creditsUserId = await this.getCreditsUserId(userId);
+
     await getCreditsRepository().initializeCredits(
-      userId,
+      creditsUserId,
       purchaseId,
       productId,
       source ?? PURCHASE_SOURCE.SETTINGS,
@@ -24,7 +36,7 @@ export class SubscriptionSyncProcessor {
       PURCHASE_TYPE.INITIAL
     );
 
-    emitCreditsUpdated(userId);
+    emitCreditsUpdated(creditsUserId);
   }
 
   async processRenewal(userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) {
@@ -32,8 +44,10 @@ export class SubscriptionSyncProcessor {
     revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
     const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
 
+    const creditsUserId = await this.getCreditsUserId(userId);
+
     await getCreditsRepository().initializeCredits(
-      userId,
+      creditsUserId,
       purchaseId,
       productId,
       PURCHASE_SOURCE.RENEWAL,
@@ -41,7 +55,7 @@ export class SubscriptionSyncProcessor {
       PURCHASE_TYPE.RENEWAL
     );
 
-    emitCreditsUpdated(userId);
+    emitCreditsUpdated(creditsUserId);
   }
 
   async processStatusChange(
@@ -52,21 +66,23 @@ export class SubscriptionSyncProcessor {
     willRenew?: boolean,
     periodType?: PeriodType
   ) {
+    const creditsUserId = await this.getCreditsUserId(userId);
+
     // Expired subscription case
     if (!isPremium && productId) {
-      await handleExpiredSubscription(userId);
+      await handleExpiredSubscription(creditsUserId);
       return;
     }
 
     // Free user case
     if (!isPremium && !productId) {
-      await handleFreeUserInitialization(userId);
+      await handleFreeUserInitialization(creditsUserId);
       return;
     }
 
     // Premium user case
     await handlePremiumStatusSync(
-      userId,
+      creditsUserId,
       isPremium,
       productId ?? NO_SUBSCRIPTION_PRODUCT_ID,
       expiresAt ?? null,

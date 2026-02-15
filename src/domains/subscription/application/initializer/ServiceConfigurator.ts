@@ -5,7 +5,7 @@ import { SubscriptionSyncService } from "../SubscriptionSyncService";
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 
 export function configureServices(config: SubscriptionInitConfig, apiKey: string): SubscriptionSyncService {
-  const { entitlementId, credits, creditPackages, getFirebaseAuth, showAuthModal, onCreditsUpdated } = config;
+  const { entitlementId, credits, creditPackages, getFirebaseAuth, showAuthModal, onCreditsUpdated, getAnonymousUserId } = config;
 
   if (!creditPackages) {
     throw new Error('[ServiceConfigurator] creditPackages configuration is required');
@@ -16,7 +16,7 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
     creditPackageAmounts: creditPackages.amounts
   });
 
-  const syncService = new SubscriptionSyncService(entitlementId);
+  const syncService = new SubscriptionSyncService(entitlementId, getAnonymousUserId);
 
   SubscriptionManager.configure({
     config: {

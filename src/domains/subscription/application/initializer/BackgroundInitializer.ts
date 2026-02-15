@@ -5,11 +5,11 @@ import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 declare const __DEV__: boolean;
 
 export async function startBackgroundInitialization(config: SubscriptionInitConfig): Promise<() => void> {
-  const initializeInBackground = async (userId?: string): Promise<void> => {
+  const initializeInBackground = async (revenueCatUserId?: string): Promise<void> => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[BackgroundInitializer] initializeInBackground called with userId:', userId || '(undefined - anonymous)');
+      console.log('[BackgroundInitializer] initializeInBackground called with userId:', revenueCatUserId || '(undefined - anonymous)');
     }
-    await SubscriptionManager.initialize(userId);
+    await SubscriptionManager.initialize(revenueCatUserId);
   };
 
   const auth = config.getFirebaseAuth();
@@ -21,22 +21,22 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     console.log('[BackgroundInitializer] Starting background initialization');
   }
 
-  const initialUserId = getCurrentUserId(() => auth);
+  const initialRevenueCatUserId = getCurrentUserId(() => auth);
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[BackgroundInitializer] Initial userId:', initialUserId || '(undefined - anonymous)');
+    console.log('[BackgroundInitializer] Initial RevenueCat userId:', initialRevenueCatUserId || '(undefined - anonymous)');
   }
 
-  await initializeInBackground(initialUserId);
+  await initializeInBackground(initialRevenueCatUserId);
 
-  const unsubscribe = setupAuthStateListener(() => auth, async (newUserId) => {
+  const unsubscribe = setupAuthStateListener(() => auth, async (newRevenueCatUserId) => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', newUserId || '(undefined - anonymous)');
+      console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', newRevenueCatUserId || '(undefined - anonymous)');
     }
     try {
-      await initializeInBackground(newUserId);
+      await initializeInBackground(newRevenueCatUserId);
     } catch (error) {
-      console.error('[BackgroundInitializer] Failed to reinitialize on auth change', { userId: newUserId, error });
+      console.error('[BackgroundInitializer] Failed to reinitialize on auth change', { userId: newRevenueCatUserId, error });
     }
   });
 

@@ -6,8 +6,11 @@ import { SubscriptionSyncProcessor } from "./SubscriptionSyncProcessor";
 export class SubscriptionSyncService {
   private processor: SubscriptionSyncProcessor;
 
-  constructor(entitlementId: string) {
-    this.processor = new SubscriptionSyncProcessor(entitlementId);
+  constructor(
+    entitlementId: string,
+    getAnonymousUserId: () => Promise<string>
+  ) {
+    this.processor = new SubscriptionSyncProcessor(entitlementId, getAnonymousUserId);
   }
 
   async handlePurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource) {
