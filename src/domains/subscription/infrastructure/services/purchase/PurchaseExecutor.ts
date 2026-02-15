@@ -1,7 +1,7 @@
 import Purchases, { type PurchasesPackage, type CustomerInfo } from "react-native-purchases";
 import type { PurchaseResult } from "../../../../../shared/application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../../../revenuecat/core/types";
-import { syncPremiumStatus, notifyPurchaseCompleted } from "../../utils/PremiumStatusSyncer";
+import { notifyPurchaseCompleted } from "../../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useAuthAwarePurchase";
 
 async function executeConsumablePurchase(
@@ -52,12 +52,6 @@ async function executeSubscriptionPurchase(
       activeEntitlements: Object.keys(customerInfo.entitlements.active),
       source,
     });
-  }
-
-  await syncPremiumStatus(config, userId, customerInfo);
-
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] syncPremiumStatus completed");
   }
 
   await notifyPurchaseCompleted(config, userId, productId, customerInfo, source);

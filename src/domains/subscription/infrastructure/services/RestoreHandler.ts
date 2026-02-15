@@ -12,7 +12,7 @@ import {
   isNetworkError,
   isInvalidCredentialsError,
 } from "../../../revenuecat/core/types";
-import { syncPremiumStatus, notifyRestoreCompleted } from "../utils/PremiumStatusSyncer";
+import { notifyRestoreCompleted } from "../utils/PremiumStatusSyncer";
 
 export interface RestoreHandlerDeps {
   config: RevenueCatConfig;
@@ -28,9 +28,6 @@ export async function handleRestore(deps: RestoreHandlerDeps, userId: string): P
     const isPremium = !!entitlement;
     const productId = entitlement?.productIdentifier ?? null;
 
-    if (isPremium) {
-      await syncPremiumStatus(deps.config, userId, customerInfo);
-    }
     await notifyRestoreCompleted(deps.config, userId, isPremium, customerInfo);
 
     return { success: true, isPremium, productId, customerInfo };
