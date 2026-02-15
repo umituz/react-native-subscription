@@ -5,7 +5,7 @@ import type { CreditsRepository } from "../../infrastructure/CreditsRepository";
 import { creditsQueryKeys } from "../creditsQueryKeys";
 import { calculateRemaining } from "../../../../shared/utils/numberUtils";
 
-interface MutationContext {
+export interface MutationContext {
   previousCredits: UserCredits | null;
   skippedOptimistic: boolean;
   wasInsufficient?: boolean;

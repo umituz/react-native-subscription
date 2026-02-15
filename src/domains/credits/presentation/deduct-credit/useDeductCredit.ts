@@ -2,7 +2,8 @@ import { useCallback } from "react";
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryManager";
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
-import { createDeductCreditMutationConfig } from "./mutationConfig";
+import type { DeductCreditsResult } from "../../core/Credits";
+import { createDeductCreditMutationConfig, type MutationContext } from "./mutationConfig";
 
 export const useDeductCredit = ({
   userId,
@@ -11,7 +12,9 @@ export const useDeductCredit = ({
   const repository = getCreditsRepository();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation(createDeductCreditMutationConfig(userId, repository, queryClient));
+  const mutation = useMutation<DeductCreditsResult, Error, number, MutationContext>(
+    createDeductCreditMutationConfig(userId, repository, queryClient)
+  );
 
   const deductCredit = useCallback(async (cost: number = 1): Promise<boolean> => {
     try {
