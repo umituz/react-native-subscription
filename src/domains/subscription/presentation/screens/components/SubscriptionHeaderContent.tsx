@@ -40,8 +40,14 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   latestPurchaseDate,
   billingIssuesDetected,
   isSandbox,
-}) => (
-  <View style={styles.details}>
+}) => {
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    console.log('[SubscriptionHeaderContent] packageType:', packageType);
+    console.log('[SubscriptionHeaderContent] periodType:', periodType);
+  }
+
+  return (
+    <View style={styles.details}>
     {isLifetime ? (
       <DetailRow
         label={translations.statusLabel}
@@ -139,4 +145,5 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
       </>
     )}
   </View>
-);
+  );
+};

@@ -3,6 +3,8 @@ import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { toDate } from "../../../../shared/utils/dateConverter";
 import { detectPackageType } from "../../../../utils/packageTypeDetector";
 
+declare const __DEV__: boolean;
+
 export interface PremiumStatus {
   isPremium: boolean;
   expirationDate: Date | null;
@@ -25,6 +27,12 @@ export class PurchaseStatusResolver {
 
     if (entitlement) {
       const productIdentifier = entitlement.productIdentifier ?? null;
+      const detectedPackageType = productIdentifier ? detectPackageType(productIdentifier) : null;
+
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[PurchaseStatusResolver] productIdentifier:", productIdentifier);
+        console.log("[PurchaseStatusResolver] detectedPackageType:", detectedPackageType);
+      }
 
       return {
         isPremium: true,
@@ -36,7 +44,7 @@ export class PurchaseStatusResolver {
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
         isSandbox: entitlement.isSandbox ?? false,
         periodType: entitlement.periodType ?? null,
-        packageType: productIdentifier ? detectPackageType(productIdentifier) : null,
+        packageType: detectedPackageType,
         store: null,
         gracePeriodExpiresDate: null,
         unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) ?? null,
