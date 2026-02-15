@@ -29,17 +29,27 @@ export const usePaywallFlow = (options: UsePaywallFlowOptions = {}): UsePaywallF
 
   // Load persisted state
   useEffect(() => {
+    let isMounted = true;
+
     const loadPersistedState = async () => {
       try {
         const value = await getString(PAYWALL_SHOWN_KEY, '');
-        setPaywallShown(value === 'true');
+        if (isMounted) {
+          setPaywallShown(value === 'true');
+        }
       } catch (error) {
         console.error('[usePaywallFlow] Failed to load paywall state', error);
-        setPaywallShown(false); // Safe default
+        if (isMounted) {
+          setPaywallShown(false); // Safe default
+        }
       }
     };
 
     loadPersistedState();
+
+    return () => {
+      isMounted = false;
+    };
   }, [getString]);
 
   const closePostOnboardingPaywall = useCallback(async (_isPremium: boolean) => {

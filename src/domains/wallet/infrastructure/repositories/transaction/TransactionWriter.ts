@@ -34,7 +34,7 @@ export async function addTransaction(
         change,
         reason,
         ...metadata,
-        createdAt: Date.now(),
+        createdAt: Date.now(), // Approximate - actual server timestamp written to Firestore
       },
     };
   } catch (error) {

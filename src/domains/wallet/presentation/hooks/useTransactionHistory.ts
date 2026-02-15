@@ -33,7 +33,7 @@ export function useTransactionHistory({
 
   const repository = useMemo(
     () => new TransactionRepository(config),
-    [config]
+    [config.collectionName, config.useUserSubcollection]
   );
 
   const { data, isLoading, error, refetch } = useQuery({

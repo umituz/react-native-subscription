@@ -12,7 +12,7 @@ export class TrialEligibilityService {
 
     const { hasUsedTrial, trialInProgress, userIds = [] } = record;
 
-    if (userId && userIds.includes(userId)) {
+    if (userId && userId.length > 0 && userIds.includes(userId)) {
       return { eligible: false, reason: "user_already_used", deviceId };
     }
 

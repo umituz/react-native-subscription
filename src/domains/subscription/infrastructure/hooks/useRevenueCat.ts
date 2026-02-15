@@ -3,7 +3,7 @@
  * React hook for RevenueCat subscription management
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import type { PurchasesOffering, PurchasesPackage } from "react-native-purchases";
 import { getRevenueCatService } from '../../infrastructure/services/RevenueCatService';
 import type { PurchaseResult, RestoreResult } from '../../../../shared/application/ports/IRevenueCatService';
@@ -35,8 +35,18 @@ export interface UseRevenueCatResult {
 export function useRevenueCat(): UseRevenueCatResult {
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [loading, setLoading] = useState(false);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const initialize = useCallback(async (userId: string, apiKey?: string) => {
+    if (!isMountedRef.current) return;
+
     setLoading(true);
     try {
       const service = getRevenueCatService();
@@ -44,17 +54,21 @@ export function useRevenueCat(): UseRevenueCatResult {
         return;
       }
       const result = await service.initialize(userId, apiKey);
-      if (result.success) {
+      if (result.success && isMountedRef.current) {
         setOffering(result.offering);
       }
     } catch {
       // Error handling is done by service
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
   const loadOfferings = useCallback(async () => {
+    if (!isMountedRef.current) return;
+
     setLoading(true);
     try {
       const service = getRevenueCatService();
@@ -62,11 +76,15 @@ export function useRevenueCat(): UseRevenueCatResult {
         return;
       }
       const fetchedOffering = await service.fetchOfferings();
-      setOffering(fetchedOffering);
+      if (isMountedRef.current) {
+        setOffering(fetchedOffering);
+      }
     } catch {
       // Error handling is done by service
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 

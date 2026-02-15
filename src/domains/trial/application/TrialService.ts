@@ -28,7 +28,7 @@ export const getDeviceId = () => PersistentDeviceIdService.getDeviceId();
 
 export async function checkTrialEligibility(userId?: string, deviceId?: string): Promise<TrialEligibilityResult> {
   try {
-    const id = deviceId || await getDeviceId();
+    const id = (deviceId && deviceId.length > 0) ? deviceId : await getDeviceId();
     const record = await repository.getRecord(id);
     return TrialEligibilityService.check(userId, id, record);
   } catch {
@@ -38,7 +38,7 @@ export async function checkTrialEligibility(userId?: string, deviceId?: string):
 
 export async function recordTrialStart(userId: string, deviceId?: string): Promise<boolean> {
   try {
-    const id = deviceId || await getDeviceId();
+    const id = (deviceId && deviceId.length > 0) ? deviceId : await getDeviceId();
     const record: TrialRecordWrite = {
       deviceId: id,
       trialInProgress: true,
@@ -54,7 +54,7 @@ export async function recordTrialStart(userId: string, deviceId?: string): Promi
 
 export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
   try {
-    const id = deviceId || await getDeviceId();
+    const id = (deviceId && deviceId.length > 0) ? deviceId : await getDeviceId();
     const record: TrialRecordWrite = {
       hasUsedTrial: true,
       trialInProgress: false,
@@ -68,7 +68,7 @@ export async function recordTrialEnd(deviceId?: string): Promise<boolean> {
 
 export async function recordTrialConversion(deviceId?: string): Promise<boolean> {
   try {
-    const id = deviceId || await getDeviceId();
+    const id = (deviceId && deviceId.length > 0) ? deviceId : await getDeviceId();
     const record: TrialRecordWrite = {
       hasUsedTrial: true,
       trialInProgress: false,

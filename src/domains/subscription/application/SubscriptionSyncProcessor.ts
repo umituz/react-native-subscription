@@ -43,7 +43,7 @@ export class SubscriptionSyncProcessor {
 
   async processRenewal(userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) {
     const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-    revenueCatData.expirationDate = newExpirationDate || revenueCatData.expirationDate;
+    revenueCatData.expirationDate = newExpirationDate ?? revenueCatData.expirationDate;
     const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
 
     const creditsUserId = await this.getCreditsUserId(userId);

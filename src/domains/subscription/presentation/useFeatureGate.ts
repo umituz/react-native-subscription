@@ -108,7 +108,7 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     }
 
     prevCreditBalanceRef.current = creditBalance;
-    hasSubscriptionRef.current = hasSubscription;
+    // hasSubscriptionRef is already synced by useSyncedRefs, no need to update manually
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditBalance, hasSubscription]);
 

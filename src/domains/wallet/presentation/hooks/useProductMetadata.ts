@@ -34,7 +34,7 @@ export function useProductMetadata({
 }: UseProductMetadataParams): UseProductMetadataResult {
   const service = useMemo(
     () => new ProductMetadataService(config),
-    [config]
+    [config.collectionName, config.cacheTTL]
   );
 
   const queryKey = type

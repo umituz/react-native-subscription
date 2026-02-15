@@ -4,8 +4,8 @@ import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 export function getApiKey(config: SubscriptionInitConfig): string {
   const { apiKey, apiKeyIos, apiKeyAndroid } = config;
   const key = Platform.OS === 'ios'
-    ? (apiKeyIos || apiKey)
-    : (apiKeyAndroid || apiKey);
+    ? (apiKeyIos ?? apiKey)
+    : (apiKeyAndroid ?? apiKey);
 
   if (!key) {
     throw new Error('API key required');
