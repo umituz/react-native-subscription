@@ -24,14 +24,7 @@ export class PackageHandler {
   }
 
   async purchase(pkg: PurchasesPackage, userId: string): Promise<boolean> {
-    console.log('🔵 [PackageHandler] purchase called', {
-      productId: pkg.product.identifier,
-      userId
-    });
-
     const result = await executePurchase(this.service, pkg, userId);
-    console.log('✅ [PackageHandler] purchase completed', { result });
-
     return result;
   }
 

@@ -11,10 +11,19 @@ import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallModalProps } from "./PaywallModal.types";
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
-  const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText } = props;
+  const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText, onPurchaseSuccess, onPurchaseError, onAuthRequired, source } = props;
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
-  const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({ packages, onPurchase, onRestore });
+  const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({
+    packages,
+    onPurchase,
+    onRestore,
+    source,
+    onPurchaseSuccess,
+    onPurchaseError,
+    onAuthRequired,
+    onClose
+  });
 
   useEffect(() => {
     if (!visible) resetState();

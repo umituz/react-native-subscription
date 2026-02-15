@@ -22,17 +22,9 @@ export const purchasePackageOperation = async (
   state: SubscriptionInternalState,
   packageHandler: PackageHandler
 ): Promise<boolean> => {
-  console.log('🔵 [purchasePackageOperation] Starting', {
-    productId: pkg.product.identifier
-  });
-
   ensureConfigured(managerConfig);
   const userId = getCurrentUserIdOrThrow(state);
-
-  console.log('🚀 [purchasePackageOperation] Calling packageHandler.purchase', { userId });
   const result = await packageHandler.purchase(pkg, userId);
-  console.log('✅ [purchasePackageOperation] Completed', { result });
-
   return result;
 };
 

@@ -77,26 +77,15 @@ export async function executePurchase(
   pkg: PurchasesPackage,
   isConsumable: boolean
 ): Promise<PurchaseResult> {
-  console.log('🔵 [PurchaseExecutor] executePurchase called', {
-    productId: pkg.product.identifier,
-    userId,
-    isConsumable,
-    packageType: pkg.packageType
-  });
-
-  console.log('🚀 [PurchaseExecutor] Calling Purchases.purchasePackage (RevenueCat SDK)');
   const { customerInfo } = await Purchases.purchasePackage(pkg);
-  console.log('✅ [PurchaseExecutor] Purchases.purchasePackage completed');
 
   const productId = pkg.product.identifier;
   const packageType = pkg.packageType ?? null;
 
   if (isConsumable) {
-    console.log('💰 [PurchaseExecutor] Processing as consumable purchase');
     return executeConsumablePurchase(config, userId, productId, customerInfo, packageType);
   }
 
-  console.log('📅 [PurchaseExecutor] Processing as subscription purchase');
   return executeSubscriptionPurchase(
     config,
     userId,

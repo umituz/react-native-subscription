@@ -1,6 +1,7 @@
 import type { ImageSourcePropType } from "react-native";
 import type { PurchasesPackage } from "react-native-purchases";
 import type { SubscriptionFeature, PaywallTranslations, PaywallLegalUrls } from "../entities/types";
+import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
 
 export interface TrialEligibilityInfo {
   eligible: boolean;
@@ -22,4 +23,8 @@ export interface PaywallModalProps {
   onRestore?: () => Promise<void | boolean>;
   trialEligibility?: Record<string, TrialEligibilityInfo>;
   trialSubtitleText?: string;
+  onPurchaseSuccess?: () => void;
+  onPurchaseError?: (error: Error | string) => void;
+  onAuthRequired?: () => void;
+  source?: PurchaseSource;
 }

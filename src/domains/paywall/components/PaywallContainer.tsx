@@ -4,7 +4,6 @@ import { useSubscriptionPackages } from "../../subscription/infrastructure/hooks
 import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure/hooks/useRevenueCatTrialEligibility";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal } from "./PaywallModal";
-import { usePaywallActions } from "../hooks/usePaywallActions";
 import { useAuthAwarePurchase } from "../../subscription/presentation/useAuthAwarePurchase";
 import { useTrialEligibilityCheck } from "../hooks/useTrialEligibilityCheck";
 import type { PaywallContainerProps } from "./PaywallContainer.types";
@@ -36,20 +35,9 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
 
   const { data: packages = [], isLoading } = useSubscriptionPackages();
   const { eligibilityMap, checkEligibility } = useRevenueCatTrialEligibility();
-  
-  const { handlePurchase: performPurchase, handleRestore: performRestore } = useAuthAwarePurchase({ 
-    source: purchaseSource 
-  });
 
-  const { handlePurchase, handleRestore } = usePaywallActions({
-    packages,
-    onPurchase: performPurchase,
-    onRestore: performRestore,
-    source: purchaseSource,
-    onPurchaseSuccess,
-    onPurchaseError,
-    onAuthRequired,
-    onClose: handleClose,
+  const { handlePurchase: performPurchase, handleRestore: performRestore } = useAuthAwarePurchase({
+    source: purchaseSource
   });
 
   const trialEligibility = useTrialEligibilityCheck({
@@ -60,7 +48,6 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     trialConfig,
   });
 
-  // Compute credit amounts from packageAllocations if not provided directly
   const creditAmounts = useMemo(() => {
     if (providedCreditAmounts) return providedCreditAmounts;
     if (!packageAllocations || packages.length === 0) return undefined;
@@ -81,10 +68,14 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       bestValueIdentifier={bestValueIdentifier}
       creditAmounts={creditAmounts}
       creditsLabel={creditsLabel}
-      onPurchase={handlePurchase}
-      onRestore={handleRestore}
+      onPurchase={performPurchase}
+      onRestore={performRestore}
       trialEligibility={trialEligibility}
       trialSubtitleText={trialConfig?.enabled ? trialConfig.trialText : undefined}
+      onPurchaseSuccess={onPurchaseSuccess}
+      onPurchaseError={onPurchaseError}
+      onAuthRequired={onAuthRequired}
+      source={purchaseSource}
     />
   );
 };

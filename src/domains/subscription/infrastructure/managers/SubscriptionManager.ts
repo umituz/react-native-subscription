@@ -87,19 +87,9 @@ class SubscriptionManagerImpl {
   }
 
   async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
-    console.log('🔵 [SubscriptionManager] purchasePackage called', {
-      productId: pkg.product.identifier,
-      isConfigured: !!this.managerConfig,
-      hasPackageHandler: !!this.packageHandler
-    });
-
     this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
-
-    console.log('🚀 [SubscriptionManager] Calling purchasePackageOperation');
     const result = await purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
-    console.log('✅ [SubscriptionManager] purchasePackageOperation completed', { result });
-
     return result;
   }
 
