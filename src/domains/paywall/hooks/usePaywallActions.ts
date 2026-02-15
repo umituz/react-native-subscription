@@ -52,37 +52,21 @@ export function usePaywallActions({
   });
 
   const handlePurchase = useCallback(async () => {
-    console.log('🔵 [usePaywallActions] handlePurchase called', {
-      selectedPlanId,
-      packagesCount: packages.length,
-      isProcessing,
-      hasOnPurchase: !!onPurchaseRef.current
-    });
-
-    const planId = selectedPlanId || (packages.length > 0 ? packages[0]?.product.identifier : null);
-
-    if (!planId || !onPurchaseRef.current || isProcessing) {
-        console.log('⚠️ [usePaywallActions] Purchase blocked', {
-          noPlanId: !planId,
-          noCallback: !onPurchaseRef.current,
-          isProcessing
-        });
-        if (!planId && onAuthRequiredRef.current) onAuthRequiredRef.current();
-        return;
+    if (!selectedPlanId || !onPurchaseRef.current || isProcessing) {
+      if (!selectedPlanId && onAuthRequiredRef.current) {
+        onAuthRequiredRef.current();
+      }
+      return;
     }
 
-    console.log('🟢 [usePaywallActions] Starting purchase', { planId });
     setIsLocalProcessing(true);
-    startPurchase(planId, "manual");
+    startPurchase(selectedPlanId, "manual");
 
     try {
-      const pkg = packages.find((p) => p.product.identifier === planId);
-      console.log('📦 [usePaywallActions] Package found:', !!pkg);
+      const pkg = packages.find((p) => p.product.identifier === selectedPlanId);
 
       if (pkg) {
-        console.log('🚀 [usePaywallActions] Calling onPurchase callback');
         const success = await onPurchaseRef.current(pkg);
-        console.log('✅ [usePaywallActions] onPurchase completed', { success });
 
         if (success !== false) {
           onPurchaseSuccessRef.current?.();
@@ -90,13 +74,11 @@ export function usePaywallActions({
         }
       }
     } catch (error) {
-      console.error('❌ [usePaywallActions] Purchase error:', error);
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseErrorRef.current?.(err);
     } finally {
-      console.log('🏁 [usePaywallActions] Purchase flow finished');
       setIsLocalProcessing(false);
-      endPurchase(planId);
+      endPurchase(selectedPlanId);
     }
   }, [selectedPlanId, packages, isProcessing, startPurchase, endPurchase]);
 

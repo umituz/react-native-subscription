@@ -4,8 +4,6 @@ import { DetailRow } from "../../components/details/DetailRow";
 import type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
 import { formatPackageTypeForDisplay } from "../../../../subscription/utils/packageTypeFormatter";
 
-declare const __DEV__: boolean;
-
 interface SubscriptionHeaderContentProps {
   isLifetime: boolean;
   showExpirationDate: boolean;
@@ -40,14 +38,8 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   latestPurchaseDate,
   billingIssuesDetected,
   isSandbox,
-}) => {
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[SubscriptionHeaderContent] packageType:', packageType);
-    console.log('[SubscriptionHeaderContent] periodType:', periodType);
-  }
-
-  return (
-    <View style={styles.details}>
+}) => (
+  <View style={styles.details}>
     {isLifetime ? (
       <DetailRow
         label={translations.statusLabel}
@@ -145,5 +137,4 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
       </>
     )}
   </View>
-  );
-};
+);
