@@ -1,6 +1,7 @@
 import type { CustomerInfo } from "react-native-purchases";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { toDate } from "../../../../shared/utils/dateConverter";
+import { detectPackageType } from "../../../../utils/packageTypeDetector";
 
 export interface PremiumStatus {
   isPremium: boolean;
@@ -23,17 +24,19 @@ export class PurchaseStatusResolver {
     const entitlement = getPremiumEntitlement(customerInfo, entitlementId);
 
     if (entitlement) {
+      const productIdentifier = entitlement.productIdentifier ?? null;
+
       return {
         isPremium: true,
         expirationDate: toDate(entitlement.expirationDate),
         willRenew: entitlement.willRenew ?? false,
-        productIdentifier: entitlement.productIdentifier ?? null,
+        productIdentifier,
         originalPurchaseDate: toDate(entitlement.originalPurchaseDate) ?? null,
         latestPurchaseDate: toDate(entitlement.latestPurchaseDate) ?? null,
         billingIssuesDetected: entitlement.billingIssueDetectedAt !== null && entitlement.billingIssueDetectedAt !== undefined,
         isSandbox: entitlement.isSandbox ?? false,
         periodType: entitlement.periodType ?? null,
-        packageType: null,
+        packageType: productIdentifier ? detectPackageType(productIdentifier) : null,
         store: null,
         gracePeriodExpiresDate: null,
         unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt) ?? null,
