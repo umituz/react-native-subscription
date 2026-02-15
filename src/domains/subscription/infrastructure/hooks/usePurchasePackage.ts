@@ -38,10 +38,6 @@ export const usePurchasePackage = () => {
 
   return useMutation({
     mutationFn: async (pkg: PurchasesPackage): Promise<PurchaseMutationResult> => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-
-      }
-
       if (!userId) {
         throw new Error("User not authenticated");
       }

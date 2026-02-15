@@ -14,8 +14,8 @@ async function handleRenewal(
 
   try {
     await onRenewalDetected(userId, productId, expirationDate, customerInfo);
-  } catch (error) {
-
+  } catch (_error) {
+    // Callback errors should not break customer info processing
   }
 }
 
@@ -31,8 +31,8 @@ async function handlePlanChange(
 
   try {
     await onPlanChanged(userId, newProductId, previousProductId, isUpgrade, customerInfo);
-  } catch (error) {
-
+  } catch (_error) {
+    // Callback errors should not break customer info processing
   }
 }
 
@@ -43,8 +43,8 @@ async function handlePremiumStatusSync(
 ): Promise<void> {
   try {
     await syncPremiumStatus(config, userId, customerInfo);
-  } catch (error) {
-
+  } catch (_error) {
+    // Sync errors are logged by PremiumStatusSyncer, don't break processing
   }
 }
 

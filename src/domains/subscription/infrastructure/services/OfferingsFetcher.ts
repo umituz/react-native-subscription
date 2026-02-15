@@ -19,29 +19,16 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
     }
 
     if (offerings.current) {
-      if (__DEV__) {
-
-      }
       return offerings.current;
     }
 
     const allOfferings = Object.values(offerings.all);
     if (allOfferings.length > 0) {
-      if (__DEV__) {
-
-      }
       return allOfferings[0];
-    }
-
-    if (__DEV__) {
-
     }
 
     return null;
   } catch (error) {
-    if (__DEV__) {
-
-    }
     throw new Error(`Failed to fetch offerings: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 }

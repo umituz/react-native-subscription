@@ -45,7 +45,7 @@ export function useCustomerInfo(): UseCustomerInfoResult {
         listenerRef.current = null;
       }
     };
-  }, []); // fetchCustomerInfo is stable, setup listener once
+  }, [fetchCustomerInfo]); // fetchCustomerInfo is stable (empty deps), included for lint
 
   return {
     customerInfo,

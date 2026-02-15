@@ -31,7 +31,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
   translations,
   styles,
   willRenew,
-  periodType,
+  periodType: _periodType,
   packageType,
   store,
   originalPurchaseDate,

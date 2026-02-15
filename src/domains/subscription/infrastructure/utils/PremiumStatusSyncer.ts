@@ -68,8 +68,7 @@ export async function notifyPurchaseCompleted(
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
-    } catch (error) {
-
+    } catch (_error) {
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }
@@ -86,8 +85,7 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch (error) {
-
+    } catch (_error) {
         // Silently fail callback notifications to prevent crashing the main flow
     }
 }

@@ -7,17 +7,11 @@ import type { FirebaseAuthLike } from "./SubscriptionInitializerTypes";
 export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string | undefined => {
   const auth = getAuth();
   if (!auth) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
-    }
     return undefined;
   }
 
   const user = auth.currentUser;
   if (!user) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
-    }
     return undefined;
   }
 
@@ -26,10 +20,6 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
       console.log('[SubscriptionAuthListener] Anonymous user - returning undefined (RevenueCat will use its own ID)');
     }
     return undefined;
-  }
-
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
   }
 
   return user.uid;
@@ -46,14 +36,7 @@ export const setupAuthStateListener = (
 ): (() => void) | null => {
   const auth = getAuth();
   if (!auth) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
-    }
     return null;
-  }
-
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
   }
 
   return auth.onAuthStateChanged((user) => {

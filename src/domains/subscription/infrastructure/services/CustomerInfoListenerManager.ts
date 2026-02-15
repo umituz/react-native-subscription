@@ -52,8 +52,8 @@ export class CustomerInfoListenerManager {
 
       if (this.state.currentUserId === capturedUserId) {
         this.state.renewalState = newRenewalState;
-      } else {
       }
+      // else: User switched during async operation, discard stale renewal state
     };
 
     Purchases.addCustomerInfoUpdateListener(this.state.listener);

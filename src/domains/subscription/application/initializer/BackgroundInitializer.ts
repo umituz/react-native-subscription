@@ -15,10 +15,6 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     throw new Error("Firebase auth is not available");
   }
 
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-
-  }
-
   const initialRevenueCatUserId = getCurrentUserId(() => auth);
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -33,8 +29,8 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     }
     try {
       await initializeInBackground(newRevenueCatUserId);
-    } catch (error) {
-
+    } catch (_error) {
+      // Background re-initialization errors are non-critical, already logged by SubscriptionManager
     }
   });
 

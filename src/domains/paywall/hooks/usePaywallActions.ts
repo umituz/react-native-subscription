@@ -95,8 +95,8 @@ export function usePaywallActions({
         if (typeof __DEV__ !== "undefined" && __DEV__) {
           console.warn("[usePaywallActions] ⚠️ Purchase returned false (user cancelled or failed)");
         }
-      } else {
       }
+      // else: success is undefined/null - no action needed
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseErrorRef.current?.(err);
@@ -125,9 +125,8 @@ export function usePaywallActions({
 
       if (success === true) {
         onPurchaseSuccessRef.current?.();
-      } else if (success === false) {
-      } else {
       }
+      // else: success is false/undefined - restore failed or user cancelled, no action needed
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseErrorRef.current?.(err);

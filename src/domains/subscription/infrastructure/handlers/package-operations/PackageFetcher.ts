@@ -11,22 +11,12 @@ export async function fetchPackages(
   try {
     const offering = await service.fetchOfferings();
 
-    if (__DEV__) {
-
-    }
-
     if (!offering) {
-      if (__DEV__) {
-
-      }
       return [];
     }
 
     const packages = offering.availablePackages;
     if (!packages || packages.length === 0) {
-      if (__DEV__) {
-
-      }
       return [];
     }
 
@@ -39,9 +29,6 @@ export async function fetchPackages(
 
     return packages;
   } catch (error) {
-    if (__DEV__) {
-
-    }
     throw new Error(
       `Failed to fetch subscription packages. ${
         error instanceof Error ? error.message : "Unknown error"
