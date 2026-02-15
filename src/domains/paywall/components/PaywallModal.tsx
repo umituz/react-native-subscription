@@ -16,8 +16,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   const insets = useSafeAreaInsets();
   const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({ packages, onPurchase, onRestore });
 
-  useEffect(() => { setSelectedPlanId(null); }, [packages, setSelectedPlanId]);
-  useEffect(() => { if (!visible) resetState(); }, [visible, resetState]);
+  useEffect(() => {
+    if (!visible) resetState();
+  }, [visible, resetState]);
 
   const handleLegalUrl = useCallback(async (url: string | undefined) => {
     if (!url) return;
