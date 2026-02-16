@@ -31,7 +31,7 @@ export class RevenueCatService implements IRevenueCatService {
             isInitialized: () => this.isInitialized(),
             getCurrentUserId: () => this.stateManager.getCurrentUserId(),
             setInitialized: (value: boolean) => this.stateManager.setInitialized(value),
-            setCurrentUserId: (id: string | null) => this.stateManager.setCurrentUserId(id),
+            setCurrentUserId: (id: string | null | undefined) => this.stateManager.setCurrentUserId(id ?? null),
         };
     }
 
