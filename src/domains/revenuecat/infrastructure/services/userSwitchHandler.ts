@@ -3,6 +3,7 @@ import type { InitializeResult } from "../../../../shared/application/ports/IRev
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { syncPremiumStatus } from "../../../subscription/infrastructure/utils/PremiumStatusSyncer";
+import { UserSwitchMutex } from "./UserSwitchMutex";
 
 declare const __DEV__: boolean;
 
@@ -20,6 +21,27 @@ function isAnonymousId(userId: string): boolean {
 }
 
 export async function handleUserSwitch(
+  deps: InitializerDeps,
+  userId: string
+): Promise<InitializeResult> {
+  const mutexKey = userId || '__anonymous__';
+
+  // Acquire mutex to prevent concurrent Purchases.logIn() calls
+  const { shouldProceed, existingPromise } = await UserSwitchMutex.acquire(mutexKey);
+
+  if (!shouldProceed && existingPromise) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.log('[UserSwitchHandler] Using result from active switch operation');
+    }
+    return existingPromise;
+  }
+
+  const switchOperation = performUserSwitch(deps, userId);
+  UserSwitchMutex.setPromise(switchOperation);
+  return switchOperation;
+}
+
+async function performUserSwitch(
   deps: InitializerDeps,
   userId: string
 ): Promise<InitializeResult> {
