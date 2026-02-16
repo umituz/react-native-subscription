@@ -66,7 +66,7 @@ class SubscriptionManagerImpl {
       });
     }
 
-    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
+    const { service, success } = await performServiceInitialization(this.managerConfig!.config, userId);
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
 
@@ -119,7 +119,7 @@ class SubscriptionManagerImpl {
 
   getEntitlementId(): string {
     this.ensureConfigured();
-    return this.managerConfig.config.entitlementIdentifier ?? '';
+    return this.managerConfig!.config.entitlementIdentifier ?? '';
   }
 }
 

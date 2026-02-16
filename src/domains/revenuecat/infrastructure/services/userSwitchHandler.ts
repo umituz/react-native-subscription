@@ -67,7 +67,7 @@ async function performUserSwitch(
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
           console.log('[UserSwitchHandler] Calling Purchases.logIn() to switch from anonymous to:', normalizedUserId);
         }
-        const result = await Purchases.logIn(normalizedUserId);
+        const result = await Purchases.logIn(normalizedUserId!);
         customerInfo = result.customerInfo;
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
           console.log('[UserSwitchHandler] ✅ Purchases.logIn() successful, created:', result.created);
@@ -128,7 +128,7 @@ export async function handleInitialConfiguration(
       });
     }
 
-    await Purchases.configure({ apiKey, appUserID: normalizedUserId });
+    await Purchases.configure({ apiKey, appUserID: normalizedUserId || undefined });
     deps.setInitialized(true);
     deps.setCurrentUserId(normalizedUserId);
 
