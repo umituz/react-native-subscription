@@ -26,22 +26,19 @@ export const useSubscriptionPackages = () => {
   const queryClient = useQueryClient();
   const prevUserIdRef = useRef(userId);
 
+  // Check if initialized (BackgroundInitializer handles initialization)
+  const isInitialized = userId
+    ? SubscriptionManager.isInitializedForUser(userId)
+    : SubscriptionManager.isInitialized();
+
   const query = useQuery({
     queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, userId ?? "anonymous"] as const,
     queryFn: async () => {
-      if (userId) {
-        if (!SubscriptionManager.isInitializedForUser(userId)) {
-          await SubscriptionManager.initialize(userId);
-        }
-      } else {
-        if (!SubscriptionManager.isInitialized()) {
-          await SubscriptionManager.initialize(undefined);
-        }
-      }
-
+      // No side effects - just fetch packages
+      // Initialization is handled by BackgroundInitializer
       return SubscriptionManager.getPackages();
     },
-    enabled: isConfigured,
+    enabled: isConfigured && isInitialized,
     gcTime: 5 * 60 * 1000,
     staleTime: 2 * 60 * 1000,
     refetchOnMount: true,

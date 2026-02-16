@@ -3,6 +3,7 @@ import type { InitializeResult } from "../../../../shared/application/ports/IRev
 export class ConfigurationStateManager {
   private _isPurchasesConfigured = false;
   private _configurationPromise: Promise<InitializeResult> | null = null;
+  private _resolveConfiguration: ((value: InitializeResult) => void) | null = null;
 
   get isPurchasesConfigured(): boolean {
     return this._isPurchasesConfigured;
@@ -21,16 +22,17 @@ export class ConfigurationStateManager {
       throw new Error('Configuration already in progress');
     }
 
-    let capturedResolve: ((value: InitializeResult) => void) | null = null;
-
-    this._configurationPromise = new Promise((resolve) => {
-      capturedResolve = resolve;
+    // Create promise and store resolve function atomically
+    this._configurationPromise = new Promise<InitializeResult>((resolve) => {
+      this._resolveConfiguration = resolve;
     });
 
+    // Return resolve function
     return (value: InitializeResult) => {
-      if (capturedResolve) {
-        capturedResolve(value);
-        capturedResolve = null;
+      if (this._resolveConfiguration) {
+        const resolve = this._resolveConfiguration;
+        this._resolveConfiguration = null;
+        resolve(value);
       }
     };
   }
@@ -38,18 +40,22 @@ export class ConfigurationStateManager {
   completeConfiguration(success: boolean): void {
     this._isPurchasesConfigured = success;
 
-    if (success) {
+    // Cleanup promise state immediately (no setTimeout)
+    // If promise hasn't resolved yet, that's fine - it will still resolve via the callback
+    if (this._configurationPromise) {
       this._configurationPromise = null;
-    } else {
-      setTimeout(() => {
-        this._configurationPromise = null;
-      }, 1000);
+    }
+
+    // Clear resolve function if it still exists
+    if (this._resolveConfiguration) {
+      this._resolveConfiguration = null;
     }
   }
 
   reset(): void {
     this._isPurchasesConfigured = false;
     this._configurationPromise = null;
+    this._resolveConfiguration = null;
   }
 }
 

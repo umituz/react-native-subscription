@@ -19,7 +19,9 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const queryClient = useQueryClient();
   const isConfigured = SubscriptionManager.isConfigured();
 
-  const queryEnabled = isAuthenticated(userId) && isConfigured;
+  // Check if initialized (BackgroundInitializer handles initialization)
+  const isInitialized = userId ? SubscriptionManager.isInitializedForUser(userId) : false;
+  const queryEnabled = isAuthenticated(userId) && isConfigured && isInitialized;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId),
@@ -28,10 +30,8 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
         return null;
       }
 
-      if (!SubscriptionManager.isInitializedForUser(userId)) {
-        await SubscriptionManager.initialize(userId);
-      }
-
+      // No side effects - just check premium status
+      // Initialization is handled by BackgroundInitializer
       try {
         const result = await SubscriptionManager.checkPremiumStatus();
         return result;

@@ -36,8 +36,12 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       try {
         await initializeInBackground(revenueCatUserId);
         lastUserId = revenueCatUserId;
-      } catch (_error) {
+      } catch (error) {
         // Background re-initialization errors are non-critical, already logged by SubscriptionManager
+        console.error('[BackgroundInitializer] Reinitialization failed:', {
+          userId: revenueCatUserId,
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
     }, AUTH_STATE_DEBOUNCE_MS);
   };

@@ -25,7 +25,6 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   const { creditBalanceRef, hasSubscriptionRef, onShowPaywallRef, requiredCreditsRef, isCreditsLoadedRef } = useSyncedRefs(creditBalance, hasSubscription, onShowPaywall, requiredCredits, isCreditsLoaded);
 
   useEffect(() => {
-
     const shouldExecute = canExecuteAuthAction(
       isWaitingForAuthCreditsRef.current,
       isCreditsLoaded,
@@ -46,9 +45,11 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     if (isWaitingForAuthCreditsRef.current && isCreditsLoaded && pendingActionRef.current) {
       isWaitingForAuthCreditsRef.current = false;
       isWaitingForPurchaseRef.current = true;
-      onShowPaywall(requiredCredits);
+      // Use ref to avoid unstable callback dependency
+      onShowPaywallRef.current(requiredCreditsRef.current);
     }
-  }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywall]);
+    // Removed onShowPaywall from dependencies - using ref instead
+  }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywallRef, requiredCreditsRef]);
 
   useEffect(() => {
 

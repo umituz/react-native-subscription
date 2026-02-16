@@ -46,6 +46,10 @@ export async function syncPremiumStatus(
         }
         return { success: true };
     } catch (error) {
+        console.error('[PremiumStatusSyncer] Premium status callback failed:', {
+            userId,
+            error: error instanceof Error ? error.message : String(error)
+        });
 
         return {
             success: false,
@@ -68,8 +72,13 @@ export async function notifyPurchaseCompleted(
 
     try {
         await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
-    } catch (_error) {
+    } catch (error) {
         // Silently fail callback notifications to prevent crashing the main flow
+        console.error('[PremiumStatusSyncer] Purchase completed callback failed:', {
+            userId,
+            productId,
+            error: error instanceof Error ? error.message : String(error)
+        });
     }
 }
 

@@ -5,5 +5,5 @@ export interface InitializerDeps {
   isInitialized: () => boolean;
   getCurrentUserId: () => string | null;
   setInitialized: (value: boolean) => void;
-  setCurrentUserId: (userId: string) => void;
+  setCurrentUserId: (userId: string | undefined) => void;
 }

@@ -2,8 +2,8 @@ import Purchases, { type CustomerInfo } from "react-native-purchases";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
-import { syncPremiumStatus } from "../../../subscription/infrastructure/utils/PremiumStatusSyncer";
 import { UserSwitchMutex } from "./UserSwitchMutex";
+import { getPremiumEntitlement } from "../../core/types";
 
 declare const __DEV__: boolean;
 
@@ -86,7 +86,7 @@ async function performUserSwitch(
     }
 
     deps.setInitialized(true);
-    deps.setCurrentUserId(normalizedUserId);
+    deps.setCurrentUserId(normalizedUserId || undefined);
     const offerings = await Purchases.getOfferings();
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -130,7 +130,7 @@ export async function handleInitialConfiguration(
 
     await Purchases.configure({ apiKey, appUserID: normalizedUserId || undefined });
     deps.setInitialized(true);
-    deps.setCurrentUserId(normalizedUserId);
+    deps.setCurrentUserId(normalizedUserId || undefined);
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[UserSwitchHandler] ✅ Purchases.configure() successful');
@@ -151,7 +151,38 @@ export async function handleInitialConfiguration(
       });
     }
 
-    await syncPremiumStatus(deps.config, currentUserId, customerInfo);
+    // Sync premium status via callback (if configured)
+    if (deps.config.onPremiumStatusChanged) {
+      try {
+        const premiumEntitlement = getPremiumEntitlement(
+          customerInfo,
+          deps.config.entitlementIdentifier
+        );
+
+        if (premiumEntitlement) {
+          await deps.config.onPremiumStatusChanged(
+            currentUserId,
+            true,
+            premiumEntitlement.productIdentifier,
+            premiumEntitlement.expirationDate ?? undefined,
+            premiumEntitlement.willRenew,
+            premiumEntitlement.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined
+          );
+        } else {
+          await deps.config.onPremiumStatusChanged(
+            currentUserId,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            undefined
+          );
+        }
+      } catch (error) {
+        // Log error but don't fail initialization
+        console.error('[UserSwitchHandler] Premium status sync callback failed:', error);
+      }
+    }
 
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
