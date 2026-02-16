@@ -45,10 +45,31 @@ export const useDeductCredit = ({
     return repository.hasCredits(userId, cost);
   }, [userId, repository]);
 
+  const refundCredits = useCallback(async (amount: number): Promise<boolean> => {
+    if (!userId) return false;
+    try {
+      const result = await repository.refundCredit(userId, amount);
+      if (result.success) {
+        // Invalidate queries to refresh credit balance
+        await queryClient.invalidateQueries({ queryKey: ['credits', userId] });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('[useDeductCredit] Unexpected error during credit refund', {
+        amount,
+        userId,
+        error
+      });
+      return false;
+    }
+  }, [userId, repository, queryClient]);
+
   return {
     checkCredits,
     deductCredit,
     deductCredits,
+    refundCredits,
     isDeducting: mutation.isPending
   };
 };

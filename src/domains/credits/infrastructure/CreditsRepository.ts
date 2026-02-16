@@ -4,6 +4,7 @@ import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/
 import type { PurchaseSource } from "../core/UserCreditsDocument";
 import type { RevenueCatData } from "../../revenuecat/core/types";
 import { deductCreditsOperation } from "../application/DeductCreditsCommand";
+import { refundCreditsOperation } from "../application/RefundCreditsCommand";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
 import { fetchCredits, checkHasCredits } from "./operations/CreditsFetcher";
@@ -57,6 +58,11 @@ export class CreditsRepository extends BaseRepository {
   async deductCredit(userId: string, cost: number): Promise<DeductCreditsResult> {
     const db = requireFirestore();
     return deductCreditsOperation(db, this.getRef(db, userId), cost, userId);
+  }
+
+  async refundCredit(userId: string, amount: number): Promise<DeductCreditsResult> {
+    const db = requireFirestore();
+    return refundCreditsOperation(db, this.getRef(db, userId), amount, userId);
   }
 
   async hasCredits(userId: string, cost: number): Promise<boolean> {
