@@ -30,7 +30,7 @@ class UserSwitchMutexImpl {
       }
       try {
         await this.activeSwitchPromise;
-      } catch (error) {
+      } catch {
         // Ignore error, just wait for completion
       }
 
