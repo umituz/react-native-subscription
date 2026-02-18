@@ -14,7 +14,7 @@ import {
 } from "../../../revenuecat/core/types";
 import { notifyRestoreCompleted } from "../utils/PremiumStatusSyncer";
 
-export interface RestoreHandlerDeps {
+interface RestoreHandlerDeps {
   config: RevenueCatConfig;
   isInitialized: () => boolean;
 }

@@ -9,14 +9,8 @@ import { usePremium } from "./usePremium";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
 import { authPurchaseStateManager } from "../infrastructure/utils/authPurchaseState";
 
-export type { PurchaseAuthProvider } from "../infrastructure/utils/authPurchaseState";
-
 export const configureAuthProvider = (provider: import("../infrastructure/utils/authPurchaseState").PurchaseAuthProvider): void => {
   authPurchaseStateManager.configure(provider);
-};
-
-export const cleanupAuthProvider = (): void => {
-  authPurchaseStateManager.cleanup();
 };
 
 export const getSavedPurchase = (): { pkg: PurchasesPackage; source: PurchaseSource } | null => {
@@ -27,11 +21,11 @@ export const clearSavedPurchase = (): void => {
   authPurchaseStateManager.clearSavedPurchase();
 };
 
-export interface UseAuthAwarePurchaseParams {
+interface UseAuthAwarePurchaseParams {
   source?: PurchaseSource;
 }
 
-export interface UseAuthAwarePurchaseResult {
+interface UseAuthAwarePurchaseResult {
   handlePurchase: (pkg: PurchasesPackage, source?: PurchaseSource) => Promise<boolean>;
   handleRestore: () => Promise<boolean>;
   executeSavedPurchase: () => Promise<boolean>;

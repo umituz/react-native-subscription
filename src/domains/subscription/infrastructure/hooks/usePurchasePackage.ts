@@ -20,7 +20,7 @@ import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys
 import { getErrorMessage } from "../../../revenuecat/core/errors";
 
 /** Purchase mutation result - simplified for presentation layer */
-export interface PurchaseMutationResult {
+interface PurchaseMutationResult {
   success: boolean;
   productId: string;
 }

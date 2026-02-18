@@ -1,6 +1,6 @@
 import Purchases, { type PurchasesOffering } from "react-native-purchases";
 
-export interface OfferingsFetcherDeps {
+interface OfferingsFetcherDeps {
   isInitialized: () => boolean;
 }
 

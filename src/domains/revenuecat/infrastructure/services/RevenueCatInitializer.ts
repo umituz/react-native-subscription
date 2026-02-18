@@ -5,8 +5,6 @@ import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS, MAX_INIT_RE
 import { configState } from "./ConfigurationStateManager";
 import { handleUserSwitch, handleInitialConfiguration, fetchCurrentUserData } from "./userSwitchHandler";
 
-export type { InitializerDeps } from "./RevenueCatInitializer.types";
-
 const MAX_CONFIG_START_RETRIES = 3;
 
 export async function initializeSDK(
@@ -29,7 +27,7 @@ export async function initializeSDK(
       if (configState.configurationPromise) {
         await configState.configurationPromise;
       } else {
-        await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
+        await new Promise<void>(resolve => setTimeout(() => resolve(), CONFIGURATION_RETRY_DELAY_MS));
       }
       retryCount++;
     }
@@ -65,12 +63,14 @@ export async function initializeSDK(
       retryCount: configStartRetryCount,
       error
     });
-    await new Promise(resolve => setTimeout(resolve, CONFIGURATION_RETRY_DELAY_MS));
+    await new Promise<void>(resolve => setTimeout(() => resolve(), CONFIGURATION_RETRY_DELAY_MS));
     return initializeSDK(deps, userId, apiKey, configStartRetryCount + 1);
   }
 
   const result = await handleInitialConfiguration(deps, userId, key);
   configState.completeConfiguration(result.success);
   resolveConfig(result);
+  // Clean up the resolved promise so future callers don't await a stale promise
+  configState.clearCompletedConfiguration();
   return result;
 }

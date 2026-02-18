@@ -41,7 +41,16 @@ class UserSwitchMutexImpl {
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
           console.log(`[UserSwitchMutex] Rate limiting: waiting ${delayNeeded}ms`);
         }
-        await new Promise(resolve => setTimeout(resolve, delayNeeded));
+        await new Promise<void>(resolve => setTimeout(() => resolve(), delayNeeded));
+      }
+
+      // Re-check after delay: another caller may have acquired the lock during our wait
+      if (this.activeSwitchPromise) {
+        if (this.activeUserId === userId) {
+          return { shouldProceed: false, existingPromise: this.activeSwitchPromise };
+        }
+        // Another switch started for a different user — recurse to wait again
+        return this.acquire(userId);
       }
     }
 

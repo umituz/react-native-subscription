@@ -1,2 +1,2 @@
 export { initializeSubscription } from "./SubscriptionInitializer";
-export type { FirebaseAuthLike, CreditPackageConfig, SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
+export type { CreditPackageConfig, SubscriptionInitConfig } from "../SubscriptionInitializerTypes";

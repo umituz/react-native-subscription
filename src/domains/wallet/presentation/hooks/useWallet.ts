@@ -13,12 +13,12 @@ import {
 } from "./useTransactionHistory";
 import type { CreditLog } from "../../domain/types/transaction.types";
 
-export interface UseWalletParams {
+interface UseWalletParams {
   transactionConfig: UseTransactionHistoryParams["config"];
   transactionLimit?: number;
 }
 
-export interface UseWalletResult {
+interface UseWalletResult {
   balance: number;
   balanceLoading: boolean;
   transactions: CreditLog[];

@@ -96,8 +96,3 @@ export const useCredits = (): UseCreditsResult => {
     canAfford,
   };
 };
-
-export const useHasCredits = (): boolean => {
-  const { hasCredits } = useCredits();
-  return hasCredits;
-};

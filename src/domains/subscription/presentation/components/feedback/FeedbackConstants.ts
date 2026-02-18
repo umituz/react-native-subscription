@@ -1,6 +1,0 @@
-export const FEEDBACK_TEXT_MAX_LENGTH = 200;
-
-export const FEEDBACK_CHECKBOX_SIZE = 22;
-export const FEEDBACK_CHECKBOX_RADIUS = 11;
-
-export const FEEDBACK_TEXT_MIN_HEIGHT = 80;

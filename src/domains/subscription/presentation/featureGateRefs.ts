@@ -1,6 +1,6 @@
 import { useRef, useEffect, type MutableRefObject } from "react";
 
-export interface FeatureGateRefs {
+interface FeatureGateRefs {
   creditBalanceRef: MutableRefObject<number>;
   hasSubscriptionRef: MutableRefObject<boolean>;
   onShowPaywallRef: MutableRefObject<(requiredCredits?: number) => void>;

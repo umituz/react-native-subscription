@@ -4,7 +4,7 @@ type EventCallback<T = unknown> = (data: T) => void;
  * Simple EventBus Implementation
  * Used to decouple services and provide an observer pattern for subscription events.
  */
-export class SubscriptionEventBus {
+class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
   private listeners: Record<string, EventCallback<any>[]> = {};
 

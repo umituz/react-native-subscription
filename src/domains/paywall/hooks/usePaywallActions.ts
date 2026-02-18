@@ -7,7 +7,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { usePurchaseLoadingStore } from "../../subscription/presentation/stores";
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
 
-export interface UsePaywallActionsParams {
+interface UsePaywallActionsParams {
   packages?: PurchasesPackage[];
   onPurchase?: (pkg: PurchasesPackage) => Promise<void | boolean>;
   onRestore?: () => Promise<void | boolean>;

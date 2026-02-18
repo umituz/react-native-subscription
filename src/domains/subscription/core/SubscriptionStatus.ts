@@ -11,11 +11,10 @@ import {
   ActiveStatusHandler 
 } from "./SubscriptionStatusHandlers";
 
-export { 
-  SUBSCRIPTION_STATUS, 
-  PERIOD_TYPE, 
-  type PeriodType, 
-  type SubscriptionStatusType 
+export {
+  PERIOD_TYPE,
+  type PeriodType,
+  type SubscriptionStatusType
 };
 
 export interface SubscriptionStatus {
@@ -44,11 +43,6 @@ export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean 
     if (!status || !status.isPremium) return false;
     if (!status.expiresAt) return true; // Lifetime
     return timezoneService.isFuture(new Date(status.expiresAt));
-};
-
-export const calculateDaysRemaining = (expiresAt: string | null): number | null => {
-    if (!expiresAt) return null;
-    return timezoneService.getDaysUntil(new Date(expiresAt));
 };
 
 export interface StatusResolverInput {

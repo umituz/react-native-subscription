@@ -7,7 +7,7 @@
 import { collection, addDoc, doc } from "firebase/firestore";
 import { getFirestore } from "@umituz/react-native-firebase";
 
-export interface FeedbackData {
+interface FeedbackData {
   userId: string | null;
   userEmail: string | null;
   type: string;
@@ -26,7 +26,7 @@ export interface FeedbackSubmitResult {
  * Submit feedback to Firestore
  * Stores under users/{userId}/feedback
  */
-export async function submitFeedback(
+async function submitFeedback(
   data: FeedbackData
 ): Promise<FeedbackSubmitResult> {
   const db = getFirestore();

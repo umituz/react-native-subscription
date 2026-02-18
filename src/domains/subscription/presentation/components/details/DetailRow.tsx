@@ -7,7 +7,7 @@ import React from "react";
 import { View, StyleSheet, type ViewStyle, type TextStyle } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
-export interface DetailRowProps {
+interface DetailRowProps {
   label: string;
   value: string;
   highlight?: boolean;

@@ -11,7 +11,3 @@ export const initializeRevenueCatService = (config: RevenueCatConfig): RevenueCa
 };
 
 export const getRevenueCatService = (): RevenueCatService | null => revenueCatServiceInstance;
-
-export const resetRevenueCatService = (): void => {
-  revenueCatServiceInstance = null;
-};

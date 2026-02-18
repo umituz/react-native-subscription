@@ -1,14 +1,14 @@
 import { isValidNumber, isNonNegativeNumber } from "../../../shared/utils/validators";
 
-export const isValidBalance = (balance: number | null | undefined): balance is number => {
+const isValidBalance = (balance: number | null | undefined): balance is number => {
   return isValidNumber(balance) && isNonNegativeNumber(balance);
 };
 
-export const isValidCost = (cost: number): boolean => {
+const isValidCost = (cost: number): boolean => {
   return isValidNumber(cost) && isNonNegativeNumber(cost);
 };
 
-export const isValidMaxCredits = (max: number): boolean => {
+const isValidMaxCredits = (max: number): boolean => {
   return isValidNumber(max) && max > 0;
 };
 

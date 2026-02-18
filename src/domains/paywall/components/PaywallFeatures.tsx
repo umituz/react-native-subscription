@@ -11,7 +11,7 @@ export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({
   return (
     <View style={[styles.features, { backgroundColor: tokens.colors.surfaceSecondary }]}>
       {features.map((feature, idx) => (
-        <View key={idx} style={styles.featureRow}>
+        <View key={`${feature.icon}-${feature.text}`} style={styles.featureRow}>
           <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primaryLight }]}>
             <AtomicIcon name={feature.icon} customSize={16} customColor={tokens.colors.primary} />
           </View>

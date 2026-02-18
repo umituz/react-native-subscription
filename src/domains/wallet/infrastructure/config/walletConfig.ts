@@ -8,7 +8,7 @@
 import type { WalletScreenTranslations } from "../../presentation/screens/WalletScreen.types";
 
 
-export interface WalletConfiguration {
+interface WalletConfiguration {
   translations: WalletScreenTranslations;
   transactionCollection: string;
   useUserSubcollection: boolean;
@@ -42,30 +42,8 @@ const DEFAULT_CONFIG: WalletConfiguration = {
 let walletConfig: WalletConfiguration = { ...DEFAULT_CONFIG };
 
 /**
- * Configure wallet settings globally
- * Call this once during app initialization
- */
-export function configureWallet(config: Partial<WalletConfiguration>): void {
-  walletConfig = {
-    ...DEFAULT_CONFIG,
-    ...config,
-    translations: {
-      ...DEFAULT_CONFIG.translations,
-      ...config.translations,
-    },
-  };
-}
-
-/**
  * Get current wallet configuration
  */
 export function getWalletConfig(): WalletConfiguration {
   return walletConfig;
-}
-
-/**
- * Reset wallet configuration to defaults
- */
-export function resetWalletConfig(): void {
-  walletConfig = { ...DEFAULT_CONFIG };
 }

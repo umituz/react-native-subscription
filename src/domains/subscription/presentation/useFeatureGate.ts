@@ -4,8 +4,6 @@ import { DEFAULT_REQUIRED_CREDITS, canExecuteAuthAction, canExecutePurchaseActio
 import { useSyncedRefs } from "./featureGateRefs";
 import { executeFeatureAction } from "./featureGateActions";
 
-export type { UseFeatureGateParams, UseFeatureGateResult } from "./useFeatureGate.types";
-
 export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResult {
   const {
     isAuthenticated,

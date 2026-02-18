@@ -7,8 +7,6 @@ import { createSubscriptionHeaderStyles } from "./SubscriptionHeader.styles";
 import { EXPIRATION_WARNING_THRESHOLD_DAYS as EXPIRING_SOON_THRESHOLD_DAYS } from "../../../constants/thresholds";
 import { SubscriptionHeaderContent } from "./SubscriptionHeaderContent";
 
-export type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
-
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   statusType,
   showExpirationDate,

@@ -5,7 +5,7 @@ import {
 } from "./SubscriptionConstants";
 import type { StatusResolverInput } from "./SubscriptionStatus";
 
-export abstract class BaseStatusHandler {
+abstract class BaseStatusHandler {
     protected next?: BaseStatusHandler;
 
     setNext(handler: BaseStatusHandler): BaseStatusHandler {

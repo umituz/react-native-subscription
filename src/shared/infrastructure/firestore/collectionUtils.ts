@@ -57,10 +57,3 @@ export function requireFirestore(): Firestore {
   }
   return db;
 }
-
-/**
- * Safe check for Firestore availability
- */
-export function isFirestoreAvailable(): boolean {
-  return getFirestore() !== null;
-}

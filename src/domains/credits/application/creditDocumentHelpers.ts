@@ -6,8 +6,6 @@
 import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { serverTimestamp, type DocumentSnapshot } from "@umituz/react-native-firebase";
 import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
-import { PROCESSED_PURCHASES_WINDOW } from "../core/CreditsConstants";
-
 /**
  * Get existing credit document or create default
  */
@@ -53,16 +51,4 @@ export function getCreditDocumentOrDefault(
     };
 
     return defaultDocument;
-}
-
-/**
- * Add purchase ID to processed purchases list
- * Maintains last N purchases (default: PROCESSED_PURCHASES_WINDOW)
- */
-export function addProcessedPurchase(
-    existing: string[],
-    purchaseId: string,
-    limit: number = PROCESSED_PURCHASES_WINDOW
-): string[] {
-    return [...existing, purchaseId].slice(-limit);
 }

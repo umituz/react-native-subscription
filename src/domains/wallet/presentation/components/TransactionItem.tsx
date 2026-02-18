@@ -6,8 +6,6 @@ import { transactionItemStyles } from "./TransactionItem.styles";
 import type { TransactionItemProps } from "./TransactionItem.types";
 import { defaultDateFormatter, getReasonLabel, getChangePrefix } from "./transactionItemHelpers";
 
-export type { TransactionItemTranslations, TransactionItemProps } from "./TransactionItem.types";
-
 export const TransactionItem: React.FC<TransactionItemProps> = ({
   transaction,
   translations,

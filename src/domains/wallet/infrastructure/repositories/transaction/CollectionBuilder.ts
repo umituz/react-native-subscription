@@ -1,7 +1,7 @@
 import { buildCollectionRef, type CollectionConfig } from "../../../../../shared/infrastructure/firestore";
 import type { TransactionRepositoryConfig } from "../../../domain/types/transaction.types";
 
-export function getCollectionConfig(config: TransactionRepositoryConfig): CollectionConfig {
+function getCollectionConfig(config: TransactionRepositoryConfig): CollectionConfig {
   return {
     collectionName: config.collectionName,
     useUserSubcollection: config.useUserSubcollection ?? false,

@@ -39,7 +39,7 @@ export const paywallControl = {
   getSource: () => paywallState.source,
 };
 
-export interface UsePaywallVisibilityResult {
+interface UsePaywallVisibilityResult {
   showPaywall: boolean;
   currentSource?: PurchaseSource;
   setShowPaywall: (visible: boolean, source?: PurchaseSource) => void;

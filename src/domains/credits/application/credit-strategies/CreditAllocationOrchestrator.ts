@@ -6,7 +6,7 @@ import { StandardPurchaseCreditStrategy } from "./StandardPurchaseCreditStrategy
 /**
  * Orchestrator to coordinate credit allocation logic using the Strategy Pattern.
  */
-export class CreditAllocationOrchestrator {
+class CreditAllocationOrchestrator {
     private strategies: ICreditStrategy[] = [
         new SyncCreditStrategy(),
         new TrialCreditStrategy(),

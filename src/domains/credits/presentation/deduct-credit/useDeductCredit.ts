@@ -1,9 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryManager";
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
 import type { DeductCreditsResult } from "../../core/Credits";
 import { createDeductCreditMutationConfig, type MutationContext } from "./mutationConfig";
+import { creditsQueryKeys } from "../creditsQueryKeys";
 
 export const useDeductCredit = ({
   userId,
@@ -16,9 +17,13 @@ export const useDeductCredit = ({
     createDeductCreditMutationConfig(userId, repository, queryClient)
   );
 
+  // Use ref for stable reference to mutateAsync — avoids re-creating callbacks every render
+  const mutateAsyncRef = useRef(mutation.mutateAsync);
+  mutateAsyncRef.current = mutation.mutateAsync;
+
   const deductCredit = useCallback(async (cost: number = 1): Promise<boolean> => {
     try {
-      const res = await mutation.mutateAsync(cost);
+      const res = await mutateAsyncRef.current(cost);
       if (!res.success) {
         if (res.error?.code === "CREDITS_EXHAUSTED") {
           onCreditsExhausted?.();
@@ -34,7 +39,7 @@ export const useDeductCredit = ({
       });
       throw error;
     }
-  }, [mutation, onCreditsExhausted, userId]);
+  }, [onCreditsExhausted, userId]);
 
   const deductCredits = useCallback(async (cost: number): Promise<boolean> => {
     return await deductCredit(cost);
@@ -51,7 +56,7 @@ export const useDeductCredit = ({
       const result = await repository.refundCredit(userId, amount);
       if (result.success) {
         // Invalidate queries to refresh credit balance
-        await queryClient.invalidateQueries({ queryKey: ['credits', userId] });
+        await queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
         return true;
       }
       return false;

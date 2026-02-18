@@ -77,6 +77,27 @@ export function buildCreditsData({
   };
 }
 
+/**
+ * Compare two Firestore Timestamp-like values by their underlying time.
+ * Handles Timestamp objects (with toMillis/seconds+nanoseconds), null, and undefined.
+ */
+function timestampsEqual(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return a == b;
+  if (typeof a === "object" && typeof b === "object" && a !== null && b !== null) {
+    if ("toMillis" in a && "toMillis" in b &&
+        typeof (a as { toMillis: unknown }).toMillis === "function" &&
+        typeof (b as { toMillis: unknown }).toMillis === "function") {
+      return (a as { toMillis: () => number }).toMillis() === (b as { toMillis: () => number }).toMillis();
+    }
+    if ("seconds" in a && "seconds" in b && "nanoseconds" in a && "nanoseconds" in b) {
+      return (a as { seconds: number; nanoseconds: number }).seconds === (b as { seconds: number; nanoseconds: number }).seconds &&
+             (a as { seconds: number; nanoseconds: number }).nanoseconds === (b as { seconds: number; nanoseconds: number }).nanoseconds;
+    }
+  }
+  return false;
+}
+
 export function shouldSkipStatusSyncWrite(
   purchaseId: string,
   existingData: any,
@@ -92,7 +113,7 @@ export function shouldSkipStatusSyncWrite(
     existingData.creditLimit === newCreditsData.creditLimit &&
     existingData.productId === newCreditsData.productId &&
     existingData.willRenew === newCreditsData.willRenew &&
-    existingData.expirationDate === newCreditsData.expirationDate &&
-    existingData.canceledAt === newCreditsData.canceledAt &&
-    existingData.billingIssueDetectedAt === newCreditsData.billingIssueDetectedAt;
+    timestampsEqual(existingData.expirationDate, newCreditsData.expirationDate) &&
+    timestampsEqual(existingData.canceledAt, newCreditsData.canceledAt) &&
+    timestampsEqual(existingData.billingIssueDetectedAt, newCreditsData.billingIssueDetectedAt);
 }

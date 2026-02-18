@@ -77,7 +77,7 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
         const exponentialDelay = baseDelay * Math.pow(2, attempt);
         const jitter = Math.random() * baseDelay;
         const delay = Math.min(exponentialDelay + jitter, maxDelay);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise<void>(resolve => setTimeout(() => resolve(), delay));
         continue;
       }
       break;

@@ -19,7 +19,7 @@ export interface BalanceCardTranslations {
   availableCredits: string;
 }
 
-export interface BalanceCardProps {
+interface BalanceCardProps {
   balance: number;
   translations: BalanceCardTranslations;
   iconName?: string;

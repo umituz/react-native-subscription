@@ -36,5 +36,3 @@ export class PackageHandler {
     return checkPremiumStatus(customerInfo, this.entitlementId);
   }
 }
-
-export type { PremiumStatus, RestoreResultInfo };

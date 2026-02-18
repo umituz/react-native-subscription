@@ -8,7 +8,7 @@ import type {
 } from "../../domain/types/transaction.types";
 import { TransactionRepository } from "../../infrastructure/repositories/transaction";
 
-export const transactionQueryKeys = {
+const transactionQueryKeys = {
   all: ["transactions"] as const,
   user: (userId: string) => ["transactions", userId] as const,
 };
@@ -18,7 +18,7 @@ export interface UseTransactionHistoryParams {
   limit?: number;
 }
 
-export interface UseTransactionHistoryResult {
+interface UseTransactionHistoryResult {
   transactions: CreditLog[];
   isLoading: boolean;
   error: Error | null;

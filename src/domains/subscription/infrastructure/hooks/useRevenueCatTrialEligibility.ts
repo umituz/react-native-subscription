@@ -14,9 +14,8 @@ import {
   type TrialEligibilityMap,
 } from "../utils/trialEligibilityUtils";
 
-export type { ProductTrialEligibility, TrialEligibilityMap };
 
-export interface UseRevenueCatTrialEligibilityResult {
+interface UseRevenueCatTrialEligibilityResult {
   /** Map of product IDs to their trial eligibility */
   eligibilityMap: TrialEligibilityMap;
   /** Whether eligibility check is in progress */

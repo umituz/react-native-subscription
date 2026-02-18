@@ -7,8 +7,6 @@ import { FEEDBACK_OPTION_OPACITY } from "./feedbackOptionConstants";
 import { FeedbackRadioButton } from "./FeedbackRadioButton";
 import { FeedbackTextInput } from "./FeedbackTextInput";
 
-export type { FeedbackOptionProps } from "./FeedbackOption.types";
-
 export const FeedbackOption: React.FC<FeedbackOptionProps> = React.memo(({
   isSelected,
   text,

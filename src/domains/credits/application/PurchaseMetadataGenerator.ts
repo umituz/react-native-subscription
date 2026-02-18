@@ -8,7 +8,7 @@ import type {
 import { detectPackageType } from "../../../utils/packageTypeDetector";
 import { PACKAGE_TYPE, PURCHASE_TYPE, type Platform } from "../../subscription/core/SubscriptionConstants";
 
-export interface MetadataGeneratorConfig {
+interface MetadataGeneratorConfig {
   productId: string;
   source: PurchaseSource;
   type: PurchaseType;

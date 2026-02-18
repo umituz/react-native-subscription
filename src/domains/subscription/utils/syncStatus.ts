@@ -1,7 +1,7 @@
 import { isDefined } from "../../../shared/utils/validators";
 import type { UserCredits } from "../../credits/core/Credits";
 
-export interface SyncState {
+interface SyncState {
   statusLoading: boolean;
   creditsLoading: boolean;
   subscriptionActive: boolean;

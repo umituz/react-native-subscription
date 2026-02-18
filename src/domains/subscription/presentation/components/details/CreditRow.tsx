@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 
-export interface CreditRowProps {
+interface CreditRowProps {
   label: string;
   current: number;
   total: number;

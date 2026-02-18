@@ -8,14 +8,14 @@ import { View, StyleSheet } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { CreditRow } from "../../components/details/CreditRow";
 
-export interface CreditItem {
+interface CreditItem {
   id: string;
   label: string;
   current: number;
   total: number;
 }
 
-export interface CreditsListProps {
+interface CreditsListProps {
   credits: readonly CreditItem[];
   title?: string;
   description?: string;

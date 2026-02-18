@@ -33,7 +33,7 @@ export const FeedbackTextInput: React.FC<FeedbackTextInputProps> = ({ placeholde
         maxLength={FEEDBACK_INPUT_MAX_LENGTH}
         value={value}
         onChangeText={onChangeText}
-        autoFocus
+
       />
     </View>
   );

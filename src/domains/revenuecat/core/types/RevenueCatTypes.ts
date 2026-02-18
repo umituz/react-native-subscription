@@ -9,7 +9,7 @@ import type { CustomerInfo, PurchasesEntitlementInfo, PurchasesPackage } from "r
  * Default entitlement identifier
  * Can be overridden in RevenueCatConfig
  */
-export const DEFAULT_ENTITLEMENT_ID = "premium";
+const DEFAULT_ENTITLEMENT_ID = "premium";
 
 /**
  * Store type - Directly from RevenueCat SDK
@@ -34,7 +34,7 @@ export type PackageType = PurchasesPackage['packageType'];
  * RevenueCat Entitlement Info
  * Represents active entitlement data from CustomerInfo
  */
-export interface RevenueCatEntitlement {
+interface RevenueCatEntitlement {
   identifier: string;
   productIdentifier: string;
   isSandbox: boolean;
@@ -50,7 +50,7 @@ export interface RevenueCatEntitlement {
 /**
  * RevenueCat Purchase Error with userCancelled flag
  */
-export interface RevenueCatPurchaseErrorInfo extends Error {
+interface RevenueCatPurchaseErrorInfo extends Error {
   userCancelled?: boolean;
   code?: string;
   readableErrorCode?: string;

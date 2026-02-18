@@ -7,7 +7,7 @@ import { StyleSheet, View, ScrollView, type ViewStyle, type ColorValue } from "r
 import { useSafeAreaInsets, type Edge } from "react-native-safe-area-context";
 import { useAppDesignTokens } from "@umituz/react-native-design-system";
 
-export interface ScreenLayoutProps {
+interface ScreenLayoutProps {
   children: React.ReactNode;
   scrollable?: boolean;
   edges?: Edge[];

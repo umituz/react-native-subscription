@@ -8,7 +8,7 @@ export interface SubscriptionInitModuleConfig extends Omit<SubscriptionInitConfi
 }
 
 export function createSubscriptionInitModule(config: SubscriptionInitModuleConfig): InitModule {
-  const { getApiKey, critical = true, dependsOn = ['auth'], ...subscriptionConfig } = config;
+  const { getApiKey, critical = false, dependsOn = ['auth'], ...subscriptionConfig } = config;
 
   return {
     name: 'subscription',

@@ -1,6 +1,6 @@
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 
-export class ConfigurationStateManager {
+class ConfigurationStateManager {
   private _isPurchasesConfigured = false;
   private _configurationPromise: Promise<InitializeResult> | null = null;
   private _resolveConfiguration: ((value: InitializeResult) => void) | null = null;
@@ -40,15 +40,19 @@ export class ConfigurationStateManager {
   completeConfiguration(success: boolean): void {
     this._isPurchasesConfigured = success;
 
-    // Cleanup promise state immediately (no setTimeout)
-    // If promise hasn't resolved yet, that's fine - it will still resolve via the callback
-    if (this._configurationPromise) {
-      this._configurationPromise = null;
-    }
+    // Note: Do NOT null _configurationPromise here.
+    // The promise is resolved externally via resolveConfig() in RevenueCatInitializer.
+    // Nulling it before resolution creates a race where concurrent callers
+    // see isConfiguring=false and start a duplicate SDK configuration.
+    // The promise is cleaned up in the next startConfiguration() or reset() call.
+    // We only clear the resolve function since it's no longer needed.
+    this._resolveConfiguration = null;
+  }
 
-    // Clear resolve function if it still exists
-    if (this._resolveConfiguration) {
-      this._resolveConfiguration = null;
+  /** Called after resolveConfig() to clean up the completed promise */
+  clearCompletedConfiguration(): void {
+    if (this._isPurchasesConfigured || !this._resolveConfiguration) {
+      this._configurationPromise = null;
     }
   }
 

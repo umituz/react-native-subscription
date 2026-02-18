@@ -54,7 +54,7 @@ const ERROR_CODE_MAP = new Map<string, PurchasesErrorCode>([
  * @param errorCode - Error code string from RevenueCat error
  * @returns ErrorMessage configuration
  */
-export function getErrorMessageForCode(errorCode: string | null | undefined): ErrorMessage {
+function getErrorMessageForCode(errorCode: string | null | undefined): ErrorMessage {
   if (!errorCode) {
     return DEFAULT_ERROR_MESSAGE;
   }
