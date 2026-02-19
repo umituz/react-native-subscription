@@ -8,6 +8,7 @@ import { createPackageHandler } from "./packageHandlerFactory";
 import { checkPremiumStatusFromService } from "./premiumStatusChecker";
 import { getPackagesOperation, purchasePackageOperation, restoreOperation } from "./managerOperations";
 import { performServiceInitialization } from "./initializationHandler";
+import { initializationState } from "../state/initializationState";
 
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
@@ -52,6 +53,9 @@ class SubscriptionManagerImpl {
       return existingPromise;
     }
 
+    // Mark pending so React components know to wait
+    initializationState.markPending();
+
     const promise = this.performInitialization(actualUserId);
     this.state.initCache.setPromise(promise, cacheKey);
     return promise;
@@ -69,6 +73,12 @@ class SubscriptionManagerImpl {
     const { service, success } = await performServiceInitialization(this.managerConfig!.config, userId);
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
+
+    if (success) {
+      // Notify reactive state so React components re-render and enable their queries
+      const notifyUserId = (userId && userId.length > 0) ? userId : null;
+      initializationState.markInitialized(notifyUserId);
+    }
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[SubscriptionManager] Initialization completed:', { success });
@@ -111,6 +121,7 @@ class SubscriptionManagerImpl {
     this.state.reset();
     this.serviceInstance = null;
     this.packageHandler = null;
+    initializationState.reset();
   }
 
   isConfigured = (): boolean => this.managerConfig !== null;

@@ -25,9 +25,17 @@ function isTransientError(error: any): boolean {
     error?.code === 'DEADLINE_EXCEEDED' ||
     error?.code === 'UNAVAILABLE' ||
     error?.code === 'RESOURCE_EXHAUSTED' ||
+    // Firestore transaction contention: document was modified between our read and write.
+    // runTransaction does not auto-retry on failed-precondition, so we do it here.
+    error?.code === 'failed-precondition' ||
+    error?.code === 'FAILED_PRECONDITION' ||
+    // Firestore transaction aborted due to concurrent modification.
+    error?.code === 'aborted' ||
+    error?.code === 'ABORTED' ||
     error?.message?.includes('already-exists') ||
     error?.message?.includes('timeout') ||
-    error?.message?.includes('unavailable')
+    error?.message?.includes('unavailable') ||
+    error?.message?.includes('failed-precondition')
   );
 }
 

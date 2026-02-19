@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
+import { initializationState } from "../infrastructure/state/initializationState";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
 import { isAuthenticated } from "../utils/authGuards";
@@ -19,8 +20,18 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const queryClient = useQueryClient();
   const isConfigured = SubscriptionManager.isConfigured();
 
-  // Check if initialized (BackgroundInitializer handles initialization)
-  const isInitialized = userId ? SubscriptionManager.isInitializedForUser(userId) : false;
+  // Reactive initialization state - triggers re-render when BackgroundInitializer completes
+  const initState = useSyncExternalStore(
+    initializationState.subscribe,
+    initializationState.getSnapshot,
+    initializationState.getSnapshot,
+  );
+
+  // Check if initialized for this specific user (reactive)
+  const isInitialized = userId
+    ? initState.initialized && initState.userId === userId
+    : false;
+
   const queryEnabled = isAuthenticated(userId) && isConfigured && isInitialized;
 
   const { data, status, error, refetch } = useQuery({
@@ -84,7 +95,3 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     refetch,
   };
 };
-
-
-
-

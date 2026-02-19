@@ -1,16 +1,21 @@
 /**
  * Subscription Packages Hook
- * TanStack query for fetching available packages
+ * TanStack query for fetching available packages (offerings)
  * Auth info automatically read from @umituz/react-native-auth
+ *
+ * IMPORTANT: Packages (offerings) are NOT user-specific - they're the same
+ * for all users. We only need RevenueCat to be initialized, not necessarily
+ * for a specific user. User-specific checks belong in useSubscriptionStatus.
  */
 
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import {
   useAuthStore,
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
+import { initializationState } from "../../infrastructure/state/initializationState";
 import {
   SUBSCRIPTION_QUERY_KEYS,
 } from "./subscriptionQueryKeys";
@@ -26,16 +31,21 @@ export const useSubscriptionPackages = () => {
   const queryClient = useQueryClient();
   const prevUserIdRef = useRef(userId);
 
-  // Check if initialized (BackgroundInitializer handles initialization)
-  const isInitialized = userId
-    ? SubscriptionManager.isInitializedForUser(userId)
-    : SubscriptionManager.isInitialized();
+  // Reactive initialization state - triggers re-render when BackgroundInitializer completes
+  const initState = useSyncExternalStore(
+    initializationState.subscribe,
+    initializationState.getSnapshot,
+    initializationState.getSnapshot,
+  );
+
+  // Packages (offerings) are NOT user-specific - same for all users.
+  // We only need RevenueCat to be initialized at all.
+  // Use reactive state OR direct manager check for backwards compatibility.
+  const isInitialized = initState.initialized || SubscriptionManager.isInitialized();
 
   const query = useQuery({
     queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, userId ?? "anonymous"] as const,
     queryFn: async () => {
-      // No side effects - just fetch packages
-      // Initialization is handled by BackgroundInitializer
       return SubscriptionManager.getPackages();
     },
     enabled: isConfigured && isInitialized,

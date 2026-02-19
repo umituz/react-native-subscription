@@ -45,7 +45,10 @@ export function detectRenewal(
   const newExpiration = new Date(newExpirationDate).getTime();
   const previousExpiration = new Date(state.previousExpirationDate).getTime();
   const productChanged = productId !== state.previousProductId;
-  const expirationExtended = newExpiration > previousExpiration;
+
+  // Guard against NaN from invalid date strings - treat as no extension
+  const expirationExtended =
+    !isNaN(newExpiration) && !isNaN(previousExpiration) && newExpiration > previousExpiration;
 
   if (productChanged) {
     const oldTier = getPackageTier(state.previousProductId);

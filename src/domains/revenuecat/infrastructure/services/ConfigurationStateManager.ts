@@ -19,7 +19,13 @@ class ConfigurationStateManager {
 
   startConfiguration(): (value: InitializeResult) => void {
     if (this._configurationPromise) {
-      throw new Error('Configuration already in progress');
+      // Resolve previous pending configuration as failed to prevent dangling promises
+      if (this._resolveConfiguration) {
+        const prevResolve = this._resolveConfiguration;
+        this._resolveConfiguration = null;
+        prevResolve({ success: false, offering: null, isPremium: false });
+      }
+      this._configurationPromise = null;
     }
 
     // Create promise and store resolve function atomically

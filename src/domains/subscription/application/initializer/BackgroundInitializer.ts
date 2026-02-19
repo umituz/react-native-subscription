@@ -3,10 +3,14 @@ import { getCurrentUserId, setupAuthStateListener } from "../SubscriptionAuthLis
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 
 const AUTH_STATE_DEBOUNCE_MS = 500; // Wait 500ms before processing auth state changes
+const MAX_RETRY_ATTEMPTS = 3;
+const RETRY_DELAY_MS = 2000;
 
 export async function startBackgroundInitialization(config: SubscriptionInitConfig): Promise<() => void> {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  let retryTimer: ReturnType<typeof setTimeout> | null = null;
   let lastUserId: string | undefined = undefined;
+  let lastInitSucceeded = false;
 
   const initializeInBackground = async (revenueCatUserId?: string): Promise<void> => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -15,16 +19,49 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     await SubscriptionManager.initialize(revenueCatUserId);
   };
 
+  const attemptInitWithRetry = async (revenueCatUserId?: string, attempt = 0): Promise<void> => {
+    try {
+      await initializeInBackground(revenueCatUserId);
+      lastUserId = revenueCatUserId;
+      lastInitSucceeded = true;
+    } catch (error) {
+      lastInitSucceeded = false;
+      console.error('[BackgroundInitializer] Initialization failed:', {
+        userId: revenueCatUserId,
+        attempt: attempt + 1,
+        maxAttempts: MAX_RETRY_ATTEMPTS,
+        error: error instanceof Error ? error.message : String(error)
+      });
+
+      if (attempt < MAX_RETRY_ATTEMPTS - 1) {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) {
+          console.log('[BackgroundInitializer] Scheduling retry', { attempt: attempt + 2 });
+        }
+        retryTimer = setTimeout(() => {
+          void attemptInitWithRetry(revenueCatUserId, attempt + 1);
+        }, RETRY_DELAY_MS * (attempt + 1));
+      } else {
+        // After all retries failed, set lastUserId so we don't block
+        // but mark as failed so next auth change can retry
+        lastUserId = revenueCatUserId;
+      }
+    }
+  };
+
   const debouncedInitialize = (revenueCatUserId?: string): void => {
-    // Clear any pending initialization
+    // Clear any pending initialization or retry
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
+    if (retryTimer) {
+      clearTimeout(retryTimer);
+      retryTimer = null;
+    }
 
-    // If userId hasn't changed, skip
-    if (lastUserId === revenueCatUserId) {
+    // If userId hasn't changed AND last init succeeded, skip
+    if (lastUserId === revenueCatUserId && lastInitSucceeded) {
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[BackgroundInitializer] UserId unchanged, skipping reinitialization');
+        console.log('[BackgroundInitializer] UserId unchanged and init succeeded, skipping');
       }
       return;
     }
@@ -33,18 +70,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', revenueCatUserId || '(undefined - anonymous)');
       }
-      try {
-        await initializeInBackground(revenueCatUserId);
-        lastUserId = revenueCatUserId;
-      } catch (error) {
-        // Don't update lastUserId on failure — allow retry on next auth state change
-        // with the same userId (e.g., network blip recovers)
-        lastUserId = undefined;
-        console.error('[BackgroundInitializer] Reinitialization failed:', {
-          userId: revenueCatUserId,
-          error: error instanceof Error ? error.message : String(error)
-        });
-      }
+      void attemptInitWithRetry(revenueCatUserId);
     }, AUTH_STATE_DEBOUNCE_MS);
   };
 
@@ -65,6 +91,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   // This prevents a Firestore permission-denied error from querying with an anonymous ID.
   if (initialRevenueCatUserId) {
     await initializeInBackground(initialRevenueCatUserId);
+    lastInitSucceeded = true;
   } else if (typeof __DEV__ !== 'undefined' && __DEV__) {
     console.log('[BackgroundInitializer] Skipping anonymous init, waiting for auth state');
   }
@@ -74,6 +101,9 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   return () => {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
+    }
+    if (retryTimer) {
+      clearTimeout(retryTimer);
     }
     if (unsubscribe) {
       unsubscribe();

@@ -54,6 +54,13 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     return createCreditAmountsFromPackages(packages, packageAllocations);
   }, [providedCreditAmounts, packageAllocations, packages]);
 
+  // When using credit system, only show packages that have a credit allocation.
+  // This filters out lifetime/"unlimited" plans that aren't part of the credit model.
+  const displayPackages = useMemo(() => {
+    if (!creditAmounts || Object.keys(creditAmounts).length === 0) return packages;
+    return packages.filter((pkg) => creditAmounts[pkg.product.identifier] != null);
+  }, [packages, creditAmounts]);
+
   if (!isVisible) return null;
 
   return (
@@ -61,7 +68,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       visible={isVisible}
       onClose={handleClose}
       translations={translations}
-      packages={packages}
+      packages={displayPackages}
       legalUrls={legalUrls}
       features={features ? [...features] : undefined}
       heroImage={heroImage}
