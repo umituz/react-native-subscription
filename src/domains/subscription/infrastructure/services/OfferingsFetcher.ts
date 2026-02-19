@@ -54,7 +54,10 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
         await new Promise<void>(resolve => setTimeout(resolve, FETCH_RETRY_DELAY_MS));
         continue;
       }
-      throw new Error(`Failed to fetch offerings: ${error instanceof Error ? error.message : "Unknown error"}`);
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.warn('[OfferingsFetcher] Failed to fetch offerings after all retries:', error);
+      }
+      return null;
     }
   }
 

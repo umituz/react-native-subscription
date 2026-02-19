@@ -9,7 +9,23 @@ declare const __DEV__: boolean;
 
 function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: any): InitializeResult {
   const isPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
-  return { success: true, offering: offerings.current, isPremium };
+  return { success: true, offering: offerings?.current ?? null, isPremium };
+}
+
+/**
+ * Fetch offerings separately - non-fatal if it fails.
+ * Empty offerings (no products configured in RevenueCat dashboard) should NOT
+ * block SDK initialization. The SDK is still usable for premium checks, purchases, etc.
+ */
+async function fetchOfferingsSafe(): Promise<any> {
+  try {
+    return await Purchases.getOfferings();
+  } catch (error) {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.warn('[UserSwitchHandler] Offerings fetch failed (non-fatal):', error);
+    }
+    return { current: null, all: {} };
+  }
 }
 
 function normalizeUserId(userId: string): string | null {
@@ -87,7 +103,7 @@ async function performUserSwitch(
 
     deps.setInitialized(true);
     deps.setCurrentUserId(normalizedUserId || undefined);
-    const offerings = await Purchases.getOfferings();
+    const offerings = await fetchOfferingsSafe();
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[UserSwitchHandler] ✅ User switch completed successfully');
@@ -136,9 +152,11 @@ export async function handleInitialConfiguration(
       console.log('[UserSwitchHandler] ✅ Purchases.configure() successful');
     }
 
+    // Fetch customer info (critical) and offerings (non-fatal) separately.
+    // Empty offerings should NOT block initialization - SDK is still usable.
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),
-      Purchases.getOfferings(),
+      fetchOfferingsSafe(),
     ]);
 
     const currentUserId = await Purchases.getAppUserID();
@@ -198,11 +216,11 @@ export async function fetchCurrentUserData(deps: InitializerDeps): Promise<Initi
   try {
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),
-      Purchases.getOfferings(),
+      fetchOfferingsSafe(),
     ]);
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
-    console.error('[UserSwitchHandler] Failed to fetch customer info/offerings for initialized user', {
+    console.error('[UserSwitchHandler] Failed to fetch customer info for initialized user', {
       error
     });
     return FAILED_INITIALIZATION_RESULT;

@@ -17,6 +17,11 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
 
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
   const prevCreditBalanceRef = useRef(creditBalance);
+  // Separate ref to track previous subscription state for canExecutePurchaseAction.
+  // NOTE: Must NOT use hasSubscriptionRef from useSyncedRefs here because useSyncedRefs
+  // effects run BEFORE this effect (React runs effects in definition order), so
+  // hasSubscriptionRef.current would already be the NEW value when we check it.
+  const prevHasSubscriptionRef = useRef(hasSubscription);
   const isWaitingForPurchaseRef = useRef(false);
   const isWaitingForAuthCreditsRef = useRef(false);
 
@@ -50,13 +55,14 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
   }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywallRef, requiredCreditsRef]);
 
   useEffect(() => {
-
+    // Use prevHasSubscriptionRef (updated AFTER check) not hasSubscriptionRef from useSyncedRefs
+    // (which is already updated to new value before this effect runs - race condition fix)
     const shouldExecute = canExecutePurchaseAction(
       isWaitingForPurchaseRef.current,
       creditBalance,
       prevCreditBalanceRef.current ?? 0,
       hasSubscription,
-      hasSubscriptionRef.current,
+      prevHasSubscriptionRef.current,
       !!pendingActionRef.current
     );
 
@@ -67,9 +73,10 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
       action();
     }
 
+    // Update AFTER check so next render has correct "prev" values
     prevCreditBalanceRef.current = creditBalance;
-    // hasSubscriptionRef is already synced by useSyncedRefs, no need to update manually
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    prevHasSubscriptionRef.current = hasSubscription;
+     
   }, [creditBalance, hasSubscription]);
 
   const requireFeature = useCallback(

@@ -74,9 +74,13 @@ class SubscriptionManagerImpl {
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
 
-    if (success) {
-      // Notify reactive state so React components re-render and enable their queries
-      const notifyUserId = (userId && userId.length > 0) ? userId : null;
+    // Always notify reactive state when service is available, even if offerings fetch failed.
+    // This ensures React components (useSubscriptionPackages, useSubscriptionStatus) are unblocked.
+    // The service IS configured and usable - empty offerings is not a fatal error.
+    const notifyUserId = (userId && userId.length > 0) ? userId : null;
+    if (service) {
+      initializationState.markInitialized(notifyUserId);
+    } else if (success) {
       initializationState.markInitialized(notifyUserId);
     }
 
