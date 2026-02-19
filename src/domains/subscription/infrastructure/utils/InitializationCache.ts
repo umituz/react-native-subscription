@@ -40,16 +40,15 @@ export class InitializationCache {
     }
 
     setPromise(promise: Promise<boolean>, userId: string): void {
-        // Add to pending queue immediately (atomic operation)
-        this.pendingQueue.set(userId, promise);
-
-        this.initPromise = promise;
         this.promiseUserId = userId;
         this.promiseCompleted = false;
 
         const targetUserId = userId;
 
-        promise
+        // Build the handled chain that ALWAYS resolves (never rejects).
+        // This is critical: pendingQueue must store a non-rejectable promise so that
+        // callers who receive it via tryAcquireInitialization never get an unhandled rejection.
+        const chain: Promise<boolean> = promise
             .then((result) => {
                 if (result && this.promiseUserId === targetUserId) {
                     this.currentUserId = targetUserId;
@@ -65,12 +64,16 @@ export class InitializationCache {
                 }
                 this.promiseCompleted = true;
                 console.error('[InitializationCache] Initialization failed', { userId: targetUserId, error });
-                return false;
+                return false as boolean;
             })
             .finally(() => {
                 // Remove from queue when complete
                 this.pendingQueue.delete(targetUserId);
             });
+
+        // Store the chain (not the original promise) so callers never receive a rejection
+        this.initPromise = chain;
+        this.pendingQueue.set(userId, chain);
     }
 
     getCurrentUserId(): string | null {
