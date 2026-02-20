@@ -17,9 +17,8 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
 
   if (user.isAnonymous) {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionAuthListener] Anonymous user - returning undefined (RevenueCat will use its own ID)');
+      console.log(`[SubscriptionAuthListener] Anonymous user - using Firebase anonymous UID: ${user.uid}`);
     }
-    return undefined;
   }
 
   return user.uid;
@@ -40,13 +39,13 @@ export const setupAuthStateListener = (
   }
 
   return auth.onAuthStateChanged((user) => {
-    const userId = (user && !user.isAnonymous) ? user.uid : undefined;
+    const userId = user ? user.uid : undefined;
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[SubscriptionAuthListener] 🔔 Auth state changed:', {
         hasUser: !!user,
         isAnonymous: user?.isAnonymous,
-        userId: userId || '(undefined - anonymous)',
+        userId: userId || '(undefined - no user)',
       });
     }
 

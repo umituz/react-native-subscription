@@ -48,10 +48,11 @@ export const usePurchasePackage = () => {
 
       const productId = pkg.product.identifier;
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[Purchase] Calling SubscriptionManager.purchasePackage()");
+        console.log(`[Purchase] Initializing and purchasing. User: ${userId}`);
       }
 
-      const success = await SubscriptionManager.purchasePackage(pkg);
+      await SubscriptionManager.initialize(userId);
+      const success = await SubscriptionManager.purchasePackage(pkg, userId);
 
       return { success, productId };
     },

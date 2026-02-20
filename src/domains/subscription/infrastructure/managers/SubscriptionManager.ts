@@ -2,7 +2,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import type { PackageHandler } from "../handlers/PackageHandler";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
-import { ensureServiceAvailable } from "./subscriptionManagerUtils";
+import { ensureServiceAvailable, getCurrentUserIdOrThrow } from "./subscriptionManagerUtils";
 import type { SubscriptionManagerConfig, PremiumStatus, RestoreResultInfo } from "./SubscriptionManager.types";
 import { createPackageHandler } from "./packageHandlerFactory";
 import { checkPremiumStatusFromService } from "./premiumStatusChecker";
@@ -100,17 +100,25 @@ class SubscriptionManagerImpl {
     return getPackagesOperation(this.managerConfig, this.serviceInstance, this.packageHandler!);
   }
 
-  async purchasePackage(pkg: PurchasesPackage): Promise<boolean> {
+  async purchasePackage(pkg: PurchasesPackage, explicitUserId?: string): Promise<boolean> {
     this.ensureConfigured();
+    if (explicitUserId) {
+        await this.initialize(explicitUserId);
+    }
     this.ensurePackageHandlerInitialized();
-    const result = await purchasePackageOperation(pkg, this.managerConfig, this.state, this.packageHandler!);
+    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.state);
+    const result = await purchasePackageOperation(pkg, this.managerConfig, resolvedUserId, this.packageHandler!);
     return result;
   }
 
-  async restore(): Promise<RestoreResultInfo> {
+  async restore(explicitUserId?: string): Promise<RestoreResultInfo> {
     this.ensureConfigured();
+    if (explicitUserId) {
+        await this.initialize(explicitUserId);
+    }
     this.ensurePackageHandlerInitialized();
-    return restoreOperation(this.managerConfig, this.state, this.packageHandler!);
+    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.state);
+    return restoreOperation(this.managerConfig, resolvedUserId, this.packageHandler!);
   }
 
   async checkPremiumStatus(): Promise<PremiumStatus> {

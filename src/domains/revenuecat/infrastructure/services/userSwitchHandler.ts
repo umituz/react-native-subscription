@@ -29,7 +29,7 @@ async function fetchOfferingsSafe(): Promise<any> {
 }
 
 function normalizeUserId(userId: string): string | null {
-  return (userId && userId.length > 0) ? userId : null;
+  return (userId && userId.length > 0 && userId !== "__anonymous__") ? userId : null;
 }
 
 function isAnonymousId(userId: string): boolean {
