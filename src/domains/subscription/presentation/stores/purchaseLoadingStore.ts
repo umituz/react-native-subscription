@@ -1,25 +1,13 @@
-/**
- * Purchase Loading Store
- * Global state for tracking purchase loading across the app
- * Supports concurrent purchases via Map-based tracking
- * Used by both PaywallModal and useSavedPurchaseAutoExecution
- */
-
 import { create } from "zustand";
 
 interface PurchaseLoadingState {
-  /** Map of product IDs to purchase sources (supports concurrent purchases) */
   activePurchases: Map<string, "manual" | "auto-execution">;
 }
 
 interface PurchaseLoadingActions {
-  /** Start purchase loading state for a product */
   startPurchase: (productId: string, source: "manual" | "auto-execution") => void;
-  /** End purchase loading state for a product */
   endPurchase: (productId: string) => void;
-  /** Check if any purchase is in progress, or if a specific product is being purchased */
   isPurchasing: (productId?: string) => boolean;
-  /** Reset all state */
   reset: () => void;
 }
 
@@ -59,5 +47,4 @@ export const usePurchaseLoadingStore = create<PurchaseLoadingStore>((set, get) =
   },
 }));
 
-// Selectors for optimized re-renders
 export const selectIsPurchasing = (state: PurchaseLoadingStore) => state.activePurchases.size > 0;

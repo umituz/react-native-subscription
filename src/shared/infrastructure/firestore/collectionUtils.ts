@@ -1,8 +1,3 @@
-/**
- * Firestore Collection Utilities
- * Shared utilities for building Firestore collection and document references
- */
-
 import { collection, doc } from "firebase/firestore";
 import {
   getFirestore,
@@ -16,10 +11,6 @@ export interface CollectionConfig {
   useUserSubcollection: boolean;
 }
 
-/**
- * Build a collection reference based on configuration
- * Supports both root collections and user subcollections
- */
 export function buildCollectionRef(
   db: Firestore,
   userId: string,
@@ -31,10 +22,6 @@ export function buildCollectionRef(
   return collection(db, config.collectionName);
 }
 
-/**
- * Build a document reference based on configuration
- * Supports both root collections and user subcollections
- */
 export function buildDocRef(
   db: Firestore,
   userId: string,
@@ -44,12 +31,9 @@ export function buildDocRef(
   if (config.useUserSubcollection) {
     return doc(db, "users", userId, config.collectionName, docId);
   }
-  return doc(db, config.collectionName, docId);
+  return doc(db, config.collectionName, userId);
 }
 
-/**
- * Get Firestore instance or throw error
- */
 export function requireFirestore(): Firestore {
   const db = getFirestore();
   if (!db) {

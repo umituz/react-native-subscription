@@ -1,8 +1,3 @@
-/**
- * Premium Details Card Styles
- * StyleSheet for PremiumDetailsCard component
- */
-
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({

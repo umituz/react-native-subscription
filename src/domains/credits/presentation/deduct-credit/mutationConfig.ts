@@ -3,7 +3,7 @@ import { timezoneService } from "@umituz/react-native-design-system";
 import type { UserCredits, DeductCreditsResult } from "../../core/Credits";
 import type { CreditsRepository } from "../../infrastructure/CreditsRepository";
 import { creditsQueryKeys } from "../creditsQueryKeys";
-import { calculateRemaining } from "../../../../shared/utils/numberUtils";
+import { calculateRemaining } from "../../../../shared/utils/numberUtils.core";
 
 export interface MutationContext {
   previousCredits: UserCredits | null;

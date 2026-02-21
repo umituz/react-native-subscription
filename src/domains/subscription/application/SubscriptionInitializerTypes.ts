@@ -1,7 +1,3 @@
-/**
- * Subscription Initializer Types
- */
-
 import type { CreditsConfig } from "../../credits/core/Credits";
 import type { UserCreditsDocumentRead } from "../../credits/core/UserCreditsDocument";
 import type { PurchaseSource, PurchaseType } from "../core/SubscriptionConstants";
@@ -40,7 +36,7 @@ export interface InitializeCreditsMetadata {
   willRenew: boolean | null;
   originalTransactionId: string | null;
   isPremium: boolean;
-  periodType: string | null; // Raw value from RevenueCat SDK
+  periodType: string | null;
   unsubscribeDetectedAt: string | null;
   billingIssueDetectedAt: string | null;
   store: Store | null;

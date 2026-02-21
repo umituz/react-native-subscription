@@ -1,8 +1,3 @@
-/**
- * Premium Details Card Types
- * Type definitions for premium subscription details display
- */
-
 import type { SubscriptionStatusType } from "./PremiumStatusBadge";
 
 export interface CreditInfo {

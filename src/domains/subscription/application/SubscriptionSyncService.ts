@@ -22,9 +22,9 @@ export class SubscriptionSyncService {
       console.error('[SubscriptionSyncService] Purchase processing failed', {
         userId,
         productId,
-        source,
-        error
+        error: error instanceof Error ? error.message : String(error)
       });
+      throw error;
     }
   }
 
@@ -37,7 +37,7 @@ export class SubscriptionSyncService {
         userId,
         productId,
         newExpirationDate,
-        error
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   }
@@ -58,12 +58,8 @@ export class SubscriptionSyncService {
         userId,
         isPremium,
         productId,
-        expiresAt,
-        willRenew,
-        periodType,
-        error
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   }
 }
-

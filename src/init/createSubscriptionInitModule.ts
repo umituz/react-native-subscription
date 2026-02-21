@@ -7,6 +7,15 @@ export interface SubscriptionInitModuleConfig extends Omit<SubscriptionInitConfi
   dependsOn?: string[];
 }
 
+let subscriptionCleanup: (() => void) | null = null;
+
+export function cleanupSubscriptionModule(): void {
+  if (subscriptionCleanup) {
+    subscriptionCleanup();
+    subscriptionCleanup = null;
+  }
+}
+
 export function createSubscriptionInitModule(config: SubscriptionInitModuleConfig): InitModule {
   const { getApiKey, critical = false, dependsOn = ['auth'], ...subscriptionConfig } = config;
 
@@ -21,9 +30,10 @@ export function createSubscriptionInitModule(config: SubscriptionInitModuleConfi
           return true;
         }
 
-        await initializeSubscription({ apiKey, ...subscriptionConfig });
+        subscriptionCleanup = await initializeSubscription({ apiKey, ...subscriptionConfig });
         return true;
-      } catch {
+      } catch (error) {
+        console.error('[SubscriptionInitModule] Initialization failed:', error instanceof Error ? error.message : String(error));
         return false;
       }
     },

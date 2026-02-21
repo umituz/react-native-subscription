@@ -1,28 +1,13 @@
-/**
- * RevenueCat Error Messages
- * User-friendly error message configurations
- */
-
 import Purchases from "react-native-purchases";
 
-/**
- * Error Message Configuration
- */
 export interface ErrorMessage {
   title: string;
   message: string;
   shouldShowAlert?: boolean;
 }
 
-/**
- * RevenueCat Error Code Type
- */
 export type PurchasesErrorCode = typeof Purchases.PURCHASES_ERROR_CODE[keyof typeof Purchases.PURCHASES_ERROR_CODE];
 
-/**
- * User-friendly error messages mapped by error code enum
- * Strategy Pattern: Each error code has its own message configuration
- */
 export const ERROR_MESSAGES_MAP = new Map<PurchasesErrorCode, ErrorMessage>([
   [
     Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR,
@@ -130,9 +115,6 @@ export const ERROR_MESSAGES_MAP = new Map<PurchasesErrorCode, ErrorMessage>([
   ],
 ]);
 
-/**
- * Default error message for unknown errors
- */
 export const DEFAULT_ERROR_MESSAGE: ErrorMessage = {
   title: "Error",
   message: "An error occurred. Please try again.",

@@ -1,8 +1,3 @@
-/**
- * Paywall Feedback Styles
- * Generates styles based on design tokens
- */
-
 import { StyleSheet } from "react-native";
 import type { DesignTokens } from "@umituz/react-native-design-system";
 

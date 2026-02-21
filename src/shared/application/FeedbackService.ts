@@ -1,11 +1,5 @@
-/**
- * Feedback Service
- * Handles feedback submission to Firestore
- * Feedback is stored under users/{userId}/feedback/{feedbackId}
- */
-
 import { collection, addDoc, doc } from "firebase/firestore";
-import { getFirestore } from "@umituz/react-native-firebase";
+import { getFirestore, serverTimestamp } from "@umituz/react-native-firebase";
 
 interface FeedbackData {
   userId: string | null;
@@ -22,10 +16,6 @@ export interface FeedbackSubmitResult {
   error?: Error;
 }
 
-/**
- * Submit feedback to Firestore
- * Stores under users/{userId}/feedback
- */
 async function submitFeedback(
   data: FeedbackData
 ): Promise<FeedbackSubmitResult> {
@@ -40,8 +30,6 @@ async function submitFeedback(
   }
 
   try {
-    const now = new Date().toISOString();
-
     const userDocRef = doc(db, "users", data.userId);
     const feedbackCollectionRef = collection(userDocRef, "feedback");
 
@@ -52,8 +40,8 @@ async function submitFeedback(
       description: data.description,
       rating: data.rating ?? null,
       status: data.status ?? "pending",
-      createdAt: now,
-      updatedAt: now,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
 
     return { success: true };
@@ -65,9 +53,6 @@ async function submitFeedback(
   }
 }
 
-/**
- * Submit paywall decline feedback
- */
 export async function submitPaywallFeedback(
   userId: string | null,
   userEmail: string | null,
@@ -82,9 +67,6 @@ export async function submitPaywallFeedback(
   });
 }
 
-/**
- * Submit general settings feedback
- */
 export async function submitSettingsFeedback(
   userId: string | null,
   userEmail: string | null,

@@ -1,9 +1,5 @@
-/**
- * Subscription Init Module
- * Provides factory for creating app initialization modules
- */
-
 export {
   createSubscriptionInitModule,
+  cleanupSubscriptionModule,
   type SubscriptionInitModuleConfig,
 } from './createSubscriptionInitModule';

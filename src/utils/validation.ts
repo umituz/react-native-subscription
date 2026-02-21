@@ -1,9 +1,3 @@
-/**
- * User Tier Validation Utilities
- *
- * Type guards and validation functions for user tier system
- */
-
 import { USER_TIER, type UserTier, type UserTierInfo } from './types';
 
 export function isValidUserTier(value: unknown): value is UserTier {

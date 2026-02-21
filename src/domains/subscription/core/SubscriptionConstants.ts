@@ -6,8 +6,6 @@ export const USER_TIER = {
 
 export type UserTierType = (typeof USER_TIER)[keyof typeof USER_TIER];
 
-export const DEFAULT_ENTITLEMENT_ID = 'premium';
-
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',
   TRIAL: 'trial',
@@ -63,5 +61,3 @@ export const PURCHASE_TYPE = {
 } as const;
 
 export type PurchaseType = (typeof PURCHASE_TYPE)[keyof typeof PURCHASE_TYPE];
-
-

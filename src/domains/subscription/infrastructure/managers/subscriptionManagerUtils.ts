@@ -1,25 +1,14 @@
-/**
- * Subscription Manager Utilities
- * Validation and helper functions for SubscriptionManager
- */
-
 import type { SubscriptionManagerConfig } from "./SubscriptionManager.types";
 
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import { SubscriptionInternalState } from "./SubscriptionInternalState";
 
-/**
- * Validate that manager is configured
- */
 export function ensureConfigured(config: SubscriptionManagerConfig | null): void {
     if (!config) {
         throw new Error("SubscriptionManager not configured");
     }
 }
 
-/**
- * Get current user ID or throw
- */
 export function getCurrentUserIdOrThrow(state: SubscriptionInternalState): string {
     const userId = state.initCache.getCurrentUserId();
     if (userId === null || userId === undefined) {
@@ -28,9 +17,6 @@ export function getCurrentUserIdOrThrow(state: SubscriptionInternalState): strin
     return userId;
 }
 
-/**
- * Get service instance or initialize
- */
 export function getOrCreateService(
     currentInstance: IRevenueCatService | null
 ): IRevenueCatService {
@@ -48,9 +34,6 @@ export function getOrCreateService(
     return serviceInstance;
 }
 
-/**
- * Validate service is available
- */
 export function ensureServiceAvailable(service: IRevenueCatService | null): void {
     if (!service) {
         throw new Error("Service instance not available");

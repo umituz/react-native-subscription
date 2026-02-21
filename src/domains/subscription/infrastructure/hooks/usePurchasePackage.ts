@@ -1,10 +1,3 @@
-/**
- * Purchase Package Hook
- * TanStack mutation for purchasing subscription packages
- * Credits are initialized by CustomerInfoListener (not here to avoid duplicates)
- * Auth info automatically read from @umituz/react-native-auth
- */
-
 import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
 import type { PurchasesPackage } from "react-native-purchases";
 import { useAlert } from "@umituz/react-native-design-system";
@@ -19,17 +12,11 @@ import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionS
 import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors";
 
-/** Purchase mutation result - simplified for presentation layer */
 interface PurchaseMutationResult {
   success: boolean;
   productId: string;
 }
 
-/**
- * Purchase a subscription package
- * Credits are initialized by CustomerInfoListener when entitlement becomes active
- * Auth info automatically read from auth store
- */
 export const usePurchasePackage = () => {
   const userId = useAuthStore(selectUserId);
   const isAnonymous = useAuthStore(selectIsAnonymous);
@@ -51,13 +38,11 @@ export const usePurchasePackage = () => {
         console.log(`[Purchase] Initializing and purchasing. User: ${userId}`);
       }
 
-      await SubscriptionManager.initialize(userId);
       const success = await SubscriptionManager.purchasePackage(pkg, userId);
 
       return { success, productId };
     },
     onSuccess: (result) => {
-
       if (result.success) {
         showSuccess("Purchase Successful", "Your subscription is now active!");
         queryClient.invalidateQueries({
@@ -76,11 +61,8 @@ export const usePurchasePackage = () => {
       }
     },
     onError: (error) => {
-
-      // Use map-based lookup - O(1) complexity
       const errorInfo = getErrorMessage(error);
 
-      // Don't show alert for user cancellation
       if (!errorInfo.shouldShowAlert) {
         return;
       }

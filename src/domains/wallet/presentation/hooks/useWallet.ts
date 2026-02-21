@@ -1,10 +1,3 @@
-/**
- * useWallet Hook
- *
- * Orchestration hook for wallet functionality.
- * Combines balance, transactions, and purchase state.
- */
-
 import { useCallback, useMemo } from "react";
 import { useCredits } from "../../../credits/presentation/useCredits";
 import {

@@ -3,10 +3,6 @@ import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
-/**
- * Refunds credits to a user's balance.
- * Used for optimistic billing rollbacks when generation fails due to transient errors.
- */
 export async function refundCreditsOperation(
   _db: Firestore,
   creditsRef: DocumentReference,
@@ -24,7 +20,7 @@ export async function refundCreditsOperation(
     };
   }
 
-  if (amount <= 0) {
+  if (amount <= 0 || !Number.isFinite(amount)) {
     return {
       success: false,
       remainingCredits: null,

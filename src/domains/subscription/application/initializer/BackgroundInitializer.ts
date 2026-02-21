@@ -20,6 +20,14 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   };
 
   const attemptInitWithRetry = async (revenueCatUserId?: string, attempt = 0): Promise<void> => {
+    // Abort if user changed since retry was scheduled
+    if (attempt > 0 && lastUserId !== revenueCatUserId) {
+      if (typeof __DEV__ !== 'undefined' && __DEV__) {
+        console.log('[BackgroundInitializer] Aborting retry - user changed');
+      }
+      return;
+    }
+
     try {
       await initializeInBackground(revenueCatUserId);
       lastUserId = revenueCatUserId;
@@ -49,7 +57,6 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   };
 
   const debouncedInitialize = (revenueCatUserId?: string): void => {
-    // Clear any pending initialization or retry
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
@@ -58,7 +65,6 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       retryTimer = null;
     }
 
-    // If userId hasn't changed AND last init succeeded, skip
     if (lastUserId === revenueCatUserId && lastInitSucceeded) {
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[BackgroundInitializer] UserId unchanged and init succeeded, skipping');
@@ -70,6 +76,13 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', revenueCatUserId || '(undefined - anonymous)');
       }
+
+      // Reset subscription state on logout to prevent stale cache
+      if (!revenueCatUserId && lastUserId) {
+        await SubscriptionManager.reset();
+        lastInitSucceeded = false;
+      }
+
       void attemptInitWithRetry(revenueCatUserId);
     }, AUTH_STATE_DEBOUNCE_MS);
   };

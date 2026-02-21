@@ -3,10 +3,6 @@ import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
-/**
- * Deducts credits from a user's balance.
- * Encapsulates the domain rules and transaction logic for credit usage.
- */
 export async function deductCreditsOperation(
   _db: Firestore,
   creditsRef: DocumentReference,
@@ -24,6 +20,18 @@ export async function deductCreditsOperation(
     };
   }
 
+  const MAX_SINGLE_DEDUCTION = 10000;
+  if (cost <= 0 || !Number.isFinite(cost) || cost > MAX_SINGLE_DEDUCTION) {
+    return {
+      success: false,
+      remainingCredits: null,
+      error: {
+        message: `Cost must be a positive finite number not exceeding ${MAX_SINGLE_DEDUCTION}`,
+        code: 'INVALID_AMOUNT'
+      }
+    };
+  }
+
   try {
     const remaining = await runTransaction(async (tx: Transaction) => {
       const docSnap = await tx.get(creditsRef);
@@ -32,7 +40,8 @@ export async function deductCreditsOperation(
         throw new Error(CREDIT_ERROR_CODES.NO_CREDITS);
       }
 
-      const current = docSnap.data().credits as number;
+      const rawCredits = docSnap.data().credits;
+      const current = typeof rawCredits === "number" && Number.isFinite(rawCredits) ? rawCredits : 0;
       if (current < cost) {
         throw new Error(CREDIT_ERROR_CODES.CREDITS_EXHAUSTED);
       }
@@ -55,8 +64,8 @@ export async function deductCreditsOperation(
     };
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : String(e);
-    const code = (message === CREDIT_ERROR_CODES.NO_CREDITS || message === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED) 
-      ? message 
+    const code = (message === CREDIT_ERROR_CODES.NO_CREDITS || message === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED)
+      ? message
       : CREDIT_ERROR_CODES.DEDUCT_ERR;
 
     return {

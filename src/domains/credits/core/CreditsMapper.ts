@@ -3,9 +3,6 @@ import { resolveSubscriptionStatus, type SubscriptionStatusType } from "../../su
 import type { UserCreditsDocumentRead } from "./UserCreditsDocument";
 import { toSafeDate } from "../../../utils/dateUtils";
 
-/**
- * Validate subscription status against expirationDate and periodType
- */
 function validateSubscription(
   doc: UserCreditsDocumentRead,
   expirationDate: Date | null,
@@ -28,9 +25,6 @@ function validateSubscription(
   };
 }
 
-/** 
- * Maps Firestore document to domain entity with expiration validation 
- */
 export function mapCreditsDocumentToEntity(doc: UserCreditsDocumentRead): UserCredits {
   const expirationDate = toSafeDate(doc.expirationDate);
   const periodType = doc.periodType;

@@ -1,6 +1,6 @@
 import { useQuery } from "@umituz/react-native-design-system";
 import { useMemo } from "react";
-import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
 import { NO_CACHE_QUERY_CONFIG } from "../../../../shared/infrastructure/react-query/queryConfig";
 import type {
   CreditLog,
@@ -31,16 +31,19 @@ export function useTransactionHistory({
   limit = 50,
 }: UseTransactionHistoryParams): UseTransactionHistoryResult {
   const userId = useAuthStore(selectUserId);
+  const isAnonymous = useAuthStore(selectIsAnonymous);
 
   const repository = useMemo(
     () => new TransactionRepository(config),
     [config]
   );
 
+  const isUserRegistered = !!userId && !isAnonymous;
+
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [...transactionQueryKeys.user(userId ?? ""), limit],
     queryFn: async () => {
-      if (!userId) return [];
+      if (!userId || isAnonymous) return [];
 
       const result = await repository.getTransactions({
         userId,
@@ -53,7 +56,7 @@ export function useTransactionHistory({
 
       return result.data ?? [];
     },
-    enabled: !!userId,
+    enabled: isUserRegistered,
     ...NO_CACHE_QUERY_CONFIG,
   });
 

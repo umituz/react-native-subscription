@@ -1,13 +1,3 @@
-/**
- * Subscription Packages Hook
- * TanStack query for fetching available packages (offerings)
- * Auth info automatically read from @umituz/react-native-auth
- *
- * IMPORTANT: Packages (offerings) are NOT user-specific - they're the same
- * for all users. We only need RevenueCat to be initialized, not necessarily
- * for a specific user. User-specific checks belong in useSubscriptionStatus.
- */
-
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import {
@@ -20,27 +10,18 @@ import {
   SUBSCRIPTION_QUERY_KEYS,
 } from "./subscriptionQueryKeys";
 
-/**
- * Fetch available subscription packages
- * Works for both authenticated and anonymous users
- * Auth info automatically read from auth store
- */
 export const useSubscriptionPackages = () => {
   const userId = useAuthStore(selectUserId);
   const isConfigured = SubscriptionManager.isConfigured();
   const queryClient = useQueryClient();
   const prevUserIdRef = useRef(userId);
 
-  // Reactive initialization state - triggers re-render when BackgroundInitializer completes
   const initState = useSyncExternalStore(
     initializationState.subscribe,
     initializationState.getSnapshot,
     initializationState.getSnapshot,
   );
 
-  // Packages (offerings) are NOT user-specific - same for all users.
-  // We only need RevenueCat to be initialized at all.
-  // Use reactive state OR direct manager check for backwards compatibility.
   const isInitialized = initState.initialized || SubscriptionManager.isInitialized();
 
   const query = useQuery({

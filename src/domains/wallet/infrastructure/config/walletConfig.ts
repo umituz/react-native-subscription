@@ -1,12 +1,4 @@
-/**
- * Wallet Configuration
- *
- * Global configuration for wallet feature.
- * Set once at app init, used by WalletScreen automatically.
- */
-
 import type { WalletScreenTranslations } from "../../presentation/screens/WalletScreen.types";
-
 
 interface WalletConfiguration {
   translations: WalletScreenTranslations;
@@ -41,9 +33,6 @@ const DEFAULT_CONFIG: WalletConfiguration = {
 
 let walletConfig: WalletConfiguration = { ...DEFAULT_CONFIG };
 
-/**
- * Get current wallet configuration
- */
 export function getWalletConfig(): WalletConfiguration {
   return walletConfig;
 }

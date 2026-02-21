@@ -35,9 +35,9 @@ export const useDeductCredit = ({
       console.error('[useDeductCredit] Unexpected error during credit deduction', {
         cost,
         userId,
-        error
+        error: error instanceof Error ? error.message : String(error)
       });
-      throw error;
+      return false;
     }
   }, [onCreditsExhausted, userId]);
 

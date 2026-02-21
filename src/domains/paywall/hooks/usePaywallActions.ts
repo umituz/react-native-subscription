@@ -1,7 +1,3 @@
-/**
- * usePaywallActions Hook
- * Encapsulates purchase and restore flow for the paywall.
- */
 import { useState, useCallback, useRef, useEffect } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePurchaseLoadingStore } from "../../subscription/presentation/stores";
@@ -52,7 +48,6 @@ export function usePaywallActions({
   });
 
   const handlePurchase = useCallback(async () => {
-
     if (!selectedPlanId) {
       return;
     }
@@ -71,7 +66,7 @@ export function usePaywallActions({
 
     if (!pkg) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.error("[usePaywallActions] ❌ Package not found", {
+        console.error("[usePaywallActions] Package not found", {
           selectedPlanId,
           availablePackages: packages.map(p => p.product.identifier),
         });
@@ -85,18 +80,12 @@ export function usePaywallActions({
     startPurchase(selectedPlanId, "manual");
 
     try {
-
       const success = await onPurchaseRef.current(pkg);
 
       if (success === true) {
         onPurchaseSuccessRef.current?.();
         onCloseRef.current?.();
-      } else if (success === false) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.warn("[usePaywallActions] ⚠️ Purchase returned false (user cancelled or failed)");
-        }
       }
-      // else: success is undefined/null - no action needed
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseErrorRef.current?.(err);
@@ -107,7 +96,6 @@ export function usePaywallActions({
   }, [selectedPlanId, packages, isProcessing, startPurchase, endPurchase]);
 
   const handleRestore = useCallback(async () => {
-
     if (!onRestoreRef.current) {
       const err = new Error("Restore handler not configured");
       onPurchaseErrorRef.current?.(err);
@@ -120,13 +108,11 @@ export function usePaywallActions({
 
     setIsLocalProcessing(true);
     try {
-
       const success = await onRestoreRef.current();
 
       if (success === true) {
         onPurchaseSuccessRef.current?.();
       }
-      // else: success is false/undefined - restore failed or user cancelled, no action needed
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
       onPurchaseErrorRef.current?.(err);

@@ -4,3 +4,6 @@ export function isAuthenticated(userId: string | null | undefined): userId is st
   return isDefined(userId) && userId.length > 0;
 }
 
+export function isRegisteredUser(userId: string | null | undefined, isAnonymous: boolean): userId is string {
+  return isAuthenticated(userId) && !isAnonymous;
+}

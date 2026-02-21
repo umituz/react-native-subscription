@@ -1,29 +1,18 @@
-/**
- * Trial Eligibility Utilities
- * Business logic for checking trial eligibility
- */
-
 import Purchases, {
   type IntroEligibility,
   INTRO_ELIGIBILITY_STATUS,
 } from "react-native-purchases";
 
-/** Trial eligibility info for a single product */
 export interface ProductTrialEligibility {
   productId: string;
   eligible: boolean;
   trialDurationDays?: number;
 }
 
-/** Map of product ID to eligibility */
 export type TrialEligibilityMap = Record<string, ProductTrialEligibility>;
 
-/** Default trial duration in days */
 const DEFAULT_TRIAL_DURATION_DAYS = 7;
 
-/**
- * Check trial eligibility for product IDs
- */
 export async function checkTrialEligibility(
   productIds: string[]
 ): Promise<TrialEligibilityMap> {
@@ -47,10 +36,6 @@ export async function checkTrialEligibility(
   return result;
 }
 
-/**
- * Create fallback eligibility map (all eligible)
- * Used when eligibility check fails
- */
 export function createFallbackEligibilityMap(
   productIds: string[]
 ): TrialEligibilityMap {
@@ -67,9 +52,6 @@ export function createFallbackEligibilityMap(
   return result;
 }
 
-/**
- * Check if any product has eligible trial
- */
 export function hasAnyEligibleTrial(
   eligibilityMap: TrialEligibilityMap
 ): boolean {

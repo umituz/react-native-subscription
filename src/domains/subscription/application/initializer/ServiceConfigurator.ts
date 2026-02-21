@@ -5,6 +5,7 @@ import { SubscriptionSyncService } from "../SubscriptionSyncService";
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
 import type { CustomerInfo } from "react-native-purchases";
 import type { PackageType } from "../../../revenuecat/core/types/RevenueCatTypes";
+import { PURCHASE_SOURCE, PERIOD_TYPE, type PurchaseSource, type PeriodType } from "../../core/SubscriptionConstants";
 
 export function configureServices(config: SubscriptionInitConfig, apiKey: string): SubscriptionSyncService {
   const { entitlementId, credits, creditPackages, getFirebaseAuth, showAuthModal, onCreditsUpdated, getAnonymousUserId } = config;
@@ -31,7 +32,10 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
         c: CustomerInfo,
         s?: string,
         pkgType?: PackageType | null
-      ) => syncService.handlePurchase(u, p, c, s as any, pkgType),
+      ) => {
+        const validSource = s && Object.values(PURCHASE_SOURCE).includes(s as PurchaseSource) ? s as PurchaseSource : undefined;
+        return syncService.handlePurchase(u, p, c, validSource, pkgType);
+      },
       onRenewalDetected: (
         u: string,
         p: string,
@@ -45,7 +49,10 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
         exp?: string,
         willR?: boolean,
         pt?: string
-      ) => syncService.handlePremiumStatusChanged(u, isP, pId, exp, willR, pt as any),
+      ) => {
+        const validPeriodType = pt && Object.values(PERIOD_TYPE).includes(pt as PeriodType) ? pt as PeriodType : undefined;
+        return syncService.handlePremiumStatusChanged(u, isP, pId, exp, willR, validPeriodType);
+      },
       onCreditsUpdated,
     },
     apiKey,

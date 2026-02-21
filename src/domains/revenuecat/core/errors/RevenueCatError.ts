@@ -1,8 +1,3 @@
-/**
- * RevenueCat Error Classes
- * Domain-specific error types for RevenueCat operations
- */
-
 import { BaseError } from "../../../../shared/utils/BaseError";
 
 class RevenueCatError extends BaseError {
@@ -49,4 +44,3 @@ export class RevenueCatNetworkError extends RevenueCatError {
         this.name = "RevenueCatNetworkError";
     }
 }
-

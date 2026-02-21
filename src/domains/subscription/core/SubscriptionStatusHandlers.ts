@@ -1,7 +1,7 @@
-import { 
-  SUBSCRIPTION_STATUS, 
-  PERIOD_TYPE, 
-  type SubscriptionStatusType 
+import {
+  SUBSCRIPTION_STATUS,
+  PERIOD_TYPE,
+  type SubscriptionStatusType
 } from "./SubscriptionConstants";
 import type { StatusResolverInput } from "./SubscriptionStatus";
 
@@ -20,7 +20,6 @@ abstract class BaseStatusHandler {
     }
 }
 
-/** Handles Expired or No-Premium cases */
 export class InactiveStatusHandler extends BaseStatusHandler {
     handle(input: StatusResolverInput): SubscriptionStatusType {
         const isExpired = input.isExpired === true;
@@ -32,7 +31,6 @@ export class InactiveStatusHandler extends BaseStatusHandler {
     }
 }
 
-/** Handles Trial-related states */
 export class TrialStatusHandler extends BaseStatusHandler {
     handle(input: StatusResolverInput): SubscriptionStatusType {
         if (input.periodType === PERIOD_TYPE.TRIAL) {
@@ -42,7 +40,6 @@ export class TrialStatusHandler extends BaseStatusHandler {
     }
 }
 
-/** Handles Canceled-Active states */
 export class ActiveStatusHandler extends BaseStatusHandler {
     handle(input: StatusResolverInput): SubscriptionStatusType {
         if (input.willRenew === false) {

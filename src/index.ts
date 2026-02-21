@@ -1,7 +1,3 @@
-/**
- * React Native Subscription - Public API
- */
-
 // Domain Layer - Constants & Types
 export * from "./domains/subscription/core/SubscriptionConstants";
 export {
@@ -103,7 +99,7 @@ export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKey
 
 // Paywall Types
 export type { PaywallTranslations, PaywallLegalUrls } from "./domains/paywall/entities/types";
-export type { TrialConfig } from "./domains/paywall/components/PaywallContainer.types";
+export type { TrialConfig, PaywallContainerProps } from "./domains/paywall/components/PaywallContainer.types";
 
 // Purchase Loading Overlay
 export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
@@ -112,6 +108,7 @@ export type { PurchaseLoadingOverlayProps } from "./domains/subscription/present
 // Init Module Factory
 export {
   createSubscriptionInitModule,
+  cleanupSubscriptionModule,
   type SubscriptionInitModuleConfig,
 } from './init';
 

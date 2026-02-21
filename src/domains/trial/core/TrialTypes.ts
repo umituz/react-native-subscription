@@ -1,15 +1,8 @@
-/**
- * Trial Types and Constants
- * Device-based trial tracking types
- */
-
-/** Trial constants */
 export const TRIAL_CONFIG = {
   DURATION_DAYS: 3,
   CREDITS: 0,
 } as const;
 
-/** Device trial record in Firestore */
 export interface DeviceTrialRecord {
   deviceId: string;
   hasUsedTrial: boolean;
@@ -23,7 +16,6 @@ export interface DeviceTrialRecord {
   updatedAt: Date;
 }
 
-/** Trial eligibility result */
 export interface TrialEligibilityResult {
   eligible: boolean;
   reason?: "already_used" | "device_not_found" | "error" | "user_already_used";

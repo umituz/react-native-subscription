@@ -1,8 +1,3 @@
-/**
- * Feedback Submit Hooks
- * React hooks for submitting feedback to Firestore
- */
-
 import { useCallback } from "react";
 import { useAuth } from "@umituz/react-native-auth";
 import {
@@ -16,9 +11,6 @@ export interface UsePaywallFeedbackSubmitOptions {
   onComplete?: () => void;
 }
 
-/**
- * Hook for submitting paywall decline feedback
- */
 export function usePaywallFeedbackSubmit(
   options: UsePaywallFeedbackSubmitOptions = {}
 ) {
@@ -63,9 +55,6 @@ export interface UseSettingsFeedbackSubmitOptions {
   onError?: (error: Error) => void;
 }
 
-/**
- * Hook for submitting general settings feedback
- */
 export function useSettingsFeedbackSubmit(
   options: UseSettingsFeedbackSubmitOptions = {}
 ) {

@@ -23,7 +23,6 @@ export function calculateNewCredits({ metadata, existingData, creditLimit, purch
 
   return creditAllocationOrchestrator.allocate({
     status,
-    isStatusSync: purchaseId.startsWith(PURCHASE_ID_PREFIXES.STATUS_SYNC),
     existingData,
     creditLimit,
     isSubscriptionActive: isPremium && !isExpired,
@@ -49,7 +48,7 @@ export function buildCreditsData({
     periodType: metadata.periodType ?? undefined,
   });
 
-  const isPurchaseOrRenewal = purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) || 
+  const isPurchaseOrRenewal = purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) ||
                               purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL);
 
   const expirationTimestamp = metadata.expirationDate ? toTimestamp(metadata.expirationDate) : null;
@@ -75,45 +74,4 @@ export function buildCreditsData({
     ...(metadata.store && { store: metadata.store }),
     ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
   };
-}
-
-/**
- * Compare two Firestore Timestamp-like values by their underlying time.
- * Handles Timestamp objects (with toMillis/seconds+nanoseconds), null, and undefined.
- */
-function timestampsEqual(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (a == null || b == null) return a == b;
-  if (typeof a === "object" && typeof b === "object" && a !== null && b !== null) {
-    if ("toMillis" in a && "toMillis" in b &&
-        typeof (a as { toMillis: unknown }).toMillis === "function" &&
-        typeof (b as { toMillis: unknown }).toMillis === "function") {
-      return (a as { toMillis: () => number }).toMillis() === (b as { toMillis: () => number }).toMillis();
-    }
-    if ("seconds" in a && "seconds" in b && "nanoseconds" in a && "nanoseconds" in b) {
-      return (a as { seconds: number; nanoseconds: number }).seconds === (b as { seconds: number; nanoseconds: number }).seconds &&
-             (a as { seconds: number; nanoseconds: number }).nanoseconds === (b as { seconds: number; nanoseconds: number }).nanoseconds;
-    }
-  }
-  return false;
-}
-
-export function shouldSkipStatusSyncWrite(
-  purchaseId: string,
-  existingData: any,
-  newCreditsData: Record<string, any>
-): boolean {
-  if (!purchaseId.startsWith(PURCHASE_ID_PREFIXES.STATUS_SYNC)) return false;
-
-  if (!existingData || !newCreditsData) return false;
-
-  return existingData.isPremium === newCreditsData.isPremium &&
-    existingData.status === newCreditsData.status &&
-    existingData.credits === newCreditsData.credits &&
-    existingData.creditLimit === newCreditsData.creditLimit &&
-    existingData.productId === newCreditsData.productId &&
-    existingData.willRenew === newCreditsData.willRenew &&
-    timestampsEqual(existingData.expirationDate, newCreditsData.expirationDate) &&
-    timestampsEqual(existingData.canceledAt, newCreditsData.canceledAt) &&
-    timestampsEqual(existingData.billingIssueDetectedAt, newCreditsData.billingIssueDetectedAt);
 }

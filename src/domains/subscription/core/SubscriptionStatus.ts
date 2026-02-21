@@ -1,21 +1,15 @@
 import { timezoneService } from "@umituz/react-native-design-system";
-import { 
-  SUBSCRIPTION_STATUS, 
-  PERIOD_TYPE, 
-  type PeriodType, 
-  type SubscriptionStatusType 
+import {
+  SUBSCRIPTION_STATUS,
+  type SubscriptionStatusType
 } from "./SubscriptionConstants";
-import { 
-  InactiveStatusHandler, 
-  TrialStatusHandler, 
-  ActiveStatusHandler 
+import {
+  InactiveStatusHandler,
+  TrialStatusHandler,
+  ActiveStatusHandler
 } from "./SubscriptionStatusHandlers";
 
-export {
-  PERIOD_TYPE,
-  type PeriodType,
-  type SubscriptionStatusType
-};
+export type { SubscriptionStatusType };
 
 export interface SubscriptionStatus {
     isPremium: boolean;
@@ -25,7 +19,7 @@ export interface SubscriptionStatus {
     customerId?: string | null;
     syncedAt?: string | null;
     status?: SubscriptionStatusType;
-    periodType?: string; // Raw value from RevenueCat SDK (NORMAL, INTRO, TRIAL)
+    periodType?: string;
     isTrialing?: boolean;
 }
 
@@ -41,7 +35,7 @@ export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
 
 export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean => {
     if (!status || !status.isPremium) return false;
-    if (!status.expiresAt) return true; // Lifetime
+    if (!status.expiresAt) return true;
     return timezoneService.isFuture(new Date(status.expiresAt));
 };
 
@@ -49,18 +43,14 @@ export interface StatusResolverInput {
     isPremium: boolean;
     willRenew?: boolean;
     isExpired?: boolean;
-    periodType?: string; // Raw value from RevenueCat SDK (NORMAL, INTRO, TRIAL)
+    periodType?: string;
 }
 
-// Singleton Chain Instance
 const inactiveHandler = new InactiveStatusHandler();
 inactiveHandler
     .setNext(new TrialStatusHandler())
     .setNext(new ActiveStatusHandler());
 
-/**
- * Resolves subscription status using Chain of Responsibility Pattern.
- */
 export const resolveSubscriptionStatus = (input: StatusResolverInput): SubscriptionStatusType => {
     return inactiveHandler.handle(input);
 };

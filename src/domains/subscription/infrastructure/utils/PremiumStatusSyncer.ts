@@ -1,8 +1,3 @@
-/**
- * Premium Status Syncer
- * Syncs premium status to database via callbacks
- */
-
 import type { CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig, PackageType } from "../../../revenuecat/core/types";
 import type { PurchaseSource } from "../../../subscription/core/SubscriptionConstants";
@@ -70,16 +65,7 @@ export async function notifyPurchaseCompleted(
         return;
     }
 
-    try {
-        await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
-    } catch (error) {
-        // Silently fail callback notifications to prevent crashing the main flow
-        console.error('[PremiumStatusSyncer] Purchase completed callback failed:', {
-            userId,
-            productId,
-            error: error instanceof Error ? error.message : String(error)
-        });
-    }
+    await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
 }
 
 export async function notifyRestoreCompleted(
@@ -94,7 +80,7 @@ export async function notifyRestoreCompleted(
 
     try {
         await config.onRestoreCompleted(userId, isPremium, customerInfo);
-    } catch (_error) {
-        // Silently fail callback notifications to prevent crashing the main flow
+    } catch (error) {
+        console.error('[PremiumStatusSyncer] Restore callback failed:', error instanceof Error ? error.message : String(error));
     }
 }

@@ -1,9 +1,3 @@
-/**
- * Paywall Visibility Hook
- * Simple global state for paywall visibility using module-level state
- * Generic implementation for 100+ apps
- */
-
 import { useCallback, useSyncExternalStore } from "react";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
 
@@ -29,9 +23,6 @@ const setPaywallState = (visible: boolean, source?: PurchaseSource): void => {
   listeners.forEach((listener) => listener());
 };
 
-/**
- * Direct paywall control for non-React services (e.g., appInitializer)
- */
 export const paywallControl = {
   open: (source?: PurchaseSource) => setPaywallState(true, source),
   close: () => setPaywallState(false, undefined),

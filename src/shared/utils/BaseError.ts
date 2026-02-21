@@ -1,8 +1,3 @@
-/**
- * Base Error Class
- * Common base error for all domain errors
- */
-
 export abstract class BaseError extends Error {
     public readonly code: string;
     public readonly cause?: Error;

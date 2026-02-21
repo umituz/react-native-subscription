@@ -8,7 +8,7 @@ import { refundCreditsOperation } from "../application/RefundCreditsCommand";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
 import { fetchCredits, checkHasCredits } from "./operations/CreditsFetcher";
-import { syncExpiredStatus } from "./operations/CreditsWriter";
+import { syncExpiredStatus, syncPremiumMetadata, type PremiumMetadata } from "./operations/CreditsWriter";
 import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
 
 export class CreditsRepository extends BaseRepository {
@@ -73,6 +73,11 @@ export class CreditsRepository extends BaseRepository {
   async syncExpiredStatus(userId: string): Promise<void> {
     const db = requireFirestore();
     await syncExpiredStatus(this.getRef(db, userId));
+  }
+
+  async syncPremiumMetadata(userId: string, metadata: PremiumMetadata): Promise<void> {
+    const db = requireFirestore();
+    await syncPremiumMetadata(this.getRef(db, userId), metadata);
   }
 }
 

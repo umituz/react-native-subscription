@@ -1,8 +1,3 @@
-/**
- * RevenueCat Error Handler
- * Error code mapping and message resolution utilities
- */
-
 import Purchases from "react-native-purchases";
 import {
   ERROR_MESSAGES_MAP,
@@ -11,12 +6,7 @@ import {
   type PurchasesErrorCode,
 } from "./RevenueCatErrorMessages";
 
-/**
- * Error Code to Enum Mapping
- * Maps both string keys and numeric codes to Purchases error enum values
- */
 const ERROR_CODE_MAP = new Map<string, PurchasesErrorCode>([
-  // String error codes
   ["PURCHASE_CANCELLED_ERROR", Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR],
   ["PURCHASE_NOT_ALLOWED_ERROR", Purchases.PURCHASES_ERROR_CODE.PURCHASE_NOT_ALLOWED_ERROR],
   ["PURCHASE_INVALID_ERROR", Purchases.PURCHASES_ERROR_CODE.PURCHASE_INVALID_ERROR],
@@ -31,7 +21,6 @@ const ERROR_CODE_MAP = new Map<string, PurchasesErrorCode>([
   ["STORE_PROBLEM_ERROR", Purchases.PURCHASES_ERROR_CODE.STORE_PROBLEM_ERROR],
   ["PAYMENT_PENDING_ERROR", Purchases.PURCHASES_ERROR_CODE.PAYMENT_PENDING_ERROR],
 
-  // Numeric error codes as fallback
   ["1", Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR],
   ["2", Purchases.PURCHASES_ERROR_CODE.STORE_PROBLEM_ERROR],
   ["3", Purchases.PURCHASES_ERROR_CODE.PURCHASE_NOT_ALLOWED_ERROR],
@@ -47,13 +36,6 @@ const ERROR_CODE_MAP = new Map<string, PurchasesErrorCode>([
   ["0", Purchases.PURCHASES_ERROR_CODE.UNKNOWN_ERROR],
 ]);
 
-/**
- * Get error message configuration for a given error code
- * Strategy Pattern with Map lookup - O(1) complexity
- *
- * @param errorCode - Error code string from RevenueCat error
- * @returns ErrorMessage configuration
- */
 function getErrorMessageForCode(errorCode: string | null | undefined): ErrorMessage {
   if (!errorCode) {
     return DEFAULT_ERROR_MESSAGE;
@@ -70,12 +52,6 @@ function getErrorMessageForCode(errorCode: string | null | undefined): ErrorMess
   return DEFAULT_ERROR_MESSAGE;
 }
 
-/**
- * Get error message from RevenueCat error object
- *
- * @param error - RevenueCat error object
- * @returns ErrorMessage configuration
- */
 export function getErrorMessage(error: unknown): ErrorMessage {
   if (!error || typeof error !== "object") {
     return DEFAULT_ERROR_MESSAGE;

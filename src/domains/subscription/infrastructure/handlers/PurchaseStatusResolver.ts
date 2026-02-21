@@ -38,7 +38,7 @@ export class PurchaseStatusResolver {
         isSandbox: entitlement.isSandbox ?? false,
         periodType: entitlement.periodType ?? null,
         packageType: detectedPackageType,
-        store: null,
+        store: entitlement.store ?? null,
         gracePeriodExpiresDate: null,
         unsubscribeDetectedAt: toDate(entitlement.unsubscribeDetectedAt),
       };

@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useEffect, useSyncExternalStore } from "react";
-import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { initializationState } from "../infrastructure/state/initializationState";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
-import { isAuthenticated } from "../utils/authGuards";
+import { isRegisteredUser } from "../utils/authGuards";
 import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 
@@ -17,32 +17,30 @@ export const subscriptionStatusQueryKeys = {
 
 export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
+  const isAnonymous = useAuthStore(selectIsAnonymous);
   const queryClient = useQueryClient();
   const isConfigured = SubscriptionManager.isConfigured();
+  const isUserRegistered = isRegisteredUser(userId, isAnonymous);
 
-  // Reactive initialization state - triggers re-render when BackgroundInitializer completes
   const initState = useSyncExternalStore(
     initializationState.subscribe,
     initializationState.getSnapshot,
     initializationState.getSnapshot,
   );
 
-  // Check if initialized for this specific user (reactive)
   const isInitialized = userId
     ? initState.initialized && initState.userId === userId
     : false;
 
-  const queryEnabled = isAuthenticated(userId) && isConfigured && isInitialized;
+  const queryEnabled = isUserRegistered && isConfigured && isInitialized;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId),
     queryFn: async () => {
-      if (!isAuthenticated(userId)) {
+      if (!isUserRegistered) {
         return null;
       }
 
-      // No side effects - just check premium status
-      // Initialization is handled by BackgroundInitializer
       try {
         const result = await SubscriptionManager.checkPremiumStatus();
         return result;
@@ -54,11 +52,10 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     ...NO_CACHE_QUERY_CONFIG,
   });
 
-  // Clean up previous user's cache on logout/user switch
   usePreviousUserCleanup(userId, queryClient, subscriptionStatusQueryKeys.user);
 
   useEffect(() => {
-    if (!isAuthenticated(userId)) return undefined;
+    if (!isUserRegistered) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(
       SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED,
@@ -72,7 +69,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     );
 
     return unsubscribe;
-  }, [userId, queryClient]);
+  }, [userId, isUserRegistered, queryClient]);
 
   const isLoading = status === "pending";
 

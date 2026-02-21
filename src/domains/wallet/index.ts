@@ -1,10 +1,3 @@
-/**
- * Wallet Domain
- *
- * Public API for wallet functionality.
- */
-
-// Screens
 export {
   WalletScreen,
 } from "./presentation/screens/WalletScreen";

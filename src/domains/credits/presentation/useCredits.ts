@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useCallback, useMemo, useEffect } from "react";
-import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
@@ -10,7 +10,7 @@ import {
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
 import { calculateSafePercentage, canAffordAmount } from "../utils/creditValidation";
-import { isAuthenticated } from "../../subscription/utils/authGuards";
+import { isRegisteredUser } from "../../subscription/utils/authGuards";
 import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
 
@@ -26,15 +26,17 @@ const deriveLoadStatus = (
 
 export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
+  const isAnonymous = useAuthStore(selectIsAnonymous);
   const isConfigured = isCreditsRepositoryConfigured();
 
   const config = isConfigured ? getCreditsConfig() : null;
-  const queryEnabled = isAuthenticated(userId) && isConfigured;
+  const isUserRegistered = isRegisteredUser(userId, isAnonymous);
+  const queryEnabled = isUserRegistered && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId),
     queryFn: async () => {
-      if (!isAuthenticated(userId) || !isConfigured) return null;
+      if (!isUserRegistered || !isConfigured) return null;
 
       const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
@@ -51,11 +53,10 @@ export const useCredits = (): UseCreditsResult => {
 
   const queryClient = useQueryClient();
 
-  // Clean up previous user's cache on logout/user switch
   usePreviousUserCleanup(userId, queryClient, creditsQueryKeys.user);
 
   useEffect(() => {
-    if (!isAuthenticated(userId)) return undefined;
+    if (!isUserRegistered) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {
@@ -64,13 +65,13 @@ export const useCredits = (): UseCreditsResult => {
     });
 
     return unsubscribe;
-  }, [userId, queryClient]);
+  }, [userId, isUserRegistered, queryClient]);
 
   const credits = data ?? null;
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
-    const limit = config?.creditLimit ?? 0;
+    const limit = credits?.creditLimit ?? config?.creditLimit ?? 0;
     const percent = calculateSafePercentage(credits?.credits, limit);
     return { hasCredits: has, creditsPercent: percent };
   }, [credits, config?.creditLimit]);

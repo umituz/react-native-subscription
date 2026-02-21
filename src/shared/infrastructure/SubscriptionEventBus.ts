@@ -1,9 +1,5 @@
 type EventCallback<T = unknown> = (data: T) => void;
 
-/**
- * Simple EventBus Implementation
- * Used to decouple services and provide an observer pattern for subscription events.
- */
 class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
   private listeners: Record<string, EventCallback<any>[]> = {};
@@ -23,13 +19,11 @@ class SubscriptionEventBus {
     }
     this.listeners[event].push(callback);
 
-    // Return unsubscribe function
     return () => {
       const listeners = this.listeners[event];
       if (listeners) {
         this.listeners[event] = listeners.filter(l => l !== callback);
 
-        // Clean up empty event arrays to prevent memory leak
         if (this.listeners[event].length === 0) {
           delete this.listeners[event];
         }
@@ -53,10 +47,6 @@ class SubscriptionEventBus {
     });
   }
 
-  /**
-   * Clear all listeners for a specific event or all events
-   * Useful for cleanup during testing or app state reset
-   */
   clear(event?: string): void {
     if (event) {
       delete this.listeners[event];
@@ -65,9 +55,6 @@ class SubscriptionEventBus {
     }
   }
 
-  /**
-   * Get listener count for debugging
-   */
   getListenerCount(event?: string): number {
     if (event) {
       return this.listeners[event]?.length ?? 0;

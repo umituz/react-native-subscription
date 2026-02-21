@@ -1,8 +1,3 @@
-/**
- * Paywall Types
- * All paywall-related type definitions
- */
-
 export interface SubscriptionFeature {
     icon: string;
     text: string;

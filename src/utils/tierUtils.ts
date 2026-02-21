@@ -1,11 +1,4 @@
-/**
- * User Tier Core Utilities
- *
- * Core logic for determining user tier and premium status
- */
-
 import { USER_TIER, type UserTierInfo } from './types';
-
 
 export function getUserTierInfo(
   isAnonymous: boolean,

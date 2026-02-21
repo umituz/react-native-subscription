@@ -5,8 +5,7 @@ import { getCreditsRepository } from "../../credits/infrastructure/CreditsReposi
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { emitCreditsUpdated } from "./syncEventEmitter";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
-import { handleExpiredSubscription, handleFreeUserInitialization, handlePremiumStatusSync } from "./statusChangeHandlers";
-import { NO_SUBSCRIPTION_PRODUCT_ID } from "./syncConstants";
+import { handleExpiredSubscription, handlePremiumStatusSync } from "./statusChangeHandlers";
 import type { PackageType } from "../../revenuecat/core/types";
 
 export class SubscriptionSyncProcessor {
@@ -16,8 +15,12 @@ export class SubscriptionSyncProcessor {
   ) {}
 
   private async getCreditsUserId(revenueCatUserId: string): Promise<string> {
-    if (!revenueCatUserId || revenueCatUserId.length === 0) {
-      return this.getAnonymousUserId();
+    if (!revenueCatUserId || revenueCatUserId.trim().length === 0) {
+      const anonymousId = await this.getAnonymousUserId();
+      if (!anonymousId || anonymousId.trim().length === 0) {
+        throw new Error("[SubscriptionSyncProcessor] Cannot resolve credits userId: both revenueCatUserId and anonymousUserId are empty");
+      }
+      return anonymousId;
     }
     return revenueCatUserId;
   }
@@ -70,23 +73,23 @@ export class SubscriptionSyncProcessor {
   ) {
     const creditsUserId = await this.getCreditsUserId(userId);
 
-    // Expired subscription case
     if (!isPremium && productId) {
       await handleExpiredSubscription(creditsUserId);
       return;
     }
 
-    // Free user case
     if (!isPremium && !productId) {
-      await handleFreeUserInitialization(creditsUserId);
       return;
     }
 
-    // Premium user case
+    if (!productId) {
+      return;
+    }
+
     await handlePremiumStatusSync(
       creditsUserId,
       isPremium,
-      productId ?? NO_SUBSCRIPTION_PRODUCT_ID,
+      productId,
       expiresAt ?? null,
       willRenew ?? false,
       periodType ?? null

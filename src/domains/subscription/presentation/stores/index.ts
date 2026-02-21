@@ -1,7 +1,3 @@
-/**
- * Presentation Layer - Stores
- */
-
 export {
   usePurchaseLoadingStore,
   selectIsPurchasing,

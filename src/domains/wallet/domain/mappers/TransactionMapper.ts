@@ -1,8 +1,3 @@
-/**
- * Transaction Mapper
- * Maps Firestore data to CreditLog entity
- */
-
 import type { QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import type { CreditLog } from "../types/transaction.types";
 

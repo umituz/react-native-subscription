@@ -1,10 +1,3 @@
-/**
- * Transaction Types
- *
- * Types for credit transaction history and logs.
- * Generic types for use across hundreds of apps.
- */
-
 export type TransactionReason =
   | "purchase"
   | "usage"

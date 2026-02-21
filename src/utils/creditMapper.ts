@@ -1,9 +1,6 @@
 import { detectPackageType, type SubscriptionPackageType } from "./packageTypeDetector";
 import type { PackageAllocationMap } from "../domains/credits/core/Credits";
 
-/**
- * Get credit allocation for a package type from provided allocations map
- */
 export function getCreditAllocation(
   packageType: SubscriptionPackageType,
   allocations?: PackageAllocationMap
@@ -12,10 +9,6 @@ export function getCreditAllocation(
   return allocations[packageType]?.credits ?? null;
 }
 
-/**
- * Create credit amounts mapping for PaywallModal from RevenueCat packages
- * Maps product.identifier to credit amount using dynamic allocations
- */
 export function createCreditAmountsFromPackages(
   packages: Array<{ product: { identifier: string } }>,
   allocations?: PackageAllocationMap

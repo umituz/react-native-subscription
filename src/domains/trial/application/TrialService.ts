@@ -1,7 +1,3 @@
-/**
- * Trial Service - Facade for device-based trial tracking
- */
-
 import { arrayUnion, type FieldValue } from "firebase/firestore";
 import { serverTimestamp } from "@umituz/react-native-firebase";
 import { PersistentDeviceIdService } from "@umituz/react-native-design-system";
@@ -10,7 +6,6 @@ import { TrialEligibilityService } from "./TrialEligibilityService";
 import type { TrialEligibilityResult } from "../core/TrialTypes";
 export type { TrialEligibilityResult };
 
-// Type for Firestore write operations with FieldValue
 interface TrialRecordWrite {
   deviceId?: string;
   hasUsedTrial?: boolean;
@@ -26,10 +21,6 @@ const repository = new DeviceTrialRepository();
 
 export const getDeviceId = () => PersistentDeviceIdService.getDeviceId();
 
-/**
- * Ensures a valid device ID is available
- * Uses provided deviceId if non-empty, otherwise fetches from PersistentDeviceIdService
- */
 async function ensureDeviceId(deviceId?: string): Promise<string> {
   return (deviceId && deviceId.length > 0) ? deviceId : await getDeviceId();
 }

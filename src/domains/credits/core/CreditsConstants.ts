@@ -1,6 +1,3 @@
-/**
- * Credit Error Codes
- */
 export const CREDIT_ERROR_CODES = {
   NO_CREDITS: 'NO_CREDITS',
   CREDITS_EXHAUSTED: 'CREDITS_EXHAUSTED',
@@ -8,17 +5,9 @@ export const CREDIT_ERROR_CODES = {
   DB_ERROR: 'ERR',
 } as const;
 
-/**
- * Purchase ID Prefixes
- */
 export const PURCHASE_ID_PREFIXES = {
-  STATUS_SYNC: 'status_sync_',
   PURCHASE: 'purchase_',
   RENEWAL: 'renewal_',
 } as const;
 
-/**
- * Processed Purchases Array Window Size
- * Maintains last N purchases to prevent reprocessing
- */
 export const PROCESSED_PURCHASES_WINDOW = 50;

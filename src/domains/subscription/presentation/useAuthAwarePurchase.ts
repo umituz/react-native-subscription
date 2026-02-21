@@ -1,9 +1,4 @@
-/**
- * Auth-Aware Purchase Hook
- * Handles purchase flow with authentication requirement
- */
-
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
@@ -35,10 +30,43 @@ export const useAuthAwarePurchase = (
   params?: UseAuthAwarePurchaseParams
 ): UseAuthAwarePurchaseResult => {
   const { purchasePackage, restorePurchase } = usePremium();
+  const isExecutingSavedRef = useRef(false);
+
+  const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
+    const saved = authPurchaseStateManager.getSavedPurchase();
+    if (!saved) {
+      return false;
+    }
+
+    try {
+      const result = await purchasePackage(saved.pkg);
+      if (result) {
+        authPurchaseStateManager.clearSavedPurchase();
+      }
+      return result;
+    } catch {
+      authPurchaseStateManager.clearSavedPurchase();
+      return false;
+    }
+  }, [purchasePackage]);
+
+  useEffect(() => {
+    const authProvider = authPurchaseStateManager.getProvider();
+    if (!authProvider) return;
+
+    const isAuth = authProvider.isAuthenticated();
+    const hasSavedPurchase = !!authPurchaseStateManager.getSavedPurchase();
+
+    if (isAuth && hasSavedPurchase && !isExecutingSavedRef.current) {
+      isExecutingSavedRef.current = true;
+      executeSavedPurchase().finally(() => {
+        isExecutingSavedRef.current = false;
+      });
+    }
+  }, [executeSavedPurchase]);
 
   const handlePurchase = useCallback(
     async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
-
       const authProvider = authPurchaseStateManager.getProvider();
 
       if (!authProvider) {
@@ -61,7 +89,6 @@ export const useAuthAwarePurchase = (
   );
 
   const handleRestore = useCallback(async (): Promise<boolean> => {
-
     const authProvider = authPurchaseStateManager.getProvider();
 
     if (!authProvider) {
@@ -77,19 +104,6 @@ export const useAuthAwarePurchase = (
 
     return result;
   }, [restorePurchase]);
-
-  const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
-    const saved = authPurchaseStateManager.getSavedPurchase();
-    if (!saved) {
-      return false;
-    }
-
-    const result = await purchasePackage(saved.pkg);
-    if (result) {
-      authPurchaseStateManager.clearSavedPurchase();
-    }
-    return result;
-  }, [purchasePackage]);
 
   return {
     handlePurchase,

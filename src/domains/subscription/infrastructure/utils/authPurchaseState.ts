@@ -1,8 +1,3 @@
-/**
- * Auth Purchase State Manager
- * Manages global state for auth-aware purchase operations
- */
-
 import type { PurchasesPackage } from "react-native-purchases";
 import type { PurchaseSource } from "../../core/SubscriptionConstants";
 
@@ -15,9 +10,12 @@ interface SavedPurchaseState {
   pkg: PurchasesPackage;
   source: PurchaseSource;
   timestamp: number;
+  sessionId: string;
 }
 
-const SAVED_PURCHASE_EXPIRY_MS = 5 * 60 * 1000;
+const SAVED_PURCHASE_EXPIRY_MS = 2 * 60 * 1000;
+
+let currentSessionId = "";
 
 class AuthPurchaseStateManager {
   private authProvider: PurchaseAuthProvider | null = null;
@@ -31,16 +29,26 @@ class AuthPurchaseStateManager {
     return this.authProvider;
   }
 
+  setSessionId(sessionId: string): void {
+    currentSessionId = sessionId;
+  }
+
   savePurchase(pkg: PurchasesPackage, source: PurchaseSource): void {
     this.savedPurchaseState = {
       pkg,
       source,
       timestamp: Date.now(),
+      sessionId: currentSessionId,
     };
   }
 
   getSavedPurchase(): { pkg: PurchasesPackage; source: PurchaseSource } | null {
     if (!this.savedPurchaseState) {
+      return null;
+    }
+
+    if (this.savedPurchaseState.sessionId !== currentSessionId) {
+      this.savedPurchaseState = null;
       return null;
     }
 
@@ -60,9 +68,14 @@ class AuthPurchaseStateManager {
     this.savedPurchaseState = null;
   }
 
+  onUserChanged(): void {
+    this.savedPurchaseState = null;
+  }
+
   cleanup(): void {
     this.authProvider = null;
     this.savedPurchaseState = null;
+    currentSessionId = "";
   }
 }
 

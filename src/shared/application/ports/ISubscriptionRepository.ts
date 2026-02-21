@@ -1,7 +1,3 @@
-/**
- * ISubscriptionRepository Interface
- */
-
 import { SubscriptionStatus } from '../../../domains/subscription/core/SubscriptionStatus';
 
 export interface ISubscriptionRepository {
