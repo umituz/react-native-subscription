@@ -7,6 +7,4 @@ export interface PlanCardProps {
     badge?: string;
     creditAmount?: number;
     creditsLabel?: string;
-    hasFreeTrial?: boolean;
-    trialSubtitleText?: string;
 }

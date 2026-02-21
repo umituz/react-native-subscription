@@ -8,8 +8,6 @@ export type UserTierType = (typeof USER_TIER)[keyof typeof USER_TIER];
 
 export const SUBSCRIPTION_STATUS = {
   ACTIVE: 'active',
-  TRIAL: 'trial',
-  TRIAL_CANCELED: 'trial_canceled',
   EXPIRED: 'expired',
   CANCELED: 'canceled',
   NONE: 'none',
@@ -20,7 +18,6 @@ export type SubscriptionStatusType = (typeof SUBSCRIPTION_STATUS)[keyof typeof S
 export const PERIOD_TYPE = {
   NORMAL: 'NORMAL',
   INTRO: 'INTRO',
-  TRIAL: 'TRIAL',
 } as const;
 
 export type PeriodType = (typeof PERIOD_TYPE)[keyof typeof PERIOD_TYPE];
@@ -29,7 +26,6 @@ export const PACKAGE_TYPE = {
   WEEKLY: 'weekly',
   MONTHLY: 'monthly',
   YEARLY: 'yearly',
-  LIFETIME: 'lifetime',
   UNKNOWN: 'unknown',
 } as const;
 

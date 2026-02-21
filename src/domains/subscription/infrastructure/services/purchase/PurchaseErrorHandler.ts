@@ -24,18 +24,20 @@ export async function handleAlreadyPurchasedError(
 ): Promise<PurchaseResult> {
   try {
     const restoreResult = await handleRestore(deps, userId);
-    if (restoreResult.success && restoreResult.isPremium && restoreResult.customerInfo) {
-      await notifyPurchaseCompleted(
-        deps.config,
-        userId,
-        pkg.product.identifier,
-        restoreResult.customerInfo,
-        getSavedPurchase()?.source
-      );
+    if (restoreResult.success && restoreResult.customerInfo) {
+      if (restoreResult.isPremium) {
+        await notifyPurchaseCompleted(
+          deps.config,
+          userId,
+          pkg.product.identifier,
+          restoreResult.customerInfo,
+          getSavedPurchase()?.source
+        );
+      }
       clearSavedPurchase();
       return {
         success: true,
-        isPremium: true,
+        isPremium: restoreResult.isPremium ?? false,
         customerInfo: restoreResult.customerInfo,
         productId: restoreResult.productId || pkg.product.identifier,
       };

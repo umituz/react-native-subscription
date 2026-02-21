@@ -29,14 +29,6 @@ export type { Result, Success, Failure } from "./shared/utils/Result";
 
 // Infrastructure Layer (Services & Repositories)
 export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./domains/subscription/application/initializer";
-export { 
-  getDeviceId,
-  checkTrialEligibility,
-  recordTrialStart,
-  recordTrialEnd,
-  recordTrialConversion,
-  type TrialEligibilityResult 
-} from "./domains/trial/application/TrialService";
 
 export { CreditsRepository } from "./domains/credits/infrastructure/CreditsRepository";
 export { 
@@ -99,7 +91,7 @@ export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKey
 
 // Paywall Types
 export type { PaywallTranslations, PaywallLegalUrls } from "./domains/paywall/entities/types";
-export type { TrialConfig, PaywallContainerProps } from "./domains/paywall/components/PaywallContainer.types";
+export type { PaywallContainerProps } from "./domains/paywall/components/PaywallContainer.types";
 
 // Purchase Loading Overlay
 export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";

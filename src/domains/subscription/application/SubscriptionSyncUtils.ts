@@ -17,8 +17,7 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
     throw new Error('[extractRevenueCatData] entitlementId is required');
   }
 
-  const entitlement = customerInfo.entitlements.active[entitlementId]
-    ?? customerInfo.entitlements.all[entitlementId];
+  const entitlement = customerInfo.entitlements.active[entitlementId];
 
   const isPremium = !!customerInfo.entitlements.active[entitlementId];
 

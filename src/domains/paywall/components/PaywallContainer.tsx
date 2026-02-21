@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
 import { usePaywallVisibility } from "../../subscription/presentation/usePaywallVisibility";
 import { useSubscriptionPackages } from "../../subscription/infrastructure/hooks/useSubscriptionPackages";
-import { useRevenueCatTrialEligibility } from "../../subscription/infrastructure/hooks/useRevenueCatTrialEligibility";
 import { createCreditAmountsFromPackages } from "../../../utils/creditMapper";
 import { PaywallModal } from "./PaywallModal";
 import { useAuthAwarePurchase } from "../../subscription/presentation/useAuthAwarePurchase";
-import { useTrialEligibilityCheck } from "../hooks/useTrialEligibilityCheck";
 import type { PaywallContainerProps } from "./PaywallContainer.types";
 
 export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
@@ -24,7 +22,6 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     onAuthRequired,
     visible,
     onClose,
-    trialConfig,
   } = props;
 
   const { showPaywall, closePaywall, currentSource } = usePaywallVisibility();
@@ -33,19 +30,10 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
 
   const purchaseSource = source ?? currentSource ?? "settings";
 
-  const { data: packages = [], isLoading } = useSubscriptionPackages();
-  const { eligibilityMap, checkEligibility } = useRevenueCatTrialEligibility();
+  const { data: packages = [] } = useSubscriptionPackages();
 
   const { handlePurchase: performPurchase, handleRestore: performRestore } = useAuthAwarePurchase({
     source: purchaseSource
-  });
-
-  const trialEligibility = useTrialEligibilityCheck({
-    packages,
-    isLoading,
-    eligibilityMap,
-    checkEligibility,
-    trialConfig,
   });
 
   const creditAmounts = useMemo(() => {
@@ -55,7 +43,6 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
   }, [providedCreditAmounts, packageAllocations, packages]);
 
   // When using credit system, only show packages that have a credit allocation.
-  // This filters out lifetime/"unlimited" plans that aren't part of the credit model.
   const displayPackages = useMemo(() => {
     if (!creditAmounts || Object.keys(creditAmounts).length === 0) return packages;
     return packages.filter((pkg) => creditAmounts[pkg.product.identifier] != null);
@@ -77,8 +64,6 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       creditsLabel={creditsLabel}
       onPurchase={performPurchase}
       onRestore={performRestore}
-      trialEligibility={trialEligibility}
-      trialSubtitleText={trialConfig?.enabled ? trialConfig.trialText : undefined}
       onPurchaseSuccess={onPurchaseSuccess}
       onPurchaseError={onPurchaseError}
       onAuthRequired={onAuthRequired}

@@ -1,3 +1,5 @@
+import type { SubscriptionStatusType } from "../../core/SubscriptionConstants";
+
 export interface SubscriptionDisplayFlags {
   showHeader: boolean;
   showCredits: boolean;
@@ -12,7 +14,6 @@ export interface SubscriptionDetailTranslations {
   statusFree: string;
   statusCanceled: string;
   statusLabel: string;
-  lifetimeLabel: string;
   expiresLabel: string;
   purchasedLabel: string;
   usageTitle?: string;
@@ -48,8 +49,7 @@ export interface CreditInfo {
 
 export interface SubscriptionDetailConfig {
   display: SubscriptionDisplayFlags;
-  statusType: "active" | "expired" | "none" | "canceled";
-  isLifetime: boolean;
+  statusType: SubscriptionStatusType;
   expirationDate?: string;
   purchaseDate?: string;
   daysRemaining?: number | null;

@@ -45,7 +45,6 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
           <SubscriptionHeader
             statusType={config.statusType}
             showExpirationDate={showExpirationDate}
-            isLifetime={config.isLifetime}
             expirationDate={config.expirationDate}
             purchaseDate={config.purchaseDate}
             daysRemaining={config.daysRemaining}

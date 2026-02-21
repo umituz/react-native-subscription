@@ -19,23 +19,26 @@ interface InitializeCreditsParams {
   type?: PurchaseType;
 }
 
-function isTransientError(error: any): boolean {
+function isTransientError(error: unknown): boolean {
+  const code = error instanceof Error ? (error as Error & { code?: string }).code : undefined;
+  const message = error instanceof Error ? error.message : '';
+
   return (
-    error?.code === 'already-exists' ||
-    error?.code === 'DEADLINE_EXCEEDED' ||
-    error?.code === 'UNAVAILABLE' ||
-    error?.code === 'RESOURCE_EXHAUSTED' ||
+    code === 'already-exists' ||
+    code === 'DEADLINE_EXCEEDED' ||
+    code === 'UNAVAILABLE' ||
+    code === 'RESOURCE_EXHAUSTED' ||
     // Firestore transaction contention: document was modified between our read and write.
     // runTransaction does not auto-retry on failed-precondition, so we do it here.
-    error?.code === 'failed-precondition' ||
-    error?.code === 'FAILED_PRECONDITION' ||
+    code === 'failed-precondition' ||
+    code === 'FAILED_PRECONDITION' ||
     // Firestore transaction aborted due to concurrent modification.
-    error?.code === 'aborted' ||
-    error?.code === 'ABORTED' ||
-    error?.message?.includes('already-exists') ||
-    error?.message?.includes('timeout') ||
-    error?.message?.includes('unavailable') ||
-    error?.message?.includes('failed-precondition')
+    code === 'aborted' ||
+    code === 'ABORTED' ||
+    message.includes('already-exists') ||
+    message.includes('timeout') ||
+    message.includes('unavailable') ||
+    message.includes('failed-precondition')
   );
 }
 
@@ -46,7 +49,7 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
   const cfg = { ...config, creditLimit };
 
   const maxRetries = 3;
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -76,7 +79,7 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
         data: result.finalData ? mapCreditsDocumentToEntity(result.finalData) : null,
         error: null,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
 
       if (isTransientError(error) && attempt < maxRetries - 1) {
@@ -98,7 +101,9 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
       ? lastError
       : 'Unknown error during credit initialization';
 
-  const errorCode = lastError?.code ?? 'UNKNOWN_ERROR';
+  const errorCode = lastError instanceof Error
+    ? (lastError as Error & { code?: string }).code ?? 'UNKNOWN_ERROR'
+    : 'UNKNOWN_ERROR';
 
   return {
     success: false,

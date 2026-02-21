@@ -17,7 +17,12 @@ async function executeConsumablePurchase(
     clearSavedPurchase();
   }
 
-  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
+  try {
+    await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
+  } catch (syncError) {
+    // Non-fatal: RevenueCat purchase succeeded, credits sync can be recovered on next session
+    console.error('[PurchaseExecutor] Post-purchase sync failed (purchase was successful):', syncError);
+  }
 
   return {
     success: true,
@@ -55,7 +60,12 @@ async function executeSubscriptionPurchase(
     });
   }
 
-  await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
+  try {
+    await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
+  } catch (syncError) {
+    // Non-fatal: RevenueCat purchase succeeded, credits sync can be recovered on next session
+    console.error('[PurchaseExecutor] Post-purchase sync failed (purchase was successful):', syncError);
+  }
 
   return {
     success: true,

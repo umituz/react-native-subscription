@@ -5,7 +5,6 @@ import {
 } from "./SubscriptionConstants";
 import {
   InactiveStatusHandler,
-  TrialStatusHandler,
   ActiveStatusHandler
 } from "./SubscriptionStatusHandlers";
 
@@ -20,7 +19,6 @@ export interface SubscriptionStatus {
     syncedAt?: string | null;
     status?: SubscriptionStatusType;
     periodType?: string;
-    isTrialing?: boolean;
 }
 
 export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
@@ -47,9 +45,7 @@ export interface StatusResolverInput {
 }
 
 const inactiveHandler = new InactiveStatusHandler();
-inactiveHandler
-    .setNext(new TrialStatusHandler())
-    .setNext(new ActiveStatusHandler());
+inactiveHandler.setNext(new ActiveStatusHandler());
 
 export const resolveSubscriptionStatus = (input: StatusResolverInput): SubscriptionStatusType => {
     return inactiveHandler.handle(input);

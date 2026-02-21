@@ -11,7 +11,7 @@ import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallModalProps } from "./PaywallModal.types";
 
 export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
-  const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, trialEligibility = {}, trialSubtitleText, onPurchaseSuccess, onPurchaseError, onAuthRequired, source } = props;
+  const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, onPurchaseSuccess, onPurchaseError, onAuthRequired, source } = props;
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
   const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({
@@ -55,9 +55,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
           <View style={styles.plans}>
             {packages.map((pkg) => {
               const pid = pkg.product.identifier;
-              const hasTrial = trialEligibility[pid]?.eligible ?? false;
               return (
-                <PlanCard key={pid} pkg={pkg} isSelected={selectedPlanId === pid} onSelect={() => setSelectedPlanId(pid)} badge={pid === bestValueIdentifier ? translations.bestValueBadgeText : undefined} creditAmount={creditAmounts?.[pid]} creditsLabel={creditsLabel} hasFreeTrial={hasTrial} trialSubtitleText={hasTrial ? trialSubtitleText : undefined} />
+                <PlanCard key={pid} pkg={pkg} isSelected={selectedPlanId === pid} onSelect={() => setSelectedPlanId(pid)} badge={pid === bestValueIdentifier ? translations.bestValueBadgeText : undefined} creditAmount={creditAmounts?.[pid]} creditsLabel={creditsLabel} />
               );
             })}
           </View>

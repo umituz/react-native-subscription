@@ -16,7 +16,6 @@ export interface PremiumDetailsTranslations {
   remainingLabel?: string;
   manageButton?: string;
   upgradeButton?: string;
-  lifetimeLabel?: string;
   statusActive: string;
   statusExpired: string;
   statusInactive: string;
@@ -28,7 +27,6 @@ export interface PremiumDetailsCardProps {
   isPremium: boolean;
   expirationDate?: string | null;
   purchaseDate?: string | null;
-  isLifetime?: boolean;
   daysRemaining?: number | null;
   credits?: CreditInfo[];
   translations: PremiumDetailsTranslations;

@@ -1,4 +1,4 @@
-import Purchases, { type CustomerInfo } from "react-native-purchases";
+import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
@@ -7,7 +7,7 @@ import { getPremiumEntitlement } from "../../core/types";
 
 declare const __DEV__: boolean;
 
-function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: any): InitializeResult {
+function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, offerings: PurchasesOfferings | null): InitializeResult {
   const isPremium = !!customerInfo.entitlements.active[deps.config.entitlementIdentifier];
   return { success: true, offering: offerings?.current ?? null, isPremium };
 }
@@ -17,14 +17,14 @@ function buildSuccessResult(deps: InitializerDeps, customerInfo: CustomerInfo, o
  * Empty offerings (no products configured in RevenueCat dashboard) should NOT
  * block SDK initialization. The SDK is still usable for premium checks, purchases, etc.
  */
-async function fetchOfferingsSafe(): Promise<any> {
+async function fetchOfferingsSafe(): Promise<PurchasesOfferings | null> {
   try {
     return await Purchases.getOfferings();
   } catch (error) {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.warn('[UserSwitchHandler] Offerings fetch failed (non-fatal):', error);
     }
-    return { current: null, all: {} };
+    return null;
   }
 }
 
@@ -144,6 +144,12 @@ export async function handleInitialConfiguration(
       });
     }
 
+    Purchases.setLogLevel(
+      (typeof __DEV__ !== 'undefined' && __DEV__)
+        ? Purchases.LOG_LEVEL.INFO
+        : Purchases.LOG_LEVEL.ERROR
+    );
+
     await Purchases.configure({ apiKey, appUserID: normalizedUserId || undefined });
     deps.setInitialized(true);
     deps.setCurrentUserId(normalizedUserId || undefined);
@@ -165,7 +171,7 @@ export async function handleInitialConfiguration(
       console.log('[UserSwitchHandler] ✅ Initial configuration completed:', {
         revenueCatUserId: currentUserId,
         activeEntitlements: Object.keys(customerInfo.entitlements.active),
-        offeringsCount: offerings.all ? Object.keys(offerings.all).length : 0,
+        offeringsCount: offerings?.all ? Object.keys(offerings.all).length : 0,
       });
     }
 
@@ -184,7 +190,7 @@ export async function handleInitialConfiguration(
             premiumEntitlement.productIdentifier,
             premiumEntitlement.expirationDate ?? undefined,
             premiumEntitlement.willRenew,
-            premiumEntitlement.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined
+            premiumEntitlement.periodType as "NORMAL" | "INTRO" | undefined
           );
         } else {
           await deps.config.onPremiumStatusChanged(

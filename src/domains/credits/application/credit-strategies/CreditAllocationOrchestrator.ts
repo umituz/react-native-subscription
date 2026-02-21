@@ -1,10 +1,8 @@
 import type { ICreditStrategy, CreditAllocationParams } from "./ICreditStrategy";
-import { TrialCreditStrategy } from "./TrialCreditStrategy";
 import { StandardPurchaseCreditStrategy } from "./StandardPurchaseCreditStrategy";
 
 class CreditAllocationOrchestrator {
     private strategies: ICreditStrategy[] = [
-        new TrialCreditStrategy(),
         new StandardPurchaseCreditStrategy(),
     ];
 

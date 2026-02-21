@@ -4,7 +4,6 @@ const PACKAGE_TIER_ORDER: Record<string, number> = {
   weekly: 1,
   monthly: 2,
   yearly: 3,
-  lifetime: 4,
   unknown: 0,
 };
 

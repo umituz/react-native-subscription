@@ -30,9 +30,5 @@ export function detectPackageType(productIdentifier: string): SubscriptionPackag
     return PACKAGE_TYPE.YEARLY;
   }
 
-  if (/\blifetime\b|_lifetime_|-lifetime-|\.lifetime\./i.test(normalized)) {
-      return PACKAGE_TYPE.LIFETIME;
-  }
-
   return PACKAGE_TYPE.UNKNOWN;
 }

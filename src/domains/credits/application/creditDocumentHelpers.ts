@@ -1,4 +1,4 @@
-import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
+import type { UserCreditsDocumentRead, FirestoreTimestamp } from "../core/UserCreditsDocument";
 import { serverTimestamp, type DocumentSnapshot } from "@umituz/react-native-firebase";
 import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
 
@@ -10,7 +10,7 @@ export function getCreditDocumentOrDefault(
         return creditsDoc.data() as UserCreditsDocumentRead;
     }
 
-    const now = serverTimestamp() as any;
+    const now = serverTimestamp() as unknown as FirestoreTimestamp;
 
     const defaultDocument: UserCreditsDocumentRead = {
         credits: 0,
@@ -34,11 +34,6 @@ export function getCreditDocumentOrDefault(
         ownershipType: null,
         appVersion: null,
         periodType: null,
-        isTrialing: false,
-        trialStartDate: null,
-        trialEndDate: null,
-        trialCredits: 0,
-        convertedFromTrial: false,
         purchaseSource: null,
         purchaseType: null,
     };

@@ -23,8 +23,6 @@ export interface SubscriptionSectionConfig {
   expirationDate?: string | null;
   /** Formatted purchase date string */
   purchaseDate?: string | null;
-  /** Whether subscription is lifetime */
-  isLifetime?: boolean;
   /** Days remaining until expiration */
   daysRemaining?: number | null;
   /** Credit info array (app-specific, passed from app) */
@@ -54,7 +52,6 @@ export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
       isPremium={config.isPremium}
       expirationDate={config.expirationDate}
       purchaseDate={config.purchaseDate}
-      isLifetime={config.isLifetime}
       daysRemaining={config.daysRemaining}
       credits={config.credits}
       translations={config.translations}

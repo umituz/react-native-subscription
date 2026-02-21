@@ -1,6 +1,5 @@
 import {
   SUBSCRIPTION_STATUS,
-  PERIOD_TYPE,
   type SubscriptionStatusType
 } from "./SubscriptionConstants";
 import type { StatusResolverInput } from "./SubscriptionStatus";
@@ -28,15 +27,6 @@ export class InactiveStatusHandler extends BaseStatusHandler {
             return isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.NONE;
         }
         return this.nextOrFallback(input, SUBSCRIPTION_STATUS.NONE);
-    }
-}
-
-export class TrialStatusHandler extends BaseStatusHandler {
-    handle(input: StatusResolverInput): SubscriptionStatusType {
-        if (input.periodType === PERIOD_TYPE.TRIAL) {
-            return input.willRenew === false ? SUBSCRIPTION_STATUS.TRIAL_CANCELED : SUBSCRIPTION_STATUS.TRIAL;
-        }
-        return this.nextOrFallback(input, SUBSCRIPTION_STATUS.ACTIVE);
     }
 }
 

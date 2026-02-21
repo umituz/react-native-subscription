@@ -1,7 +1,8 @@
+import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";
+
 export interface SubscriptionHeaderProps {
-  statusType: "active" | "expired" | "none" | "canceled";
+  statusType: SubscriptionStatusType;
   showExpirationDate: boolean;
-  isLifetime: boolean;
   expirationDate?: string;
   purchaseDate?: string;
   daysRemaining?: number | null;
@@ -13,7 +14,6 @@ export interface SubscriptionHeaderProps {
     statusFree: string;
     statusCanceled: string;
     statusLabel: string;
-    lifetimeLabel: string;
     expiresLabel: string;
     purchasedLabel: string;
     willRenewLabel?: string;

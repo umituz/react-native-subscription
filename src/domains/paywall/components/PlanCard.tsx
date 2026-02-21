@@ -5,7 +5,7 @@ import { formatPriceWithPeriod } from '../../../utils/priceUtils';
 import { PlanCardProps } from "./PlanCard.types";
 
 export const PlanCard: React.FC<PlanCardProps> = React.memo(
-  ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel, hasFreeTrial, trialSubtitleText }) => {
+  ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel }) => {
     const tokens = useAppDesignTokens();
     const title = pkg.product.title;
     const price = formatPriceWithPeriod(pkg.product.price, pkg.product.currencyCode, pkg.identifier);
@@ -30,9 +30,6 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                 <AtomicText type="titleSmall" style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}>{title}</AtomicText>
                 {creditAmount != null && creditAmount > 0 && creditsLabel && (
                   <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>{creditAmount} {creditsLabel}</AtomicText>
-                )}
-                {hasFreeTrial && trialSubtitleText && (
-                  <AtomicText type="bodySmall" style={{ color: tokens.colors.textTertiary ?? tokens.colors.textSecondary, fontSize: 11, marginTop: 2 }}>{trialSubtitleText}</AtomicText>
                 )}
               </View>
             </View>

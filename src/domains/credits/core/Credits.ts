@@ -21,11 +21,6 @@ export interface UserCredits {
   packageType: PackageType | null;
   originalTransactionId: string | null;
   periodType: string | null;
-  isTrialing: boolean | null;
-  trialStartDate: Date | null;
-  trialEndDate: Date | null;
-  trialCredits: number | null;
-  convertedFromTrial: boolean | null;
   credits: number;
   creditLimit: number;
   purchaseSource: PurchaseSource | null;

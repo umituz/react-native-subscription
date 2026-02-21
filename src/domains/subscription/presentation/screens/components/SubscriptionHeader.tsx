@@ -10,7 +10,6 @@ import { SubscriptionHeaderContent } from "./SubscriptionHeaderContent";
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   statusType,
   showExpirationDate,
-  isLifetime,
   expirationDate,
   purchaseDate,
   daysRemaining,
@@ -49,7 +48,6 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
       </View>
 
       <SubscriptionHeaderContent
-        isLifetime={isLifetime}
         showExpirationDate={showExpirationDate}
         expirationDate={expirationDate}
         purchaseDate={purchaseDate}

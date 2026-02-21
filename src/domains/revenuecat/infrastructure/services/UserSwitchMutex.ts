@@ -18,7 +18,8 @@ class UserSwitchMutexImpl {
       }
       try {
         await this.activeSwitchPromise;
-      } catch {
+      } catch (_ignored) {
+        // Intentional: waiting for active switch to complete without failing
       }
 
       const timeSinceLastSwitch = Date.now() - this.lastSwitchTime;

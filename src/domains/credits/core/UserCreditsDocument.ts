@@ -46,11 +46,6 @@ export interface UserCreditsDocumentRead {
     store: Store | null;
     ownershipType: OwnershipType | null;
     periodType: string | null;
-    isTrialing: boolean | null;
-    trialStartDate: FirestoreTimestamp | null;
-    trialEndDate: FirestoreTimestamp | null;
-    trialCredits: number | null;
-    convertedFromTrial: boolean | null;
     credits: number;
     creditLimit: number;
     purchaseSource: PurchaseSource | null;

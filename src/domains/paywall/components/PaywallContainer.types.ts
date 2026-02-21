@@ -3,13 +3,6 @@ import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from 
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
 import type { PackageAllocationMap } from "../../credits/core/Credits";
 
-export interface TrialConfig {
-  readonly enabled: boolean;
-  readonly eligibleProductIds?: readonly string[];
-  readonly durationDays?: number;
-  readonly trialText?: string;
-}
-
 export interface PaywallContainerProps {
   readonly translations: PaywallTranslations;
   readonly legalUrls?: PaywallLegalUrls;
@@ -25,5 +18,4 @@ export interface PaywallContainerProps {
   readonly onAuthRequired?: () => void;
   readonly visible?: boolean;
   readonly onClose?: () => void;
-  readonly trialConfig?: TrialConfig;
 }

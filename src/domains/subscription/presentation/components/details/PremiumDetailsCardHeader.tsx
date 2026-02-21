@@ -3,10 +3,11 @@ import { View } from "react-native";
 import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
 import { PremiumStatusBadge } from "./PremiumStatusBadge";
 import { styles } from "./PremiumDetailsCard.styles";
+import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";
 import type { PremiumDetailsTranslations } from "./PremiumDetailsCardTypes";
 
 interface PremiumDetailsCardHeaderProps {
-  statusType: "active" | "expired" | "none" | "canceled";
+  statusType: SubscriptionStatusType;
   translations: PremiumDetailsTranslations;
 }
 

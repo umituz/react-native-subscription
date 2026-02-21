@@ -34,7 +34,7 @@ export async function syncPremiumStatus(
                 premiumEntitlement.productIdentifier,
                 premiumEntitlement.expirationDate ?? undefined,
                 premiumEntitlement.willRenew,
-                premiumEntitlement.periodType as "NORMAL" | "INTRO" | "TRIAL" | undefined
+                premiumEntitlement.periodType as "NORMAL" | "INTRO" | undefined
             );
         } else {
             await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);

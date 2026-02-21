@@ -11,7 +11,7 @@ import {
 import { PURCHASE_ID_PREFIXES, PROCESSED_PURCHASES_WINDOW } from "../core/CreditsConstants";
 
 
-export function calculateNewCredits({ metadata, existingData, creditLimit, purchaseId }: CalculateCreditsParams): number {
+export function calculateNewCredits({ metadata, existingData, creditLimit }: CalculateCreditsParams): number {
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
   const isPremium = metadata.isPremium;
   const status = resolveSubscriptionStatus({
