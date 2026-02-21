@@ -1,10 +1,10 @@
 class UserSwitchMutexImpl {
-  private activeSwitchPromise: Promise<any> | null = null;
+  private activeSwitchPromise: Promise<unknown> | null = null;
   private activeUserId: string | null = null;
   private lastSwitchTime = 0;
   private readonly MIN_SWITCH_INTERVAL_MS = 1000;
 
-  async acquire(userId: string): Promise<{ shouldProceed: boolean; existingPromise?: Promise<any> }> {
+  async acquire(userId: string): Promise<{ shouldProceed: boolean; existingPromise?: Promise<unknown> }> {
     if (this.activeSwitchPromise && this.activeUserId === userId) {
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[UserSwitchMutex] Switch already in progress for this user, returning existing promise');
@@ -43,7 +43,7 @@ class UserSwitchMutexImpl {
     return { shouldProceed: true };
   }
 
-  setPromise(promise: Promise<any>): void {
+  setPromise(promise: Promise<unknown>): void {
     this.activeSwitchPromise = promise;
     this.lastSwitchTime = Date.now();
 

@@ -1,7 +1,6 @@
-import type { RenewalState, RenewalDetectionResult } from "./types";
+import type { RenewalDetectionResult, RenewalState } from "./types";
 
 export function updateRenewalState(
-  _state: RenewalState,
   result: RenewalDetectionResult
 ): RenewalState {
   return {

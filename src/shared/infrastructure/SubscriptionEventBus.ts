@@ -2,7 +2,7 @@ type EventCallback<T = unknown> = (data: T) => void;
 
 class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
-  private listeners: Record<string, EventCallback<any>[]> = {};
+  private listeners: Record<string, EventCallback[]> = {};
 
   private constructor() {}
 
@@ -17,7 +17,7 @@ class SubscriptionEventBus {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event].push(callback);
+    this.listeners[event].push(callback as EventCallback);
 
     return () => {
       const listeners = this.listeners[event];

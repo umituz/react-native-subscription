@@ -1,11 +1,10 @@
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
-import type { PremiumStatus } from "./PurchaseStatusResolver";
+import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
 import {
   fetchPackages,
   executePurchase,
   restorePurchases,
-  checkPremiumStatus,
   type RestoreResultInfo,
 } from "./package-operations";
 
@@ -33,6 +32,6 @@ export class PackageHandler {
   }
 
   checkPremiumStatusFromInfo(customerInfo: CustomerInfo): PremiumStatus {
-    return checkPremiumStatus(customerInfo, this.entitlementId);
+    return PurchaseStatusResolver.resolve(customerInfo, this.entitlementId);
   }
 }

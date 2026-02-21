@@ -39,6 +39,7 @@ export class SubscriptionSyncService {
         newExpirationDate,
         error: error instanceof Error ? error.message : String(error)
       });
+      throw error;
     }
   }
 
@@ -60,6 +61,7 @@ export class SubscriptionSyncService {
         productId,
         error: error instanceof Error ? error.message : String(error)
       });
+      throw error;
     }
   }
 }

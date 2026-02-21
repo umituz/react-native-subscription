@@ -4,6 +4,9 @@ import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { UserSwitchMutex } from "./UserSwitchMutex";
 import { getPremiumEntitlement } from "../../core/types";
+import type { PeriodType } from "../../../subscription/core/SubscriptionConstants";
+
+const ANONYMOUS_CACHE_KEY = '__anonymous__';
 
 declare const __DEV__: boolean;
 
@@ -29,7 +32,7 @@ async function fetchOfferingsSafe(): Promise<PurchasesOfferings | null> {
 }
 
 function normalizeUserId(userId: string): string | null {
-  return (userId && userId.length > 0 && userId !== "__anonymous__") ? userId : null;
+  return (userId && userId.length > 0 && userId !== ANONYMOUS_CACHE_KEY) ? userId : null;
 }
 
 function isAnonymousId(userId: string): boolean {
@@ -40,7 +43,7 @@ export async function handleUserSwitch(
   deps: InitializerDeps,
   userId: string
 ): Promise<InitializeResult> {
-  const mutexKey = userId || '__anonymous__';
+  const mutexKey = userId || ANONYMOUS_CACHE_KEY;
 
   // Acquire mutex to prevent concurrent Purchases.logIn() calls
   const { shouldProceed, existingPromise } = await UserSwitchMutex.acquire(mutexKey);
@@ -49,7 +52,7 @@ export async function handleUserSwitch(
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[UserSwitchHandler] Using result from active switch operation');
     }
-    return existingPromise;
+    return existingPromise as Promise<InitializeResult>;
   }
 
   const switchOperation = performUserSwitch(deps, userId);
@@ -190,7 +193,7 @@ export async function handleInitialConfiguration(
             premiumEntitlement.productIdentifier,
             premiumEntitlement.expirationDate ?? undefined,
             premiumEntitlement.willRenew,
-            premiumEntitlement.periodType as "NORMAL" | "INTRO" | undefined
+            premiumEntitlement.periodType as PeriodType | undefined
           );
         } else {
           await deps.config.onPremiumStatusChanged(

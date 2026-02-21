@@ -113,5 +113,5 @@ export async function processCustomerInfo(
     await handlePremiumStatusSync(config, userId, customerInfo);
   }
 
-  return updateRenewalState(renewalState, renewalResult);
+  return updateRenewalState(renewalResult);
 }

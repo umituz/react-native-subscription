@@ -41,12 +41,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
         return null;
       }
 
-      try {
-        const result = await SubscriptionManager.checkPremiumStatus();
-        return result;
-      } catch {
-        return null;
-      }
+      return SubscriptionManager.checkPremiumStatus();
     },
     enabled: queryEnabled,
     ...NO_CACHE_QUERY_CONFIG,

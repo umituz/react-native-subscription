@@ -1,4 +1,5 @@
-import { addDoc, serverTimestamp } from "firebase/firestore";
+import { addDoc } from "firebase/firestore";
+import { serverTimestamp } from "@umituz/react-native-firebase";
 import type {
   CreditLog,
   TransactionRepositoryConfig,

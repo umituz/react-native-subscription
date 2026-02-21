@@ -34,7 +34,7 @@ export function createSubscriptionInitModule(config: SubscriptionInitModuleConfi
         return true;
       } catch (error) {
         console.error('[SubscriptionInitModule] Initialization failed:', error instanceof Error ? error.message : String(error));
-        return false;
+        throw error;
       }
     },
   };

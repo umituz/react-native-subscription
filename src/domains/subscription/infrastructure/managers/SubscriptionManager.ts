@@ -10,6 +10,8 @@ import { getPackagesOperation, purchasePackageOperation, restoreOperation } from
 import { performServiceInitialization } from "./initializationHandler";
 import { initializationState } from "../state/initializationState";
 
+const ANONYMOUS_CACHE_KEY = '__anonymous__';
+
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
   private serviceInstance: IRevenueCatService | null = null;
@@ -43,7 +45,7 @@ class SubscriptionManagerImpl {
       });
     }
 
-    const cacheKey = actualUserId || '__anonymous__';
+    const cacheKey = actualUserId || ANONYMOUS_CACHE_KEY;
     const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(cacheKey);
 
     if (!shouldInit && existingPromise) {
@@ -56,14 +58,13 @@ class SubscriptionManagerImpl {
     // Mark pending so React components know to wait
     initializationState.markPending();
 
+    const realUserId = actualUserId || null;
     const promise = this.performInitialization(actualUserId);
-    this.state.initCache.setPromise(promise, cacheKey);
+    this.state.initCache.setPromise(promise, cacheKey, realUserId);
     return promise;
   }
 
   private async performInitialization(userId: string): Promise<boolean> {
-    this.ensureConfigured();
-
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[SubscriptionManager] performInitialization:', {
         userId: userId || '(empty - anonymous)',
@@ -74,13 +75,8 @@ class SubscriptionManagerImpl {
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
 
-    // Always notify reactive state when service is available, even if offerings fetch failed.
-    // This ensures React components (useSubscriptionPackages, useSubscriptionStatus) are unblocked.
-    // The service IS configured and usable - empty offerings is not a fatal error.
     const notifyUserId = (userId && userId.length > 0) ? userId : null;
-    if (service) {
-      initializationState.markInitialized(notifyUserId);
-    } else if (success) {
+    if (service || success) {
       initializationState.markInitialized(notifyUserId);
     }
 
@@ -142,7 +138,7 @@ class SubscriptionManagerImpl {
 
   getEntitlementId(): string {
     this.ensureConfigured();
-    return this.managerConfig!.config.entitlementIdentifier ?? '';
+    return this.managerConfig!.config.entitlementIdentifier;
   }
 }
 

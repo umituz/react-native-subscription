@@ -19,8 +19,6 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
 
   const entitlement = customerInfo.entitlements.active[entitlementId];
 
-  const isPremium = !!customerInfo.entitlements.active[entitlementId];
-
   if (!entitlement) {
     return {
       expirationDate: null,
@@ -36,13 +34,15 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
     };
   }
 
+  const subscription = customerInfo.subscriptionsByProductIdentifier?.[entitlement.productIdentifier];
+
   return {
     expirationDate: entitlement.expirationDate ?? null,
     willRenew: entitlement.willRenew ?? null,
-    originalTransactionId: entitlement.originalPurchaseDate ?? null,
+    originalTransactionId: subscription?.storeTransactionId ?? null,
     periodType: validatePeriodType(entitlement.periodType),
     packageType: null,
-    isPremium,
+    isPremium: true,
     unsubscribeDetectedAt: entitlement.unsubscribeDetectedAt ?? null,
     billingIssueDetectedAt: entitlement.billingIssueDetectedAt ?? null,
     store: entitlement.store ?? null,
