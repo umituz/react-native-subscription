@@ -70,6 +70,7 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
           billingIssueDetectedAt: revenueCatData.billingIssueDetectedAt,
           store: revenueCatData.store,
           ownershipType: revenueCatData.ownershipType,
+          revenueCatUserId: revenueCatData.revenueCatUserId,
           type,
         }
       );

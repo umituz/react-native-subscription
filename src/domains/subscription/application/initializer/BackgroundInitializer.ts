@@ -11,6 +11,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   let retryTimer: ReturnType<typeof setTimeout> | null = null;
   let lastUserId: string | undefined = undefined;
   let lastInitSucceeded = false;
+  let isInitializing = false; // true while attemptInitWithRetry is awaited
 
   const initializeInBackground = async (revenueCatUserId?: string): Promise<void> => {
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -65,7 +66,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       retryTimer = null;
     }
 
-    if (lastUserId === revenueCatUserId && lastInitSucceeded) {
+    if (lastUserId === revenueCatUserId && (lastInitSucceeded || isInitializing)) {
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[BackgroundInitializer] UserId unchanged and init succeeded, skipping');
       }
@@ -83,7 +84,12 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
         lastInitSucceeded = false;
       }
 
-      void attemptInitWithRetry(revenueCatUserId);
+      isInitializing = true;
+      try {
+        await attemptInitWithRetry(revenueCatUserId);
+      } finally {
+        isInitializing = false;
+      }
     }, AUTH_STATE_DEBOUNCE_MS);
   };
 

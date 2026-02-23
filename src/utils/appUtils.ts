@@ -1,8 +1,6 @@
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
-export const IS_DEV_MODE = typeof __DEV__ !== "undefined" && __DEV__;
-
 export function getAppVersion(): string {
   const version = Constants.expoConfig?.version;
 
@@ -18,8 +16,4 @@ export function validatePlatform(): "ios" | "android" {
     throw new Error(`Unsupported platform: ${platform}`);
   }
   return platform;
-}
-
-export function isDev(): boolean {
-  return __DEV__;
 }

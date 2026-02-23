@@ -54,10 +54,10 @@ export const useAuthAwarePurchase = (
     const authProvider = authPurchaseStateManager.getProvider();
     if (!authProvider) return;
 
-    const isAuth = authProvider.isAuthenticated();
+    const hasUser = authProvider.hasFirebaseUser();
     const hasSavedPurchase = !!authPurchaseStateManager.getSavedPurchase();
 
-    if (isAuth && hasSavedPurchase && !isExecutingSavedRef.current) {
+    if (hasUser && hasSavedPurchase && !isExecutingSavedRef.current) {
       isExecutingSavedRef.current = true;
       executeSavedPurchase().finally(() => {
         isExecutingSavedRef.current = false;
@@ -73,9 +73,7 @@ export const useAuthAwarePurchase = (
         return false;
       }
 
-      const isAuth = authProvider.isAuthenticated();
-
-      if (!isAuth) {
+      if (!authProvider.hasFirebaseUser()) {
         authPurchaseStateManager.savePurchase(pkg, source || params?.source || "settings");
         authProvider.showAuthModal();
         return false;
@@ -95,7 +93,7 @@ export const useAuthAwarePurchase = (
       return false;
     }
 
-    if (!authProvider.isAuthenticated()) {
+    if (!authProvider.hasFirebaseUser()) {
       authProvider.showAuthModal();
       return false;
     }

@@ -24,7 +24,7 @@ export function getOrCreateService(
         return currentInstance;
     }
 
-    const { getRevenueCatService } = require("../services/RevenueCatService");
+    const { getRevenueCatService } = require("../services/revenueCatServiceInstance");
     const serviceInstance = getRevenueCatService();
 
     if (!serviceInstance) {

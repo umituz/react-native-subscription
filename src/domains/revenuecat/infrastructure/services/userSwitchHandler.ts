@@ -1,10 +1,12 @@
 import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
+import { doc, setDoc } from "firebase/firestore";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { UserSwitchMutex } from "./UserSwitchMutex";
 import { getPremiumEntitlement } from "../../core/types";
 import type { PeriodType } from "../../../subscription/core/SubscriptionConstants";
+import { requireFirestore } from "../../../../shared/infrastructure/firestore";
 
 const ANONYMOUS_CACHE_KEY = '__anonymous__';
 
@@ -37,6 +39,16 @@ function normalizeUserId(userId: string): string | null {
 
 function isAnonymousId(userId: string): boolean {
   return userId.startsWith('$RCAnonymous') || userId.startsWith('device_');
+}
+
+async function syncRevenueCatIdToProfile(firebaseUserId: string, revenueCatUserId: string): Promise<void> {
+  try {
+    const db = requireFirestore();
+    const userRef = doc(db, "users", firebaseUserId);
+    await setDoc(userRef, { revenueCatUserId }, { merge: true });
+  } catch {
+    // Non-fatal: profile update failure should not block SDK initialization
+  }
 }
 
 export async function handleUserSwitch(
@@ -108,6 +120,11 @@ async function performUserSwitch(
     deps.setCurrentUserId(normalizedUserId || undefined);
     const offerings = await fetchOfferingsSafe();
 
+    if (normalizedUserId) {
+      const rcId = await Purchases.getAppUserID();
+      void syncRevenueCatIdToProfile(normalizedUserId, rcId);
+    }
+
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[UserSwitchHandler] ✅ User switch completed successfully');
     }
@@ -169,6 +186,10 @@ export async function handleInitialConfiguration(
     ]);
 
     const currentUserId = await Purchases.getAppUserID();
+
+    if (normalizedUserId) {
+      void syncRevenueCatIdToProfile(normalizedUserId, currentUserId);
+    }
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
       console.log('[UserSwitchHandler] ✅ Initial configuration completed:', {

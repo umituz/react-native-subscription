@@ -47,35 +47,3 @@ export function toTimestamp(value: Date | string | number | null | undefined): F
 export function getCurrentISOString(): string {
   return new Date().toISOString();
 }
-
-export function getCurrentDate(): Date {
-  return new Date();
-}
-
-export function isBefore(date1: Date | string | null | undefined, date2: Date | string | null | undefined): boolean {
-  const d1 = toDate(date1);
-  const d2 = toDate(date2);
-
-  if (!d1 || !d2) return false;
-  return d1.getTime() < d2.getTime();
-}
-
-export function isAfter(date1: Date | string | null | undefined, date2: Date | string | null | undefined): boolean {
-  const d1 = toDate(date1);
-  const d2 = toDate(date2);
-
-  if (!d1 || !d2) return false;
-  return d1.getTime() > d2.getTime();
-}
-
-export function isInPast(date: Date | string | null | undefined): boolean {
-  const d = toDate(date);
-  if (!d) return false;
-  return d.getTime() < Date.now();
-}
-
-export function isInFuture(date: Date | string | null | undefined): boolean {
-  const d = toDate(date);
-  if (!d) return false;
-  return d.getTime() > Date.now();
-}

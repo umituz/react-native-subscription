@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
 import { useCallback, useMemo, useEffect } from "react";
-import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
@@ -10,7 +10,7 @@ import {
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
 import { calculateSafePercentage, canAffordAmount } from "../utils/creditValidation";
-import { isRegisteredUser } from "../../subscription/utils/authGuards";
+import { isAuthenticated } from "../../subscription/utils/authGuards";
 import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
 
@@ -26,17 +26,16 @@ const deriveLoadStatus = (
 
 export const useCredits = (): UseCreditsResult => {
   const userId = useAuthStore(selectUserId);
-  const isAnonymous = useAuthStore(selectIsAnonymous);
   const isConfigured = isCreditsRepositoryConfigured();
 
   const config = isConfigured ? getCreditsConfig() : null;
-  const isUserRegistered = isRegisteredUser(userId, isAnonymous);
-  const queryEnabled = isUserRegistered && isConfigured;
+  const hasUser = isAuthenticated(userId);
+  const queryEnabled = hasUser && isConfigured;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: creditsQueryKeys.user(userId),
     queryFn: async () => {
-      if (!isUserRegistered || !isConfigured) return null;
+      if (!hasUser || !isConfigured) return null;
 
       const repository = getCreditsRepository();
       const result = await repository.getCredits(userId);
@@ -56,7 +55,7 @@ export const useCredits = (): UseCreditsResult => {
   usePreviousUserCleanup(userId, queryClient, creditsQueryKeys.user);
 
   useEffect(() => {
-    if (!isUserRegistered) return undefined;
+    if (!hasUser) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
       if (updatedUserId === userId) {
@@ -65,7 +64,7 @@ export const useCredits = (): UseCreditsResult => {
     });
 
     return unsubscribe;
-  }, [userId, isUserRegistered, queryClient]);
+  }, [userId, hasUser, queryClient]);
 
   const credits = data ?? null;
 

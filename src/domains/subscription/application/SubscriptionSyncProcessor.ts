@@ -1,4 +1,5 @@
 import type { CustomerInfo } from "react-native-purchases";
+import Purchases from "react-native-purchases";
 import type { PeriodType, PurchaseSource } from "../core/SubscriptionConstants";
 import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
@@ -14,6 +15,14 @@ export class SubscriptionSyncProcessor {
     private getAnonymousUserId: () => Promise<string>
   ) {}
 
+  private async getRevenueCatAppUserId(): Promise<string | null> {
+    try {
+      return await Purchases.getAppUserID();
+    } catch {
+      return null;
+    }
+  }
+
   private async getCreditsUserId(revenueCatUserId: string): Promise<string> {
     if (!revenueCatUserId || revenueCatUserId.trim().length === 0) {
       const anonymousId = await this.getAnonymousUserId();
@@ -28,6 +37,7 @@ export class SubscriptionSyncProcessor {
   async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource, packageType?: PackageType | null) {
     const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
     revenueCatData.packageType = packageType ?? null;
+    revenueCatData.revenueCatUserId = await this.getRevenueCatAppUserId();
     const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
 
     const creditsUserId = await this.getCreditsUserId(userId);
@@ -47,6 +57,7 @@ export class SubscriptionSyncProcessor {
   async processRenewal(userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) {
     const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
     revenueCatData.expirationDate = newExpirationDate ?? revenueCatData.expirationDate;
+    revenueCatData.revenueCatUserId = await this.getRevenueCatAppUserId();
     const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
 
     const creditsUserId = await this.getCreditsUserId(userId);

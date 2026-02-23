@@ -4,7 +4,6 @@ import { useAlert } from "@umituz/react-native-design-system";
 import {
   useAuthStore,
   selectUserId,
-  selectIsAnonymous,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
@@ -19,7 +18,6 @@ interface PurchaseMutationResult {
 
 export const usePurchasePackage = () => {
   const userId = useAuthStore(selectUserId);
-  const isAnonymous = useAuthStore(selectIsAnonymous);
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlert();
 
@@ -27,10 +25,6 @@ export const usePurchasePackage = () => {
     mutationFn: async (pkg: PurchasesPackage): Promise<PurchaseMutationResult> => {
       if (!userId) {
         throw new Error("User not authenticated");
-      }
-
-      if (isAnonymous) {
-        throw new Error("Anonymous users cannot purchase subscriptions");
       }
 
       const productId = pkg.product.identifier;

@@ -73,5 +73,6 @@ export function buildCreditsData({
     ...(billingIssueTimestamp && { billingIssueDetectedAt: billingIssueTimestamp }),
     ...(metadata.store && { store: metadata.store }),
     ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
+    ...(metadata.revenueCatUserId && { revenueCatUserId: metadata.revenueCatUserId }),
   };
 }

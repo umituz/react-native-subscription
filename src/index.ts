@@ -19,11 +19,7 @@ export {
   isFailure,
   unwrap,
   unwrapOr,
-  map,
-  flatMap,
   tryCatch,
-  tryCatchSync,
-  combine,
 } from "./shared/utils/Result";
 export type { Result, Success, Failure } from "./shared/utils/Result";
 
@@ -75,16 +71,12 @@ export type {
 
 // Utils
 export * from "./utils/creditMapper";
-export * from "./utils/packagePeriodUtils";
 export * from "./utils/packageTypeDetector";
-export * from "./utils/premiumStatusUtils";
 export * from "./utils/priceUtils";
-export * from "./utils/tierUtils";
 export * from "./utils/types";
-export * from "./utils/validation";
 export * from "./utils/dateUtils";
-export * from "./utils/appUtils";
-export * from "./shared/utils/dateConverter";
+export { getAppVersion, validatePlatform } from "./utils/appUtils";
+export { toDate, toISOString, toTimestamp, getCurrentISOString } from "./shared/utils/dateConverter";
 
 // Credits Query Keys
 export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKeys";

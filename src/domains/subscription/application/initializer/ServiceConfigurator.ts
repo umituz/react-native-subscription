@@ -68,6 +68,10 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
       const u = auth.currentUser;
       return !!(u && !u.isAnonymous);
     },
+    hasFirebaseUser: () => {
+      const auth = getFirebaseAuth();
+      return !!(auth?.currentUser);
+    },
     showAuthModal,
   });
 

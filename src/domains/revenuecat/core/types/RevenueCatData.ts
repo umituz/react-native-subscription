@@ -11,4 +11,5 @@ export interface RevenueCatData {
   billingIssueDetectedAt: string | null;
   store: Store | null;
   ownershipType: OwnershipType | null;
+  revenueCatUserId?: string | null;
 }

@@ -41,6 +41,7 @@ export interface InitializeCreditsMetadata {
   billingIssueDetectedAt: string | null;
   store: Store | null;
   ownershipType: OwnershipType | null;
+  revenueCatUserId?: string | null;
 }
 
 export interface InitializationResult {

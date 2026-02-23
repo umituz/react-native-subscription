@@ -3,6 +3,7 @@ import type { PurchaseSource } from "../../core/SubscriptionConstants";
 
 export interface PurchaseAuthProvider {
   isAuthenticated: () => boolean;
+  hasFirebaseUser: () => boolean;
   showAuthModal: () => void;
 }
 

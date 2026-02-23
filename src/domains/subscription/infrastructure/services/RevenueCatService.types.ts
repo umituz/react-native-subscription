@@ -78,11 +78,18 @@ export class RevenueCatService implements IRevenueCatService {
 
         this.listenerManager.destroy();
 
-        try {
-            await Purchases.logOut();
-            this.stateManager.setInitialized(false);
-        } catch (error) {
-            console.error('[RevenueCatService] Logout failed during reset', { error });
+        const currentUserId = this.getCurrentUserId();
+
+        if (currentUserId) {
+            try {
+                await Purchases.logOut();
+            } catch (error) {
+                if (__DEV__) {
+                    console.warn('[RevenueCatService] logOut failed during reset', { error });
+                }
+            }
         }
+
+        this.stateManager.setInitialized(false);
     }
 }

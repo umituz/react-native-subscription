@@ -14,10 +14,6 @@ export class PackageHandler {
     private entitlementId: string
   ) { }
 
-  setService(service: IRevenueCatService): void {
-    this.service = service;
-  }
-
   async fetchPackages(): Promise<PurchasesPackage[]> {
     return fetchPackages(this.service);
   }
