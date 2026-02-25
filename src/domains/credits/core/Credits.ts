@@ -42,8 +42,8 @@ export interface CreditsConfig {
   collectionName: string;
   creditLimit: number;
   useUserSubcollection: boolean;
-  creditPackageAmounts: Record<string, number>;
-  packageAllocations: PackageAllocationMap;
+  creditPackageAmounts?: Record<string, number>;
+  packageAllocations?: PackageAllocationMap;
 }
 
 export interface CreditsResult<T = UserCredits> {

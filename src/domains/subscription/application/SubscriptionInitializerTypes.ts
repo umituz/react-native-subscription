@@ -15,17 +15,17 @@ export interface CreditPackageConfig {
 
 export interface SubscriptionInitConfig {
   apiKey: string;
-  apiKeyIos: string;
-  apiKeyAndroid: string;
+  apiKeyIos?: string;
+  apiKeyAndroid?: string;
   entitlementId: string;
   credits: CreditsConfig;
   getAnonymousUserId: () => Promise<string>;
   getFirebaseAuth: () => FirebaseAuthLike | null;
   showAuthModal: () => void;
-  onCreditsUpdated: (userId: string) => void;
-  creditPackages: CreditPackageConfig;
-  timeoutMs: number;
-  authStateTimeoutMs: number;
+  onCreditsUpdated?: (userId: string) => void;
+  creditPackages?: CreditPackageConfig;
+  timeoutMs?: number;
+  authStateTimeoutMs?: number;
 }
 
 export interface InitializeCreditsMetadata {
