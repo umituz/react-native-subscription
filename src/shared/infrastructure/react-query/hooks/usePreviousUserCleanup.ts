@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { QueryClient } from "@umituz/react-native-design-system";
+import type { QueryClient } from "@umituz/react-native-design-system/tanstack";
 import { isAuthenticated } from "../../../../domains/subscription/utils/authGuards";
 
 export function usePreviousUserCleanup(

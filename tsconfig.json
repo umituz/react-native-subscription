@@ -9,7 +9,7 @@
     "jsx": "react-native",
     /* Modules */
     "module": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     /* Emit */
     "declaration": true,

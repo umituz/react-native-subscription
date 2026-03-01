@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
-import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { PremiumStatusBadge } from "./PremiumStatusBadge";
 import { styles } from "./PremiumDetailsCard.styles";
 import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";

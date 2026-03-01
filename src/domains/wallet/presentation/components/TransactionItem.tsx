@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { View } from "react-native";
-import { useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { getTransactionIcon } from "../../utils/transactionIconMap";
 import { transactionItemStyles } from "./TransactionItem.styles";
 import type { TransactionItemProps } from "./TransactionItem.types";

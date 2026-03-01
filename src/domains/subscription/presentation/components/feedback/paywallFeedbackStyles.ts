@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import type { DesignTokens } from "@umituz/react-native-design-system";
+import type { DesignTokens } from "@umituz/react-native-design-system/theme";
 
 export const createPaywallFeedbackStyles = (
     tokens: DesignTokens,

@@ -5,7 +5,7 @@
 import React from "react";
 import { StyleSheet, View, ScrollView, type ViewStyle, type ColorValue } from "react-native";
 import { useSafeAreaInsets, type Edge } from "react-native-safe-area-context";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 
 interface ScreenLayoutProps {
   children: React.ReactNode;

@@ -1,4 +1,4 @@
-import { useQuery } from "@umituz/react-native-design-system";
+import { useQuery } from "@umituz/react-native-design-system/tanstack";
 import { useMemo } from "react";
 import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
 import { NO_CACHE_QUERY_CONFIG } from "../../../../shared/infrastructure/react-query/queryConfig";

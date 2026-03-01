@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { AtomicText, BaseModal, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system/atoms";
+import { BaseModal } from "@umituz/react-native-design-system/molecules";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
 import { FeedbackOption } from "./FeedbackOption";

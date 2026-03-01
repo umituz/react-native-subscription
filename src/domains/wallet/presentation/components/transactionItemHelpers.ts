@@ -1,4 +1,4 @@
-import { timezoneService } from "@umituz/react-native-design-system";
+import { timezoneService } from "@umituz/react-native-design-system/timezone";
 import type { TransactionItemTranslations } from "./TransactionItem.types";
 
 export const defaultDateFormatter = (timestamp: number): string => {

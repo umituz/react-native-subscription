@@ -26,9 +26,20 @@ export class CustomerInfoListenerManager {
     this.state.resetRenewalState();
   }
 
-  setupListener(config: RevenueCatConfig): void {
+  setupListener(config: RevenueCatConfig): boolean {
     this.removeListener();
 
+    try {
+      this._createAndAttachListener(config);
+      return true;
+    } catch (error) {
+      console.error("[CustomerInfoListenerManager] Failed to setup listener:", error);
+      this.state.currentUserId = null;
+      return false;
+    }
+  }
+
+  private _createAndAttachListener(config: RevenueCatConfig): void {
     this.state.listener = async (customerInfo: CustomerInfo) => {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[CustomerInfoListener] 🔔 LISTENER TRIGGERED!", {
@@ -43,17 +54,21 @@ export class CustomerInfoListenerManager {
         return;
       }
 
-      const newRenewalState = await processCustomerInfo(
-        customerInfo,
-        capturedUserId,
-        this.state.renewalState,
-        config
-      );
+      try {
+        const newRenewalState = await processCustomerInfo(
+          customerInfo,
+          capturedUserId,
+          this.state.renewalState,
+          config
+        );
 
-      if (this.state.currentUserId === capturedUserId) {
-        this.state.renewalState = newRenewalState;
+        if (this.state.currentUserId === capturedUserId) {
+          this.state.renewalState = newRenewalState;
+        }
+        // else: User switched during async operation, discard stale renewal state
+      } catch (error) {
+        console.error("[CustomerInfoListener] processCustomerInfo failed:", error);
       }
-      // else: User switched during async operation, discard stale renewal state
     };
 
     Purchases.addCustomerInfoUpdateListener(this.state.listener);

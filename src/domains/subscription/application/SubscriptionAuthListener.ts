@@ -11,10 +11,9 @@ export const getCurrentUserId = (getAuth: () => FirebaseAuthLike | null): string
     return undefined;
   }
 
-  if (user.isAnonymous) {
-    return undefined;
-  }
-
+  // Return UID for ALL users including anonymous.
+  // Anonymous users need RevenueCat initialized so they can purchase subscriptions.
+  // Their credits are stored at users/{anonymousUID}/credits/balance.
   return user.uid;
 };
 
@@ -28,11 +27,13 @@ export const setupAuthStateListener = (
   }
 
   return auth.onAuthStateChanged((user) => {
-    if (!user || user.isAnonymous) {
+    if (!user) {
       onUserChange(undefined);
       return;
     }
 
+    // Pass UID for ALL users including anonymous.
+    // Anonymous users need RevenueCat initialized for purchases.
     onUserChange(user.uid);
   });
 };

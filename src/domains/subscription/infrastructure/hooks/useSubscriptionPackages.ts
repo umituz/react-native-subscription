@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
+import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import {
   useAuthStore,

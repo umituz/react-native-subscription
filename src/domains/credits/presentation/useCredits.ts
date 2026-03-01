@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@umituz/react-native-design-system";
+import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
 import { useCallback, useMemo, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";

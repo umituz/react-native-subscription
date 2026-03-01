@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
+import { useMutation, useQueryClient } from "@umituz/react-native-design-system/tanstack";
 import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryManager";
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
 import type { DeductCreditsResult } from "../../core/Credits";
@@ -64,7 +64,7 @@ export const useDeductCredit = ({
       console.error('[useDeductCredit] Unexpected error during credit refund', {
         amount,
         userId,
-        error
+        error: error instanceof Error ? error.message : String(error),
       });
       return false;
     }

@@ -10,6 +10,8 @@ import { handleExpiredSubscription, handlePremiumStatusSync } from "./statusChan
 import type { PackageType } from "../../revenuecat/core/types";
 
 export class SubscriptionSyncProcessor {
+  private purchaseInProgress = false;
+
   constructor(
     private entitlementId: string,
     private getAnonymousUserId: () => Promise<string>
@@ -23,55 +25,79 @@ export class SubscriptionSyncProcessor {
     }
   }
 
-  private async getCreditsUserId(revenueCatUserId: string): Promise<string> {
-    if (!revenueCatUserId || revenueCatUserId.trim().length === 0) {
-      const anonymousId = await this.getAnonymousUserId();
-      if (!anonymousId || anonymousId.trim().length === 0) {
-        throw new Error("[SubscriptionSyncProcessor] Cannot resolve credits userId: both revenueCatUserId and anonymousUserId are empty");
-      }
-      return anonymousId;
+  private async getCreditsUserId(revenueCatUserId: string | null | undefined): Promise<string> {
+    const trimmed = revenueCatUserId?.trim();
+    if (trimmed && trimmed.length > 0) {
+      return trimmed;
     }
-    return revenueCatUserId;
+
+    console.warn("[SubscriptionSyncProcessor] revenueCatUserId is empty/null, falling back to anonymousUserId");
+    const anonymousId = await this.getAnonymousUserId();
+    const trimmedAnonymous = anonymousId?.trim();
+    if (!trimmedAnonymous || trimmedAnonymous.length === 0) {
+      throw new Error("[SubscriptionSyncProcessor] Cannot resolve credits userId: both revenueCatUserId and anonymousUserId are empty");
+    }
+    return trimmedAnonymous;
   }
 
   async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource, packageType?: PackageType | null) {
-    const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-    revenueCatData.packageType = packageType ?? null;
-    revenueCatData.revenueCatUserId = await this.getRevenueCatAppUserId();
-    const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
+    this.purchaseInProgress = true;
+    try {
+      const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
+      revenueCatData.packageType = packageType ?? null;
+      const revenueCatAppUserId = await this.getRevenueCatAppUserId();
+      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? userId;
+      const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
 
-    const creditsUserId = await this.getCreditsUserId(userId);
+      const creditsUserId = await this.getCreditsUserId(userId);
 
-    await getCreditsRepository().initializeCredits(
-      creditsUserId,
-      purchaseId,
-      productId,
-      source ?? PURCHASE_SOURCE.SETTINGS,
-      revenueCatData,
-      PURCHASE_TYPE.INITIAL
-    );
+      const result = await getCreditsRepository().initializeCredits(
+        creditsUserId,
+        purchaseId,
+        productId,
+        source ?? PURCHASE_SOURCE.SETTINGS,
+        revenueCatData,
+        PURCHASE_TYPE.INITIAL
+      );
 
-    emitCreditsUpdated(creditsUserId);
+      if (!result.success) {
+        throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for purchase: ${result.error?.message ?? 'unknown'}`);
+      }
+
+      emitCreditsUpdated(creditsUserId);
+    } finally {
+      this.purchaseInProgress = false;
+    }
   }
 
   async processRenewal(userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) {
-    const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-    revenueCatData.expirationDate = newExpirationDate ?? revenueCatData.expirationDate;
-    revenueCatData.revenueCatUserId = await this.getRevenueCatAppUserId();
-    const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
+    this.purchaseInProgress = true;
+    try {
+      const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
+      revenueCatData.expirationDate = newExpirationDate ?? revenueCatData.expirationDate;
+      const revenueCatAppUserId = await this.getRevenueCatAppUserId();
+      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? userId;
+      const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
 
-    const creditsUserId = await this.getCreditsUserId(userId);
+      const creditsUserId = await this.getCreditsUserId(userId);
 
-    await getCreditsRepository().initializeCredits(
-      creditsUserId,
-      purchaseId,
-      productId,
-      PURCHASE_SOURCE.RENEWAL,
-      revenueCatData,
-      PURCHASE_TYPE.RENEWAL
-    );
+      const result = await getCreditsRepository().initializeCredits(
+        creditsUserId,
+        purchaseId,
+        productId,
+        PURCHASE_SOURCE.RENEWAL,
+        revenueCatData,
+        PURCHASE_TYPE.RENEWAL
+      );
 
-    emitCreditsUpdated(creditsUserId);
+      if (!result.success) {
+        throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for renewal: ${result.error?.message ?? 'unknown'}`);
+      }
+
+      emitCreditsUpdated(creditsUserId);
+    } finally {
+      this.purchaseInProgress = false;
+    }
   }
 
   async processStatusChange(
@@ -82,6 +108,27 @@ export class SubscriptionSyncProcessor {
     willRenew?: boolean,
     periodType?: PeriodType
   ) {
+    // If a purchase is in progress, skip metadata sync (purchase handler does it)
+    // but still allow recovery to run — the purchase handler's credit initialization
+    // might have failed, and this is the safety net.
+    if (this.purchaseInProgress) {
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log("[SubscriptionSyncProcessor] Purchase in progress - running recovery only");
+      }
+      if (isPremium && productId) {
+        const creditsUserId = await this.getCreditsUserId(userId);
+        await handlePremiumStatusSync(
+          creditsUserId,
+          isPremium,
+          productId,
+          expiresAt ?? null,
+          willRenew ?? false,
+          periodType ?? null
+        );
+      }
+      return;
+    }
+
     const creditsUserId = await this.getCreditsUserId(userId);
 
     if (!isPremium && productId) {
@@ -90,6 +137,9 @@ export class SubscriptionSyncProcessor {
     }
 
     if (!isPremium && !productId) {
+      // Cancellation: RevenueCat removed entitlement, no productId available.
+      // Must still update Firestore to reflect expired/canceled status.
+      await handleExpiredSubscription(creditsUserId);
       return;
     }
 

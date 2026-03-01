@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 
 export const createSubscriptionHeaderStyles = (tokens: ReturnType<typeof useAppDesignTokens>) =>
   StyleSheet.create({

@@ -1,5 +1,5 @@
-import type { QueryClient } from "@umituz/react-native-design-system";
-import { timezoneService } from "@umituz/react-native-design-system";
+import type { QueryClient } from "@umituz/react-native-design-system/tanstack";
+import { timezoneService } from "@umituz/react-native-design-system/timezone";
 import type { UserCredits, DeductCreditsResult } from "../../core/Credits";
 import type { CreditsRepository } from "../../infrastructure/CreditsRepository";
 import { creditsQueryKeys } from "../creditsQueryKeys";

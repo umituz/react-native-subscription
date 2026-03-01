@@ -1,6 +1,7 @@
 import React from "react";
 import { View } from "react-native";
-import { useAppDesignTokens, AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { transactionListStyles } from "./TransactionList.styles";
 
 interface LoadingStateProps {

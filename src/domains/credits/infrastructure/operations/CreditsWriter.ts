@@ -5,10 +5,14 @@ import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionCons
 import { resolveSubscriptionStatus } from "../../../subscription/core/SubscriptionStatus";
 import { toTimestamp } from "../../../../shared/utils/dateConverter";
 import { isPast } from "../../../../utils/dateUtils";
+import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
 
 export async function syncExpiredStatus(ref: DocumentReference): Promise<void> {
   const doc = await getDoc(ref);
-  if (!doc.exists()) return;
+  if (!doc.exists()) {
+    console.warn("[CreditsWriter] syncExpiredStatus: credits document does not exist, skipping.", ref.path);
+    return;
+  }
 
   await setDoc(ref, {
     isPremium: false,
@@ -35,7 +39,10 @@ export async function syncPremiumMetadata(
   metadata: PremiumMetadata
 ): Promise<void> {
   const doc = await getDoc(ref);
-  if (!doc.exists()) return;
+  if (!doc.exists()) {
+    console.warn("[CreditsWriter] syncPremiumMetadata: credits document does not exist, skipping.", ref.path);
+    return;
+  }
 
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
   const status = resolveSubscriptionStatus({
@@ -61,4 +68,53 @@ export async function syncPremiumMetadata(
     ...(metadata.store && { store: metadata.store }),
     ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
   }, { merge: true });
+}
+
+/**
+ * Recovery: creates a credits document for premium users who don't have one.
+ * This handles edge cases like test store purchases, reinstalls, or failed initializations.
+ * Returns true if a new document was created, false if one already existed.
+ */
+export async function createRecoveryCreditsDocument(
+  ref: DocumentReference,
+  creditLimit: number,
+  productId: string,
+  willRenew: boolean,
+  expirationDate: string | null,
+  periodType: string | null,
+): Promise<boolean> {
+  const doc = await getDoc(ref);
+  if (doc.exists()) return false;
+
+  const platform = validatePlatform();
+  const appVersion = getAppVersion();
+
+  const isExpired = expirationDate ? isPast(expirationDate) : false;
+  const status = resolveSubscriptionStatus({
+    isPremium: true,
+    willRenew,
+    isExpired,
+    periodType: periodType ?? undefined,
+  });
+
+  const expirationTimestamp = expirationDate ? toTimestamp(expirationDate) : null;
+
+  await setDoc(ref, {
+    credits: creditLimit,
+    creditLimit,
+    isPremium: true,
+    status,
+    willRenew,
+    productId,
+    platform,
+    appVersion,
+    processedPurchases: [],
+    purchaseHistory: [],
+    createdAt: serverTimestamp(),
+    lastUpdatedAt: serverTimestamp(),
+    recoveryInitialized: true,
+    ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
+  });
+
+  return true;
 }

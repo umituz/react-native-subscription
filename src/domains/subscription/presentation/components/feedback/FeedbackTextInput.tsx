@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput } from "react-native";
-import { useAppDesignTokens } from "@umituz/react-native-design-system";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { feedbackOptionStyles } from "./FeedbackOption.styles";
 import { FEEDBACK_INPUT_MAX_LENGTH, FEEDBACK_INPUT_MIN_HEIGHT } from "./feedbackOptionConstants";
 

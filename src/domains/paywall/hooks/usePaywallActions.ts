@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePurchaseLoadingStore } from "../../subscription/presentation/stores";
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
@@ -38,14 +38,13 @@ export function usePaywallActions({
   const onAuthRequiredRef = useRef(onAuthRequired);
   const onCloseRef = useRef(onClose);
 
-  useEffect(() => {
-    onPurchaseRef.current = onPurchase;
-    onRestoreRef.current = onRestore;
-    onPurchaseSuccessRef.current = onPurchaseSuccess;
-    onPurchaseErrorRef.current = onPurchaseError;
-    onAuthRequiredRef.current = onAuthRequired;
-    onCloseRef.current = onClose;
-  });
+  // Update refs in render body — always in sync, no 1-frame delay
+  onPurchaseRef.current = onPurchase;
+  onRestoreRef.current = onRestore;
+  onPurchaseSuccessRef.current = onPurchaseSuccess;
+  onPurchaseErrorRef.current = onPurchaseError;
+  onAuthRequiredRef.current = onAuthRequired;
+  onCloseRef.current = onClose;
 
   const handlePurchase = useCallback(async () => {
     if (!selectedPlanId) {

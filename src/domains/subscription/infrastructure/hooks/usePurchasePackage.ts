@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@umituz/react-native-design-system";
+import { useMutation, useQueryClient } from "@umituz/react-native-design-system/tanstack";
 import type { PurchasesPackage } from "react-native-purchases";
-import { useAlert } from "@umituz/react-native-design-system";
+import { useAlert } from "@umituz/react-native-design-system/molecules";
 import {
   useAuthStore,
   selectUserId,

@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { AtomicText, AtomicIcon, AtomicBadge, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon, AtomicBadge } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { formatPriceWithPeriod } from '../../../utils/priceUtils';
 import { PlanCardProps } from "./PlanCard.types";
 

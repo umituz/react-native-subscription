@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect } from "react";
 import { View, TouchableOpacity, Linking } from "react-native";
-import { BaseModal, useAppDesignTokens, AtomicText, AtomicIcon, useSafeAreaInsets } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
+import { BaseModal } from "@umituz/react-native-design-system/molecules";
+import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { ScreenLayout } from "../../../shared/presentation";
 import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
@@ -33,8 +36,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
     if (!url) return;
     try {
       if (await Linking.canOpenURL(url)) await Linking.openURL(url);
-    } catch (_err) {
-      // Silently fail - legal links are non-critical
+    } catch (error) {
+      console.error('[PaywallModal] Failed to open URL:', error instanceof Error ? error.message : String(error));
     }
   }, []);
 

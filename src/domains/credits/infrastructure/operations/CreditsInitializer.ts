@@ -96,22 +96,14 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
     }
   }
 
+  // Throw so the error propagates to callers (PurchaseExecutor, SubscriptionSyncProcessor).
+  // Previously this returned { success: false } which was silently ignored by callers,
+  // causing purchases to succeed in RevenueCat but credits to never be written to Firestore.
   const errorMessage = lastError instanceof Error
     ? lastError.message
     : typeof lastError === 'string'
       ? lastError
       : 'Unknown error during credit initialization';
 
-  const errorCode = lastError instanceof Error
-    ? (lastError as Error & { code?: string }).code ?? 'UNKNOWN_ERROR'
-    : 'UNKNOWN_ERROR';
-
-  return {
-    success: false,
-    data: null,
-    error: {
-      message: errorMessage,
-      code: errorCode,
-    },
-  };
+  throw new Error(`[CreditsInitializer] Credit initialization failed after ${maxRetries} retries: ${errorMessage}`);
 }

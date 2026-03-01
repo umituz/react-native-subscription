@@ -5,7 +5,8 @@
 
 import React from "react";
 import { View, StyleSheet, type ViewStyle, type TextStyle } from "react-native";
-import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 
 interface DetailRowProps {
   label: string;

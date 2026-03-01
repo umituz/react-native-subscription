@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import type { FeedbackOptionProps } from "./FeedbackOption.types";
 import { feedbackOptionStyles } from "./FeedbackOption.styles";
 import { FEEDBACK_OPTION_OPACITY } from "./feedbackOptionConstants";

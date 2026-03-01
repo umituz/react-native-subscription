@@ -105,14 +105,14 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     console.log('[BackgroundInitializer] Initial RevenueCat userId:', initialRevenueCatUserId || '(undefined - anonymous)');
   }
 
-  // Only initialize immediately if we have a real (non-anonymous) user ID.
-  // If anonymous, skip and wait for auth listener to provide the real user ID.
-  // This prevents a Firestore permission-denied error from querying with an anonymous ID.
+  // Initialize RevenueCat for all users (including anonymous).
+  // Anonymous users get their Firebase UID passed to RevenueCat so they can make purchases.
+  // Credits are stored at users/{uid}/credits/balance regardless of auth status.
   if (initialRevenueCatUserId) {
     await initializeInBackground(initialRevenueCatUserId);
     lastInitSucceeded = true;
   } else if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[BackgroundInitializer] Skipping anonymous init, waiting for auth state');
+    console.log('[BackgroundInitializer] No user available yet, waiting for auth state');
   }
 
   const unsubscribe = setupAuthStateListener(() => auth, debouncedInitialize);

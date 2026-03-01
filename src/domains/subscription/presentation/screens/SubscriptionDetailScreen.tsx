@@ -1,11 +1,15 @@
-import React, { useMemo } from "react";
-import { StyleSheet, View, Pressable } from "react-native";
-import { useAppDesignTokens, NavigationHeader, AtomicIcon } from "@umituz/react-native-design-system";
+import React, { useMemo, useState, useCallback } from "react";
+import { StyleSheet, View, Pressable, Alert } from "react-native";
+import { AtomicIcon, AtomicText } from "@umituz/react-native-design-system/atoms";
+import { NavigationHeader } from "@umituz/react-native-design-system/molecules";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { ScreenLayout } from "../../../../shared/presentation";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";
 import { UpgradePrompt } from "./components/UpgradePrompt";
 import { SubscriptionDetailScreenProps } from "./SubscriptionDetailScreen.types";
+
+const IS_DEV = typeof __DEV__ !== "undefined" && __DEV__;
 
 export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> = ({ config }) => {
   const tokens = useAppDesignTokens();
@@ -79,7 +83,65 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
             onUpgrade={config.upgradePrompt.onUpgrade ?? (() => {})}
           />
         )}
+        {IS_DEV && <DevTestPanel statusType={config.statusType} />}
       </View>
     </ScreenLayout>
   );
 };
+
+/* ─── DEV TEST PANEL ─── Only rendered in __DEV__ ─── */
+
+const DevTestPanel: React.FC<{ statusType: string }> = ({ statusType }) => {
+  const [loading, setLoading] = useState<string | null>(null);
+  const isPremium = statusType === "active";
+
+  const run = useCallback(async (label: string, fn: () => Promise<void>) => {
+    if (loading) return;
+    setLoading(label);
+    try {
+      await fn();
+      Alert.alert("DEV", `${label} OK`);
+    } catch (e) {
+      Alert.alert("DEV Error", e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(null);
+    }
+  }, [loading]);
+
+  const handleCancel = useCallback(() => run("Cancel", async () => {
+    const { useAuthStore, selectUserId } = require("@umituz/react-native-auth");
+    const { handleExpiredSubscription } = require("../../application/statusChangeHandlers");
+    const userId = selectUserId(useAuthStore.getState());
+    if (!userId) throw new Error("No userId found");
+    await handleExpiredSubscription(userId);
+  }), [run]);
+
+  const handleRestore = useCallback(() => run("Restore", async () => {
+    const Purchases = require("react-native-purchases").default;
+    await Purchases.restorePurchases();
+  }), [run]);
+
+  return (
+    <View style={{ marginTop: 16, padding: 16, borderRadius: 12, backgroundColor: "#1a1a2e", borderWidth: 1, borderColor: "#e94560" }}>
+      <AtomicText type="labelLarge" style={{ color: "#e94560", marginBottom: 12, textAlign: "center" }}>
+        DEV TEST PANEL
+      </AtomicText>
+      <View style={{ gap: 8 }}>
+        {isPremium && <DevButton label="Cancel" color="#e94560" loading={loading} onPress={handleCancel} />}
+        {!isPremium && <DevButton label="Restore" color="#0f3460" loading={loading} onPress={handleRestore} />}
+      </View>
+    </View>
+  );
+};
+
+const DevButton: React.FC<{ label: string; color: string; loading: string | null; onPress: () => void }> = ({ label, color, loading, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    disabled={!!loading}
+    style={{ backgroundColor: loading === label ? "#555" : color, padding: 12, borderRadius: 8, alignItems: "center" }}
+  >
+    <AtomicText type="labelMedium" style={{ color: "#fff" }}>
+      {loading === label ? `${label}...` : label}
+    </AtomicText>
+  </Pressable>
+);

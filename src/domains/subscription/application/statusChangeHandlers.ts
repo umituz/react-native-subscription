@@ -19,7 +19,24 @@ export const handlePremiumStatusSync = async (
   store?: string | null,
   ownershipType?: string | null
 ): Promise<void> => {
-  await getCreditsRepository().syncPremiumMetadata(userId, {
+  const repo = getCreditsRepository();
+
+  // Recovery: if premium user has no credits document, create one.
+  // Handles edge cases like test store, reinstalls, or failed purchase initialization.
+  if (isPremium) {
+    const created = await repo.ensurePremiumCreditsExist(
+      userId,
+      productId,
+      willRenew,
+      expiresAt,
+      periodType,
+    );
+    if (__DEV__ && created) {
+      console.log('[handlePremiumStatusSync] Recovery: created missing credits document for premium user', { userId, productId });
+    }
+  }
+
+  await repo.syncPremiumMetadata(userId, {
     isPremium,
     willRenew,
     expirationDate: expiresAt,

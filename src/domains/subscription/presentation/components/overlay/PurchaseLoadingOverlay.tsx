@@ -6,7 +6,8 @@
 
 import React from "react";
 import { View, Modal, StyleSheet } from "react-native";
-import { AtomicSpinner, AtomicText, useAppDesignTokens } from "@umituz/react-native-design-system";
+import { AtomicSpinner, AtomicText } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePurchaseLoadingStore, selectIsPurchasing } from "../../stores";
 
 export interface PurchaseLoadingOverlayProps {

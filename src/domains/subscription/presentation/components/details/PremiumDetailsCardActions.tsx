@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
-import { useAppDesignTokens, AtomicText } from "@umituz/react-native-design-system";
+import { AtomicText } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { styles } from "./PremiumDetailsCard.styles";
 import type { PremiumDetailsTranslations } from "./PremiumDetailsCardTypes";
 

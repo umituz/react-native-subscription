@@ -39,8 +39,10 @@ export async function refundCreditsOperation(
         throw new Error(CREDIT_ERROR_CODES.NO_CREDITS);
       }
 
-      const current = docSnap.data().credits as number;
-      const updated = current + amount;
+      const data = docSnap.data();
+      const current = data.credits as number;
+      const creditLimit = (data.creditLimit as number) ?? Infinity;
+      const updated = Math.min(current + amount, creditLimit);
 
       tx.update(creditsRef, {
         credits: updated,

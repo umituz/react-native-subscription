@@ -1,6 +1,7 @@
 import React from "react";
 import { View, ScrollView } from "react-native";
-import { useAppDesignTokens, AtomicText, AtomicIcon } from "@umituz/react-native-design-system";
+import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import type { CreditLog } from "../../domain/types/transaction.types";
 import { TransactionItem } from "./TransactionItem";
 import type { TransactionItemTranslations } from "./TransactionItem.types";
