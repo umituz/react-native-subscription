@@ -86,13 +86,44 @@ async function executeSubscriptionPurchase(
   };
 }
 
+/** Default timeout for purchase operations (2 minutes) */
+const PURCHASE_TIMEOUT_MS = 120_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`[PurchaseExecutor] ${label} timed out after ${ms / 1000}s`));
+    }, ms);
+
+    promise
+      .then((result) => { clearTimeout(timer); resolve(result); })
+      .catch((error) => { clearTimeout(timer); reject(error); });
+  });
+}
+
 export async function executePurchase(
   config: RevenueCatConfig,
   userId: string,
   pkg: PurchasesPackage,
   isConsumable: boolean
 ): Promise<PurchaseResult> {
-  const { customerInfo } = await Purchases.purchasePackage(pkg);
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseExecutor] Starting Purchases.purchasePackage:", {
+      productId: pkg.product.identifier,
+      userId,
+      isConsumable,
+    });
+  }
+
+  const { customerInfo } = await withTimeout(
+    Purchases.purchasePackage(pkg),
+    PURCHASE_TIMEOUT_MS,
+    `Purchases.purchasePackage(${pkg.product.identifier})`
+  );
+
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseExecutor] Purchases.purchasePackage completed successfully");
+  }
 
   const productId = pkg.product.identifier;
   const packageType = pkg.packageType ?? null;

@@ -21,6 +21,14 @@ export async function handlePurchase(
   const consumableIds = deps.config.consumableProductIdentifiers || [];
   const isConsumable = isConsumableProduct(pkg, consumableIds);
 
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PurchaseHandler] handlePurchase:", {
+      productId: pkg.product.identifier,
+      userId,
+      isConsumable,
+    });
+  }
+
   try {
     const result = await executePurchase(deps.config, userId, pkg, isConsumable);
     return result;

@@ -137,9 +137,13 @@ export class SubscriptionSyncProcessor {
     }
 
     if (!isPremium && !productId) {
-      // Cancellation: RevenueCat removed entitlement, no productId available.
-      // Must still update Firestore to reflect expired/canceled status.
-      await handleExpiredSubscription(creditsUserId);
+      // No entitlement and no productId — could be:
+      // 1. Free user who never purchased (no credits doc) → skip
+      // 2. Previously premium user whose entitlement was removed → expire
+      const hasDoc = await getCreditsRepository().creditsDocumentExists(creditsUserId);
+      if (hasDoc) {
+        await handleExpiredSubscription(creditsUserId);
+      }
       return;
     }
 

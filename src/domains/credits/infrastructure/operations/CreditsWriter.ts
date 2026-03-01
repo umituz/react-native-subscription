@@ -10,7 +10,6 @@ import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
 export async function syncExpiredStatus(ref: DocumentReference): Promise<void> {
   const doc = await getDoc(ref);
   if (!doc.exists()) {
-    console.warn("[CreditsWriter] syncExpiredStatus: credits document does not exist, skipping.", ref.path);
     return;
   }
 
@@ -40,7 +39,6 @@ export async function syncPremiumMetadata(
 ): Promise<void> {
   const doc = await getDoc(ref);
   if (!doc.exists()) {
-    console.warn("[CreditsWriter] syncPremiumMetadata: credits document does not exist, skipping.", ref.path);
     return;
   }
 

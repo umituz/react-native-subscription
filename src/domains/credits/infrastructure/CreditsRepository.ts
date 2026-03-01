@@ -7,7 +7,7 @@ import { deductCreditsOperation } from "../application/DeductCreditsCommand";
 import { refundCreditsOperation } from "../application/RefundCreditsCommand";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
-import { fetchCredits, checkHasCredits } from "./operations/CreditsFetcher";
+import { fetchCredits, checkHasCredits, documentExists } from "./operations/CreditsFetcher";
 import { syncExpiredStatus, syncPremiumMetadata, createRecoveryCreditsDocument, type PremiumMetadata } from "./operations/CreditsWriter";
 import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
 import { calculateCreditLimit } from "../application/CreditLimitCalculator";
@@ -69,6 +69,11 @@ export class CreditsRepository extends BaseRepository {
   async hasCredits(userId: string, cost: number): Promise<boolean> {
     const db = requireFirestore();
     return checkHasCredits(this.getRef(db, userId), cost);
+  }
+
+  async creditsDocumentExists(userId: string): Promise<boolean> {
+    const db = requireFirestore();
+    return documentExists(this.getRef(db, userId));
   }
 
   async syncExpiredStatus(userId: string): Promise<void> {
