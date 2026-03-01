@@ -59,15 +59,6 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
   });
 
   configureAuthProvider({
-    isAuthenticated: () => {
-      const auth = getFirebaseAuth();
-      if (!auth) {
-        throw new Error("Firebase auth is not available");
-      }
-
-      const u = auth.currentUser;
-      return !!(u && !u.isAnonymous);
-    },
     hasFirebaseUser: () => {
       const auth = getFirebaseAuth();
       return !!(auth?.currentUser);

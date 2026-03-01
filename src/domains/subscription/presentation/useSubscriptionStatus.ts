@@ -1,11 +1,11 @@
 import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
 import { useEffect, useSyncExternalStore } from "react";
-import { useAuthStore, selectUserId, selectIsAnonymous } from "@umituz/react-native-auth";
+import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { initializationState } from "../infrastructure/state/initializationState";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
-import { isRegisteredUser } from "../utils/authGuards";
+import { isAuthenticated } from "../utils/authGuards";
 import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 
@@ -17,10 +17,9 @@ export const subscriptionStatusQueryKeys = {
 
 export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
-  const isAnonymous = useAuthStore(selectIsAnonymous);
   const queryClient = useQueryClient();
   const isConfigured = SubscriptionManager.isConfigured();
-  const isUserRegistered = isRegisteredUser(userId, isAnonymous);
+  const hasUser = isAuthenticated(userId);
 
   const initState = useSyncExternalStore(
     initializationState.subscribe,
@@ -32,12 +31,12 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     ? initState.initialized && initState.userId === userId
     : false;
 
-  const queryEnabled = isUserRegistered && isConfigured && isInitialized;
+  const queryEnabled = hasUser && isConfigured && isInitialized;
 
   const { data, status, error, refetch } = useQuery({
     queryKey: subscriptionStatusQueryKeys.user(userId),
     queryFn: async () => {
-      if (!isUserRegistered) {
+      if (!hasUser) {
         return null;
       }
 
@@ -50,7 +49,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   usePreviousUserCleanup(userId, queryClient, subscriptionStatusQueryKeys.user);
 
   useEffect(() => {
-    if (!isUserRegistered) return undefined;
+    if (!hasUser) return undefined;
 
     const unsubscribe = subscriptionEventBus.on(
       SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED,
@@ -64,7 +63,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     );
 
     return unsubscribe;
-  }, [userId, isUserRegistered, queryClient]);
+  }, [userId, hasUser, queryClient]);
 
   const isLoading = status === "pending";
 

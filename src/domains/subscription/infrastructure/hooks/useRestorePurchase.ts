@@ -3,7 +3,6 @@ import { useAlert } from "@umituz/react-native-design-system/molecules";
 import {
   useAuthStore,
   selectUserId,
-  selectIsAnonymous,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
@@ -18,13 +17,12 @@ interface RestoreResult {
 
 export const useRestorePurchase = () => {
   const userId = useAuthStore(selectUserId);
-  const isAnonymous = useAuthStore(selectIsAnonymous);
   const queryClient = useQueryClient();
   const { showSuccess, showInfo, showError } = useAlert();
 
   return useMutation({
     mutationFn: async (): Promise<RestoreResult> => {
-      if (!userId || isAnonymous) {
+      if (!userId) {
         throw new Error("User not authenticated");
       }
 
