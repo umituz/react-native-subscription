@@ -74,6 +74,15 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     }
 
     debounceTimer = setTimeout(async () => {
+      // Don't initialize when there's no user and no previous user.
+      // This is the initial signed-out state before auth resolves, not a logout.
+      if (!revenueCatUserId && !lastUserId) {
+        if (typeof __DEV__ !== 'undefined' && __DEV__) {
+          console.log('[BackgroundInitializer] No user and no previous user, waiting for auth');
+        }
+        return;
+      }
+
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
         console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', revenueCatUserId || '(undefined - anonymous)');
       }

@@ -1,24 +1,27 @@
+import type { DocumentReference, Transaction } from "@umituz/react-native-firebase";
+import { runTransaction, serverTimestamp } from "@umituz/react-native-firebase";
 import { getDoc, setDoc } from "firebase/firestore";
-import type { DocumentReference } from "@umituz/react-native-firebase";
-import { serverTimestamp } from "@umituz/react-native-firebase";
 import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionConstants";
 import { resolveSubscriptionStatus } from "../../../subscription/core/SubscriptionStatus";
 import { toTimestamp } from "../../../../shared/utils/dateConverter";
 import { isPast } from "../../../../utils/dateUtils";
 import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
 
+// Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction so concurrent
+// initializeCreditsTransaction and deductCreditsOperation no longer see stale
+// updateTime preconditions that produce failed-precondition errors.
 export async function syncExpiredStatus(ref: DocumentReference): Promise<void> {
-  const doc = await getDoc(ref);
-  if (!doc.exists()) {
-    return;
-  }
+  await runTransaction(async (tx: Transaction) => {
+    const doc = await tx.get(ref);
+    if (!doc.exists()) return;
 
-  await setDoc(ref, {
-    isPremium: false,
-    status: SUBSCRIPTION_STATUS.EXPIRED,
-    willRenew: false,
-    lastUpdatedAt: serverTimestamp(),
-  }, { merge: true });
+    tx.update(ref, {
+      isPremium: false,
+      status: SUBSCRIPTION_STATUS.EXPIRED,
+      willRenew: false,
+      lastUpdatedAt: serverTimestamp(),
+    });
+  });
 }
 
 export interface PremiumMetadata {
@@ -33,39 +36,40 @@ export interface PremiumMetadata {
   ownershipType: string | null;
 }
 
+// Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction.
 export async function syncPremiumMetadata(
   ref: DocumentReference,
   metadata: PremiumMetadata
 ): Promise<void> {
-  const doc = await getDoc(ref);
-  if (!doc.exists()) {
-    return;
-  }
+  await runTransaction(async (tx: Transaction) => {
+    const doc = await tx.get(ref);
+    if (!doc.exists()) return;
 
-  const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
-  const status = resolveSubscriptionStatus({
-    isPremium: metadata.isPremium,
-    willRenew: metadata.willRenew,
-    isExpired,
-    periodType: metadata.periodType ?? undefined,
+    const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
+    const status = resolveSubscriptionStatus({
+      isPremium: metadata.isPremium,
+      willRenew: metadata.willRenew,
+      isExpired,
+      periodType: metadata.periodType ?? undefined,
+    });
+
+    const expirationTimestamp = metadata.expirationDate ? toTimestamp(metadata.expirationDate) : null;
+    const canceledAtTimestamp = metadata.unsubscribeDetectedAt ? toTimestamp(metadata.unsubscribeDetectedAt) : null;
+    const billingIssueTimestamp = metadata.billingIssueDetectedAt ? toTimestamp(metadata.billingIssueDetectedAt) : null;
+
+    tx.set(ref, {
+      isPremium: metadata.isPremium,
+      status,
+      willRenew: metadata.willRenew,
+      productId: metadata.productId,
+      lastUpdatedAt: serverTimestamp(),
+      ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
+      ...(canceledAtTimestamp && { canceledAt: canceledAtTimestamp }),
+      ...(billingIssueTimestamp && { billingIssueDetectedAt: billingIssueTimestamp }),
+      ...(metadata.store && { store: metadata.store }),
+      ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
+    }, { merge: true });
   });
-
-  const expirationTimestamp = metadata.expirationDate ? toTimestamp(metadata.expirationDate) : null;
-  const canceledAtTimestamp = metadata.unsubscribeDetectedAt ? toTimestamp(metadata.unsubscribeDetectedAt) : null;
-  const billingIssueTimestamp = metadata.billingIssueDetectedAt ? toTimestamp(metadata.billingIssueDetectedAt) : null;
-
-  await setDoc(ref, {
-    isPremium: metadata.isPremium,
-    status,
-    willRenew: metadata.willRenew,
-    productId: metadata.productId,
-    lastUpdatedAt: serverTimestamp(),
-    ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
-    ...(canceledAtTimestamp && { canceledAt: canceledAtTimestamp }),
-    ...(billingIssueTimestamp && { billingIssueDetectedAt: billingIssueTimestamp }),
-    ...(metadata.store && { store: metadata.store }),
-    ...(metadata.ownershipType && { ownershipType: metadata.ownershipType }),
-  }, { merge: true });
 }
 
 /**

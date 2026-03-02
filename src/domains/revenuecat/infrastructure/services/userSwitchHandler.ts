@@ -199,8 +199,11 @@ export async function handleInitialConfiguration(
       });
     }
 
-    // Sync premium status via callback (if configured)
-    if (deps.config.onPremiumStatusChanged) {
+    // Sync premium status via callback (if configured).
+    // Only when we have a real Firebase UID — skip for pre-auth anonymous state
+    // to avoid writing to Firestore with a RevenueCat-generated ID that doesn't
+    // match request.auth.uid.
+    if (deps.config.onPremiumStatusChanged && normalizedUserId) {
       try {
         const premiumEntitlement = getPremiumEntitlement(
           customerInfo,
@@ -209,7 +212,7 @@ export async function handleInitialConfiguration(
 
         if (premiumEntitlement) {
           await deps.config.onPremiumStatusChanged(
-            currentUserId,
+            normalizedUserId,
             true,
             premiumEntitlement.productIdentifier,
             premiumEntitlement.expirationDate ?? undefined,
@@ -218,7 +221,7 @@ export async function handleInitialConfiguration(
           );
         } else {
           await deps.config.onPremiumStatusChanged(
-            currentUserId,
+            normalizedUserId,
             false,
             undefined,
             undefined,

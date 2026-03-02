@@ -86,8 +86,8 @@ async function executeSubscriptionPurchase(
   };
 }
 
-/** Default timeout for purchase operations (2 minutes) */
-const PURCHASE_TIMEOUT_MS = 120_000;
+/** Default timeout for purchase operations (60 seconds) */
+const PURCHASE_TIMEOUT_MS = 60_000;
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {

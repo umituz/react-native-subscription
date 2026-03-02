@@ -6,6 +6,14 @@ export async function executePurchase(
   pkg: PurchasesPackage,
   userId: string
 ): Promise<boolean> {
+  if (typeof __DEV__ !== "undefined" && __DEV__) {
+    console.log("[PackagePurchaser] executePurchase called", {
+      productId: pkg.product.identifier,
+      userId,
+      serviceInitialized: service.isInitialized(),
+    });
+  }
+
   if (!service.isInitialized()) {
     throw new Error("Service not initialized");
   }

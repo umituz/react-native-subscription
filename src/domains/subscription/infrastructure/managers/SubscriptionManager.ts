@@ -101,6 +101,14 @@ class SubscriptionManagerImpl {
     if (explicitUserId) {
         await this.initialize(explicitUserId);
     }
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.log('[SubscriptionManager] purchasePackage: init complete, starting purchase', {
+        productId: pkg.product.identifier,
+        hasPackageHandler: !!this.packageHandler,
+        hasService: !!this.serviceInstance,
+        serviceInitialized: this.serviceInstance?.isInitialized() ?? false,
+      });
+    }
     this.ensurePackageHandlerInitialized();
     const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.state);
     const result = await purchasePackageOperation(pkg, this.managerConfig, resolvedUserId, this.packageHandler!);
