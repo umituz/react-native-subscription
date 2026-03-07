@@ -20,4 +20,5 @@ export interface PaywallModalProps {
   onPurchaseError?: (error: Error | string) => void;
   onAuthRequired?: () => void;
   source?: PurchaseSource;
+  isLoadingPackages?: boolean;
 }

@@ -1,8 +1,10 @@
 import { StyleSheet } from "react-native";
 
+
 export const paywallModalStyles = StyleSheet.create({
     modalContent: { padding: 0, borderWidth: 0, overflow: "hidden" },
-    container: { flex: 1 },
+    container: { flex: 1, flexDirection: "column" as const },
+    scrollContainer: { flex: 1, flexShrink: 1 },
     closeBtn: {
         position: "absolute",
         top: 12,
@@ -34,6 +36,7 @@ export const paywallModalStyles = StyleSheet.create({
     loading: { alignItems: "center", paddingVertical: 24 },
     loadingText: { marginTop: 8 },
     plans: { marginBottom: 12 },
+    stickyFooter: { flexShrink: 0, paddingHorizontal: 16, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "rgba(128,128,128,0.2)" },
     cta: { borderRadius: 12, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
     ctaDisabled: { opacity: 0.5 },
     ctaText: { fontWeight: "700" },

@@ -28,13 +28,13 @@ export const PlanCard: React.FC<PlanCardProps> = React.memo(
                 {isSelected && <AtomicIcon name="checkmark-circle-outline" customSize={12} customColor={tokens.colors.onPrimary} />}
               </View>
               <View style={styles.textSection}>
-                <AtomicText type="titleSmall" style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}>{title}</AtomicText>
+                <AtomicText type="titleSmall" numberOfLines={2} style={{ color: tokens.colors.textPrimary, fontWeight: "600" }}>{title}</AtomicText>
                 {creditAmount != null && creditAmount > 0 && creditsLabel && (
                   <AtomicText type="bodySmall" style={{ color: tokens.colors.textSecondary }}>{creditAmount} {creditsLabel}</AtomicText>
                 )}
               </View>
             </View>
-            <AtomicText type="titleMedium" style={{ color: isSelected ? tokens.colors.primary : tokens.colors.textPrimary, fontWeight: "700", fontSize: 18 }}>{price}</AtomicText>
+            <AtomicText type="titleMedium" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ color: isSelected ? tokens.colors.primary : tokens.colors.textPrimary, fontWeight: "700", fontSize: 18, flexShrink: 0 }}>{price}</AtomicText>
           </View>
         </View>
       </TouchableOpacity>

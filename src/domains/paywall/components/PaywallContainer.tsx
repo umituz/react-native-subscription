@@ -30,7 +30,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
 
   const purchaseSource = source ?? currentSource ?? "settings";
 
-  const { data: packages = [] } = useSubscriptionPackages();
+  const { data: packages = [], isLoading: isLoadingPackages } = useSubscriptionPackages();
 
   const { handlePurchase: performPurchase, handleRestore: performRestore } = useAuthAwarePurchase({
     source: purchaseSource
@@ -68,6 +68,7 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
       onPurchaseError={onPurchaseError}
       onAuthRequired={onAuthRequired}
       source={purchaseSource}
+      isLoadingPackages={isLoadingPackages}
     />
   );
 };

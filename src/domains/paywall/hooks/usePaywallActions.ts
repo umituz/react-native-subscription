@@ -111,6 +111,7 @@ export function usePaywallActions({
 
       if (success === true) {
         onPurchaseSuccessRef.current?.();
+        onCloseRef.current?.();
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error));
