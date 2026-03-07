@@ -33,8 +33,12 @@ export async function deductCreditsOperation(
   }
 
   try {
+    if (__DEV__) console.log('[DeductCreditsCommand] >>> starting transaction', { userId, cost, creditsRefPath: creditsRef.path });
+
     const remaining = await runTransaction(async (tx: Transaction) => {
       const docSnap = await tx.get(creditsRef);
+
+      if (__DEV__) console.log('[DeductCreditsCommand] doc exists:', docSnap.exists());
 
       if (!docSnap.exists()) {
         throw new Error(CREDIT_ERROR_CODES.NO_CREDITS);
@@ -42,6 +46,9 @@ export async function deductCreditsOperation(
 
       const rawCredits = docSnap.data().credits;
       const current = typeof rawCredits === "number" && Number.isFinite(rawCredits) ? rawCredits : 0;
+
+      if (__DEV__) console.log('[DeductCreditsCommand] current credits:', current, 'cost:', cost);
+
       if (current < cost) {
         throw new Error(CREDIT_ERROR_CODES.CREDITS_EXHAUSTED);
       }
@@ -52,8 +59,12 @@ export async function deductCreditsOperation(
         lastUpdatedAt: serverTimestamp()
       });
 
+      if (__DEV__) console.log('[DeductCreditsCommand] updated credits to:', updated);
+
       return updated;
     });
+
+    if (__DEV__) console.log('[DeductCreditsCommand] transaction SUCCESS, remaining:', remaining);
 
     subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
 
@@ -67,6 +78,8 @@ export async function deductCreditsOperation(
     const code = (message === CREDIT_ERROR_CODES.NO_CREDITS || message === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED)
       ? message
       : CREDIT_ERROR_CODES.DEDUCT_ERR;
+
+    if (__DEV__) console.error('[DeductCreditsCommand] transaction FAILED:', { code, message });
 
     return {
       success: false,

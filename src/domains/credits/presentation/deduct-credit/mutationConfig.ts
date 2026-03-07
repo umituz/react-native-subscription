@@ -19,6 +19,7 @@ export function createDeductCreditMutationConfig(
 ) {
   return {
     mutationFn: async (cost: number): Promise<DeductCreditsResult> => {
+      if (__DEV__) console.log('[deductCreditMutation] mutationFn called', { userId, cost });
       if (!userId) throw new Error("User not authenticated");
       return repository.deductCredit(userId, cost);
     },

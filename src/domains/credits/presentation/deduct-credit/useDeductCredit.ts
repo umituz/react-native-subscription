@@ -22,17 +22,21 @@ export const useDeductCredit = ({
   mutateAsyncRef.current = mutation.mutateAsync;
 
   const deductCredit = useCallback(async (cost: number = 1): Promise<boolean> => {
+    if (__DEV__) console.log('[useDeductCredit] >>> deductCredit called', { cost, userId });
     try {
       const res = await mutateAsyncRef.current(cost);
+      if (__DEV__) console.log('[useDeductCredit] mutation result:', JSON.stringify(res));
       if (!res.success) {
+        if (__DEV__) console.log('[useDeductCredit] deduction FAILED:', res.error?.code, res.error?.message);
         if (res.error?.code === "CREDITS_EXHAUSTED") {
           onCreditsExhausted?.();
         }
         return false;
       }
+      if (__DEV__) console.log('[useDeductCredit] deduction SUCCESS, remaining:', res.remainingCredits);
       return true;
     } catch (error) {
-      console.error('[useDeductCredit] Unexpected error during credit deduction', {
+      if (__DEV__) console.error('[useDeductCredit] UNEXPECTED ERROR during credit deduction', {
         cost,
         userId,
         error: error instanceof Error ? error.message : String(error)
