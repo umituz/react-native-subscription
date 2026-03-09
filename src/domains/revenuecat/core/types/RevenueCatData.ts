@@ -1,15 +1,9 @@
-import type { Store, OwnershipType, PackageType } from "./RevenueCatTypes";
+import type { SubscriptionMetadata } from "../../../subscription/core/types";
+import type { PackageType } from "./RevenueCatTypes";
 
-export interface RevenueCatData {
-  expirationDate: string | null;
+export interface RevenueCatData extends Omit<SubscriptionMetadata, 'willRenew' | 'productId'> {
   willRenew: boolean | null;
-  originalTransactionId: string | null;
-  isPremium: boolean;
-  periodType: string | null;
+  storeTransactionId: string | null;
   packageType: PackageType | null;
-  unsubscribeDetectedAt: string | null;
-  billingIssueDetectedAt: string | null;
-  store: Store | null;
-  ownershipType: OwnershipType | null;
   revenueCatUserId?: string | null;
 }

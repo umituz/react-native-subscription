@@ -5,8 +5,9 @@ import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { PremiumStatusBadge } from "../../components/details/PremiumStatusBadge";
 import type { SubscriptionHeaderProps } from "./SubscriptionHeader.types";
 import { createSubscriptionHeaderStyles } from "./SubscriptionHeader.styles";
-import { EXPIRATION_WARNING_THRESHOLD_DAYS as EXPIRING_SOON_THRESHOLD_DAYS } from "../../../constants/thresholds";
 import { SubscriptionHeaderContent } from "./SubscriptionHeaderContent";
+
+const EXPIRING_SOON_THRESHOLD_DAYS = 7;
 
 export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
   statusType,

@@ -1,6 +1,6 @@
 import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
-import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
+import { CREDIT_ERROR_CODES, MAX_SINGLE_DEDUCTION } from "../core/CreditsConstants";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 export async function deductCreditsOperation(
@@ -20,7 +20,6 @@ export async function deductCreditsOperation(
     };
   }
 
-  const MAX_SINGLE_DEDUCTION = 10000;
   if (cost <= 0 || !Number.isFinite(cost) || cost > MAX_SINGLE_DEDUCTION) {
     return {
       success: false,

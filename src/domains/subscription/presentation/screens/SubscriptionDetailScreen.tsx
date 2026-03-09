@@ -1,9 +1,13 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { StyleSheet, View, Pressable, Alert } from "react-native";
+import Purchases from "react-native-purchases";
 import { AtomicIcon, AtomicText } from "@umituz/react-native-design-system/atoms";
 import { NavigationHeader } from "@umituz/react-native-design-system/molecules";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { ScreenLayout } from "../../../../shared/presentation";
+import { getCreditsRepository } from "../../../credits/infrastructure/CreditsRepositoryManager";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";
 import { UpgradePrompt } from "./components/UpgradePrompt";
@@ -109,15 +113,13 @@ const DevTestPanel: React.FC<{ statusType: string }> = ({ statusType }) => {
   }, [loading]);
 
   const handleCancel = useCallback(() => run("Cancel", async () => {
-    const { useAuthStore, selectUserId } = require("@umituz/react-native-auth");
-    const { handleExpiredSubscription } = require("../../application/statusChangeHandlers");
     const userId = selectUserId(useAuthStore.getState());
     if (!userId) throw new Error("No userId found");
-    await handleExpiredSubscription(userId);
+    await getCreditsRepository().syncExpiredStatus(userId);
+    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
   }), [run]);
 
   const handleRestore = useCallback(() => run("Restore", async () => {
-    const Purchases = require("react-native-purchases").default;
     await Purchases.restorePurchases();
   }), [run]);
 

@@ -1,11 +1,7 @@
 import type { SubscriptionStatusType } from "./PremiumStatusBadge";
+import type { CreditInfo } from "../../../core/types";
 
-export interface CreditInfo {
-  id: string;
-  label: string;
-  current: number;
-  total: number;
-}
+export type { CreditInfo };
 
 export interface PremiumDetailsTranslations {
   title: string;

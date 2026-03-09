@@ -23,7 +23,7 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
     return {
       expirationDate: null,
       willRenew: null,
-      originalTransactionId: null,
+      storeTransactionId: null,
       periodType: null,
       packageType: null,
       isPremium: false,
@@ -39,7 +39,11 @@ export const extractRevenueCatData = (customerInfo: CustomerInfo, entitlementId:
   return {
     expirationDate: entitlement.expirationDate ?? null,
     willRenew: entitlement.willRenew ?? null,
-    originalTransactionId: subscription?.storeTransactionId ?? null,
+    // Current transaction ID from Apple/Google — changes with each renewal.
+    // Used as dedup key in processedTransactions collection.
+    // Note: original_store_transaction_id (stable across renewals) is only
+    // available server-side (webhooks/REST API), not in the client SDK.
+    storeTransactionId: subscription?.storeTransactionId ?? null,
     periodType: validatePeriodType(entitlement.periodType),
     packageType: null,
     isPremium: true,

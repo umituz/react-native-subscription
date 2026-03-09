@@ -41,7 +41,7 @@ export function mapCreditsDocumentToEntity(doc: UserCreditsDocumentRead): UserCr
     willRenew: doc.willRenew,
     productId: doc.productId,
     packageType: doc.packageType,
-    originalTransactionId: doc.originalTransactionId,
+    storeTransactionId: doc.storeTransactionId,
     periodType,
     credits: doc.credits,
     creditLimit: doc.creditLimit,

@@ -1,14 +1,10 @@
 import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
-import { doc, setDoc } from "firebase/firestore";
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { UserSwitchMutex } from "./UserSwitchMutex";
 import { getPremiumEntitlement } from "../../core/types";
-import type { PeriodType } from "../../../subscription/core/SubscriptionConstants";
-import { requireFirestore } from "../../../../shared/infrastructure/firestore";
-
-const ANONYMOUS_CACHE_KEY = '__anonymous__';
+import { ANONYMOUS_CACHE_KEY, type PeriodType } from "../../../subscription/core/SubscriptionConstants";
 
 declare const __DEV__: boolean;
 
@@ -39,16 +35,6 @@ function normalizeUserId(userId: string): string | null {
 
 function isAnonymousId(userId: string): boolean {
   return userId.startsWith('$RCAnonymous') || userId.startsWith('device_');
-}
-
-async function syncRevenueCatIdToProfile(firebaseUserId: string, revenueCatUserId: string): Promise<void> {
-  try {
-    const db = requireFirestore();
-    const userRef = doc(db, "users", firebaseUserId);
-    await setDoc(userRef, { revenueCatUserId }, { merge: true });
-  } catch {
-    // Non-fatal: profile update failure should not block SDK initialization
-  }
 }
 
 export async function handleUserSwitch(
@@ -101,7 +87,7 @@ async function performUserSwitch(
         const result = await Purchases.logIn(normalizedUserId!);
         customerInfo = result.customerInfo;
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[UserSwitchHandler] ✅ Purchases.logIn() successful, created:', result.created);
+          console.log('[UserSwitchHandler] Purchases.logIn() successful, created:', result.created);
         }
       } else {
         if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -120,13 +106,8 @@ async function performUserSwitch(
     deps.setCurrentUserId(normalizedUserId || undefined);
     const offerings = await fetchOfferingsSafe();
 
-    if (normalizedUserId) {
-      const rcId = await Purchases.getAppUserID();
-      void syncRevenueCatIdToProfile(normalizedUserId, rcId);
-    }
-
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchHandler] ✅ User switch completed successfully');
+      console.log('[UserSwitchHandler] User switch completed successfully');
     }
 
     return buildSuccessResult(deps, customerInfo, offerings);
@@ -175,7 +156,7 @@ export async function handleInitialConfiguration(
     deps.setCurrentUserId(normalizedUserId || undefined);
 
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchHandler] ✅ Purchases.configure() successful');
+      console.log('[UserSwitchHandler] Purchases.configure() successful');
     }
 
     // Fetch customer info (critical) and offerings (non-fatal) separately.
@@ -185,14 +166,9 @@ export async function handleInitialConfiguration(
       fetchOfferingsSafe(),
     ]);
 
-    const currentUserId = await Purchases.getAppUserID();
-
-    if (normalizedUserId) {
-      void syncRevenueCatIdToProfile(normalizedUserId, currentUserId);
-    }
-
     if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchHandler] ✅ Initial configuration completed:', {
+      const currentUserId = await Purchases.getAppUserID();
+      console.log('[UserSwitchHandler] Initial configuration completed:', {
         revenueCatUserId: currentUserId,
         activeEntitlements: Object.keys(customerInfo.entitlements.active),
         offeringsCount: offerings?.all ? Object.keys(offerings.all).length : 0,
@@ -211,23 +187,26 @@ export async function handleInitialConfiguration(
         );
 
         if (premiumEntitlement) {
-          await deps.config.onPremiumStatusChanged(
-            normalizedUserId,
-            true,
-            premiumEntitlement.productIdentifier,
-            premiumEntitlement.expirationDate ?? undefined,
-            premiumEntitlement.willRenew,
-            premiumEntitlement.periodType as PeriodType | undefined
-          );
+          const subscription = customerInfo.subscriptionsByProductIdentifier?.[premiumEntitlement.productIdentifier];
+
+          await deps.config.onPremiumStatusChanged({
+            userId: normalizedUserId,
+            isPremium: true,
+            productId: premiumEntitlement.productIdentifier,
+            expirationDate: premiumEntitlement.expirationDate ?? null,
+            willRenew: premiumEntitlement.willRenew,
+            periodType: premiumEntitlement.periodType as PeriodType | undefined,
+            storeTransactionId: subscription?.storeTransactionId ?? undefined,
+            unsubscribeDetectedAt: premiumEntitlement.unsubscribeDetectedAt ?? null,
+            billingIssueDetectedAt: premiumEntitlement.billingIssueDetectedAt ?? null,
+            store: premiumEntitlement.store ?? null,
+            ownershipType: premiumEntitlement.ownershipType ?? null,
+          });
         } else {
-          await deps.config.onPremiumStatusChanged(
-            normalizedUserId,
-            false,
-            undefined,
-            undefined,
-            undefined,
-            undefined
-          );
+          await deps.config.onPremiumStatusChanged({
+            userId: normalizedUserId,
+            isPremium: false,
+          });
         }
       } catch (error) {
         // Log error but don't fail initialization

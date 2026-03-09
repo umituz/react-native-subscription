@@ -2,7 +2,6 @@ import Purchases from "react-native-purchases";
 import type { PurchasesOffering, PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService, InitializeResult, PurchaseResult, RestoreResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../../revenuecat/core/types";
-import { resolveApiKey } from "../../../revenuecat/infrastructure/utils/ApiKeyResolver";
 import { initializeSDK } from "../../../revenuecat/infrastructure/services/RevenueCatInitializer";
 import { fetchOfferings } from "./OfferingsFetcher";
 import { handlePurchase } from "./PurchaseHandler";
@@ -19,7 +18,7 @@ export class RevenueCatService implements IRevenueCatService {
         this.listenerManager = new CustomerInfoListenerManager();
     }
 
-    getRevenueCatKey = (): string | null => resolveApiKey(this.stateManager.getConfig());
+    getRevenueCatKey = (): string | null => this.stateManager.getConfig().apiKey || null;
 
     isInitialized = (): boolean => this.stateManager.isInitialized();
 

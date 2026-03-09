@@ -19,7 +19,7 @@ export interface UserCredits {
   willRenew: boolean | null;
   productId: string | null;
   packageType: PackageType | null;
-  originalTransactionId: string | null;
+  storeTransactionId: string | null;
   periodType: string | null;
   credits: number;
   creditLimit: number;

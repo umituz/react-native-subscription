@@ -25,6 +25,10 @@ export interface SubscriptionHeaderProps {
     latestPurchaseDateLabel?: string;
     billingIssuesLabel?: string;
     sandboxLabel?: string;
+    willRenewYes?: string;
+    willRenewNo?: string;
+    billingIssuesDetected?: string;
+    sandboxTestMode?: string;
   };
   // Additional RevenueCat subscription details
   willRenew?: boolean | null;

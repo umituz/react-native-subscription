@@ -18,8 +18,10 @@ class UserSwitchMutexImpl {
       }
       try {
         await this.activeSwitchPromise;
-      } catch (_ignored) {
-        // Intentional: waiting for active switch to complete without failing
+      } catch (error) {
+        // Previous switch failed — this is non-fatal for the current switch,
+        // but worth logging so the failure is visible in diagnostics.
+        console.warn('[UserSwitchMutex] Previous user switch failed:', error instanceof Error ? error.message : String(error));
       }
 
       const timeSinceLastSwitch = Date.now() - this.lastSwitchTime;

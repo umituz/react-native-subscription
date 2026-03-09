@@ -1,14 +1,21 @@
-import type { CustomerInfo } from "react-native-purchases";
 import Purchases from "react-native-purchases";
-import type { PeriodType, PurchaseSource } from "../core/SubscriptionConstants";
 import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
+import type { PremiumStatusChangedEvent, PurchaseCompletedEvent, RenewalDetectedEvent } from "../core/SubscriptionEvents";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
-import { emitCreditsUpdated } from "./syncEventEmitter";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
-import { handleExpiredSubscription, handlePremiumStatusSync } from "./statusChangeHandlers";
-import type { PackageType } from "../../revenuecat/core/types";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
+/**
+ * Central processor for all subscription sync operations.
+ * Handles purchases, renewals, and status changes with credit allocation.
+ *
+ * Responsibilities:
+ * - Purchase: allocate initial credits via atomic Firestore transaction
+ * - Renewal: allocate renewal credits
+ * - Status change: sync metadata (no credit allocation) or mark expired
+ * - Recovery: create missing credits document for premium users
+ */
 export class SubscriptionSyncProcessor {
   private purchaseInProgress = false;
 
@@ -16,6 +23,62 @@ export class SubscriptionSyncProcessor {
     private entitlementId: string,
     private getAnonymousUserId: () => Promise<string>
   ) {}
+
+  // ─── Public API (replaces SubscriptionSyncService) ────────────────
+
+  async handlePurchase(event: PurchaseCompletedEvent): Promise<void> {
+    try {
+      await this.processPurchase(event);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, {
+        userId: event.userId,
+        productId: event.productId,
+      });
+    } catch (error) {
+      console.error('[SubscriptionSyncProcessor] Purchase processing failed', {
+        userId: event.userId,
+        productId: event.productId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  async handleRenewal(event: RenewalDetectedEvent): Promise<void> {
+    try {
+      await this.processRenewal(event);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, {
+        userId: event.userId,
+        productId: event.productId,
+      });
+    } catch (error) {
+      console.error('[SubscriptionSyncProcessor] Renewal processing failed', {
+        userId: event.userId,
+        productId: event.productId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  async handlePremiumStatusChanged(event: PremiumStatusChangedEvent): Promise<void> {
+    try {
+      await this.processStatusChange(event);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, {
+        userId: event.userId,
+        isPremium: event.isPremium,
+      });
+    } catch (error) {
+      console.error('[SubscriptionSyncProcessor] Status change processing failed', {
+        userId: event.userId,
+        isPremium: event.isPremium,
+        productId: event.productId,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+
+  // ─── Internal Processing ──────────────────────────────────────────
 
   private async getRevenueCatAppUserId(): Promise<string | null> {
     try {
@@ -27,35 +90,35 @@ export class SubscriptionSyncProcessor {
 
   private async getCreditsUserId(revenueCatUserId: string | null | undefined): Promise<string> {
     const trimmed = revenueCatUserId?.trim();
-    if (trimmed && trimmed.length > 0) {
+    if (trimmed && trimmed.length > 0 && trimmed !== 'undefined' && trimmed !== 'null') {
       return trimmed;
     }
 
     console.warn("[SubscriptionSyncProcessor] revenueCatUserId is empty/null, falling back to anonymousUserId");
     const anonymousId = await this.getAnonymousUserId();
     const trimmedAnonymous = anonymousId?.trim();
-    if (!trimmedAnonymous || trimmedAnonymous.length === 0) {
+    if (!trimmedAnonymous || trimmedAnonymous.length === 0 || trimmedAnonymous === 'undefined' || trimmedAnonymous === 'null') {
       throw new Error("[SubscriptionSyncProcessor] Cannot resolve credits userId: both revenueCatUserId and anonymousUserId are empty");
     }
     return trimmedAnonymous;
   }
 
-  async processPurchase(userId: string, productId: string, customerInfo: CustomerInfo, source?: PurchaseSource, packageType?: PackageType | null) {
+  private async processPurchase(event: PurchaseCompletedEvent): Promise<void> {
     this.purchaseInProgress = true;
     try {
-      const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-      revenueCatData.packageType = packageType ?? null;
+      const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
+      revenueCatData.packageType = event.packageType ?? null;
       const revenueCatAppUserId = await this.getRevenueCatAppUserId();
-      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? userId;
-      const purchaseId = generatePurchaseId(revenueCatData.originalTransactionId, productId);
+      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? event.userId;
+      const purchaseId = generatePurchaseId(revenueCatData.storeTransactionId, event.productId);
 
-      const creditsUserId = await this.getCreditsUserId(userId);
+      const creditsUserId = await this.getCreditsUserId(event.userId);
 
       const result = await getCreditsRepository().initializeCredits(
         creditsUserId,
         purchaseId,
-        productId,
-        source ?? PURCHASE_SOURCE.SETTINGS,
+        event.productId,
+        event.source ?? PURCHASE_SOURCE.SETTINGS,
         revenueCatData,
         PURCHASE_TYPE.INITIAL
       );
@@ -64,27 +127,27 @@ export class SubscriptionSyncProcessor {
         throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for purchase: ${result.error?.message ?? 'unknown'}`);
       }
 
-      emitCreditsUpdated(creditsUserId);
+      this.emitCreditsUpdated(creditsUserId);
     } finally {
       this.purchaseInProgress = false;
     }
   }
 
-  async processRenewal(userId: string, productId: string, newExpirationDate: string, customerInfo: CustomerInfo) {
+  private async processRenewal(event: RenewalDetectedEvent): Promise<void> {
     this.purchaseInProgress = true;
     try {
-      const revenueCatData = extractRevenueCatData(customerInfo, this.entitlementId);
-      revenueCatData.expirationDate = newExpirationDate ?? revenueCatData.expirationDate;
+      const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
+      revenueCatData.expirationDate = event.newExpirationDate ?? revenueCatData.expirationDate;
       const revenueCatAppUserId = await this.getRevenueCatAppUserId();
-      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? userId;
-      const purchaseId = generateRenewalId(revenueCatData.originalTransactionId, productId, newExpirationDate);
+      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? event.userId;
+      const purchaseId = generateRenewalId(revenueCatData.storeTransactionId, event.productId, event.newExpirationDate);
 
-      const creditsUserId = await this.getCreditsUserId(userId);
+      const creditsUserId = await this.getCreditsUserId(event.userId);
 
       const result = await getCreditsRepository().initializeCredits(
         creditsUserId,
         purchaseId,
-        productId,
+        event.productId,
         PURCHASE_SOURCE.RENEWAL,
         revenueCatData,
         PURCHASE_TYPE.RENEWAL
@@ -94,20 +157,13 @@ export class SubscriptionSyncProcessor {
         throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for renewal: ${result.error?.message ?? 'unknown'}`);
       }
 
-      emitCreditsUpdated(creditsUserId);
+      this.emitCreditsUpdated(creditsUserId);
     } finally {
       this.purchaseInProgress = false;
     }
   }
 
-  async processStatusChange(
-    userId: string,
-    isPremium: boolean,
-    productId?: string,
-    expiresAt?: string,
-    willRenew?: boolean,
-    periodType?: PeriodType
-  ) {
+  private async processStatusChange(event: PremiumStatusChangedEvent): Promise<void> {
     // If a purchase is in progress, skip metadata sync (purchase handler does it)
     // but still allow recovery to run — the purchase handler's credit initialization
     // might have failed, and this is the safety net.
@@ -115,49 +171,82 @@ export class SubscriptionSyncProcessor {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[SubscriptionSyncProcessor] Purchase in progress - running recovery only");
       }
-      if (isPremium && productId) {
-        const creditsUserId = await this.getCreditsUserId(userId);
-        await handlePremiumStatusSync(
-          creditsUserId,
-          isPremium,
-          productId,
-          expiresAt ?? null,
-          willRenew ?? false,
-          periodType ?? null
-        );
+      if (event.isPremium && event.productId) {
+        const creditsUserId = await this.getCreditsUserId(event.userId);
+        await this.syncPremiumStatus(creditsUserId, event);
       }
       return;
     }
 
-    const creditsUserId = await this.getCreditsUserId(userId);
+    const creditsUserId = await this.getCreditsUserId(event.userId);
 
-    if (!isPremium && productId) {
-      await handleExpiredSubscription(creditsUserId);
+    if (!event.isPremium && event.productId) {
+      await this.expireSubscription(creditsUserId);
       return;
     }
 
-    if (!isPremium && !productId) {
+    if (!event.isPremium && !event.productId) {
       // No entitlement and no productId — could be:
       // 1. Free user who never purchased (no credits doc) → skip
       // 2. Previously premium user whose entitlement was removed → expire
       const hasDoc = await getCreditsRepository().creditsDocumentExists(creditsUserId);
       if (hasDoc) {
-        await handleExpiredSubscription(creditsUserId);
+        await this.expireSubscription(creditsUserId);
       }
       return;
     }
 
-    if (!productId) {
+    if (!event.productId) {
       return;
     }
 
-    await handlePremiumStatusSync(
-      creditsUserId,
-      isPremium,
-      productId,
-      expiresAt ?? null,
-      willRenew ?? false,
-      periodType ?? null
-    );
+    await this.syncPremiumStatus(creditsUserId, event);
+  }
+
+  // ─── Credit Document Operations (replaces statusChangeHandlers) ───
+
+  private async expireSubscription(userId: string): Promise<void> {
+    await getCreditsRepository().syncExpiredStatus(userId);
+    this.emitCreditsUpdated(userId);
+  }
+
+  private async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
+    const repo = getCreditsRepository();
+
+    // Recovery: if premium user has no credits document, create one.
+    // Handles edge cases like test store, reinstalls, or failed purchase initialization.
+    if (event.isPremium) {
+      const created = await repo.ensurePremiumCreditsExist(
+        userId,
+        event.productId!,
+        event.willRenew ?? false,
+        event.expirationDate ?? null,
+        event.periodType ?? null,
+        event.storeTransactionId,
+      );
+      if (__DEV__ && created) {
+        console.log('[SubscriptionSyncProcessor] Recovery: created missing credits document for premium user', {
+          userId,
+          productId: event.productId,
+        });
+      }
+    }
+
+    await repo.syncPremiumMetadata(userId, {
+      isPremium: event.isPremium,
+      willRenew: event.willRenew ?? false,
+      expirationDate: event.expirationDate ?? null,
+      productId: event.productId!,
+      periodType: event.periodType ?? null,
+      unsubscribeDetectedAt: event.unsubscribeDetectedAt ?? null,
+      billingIssueDetectedAt: event.billingIssueDetectedAt ?? null,
+      store: event.store ?? null,
+      ownershipType: event.ownershipType ?? null,
+    });
+    this.emitCreditsUpdated(userId);
+  }
+
+  private emitCreditsUpdated(userId: string): void {
+    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
   }
 }

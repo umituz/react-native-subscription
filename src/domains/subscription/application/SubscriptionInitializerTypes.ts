@@ -1,7 +1,7 @@
 import type { CreditsConfig } from "../../credits/core/Credits";
 import type { UserCreditsDocumentRead } from "../../credits/core/UserCreditsDocument";
 import type { PurchaseSource, PurchaseType } from "../core/SubscriptionConstants";
-import type { Store, OwnershipType } from "../../revenuecat/core/types";
+import type { SubscriptionMetadata } from "../core/types";
 
 export interface FirebaseAuthLike {
   currentUser: { uid: string; isAnonymous: boolean } | null;
@@ -28,19 +28,11 @@ export interface SubscriptionInitConfig {
   authStateTimeoutMs?: number;
 }
 
-export interface InitializeCreditsMetadata {
-  productId: string;
+export interface InitializeCreditsMetadata extends Omit<SubscriptionMetadata, 'willRenew'> {
   source: PurchaseSource;
   type: PurchaseType;
-  expirationDate: string | null;
   willRenew: boolean | null;
-  originalTransactionId: string | null;
-  isPremium: boolean;
-  periodType: string | null;
-  unsubscribeDetectedAt: string | null;
-  billingIssueDetectedAt: string | null;
-  store: Store | null;
-  ownershipType: OwnershipType | null;
+  storeTransactionId: string | null;
   revenueCatUserId?: string | null;
 }
 

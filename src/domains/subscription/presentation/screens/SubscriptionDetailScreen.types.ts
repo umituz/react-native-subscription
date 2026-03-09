@@ -1,4 +1,7 @@
 import type { SubscriptionStatusType } from "../../core/SubscriptionConstants";
+import type { CreditInfo } from "../../core/types";
+
+export type { CreditInfo };
 
 export interface SubscriptionDisplayFlags {
   showHeader: boolean;
@@ -38,13 +41,6 @@ export interface UpgradePromptConfig {
   subtitle?: string;
   benefits?: readonly { icon?: string; text: string }[];
   onUpgrade?: () => void;
-}
-
-export interface CreditInfo {
-  id: string;
-  label: string;
-  current: number;
-  total: number;
 }
 
 export interface SubscriptionDetailConfig {

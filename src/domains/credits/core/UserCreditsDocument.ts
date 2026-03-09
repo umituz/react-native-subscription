@@ -42,7 +42,7 @@ export interface UserCreditsDocumentRead {
     willRenew: boolean | null;
     productId: string | null;
     packageType: PackageType | null;
-    originalTransactionId: string | null;
+    storeTransactionId: string | null;
     store: Store | null;
     ownershipType: OwnershipType | null;
     periodType: string | null;

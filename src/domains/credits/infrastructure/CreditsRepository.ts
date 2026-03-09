@@ -8,7 +8,8 @@ import { refundCreditsOperation } from "../application/RefundCreditsCommand";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
 import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
 import { fetchCredits, checkHasCredits, documentExists } from "./operations/CreditsFetcher";
-import { syncExpiredStatus, syncPremiumMetadata, createRecoveryCreditsDocument, type PremiumMetadata } from "./operations/CreditsWriter";
+import { syncExpiredStatus, syncPremiumMetadata, createRecoveryCreditsDocument } from "./operations/CreditsWriter";
+import type { SubscriptionMetadata } from "../../subscription/core/types";
 import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
 import { calculateCreditLimit } from "../application/CreditLimitCalculator";
 
@@ -81,7 +82,7 @@ export class CreditsRepository extends BaseRepository {
     await syncExpiredStatus(this.getRef(db, userId));
   }
 
-  async syncPremiumMetadata(userId: string, metadata: PremiumMetadata): Promise<void> {
+  async syncPremiumMetadata(userId: string, metadata: SubscriptionMetadata): Promise<void> {
     const db = requireFirestore();
     await syncPremiumMetadata(this.getRef(db, userId), metadata);
   }
@@ -92,6 +93,7 @@ export class CreditsRepository extends BaseRepository {
     willRenew: boolean,
     expirationDate: string | null,
     periodType: string | null,
+    storeTransactionId?: string | null,
   ): Promise<boolean> {
     const db = requireFirestore();
     const creditLimit = calculateCreditLimit(productId, this.config);
@@ -102,6 +104,9 @@ export class CreditsRepository extends BaseRepository {
       willRenew,
       expirationDate,
       periodType,
+      db,
+      userId,
+      storeTransactionId,
     );
   }
 }

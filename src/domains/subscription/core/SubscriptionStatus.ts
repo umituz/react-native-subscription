@@ -12,7 +12,7 @@ export type { SubscriptionStatusType };
 
 export interface SubscriptionStatus {
     isPremium: boolean;
-    expiresAt: string | null;
+    expirationDate: string | null;
     productId: string | null;
     purchasedAt?: string | null;
     customerId?: string | null;
@@ -23,7 +23,7 @@ export interface SubscriptionStatus {
 
 export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
     isPremium: false,
-    expiresAt: null,
+    expirationDate: null,
     productId: null,
     purchasedAt: null,
     customerId: null,
@@ -33,8 +33,8 @@ export const createDefaultSubscriptionStatus = (): SubscriptionStatus => ({
 
 export const isSubscriptionValid = (status: SubscriptionStatus | null): boolean => {
     if (!status || !status.isPremium) return false;
-    if (!status.expiresAt) return true;
-    return timezoneService.isFuture(new Date(status.expiresAt));
+    if (!status.expirationDate) return true;
+    return timezoneService.isFuture(new Date(status.expirationDate));
 };
 
 export interface StatusResolverInput {

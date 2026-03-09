@@ -68,7 +68,7 @@ export function buildCreditsData({
     ...(isPurchaseOrRenewal && { lastPurchaseAt: serverTimestamp() }),
     ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
     ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
-    ...(metadata.originalTransactionId && { originalTransactionId: metadata.originalTransactionId }),
+    ...(metadata.storeTransactionId && { storeTransactionId: metadata.storeTransactionId }),
     ...(canceledAtTimestamp && { canceledAt: canceledAtTimestamp }),
     ...(billingIssueTimestamp && { billingIssueDetectedAt: billingIssueTimestamp }),
     ...(metadata.store && { store: metadata.store }),

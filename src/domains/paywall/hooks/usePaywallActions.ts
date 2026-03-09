@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
-import { usePurchaseLoadingStore } from "../../subscription/presentation/stores";
+import { usePurchaseLoadingStore } from "../../subscription/presentation/stores/purchaseLoadingStore";
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
 
 interface UsePaywallActionsParams {

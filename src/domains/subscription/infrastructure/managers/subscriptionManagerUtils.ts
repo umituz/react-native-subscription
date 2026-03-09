@@ -1,7 +1,7 @@
 import type { SubscriptionManagerConfig } from "./SubscriptionManager.types";
-
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
-import { SubscriptionInternalState } from "./SubscriptionInternalState";
+import { getRevenueCatService } from "../services/revenueCatServiceInstance";
+import type { InitializationCache } from "../utils/InitializationCache";
 
 export function ensureConfigured(config: SubscriptionManagerConfig | null): void {
     if (!config) {
@@ -9,8 +9,8 @@ export function ensureConfigured(config: SubscriptionManagerConfig | null): void
     }
 }
 
-export function getCurrentUserIdOrThrow(state: SubscriptionInternalState): string {
-    const userId = state.initCache.getCurrentUserId();
+export function getCurrentUserIdOrThrow(initCache: InitializationCache): string {
+    const userId = initCache.getCurrentUserId();
     if (userId == null) {
         throw new Error("SubscriptionManager not initialized - no current user ID available");
     }
@@ -24,7 +24,6 @@ export function getOrCreateService(
         return currentInstance;
     }
 
-    const { getRevenueCatService } = require("../services/revenueCatServiceInstance");
     const serviceInstance = getRevenueCatService();
 
     if (!serviceInstance) {

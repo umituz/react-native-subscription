@@ -43,7 +43,7 @@ function isTransientError(error: unknown): boolean {
 }
 
 export async function initializeCreditsWithRetry(params: InitializeCreditsParams): Promise<CreditsResult> {
-  const { db, ref, config, purchaseId, productId, source, revenueCatData, type = PURCHASE_TYPE.INITIAL } = params;
+  const { db, ref, config, userId, purchaseId, productId, source, revenueCatData, type = PURCHASE_TYPE.INITIAL } = params;
 
   const creditLimit = calculateCreditLimit(productId, config);
   const cfg = { ...config, creditLimit };
@@ -63,7 +63,7 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
           source,
           expirationDate: revenueCatData.expirationDate,
           willRenew: revenueCatData.willRenew,
-          originalTransactionId: revenueCatData.originalTransactionId,
+          storeTransactionId: revenueCatData.storeTransactionId,
           isPremium: revenueCatData.isPremium,
           periodType: revenueCatData.periodType,
           unsubscribeDetectedAt: revenueCatData.unsubscribeDetectedAt,
@@ -72,7 +72,8 @@ export async function initializeCreditsWithRetry(params: InitializeCreditsParams
           ownershipType: revenueCatData.ownershipType,
           revenueCatUserId: revenueCatData.revenueCatUserId,
           type,
-        }
+        },
+        userId
       );
 
       return {

@@ -67,7 +67,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
     {willRenew !== null && willRenew !== undefined && translations.willRenewLabel && (
       <DetailRow
         label={translations.willRenewLabel}
-        value={willRenew ? "Yes" : "No"}
+        value={willRenew ? (translations.willRenewYes ?? "Yes") : (translations.willRenewNo ?? "No")}
         highlight={!willRenew}
         style={styles.row}
         labelStyle={styles.label}
@@ -113,7 +113,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
     {billingIssuesDetected && translations.billingIssuesLabel && (
       <DetailRow
         label={translations.billingIssuesLabel}
-        value="Detected"
+        value={translations.billingIssuesDetected ?? "Detected"}
         highlight={true}
         style={styles.row}
         labelStyle={styles.label}
@@ -123,7 +123,7 @@ export const SubscriptionHeaderContent: React.FC<SubscriptionHeaderContentProps>
     {typeof __DEV__ !== 'undefined' && __DEV__ && isSandbox && translations.sandboxLabel && (
       <DetailRow
         label={translations.sandboxLabel}
-        value="Test Mode"
+        value={translations.sandboxTestMode ?? "Test Mode"}
         style={styles.row}
         labelStyle={styles.label}
         valueStyle={styles.value}

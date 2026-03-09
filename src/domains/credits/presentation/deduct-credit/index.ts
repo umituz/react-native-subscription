@@ -1,1 +1,0 @@
-export { useDeductCredit } from "./useDeductCredit";

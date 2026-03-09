@@ -26,7 +26,10 @@ export function generatePurchaseMetadata(
   const packageType = detectPackageType(productId);
   let purchaseType: PurchaseType = type;
 
-  if (packageType !== PACKAGE_TYPE.UNKNOWN && creditLimit > existingData.creditLimit) {
+  const existingLimit = typeof existingData.creditLimit === 'number' && Number.isFinite(existingData.creditLimit)
+    ? existingData.creditLimit
+    : 0;
+  if (packageType !== PACKAGE_TYPE.UNKNOWN && creditLimit > existingLimit) {
     purchaseType = PURCHASE_TYPE.UPGRADE;
   }
 

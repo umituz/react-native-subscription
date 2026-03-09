@@ -1,7 +1,9 @@
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig, PackageType } from "../../../revenuecat/core/types";
-import type { PurchaseSource } from "../../../subscription/core/SubscriptionConstants";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+import type { PurchaseSource } from "../../core/SubscriptionConstants";
+import type { PackageType } from "../../../revenuecat/core/types";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
+import type { PeriodType } from "../../core/SubscriptionConstants";
 
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
@@ -28,16 +30,23 @@ export async function syncPremiumStatus(
 
     try {
         if (premiumEntitlement) {
-            await config.onPremiumStatusChanged(
+            const subscription = customerInfo.subscriptionsByProductIdentifier?.[premiumEntitlement.productIdentifier];
+
+            await config.onPremiumStatusChanged({
                 userId,
-                true,
-                premiumEntitlement.productIdentifier,
-                premiumEntitlement.expirationDate ?? undefined,
-                premiumEntitlement.willRenew,
-                premiumEntitlement.periodType as "NORMAL" | "INTRO" | undefined
-            );
+                isPremium: true,
+                productId: premiumEntitlement.productIdentifier,
+                expirationDate: premiumEntitlement.expirationDate ?? null,
+                willRenew: premiumEntitlement.willRenew,
+                periodType: premiumEntitlement.periodType as PeriodType | undefined,
+                storeTransactionId: subscription?.storeTransactionId ?? undefined,
+                unsubscribeDetectedAt: premiumEntitlement.unsubscribeDetectedAt ?? null,
+                billingIssueDetectedAt: premiumEntitlement.billingIssueDetectedAt ?? null,
+                store: premiumEntitlement.store ?? null,
+                ownershipType: premiumEntitlement.ownershipType ?? null,
+            });
         } else {
-            await config.onPremiumStatusChanged(userId, false, undefined, undefined, undefined, undefined);
+            await config.onPremiumStatusChanged({ userId, isPremium: false });
         }
         return { success: true };
     } catch (error) {
@@ -61,11 +70,9 @@ export async function notifyPurchaseCompleted(
     source?: PurchaseSource,
     packageType?: PackageType | null
 ): Promise<void> {
-    if (!config.onPurchaseCompleted) {
-        return;
-    }
+    if (!config.onPurchaseCompleted) return;
 
-    await config.onPurchaseCompleted(userId, productId, customerInfo, source, packageType);
+    await config.onPurchaseCompleted({ userId, productId, customerInfo, source, packageType });
 }
 
 export async function notifyRestoreCompleted(
@@ -74,12 +81,10 @@ export async function notifyRestoreCompleted(
     isPremium: boolean,
     customerInfo: CustomerInfo
 ): Promise<void> {
-    if (!config.onRestoreCompleted) {
-        return;
-    }
+    if (!config.onRestoreCompleted) return;
 
     try {
-        await config.onRestoreCompleted(userId, isPremium, customerInfo);
+        await config.onRestoreCompleted({ userId, isPremium, customerInfo });
     } catch (error) {
         console.error('[PremiumStatusSyncer] Restore callback failed:', error instanceof Error ? error.message : String(error));
     }

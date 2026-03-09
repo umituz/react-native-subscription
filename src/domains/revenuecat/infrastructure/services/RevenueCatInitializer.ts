@@ -1,5 +1,4 @@
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
-import { resolveApiKey } from "../utils/ApiKeyResolver";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS, MAX_INIT_RETRIES } from "./initializerConstants";
 import { configState } from "./ConfigurationStateManager";
@@ -40,7 +39,7 @@ export async function initializeSDK(
     return initializeSDK(deps, userId, apiKey, configStartRetryCount);
   }
 
-  const key = apiKey || resolveApiKey(deps.config);
+  const key = apiKey || deps.config.apiKey || null;
   if (!key) {
     return FAILED_INITIALIZATION_RESULT;
   }

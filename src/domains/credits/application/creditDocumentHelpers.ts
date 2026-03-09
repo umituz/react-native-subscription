@@ -7,7 +7,16 @@ export function getCreditDocumentOrDefault(
     platform: Platform
 ): UserCreditsDocumentRead {
     if (creditsDoc.exists()) {
-        return creditsDoc.data() as UserCreditsDocumentRead;
+        const raw = creditsDoc.data() as Record<string, unknown>;
+        // Ensure critical fields have safe defaults to prevent NaN/undefined propagation
+        return {
+            ...raw,
+            credits: typeof raw.credits === 'number' && Number.isFinite(raw.credits) ? raw.credits : 0,
+            creditLimit: typeof raw.creditLimit === 'number' && Number.isFinite(raw.creditLimit) ? raw.creditLimit : 0,
+            processedPurchases: Array.isArray(raw.processedPurchases) ? raw.processedPurchases : [],
+            purchaseHistory: Array.isArray(raw.purchaseHistory) ? raw.purchaseHistory : [],
+            isPremium: typeof raw.isPremium === 'boolean' ? raw.isPremium : false,
+        } as UserCreditsDocumentRead;
     }
 
     const now = serverTimestamp() as unknown as FirestoreTimestamp;
@@ -29,7 +38,7 @@ export function getCreditDocumentOrDefault(
         willRenew: false,
         productId: null,
         packageType: null,
-        originalTransactionId: null,
+        storeTransactionId: null,
         store: null,
         ownershipType: null,
         appVersion: null,

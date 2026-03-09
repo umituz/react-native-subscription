@@ -57,3 +57,5 @@ export const PURCHASE_TYPE = {
 } as const;
 
 export type PurchaseType = (typeof PURCHASE_TYPE)[keyof typeof PURCHASE_TYPE];
+
+export const ANONYMOUS_CACHE_KEY = '__anonymous__';

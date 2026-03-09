@@ -13,9 +13,8 @@ async function handleRenewal(
   if (!onRenewalDetected) return;
 
   try {
-    await onRenewalDetected(userId, productId, expirationDate, customerInfo);
+    await onRenewalDetected({ userId, productId, newExpirationDate: expirationDate, customerInfo });
   } catch (error) {
-    // Callback errors should not break customer info processing
     console.error('[CustomerInfoHandler] Renewal callback failed:', {
       userId,
       productId,
@@ -35,9 +34,8 @@ async function handlePlanChange(
   if (!onPlanChanged) return;
 
   try {
-    await onPlanChanged(userId, newProductId, previousProductId, isUpgrade, customerInfo);
+    await onPlanChanged({ userId, newProductId, previousProductId, isUpgrade, customerInfo });
   } catch (error) {
-    // Callback errors should not break customer info processing
     console.error('[CustomerInfoHandler] Plan change callback failed:', {
       userId,
       newProductId,
@@ -56,7 +54,6 @@ async function handlePremiumStatusSync(
   try {
     await syncPremiumStatus(config, userId, customerInfo);
   } catch (error) {
-    // Sync errors are logged by PremiumStatusSyncer, don't break processing
     console.error('[CustomerInfoHandler] Premium status sync failed:', {
       userId,
       error: error instanceof Error ? error.message : String(error)

@@ -1,7 +1,7 @@
 import type { PurchasesPackage } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import type { PackageHandler } from "../handlers/PackageHandler";
-import { SubscriptionInternalState } from "./SubscriptionInternalState";
+import { InitializationCache } from "../utils/InitializationCache";
 import { ensureServiceAvailable, getCurrentUserIdOrThrow } from "./subscriptionManagerUtils";
 import type { SubscriptionManagerConfig, PremiumStatus, RestoreResultInfo } from "./SubscriptionManager.types";
 import { createPackageHandler } from "./packageHandlerFactory";
@@ -9,13 +9,12 @@ import { checkPremiumStatusFromService } from "./premiumStatusChecker";
 import { getPackagesOperation, purchasePackageOperation, restoreOperation } from "./managerOperations";
 import { performServiceInitialization } from "./initializationHandler";
 import { initializationState } from "../state/initializationState";
-
-const ANONYMOUS_CACHE_KEY = '__anonymous__';
+import { ANONYMOUS_CACHE_KEY } from "../../core/SubscriptionConstants";
 
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
   private serviceInstance: IRevenueCatService | null = null;
-  private state = new SubscriptionInternalState();
+  private initCache = new InitializationCache();
   private packageHandler: PackageHandler | null = null;
 
   configure(config: SubscriptionManagerConfig): void {
@@ -46,7 +45,7 @@ class SubscriptionManagerImpl {
     }
 
     const cacheKey = actualUserId || ANONYMOUS_CACHE_KEY;
-    const { shouldInit, existingPromise } = this.state.initCache.tryAcquireInitialization(cacheKey);
+    const { shouldInit, existingPromise } = this.initCache.tryAcquireInitialization(cacheKey);
 
     if (!shouldInit && existingPromise) {
       if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -60,7 +59,7 @@ class SubscriptionManagerImpl {
 
     const realUserId = actualUserId || null;
     const promise = this.performInitialization(actualUserId);
-    this.state.initCache.setPromise(promise, cacheKey, realUserId);
+    this.initCache.setPromise(promise, cacheKey, realUserId);
     return promise;
   }
 
@@ -88,7 +87,7 @@ class SubscriptionManagerImpl {
   }
 
   isInitializedForUser = (userId: string): boolean =>
-    !!(this.serviceInstance?.isInitialized() && this.state.initCache.getCurrentUserId() === userId);
+    !!(this.serviceInstance?.isInitialized() && this.initCache.getCurrentUserId() === userId);
 
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
@@ -110,7 +109,7 @@ class SubscriptionManagerImpl {
       });
     }
     this.ensurePackageHandlerInitialized();
-    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.state);
+    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.initCache);
     const result = await purchasePackageOperation(pkg, this.managerConfig, resolvedUserId, this.packageHandler!);
     return result;
   }
@@ -121,7 +120,7 @@ class SubscriptionManagerImpl {
         await this.initialize(explicitUserId);
     }
     this.ensurePackageHandlerInitialized();
-    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.state);
+    const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.initCache);
     return restoreOperation(this.managerConfig, resolvedUserId, this.packageHandler!);
   }
 
@@ -134,7 +133,7 @@ class SubscriptionManagerImpl {
 
   async reset(): Promise<void> {
     await this.serviceInstance?.reset();
-    this.state.reset();
+    this.initCache.reset();
     this.serviceInstance = null;
     this.packageHandler = null;
     initializationState.reset();

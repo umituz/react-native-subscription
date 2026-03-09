@@ -1,5 +1,6 @@
 // Domain Layer - Constants & Types
 export * from "./domains/subscription/core/SubscriptionConstants";
+export type { SubscriptionMetadata, PremiumStatus, CreditInfo } from "./domains/subscription/core/types";
 export {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
@@ -37,7 +38,7 @@ export {
 // Presentation Layer - Hooks
 export { useAuthAwarePurchase } from "./domains/subscription/presentation/useAuthAwarePurchase";
 export { useCredits } from "./domains/credits/presentation/useCredits";
-export { useDeductCredit } from "./domains/credits/presentation/deduct-credit";
+export { useDeductCredit } from "./domains/credits/presentation/deduct-credit/useDeductCredit";
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
 export { usePremium } from "./domains/subscription/presentation/usePremium";
@@ -57,7 +58,6 @@ export type {
   SubscriptionDetailTranslations,
   SubscriptionDisplayFlags,
   UpgradePromptConfig,
-  CreditInfo,
 } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
 export * from "./domains/paywall/components/PaywallContainer";
 
@@ -99,6 +99,8 @@ export {
 // Wallet Domain
 export {
   WalletScreen as WalletScreenContainer,
-  type WalletScreenProps,
-  type WalletScreenTranslations,
-} from './domains/wallet';
+} from './domains/wallet/presentation/screens/WalletScreen';
+export type {
+  WalletScreenProps,
+  WalletScreenTranslations,
+} from './domains/wallet/presentation/screens/WalletScreen.types';

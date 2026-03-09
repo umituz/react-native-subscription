@@ -2,22 +2,9 @@ import type { CustomerInfo } from "react-native-purchases";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
 import { toDate } from "../../../../shared/utils/dateConverter";
 import { detectPackageType } from "../../../../utils/packageTypeDetector";
+import type { PremiumStatus } from "../../core/types";
 
-export interface PremiumStatus {
-  isPremium: boolean;
-  expirationDate: Date | null;
-  willRenew: boolean;
-  productIdentifier: string | null;
-  originalPurchaseDate: Date | null;
-  latestPurchaseDate: Date | null;
-  billingIssuesDetected: boolean;
-  isSandbox: boolean;
-  periodType: string | null;
-  packageType: string | null;
-  store: string | null;
-  gracePeriodExpiresDate: Date | null;
-  unsubscribeDetectedAt: Date | null;
-}
+export type { PremiumStatus };
 
 export class PurchaseStatusResolver {
   static resolve(customerInfo: CustomerInfo, entitlementId: string): PremiumStatus {
