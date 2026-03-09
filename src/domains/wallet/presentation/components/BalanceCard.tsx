@@ -10,17 +10,9 @@ import { View, StyleSheet } from "react-native";
 
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import type { BalanceCardTranslations, BalanceCardProps } from "./BalanceCard.types";
 
-export interface BalanceCardTranslations {
-  balanceLabel: string;
-  availableCredits: string;
-}
-
-interface BalanceCardProps {
-  balance: number;
-  translations: BalanceCardTranslations;
-  iconName?: string;
-}
+export type { BalanceCardTranslations };
 
 export const BalanceCard: React.FC<BalanceCardProps> = ({
   balance,

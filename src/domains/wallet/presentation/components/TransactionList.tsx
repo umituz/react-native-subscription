@@ -2,26 +2,13 @@ import React from "react";
 import { View, ScrollView } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
-import type { CreditLog } from "../../domain/types/transaction.types";
 import { TransactionItem } from "./TransactionItem";
-import type { TransactionItemTranslations } from "./TransactionItem.types";
 import { transactionListStyles } from "./TransactionList.styles";
 import { LoadingState, EmptyState } from "./TransactionListStates";
 import { DEFAULT_TRANSACTION_LIST_MAX_HEIGHT } from "./TransactionList.constants";
+import type { TransactionListTranslations, TransactionListProps } from "./TransactionList.types";
 
-export interface TransactionListTranslations extends TransactionItemTranslations {
-  title: string;
-  empty: string;
-  loading: string;
-}
-
-interface TransactionListProps {
-  transactions: CreditLog[];
-  loading: boolean;
-  translations: TransactionListTranslations;
-  maxHeight?: number;
-  dateFormatter?: (timestamp: number) => string;
-}
+export type { TransactionListTranslations };
 
 export const TransactionList: React.FC<TransactionListProps> = ({
   transactions,

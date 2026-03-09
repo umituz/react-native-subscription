@@ -49,7 +49,8 @@ export * from "./presentation/hooks/feedback/useFeedbackSubmit";
 
 // Presentation Layer - Components
 export * from "./domains/subscription/presentation/components/details/PremiumDetailsCard";
-export * from "./domains/subscription/presentation/components/details/PremiumStatusBadge";
+export { PremiumStatusBadge } from "./domains/subscription/presentation/components/details/PremiumStatusBadge";
+export type { PremiumStatusBadgeProps } from "./domains/subscription/presentation/components/details/PremiumStatusBadge.types";
 export * from "./domains/subscription/presentation/components/sections/SubscriptionSection";
 export * from "./domains/subscription/presentation/components/feedback/PaywallFeedbackModal";
 export * from "./domains/subscription/presentation/screens/SubscriptionDetailScreen";

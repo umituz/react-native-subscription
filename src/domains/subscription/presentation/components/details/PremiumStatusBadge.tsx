@@ -7,20 +7,11 @@ import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
-import {
-  SUBSCRIPTION_STATUS,
-  type SubscriptionStatusType
-} from "../../../core/SubscriptionConstants";
+import { SUBSCRIPTION_STATUS } from "../../../core/SubscriptionConstants";
+import type { PremiumStatusBadgeProps } from "./PremiumStatusBadge.types";
+import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";
 
-export type { SubscriptionStatusType };
-
-export interface PremiumStatusBadgeProps {
-  status: SubscriptionStatusType;
-  activeLabel: string;
-  expiredLabel: string;
-  noneLabel: string;
-  canceledLabel: string;
-}
+export type { PremiumStatusBadgeProps };
 
 export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
   status,

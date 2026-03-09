@@ -9,11 +9,9 @@ import { View, Modal, StyleSheet } from "react-native";
 import { AtomicSpinner, AtomicText } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePurchaseLoadingStore, selectIsPurchasing } from "../../stores/purchaseLoadingStore";
+import type { PurchaseLoadingOverlayProps } from "./PurchaseLoadingOverlay.types";
 
-export interface PurchaseLoadingOverlayProps {
-  /** Loading message to display */
-  loadingText?: string;
-}
+export type { PurchaseLoadingOverlayProps };
 
 export const PurchaseLoadingOverlay: React.FC<PurchaseLoadingOverlayProps> = React.memo(
   ({ loadingText }) => {

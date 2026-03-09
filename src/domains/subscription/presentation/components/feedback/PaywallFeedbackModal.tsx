@@ -6,6 +6,9 @@ import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
 import { FeedbackOption } from "./FeedbackOption";
+import type { PaywallFeedbackTranslations, PaywallFeedbackModalProps } from "./PaywallFeedbackModal.types";
+
+export type { PaywallFeedbackTranslations, PaywallFeedbackModalProps };
 
 const FEEDBACK_OPTION_IDS = [
     "too_expensive",
@@ -14,27 +17,6 @@ const FEEDBACK_OPTION_IDS = [
     "technical_issues",
     "other",
 ] as const;
-
-export interface PaywallFeedbackTranslations {
-    title: string;
-    subtitle: string;
-    submit: string;
-    otherPlaceholder: string;
-    reasons: {
-        too_expensive: string;
-        no_need: string;
-        trying_out: string;
-        technical_issues: string;
-        other: string;
-    };
-}
-
-export interface PaywallFeedbackModalProps {
-    translations: PaywallFeedbackTranslations;
-    visible: boolean;
-    onClose: () => void;
-    onSubmit: (reason: string) => void;
-}
 
 export const PaywallFeedbackModal: React.FC<PaywallFeedbackModalProps> = React.memo(({
     translations,

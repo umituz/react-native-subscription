@@ -1,4 +1,4 @@
-import type { SubscriptionStatusType } from "./PremiumStatusBadge";
+import type { SubscriptionStatusType } from "./PremiumStatusBadge.types";
 import type { CreditInfo } from "../../../core/types";
 
 export type { CreditInfo };
