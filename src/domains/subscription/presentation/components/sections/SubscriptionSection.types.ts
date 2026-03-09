@@ -1,6 +1,6 @@
 import type { StyleProp, ViewStyle } from "react-native";
-import type { SubscriptionStatusType } from "../../../../core/SubscriptionConstants";
-import type { CreditInfo } from "../../../../core/types";
+import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";
+import type { CreditInfo } from "../../../core/types";
 import type { PremiumDetailsTranslations } from "../details/PremiumDetailsCardTypes";
 
 export interface SubscriptionSectionConfig {

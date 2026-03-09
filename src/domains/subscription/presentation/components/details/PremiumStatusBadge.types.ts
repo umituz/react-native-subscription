@@ -1,4 +1,4 @@
-import type { SubscriptionStatusType } from "../../../../core/SubscriptionConstants";
+import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants";
 
 export type { SubscriptionStatusType };
 
