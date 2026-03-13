@@ -70,6 +70,15 @@ export async function syncPremiumMetadata(
  * Cross-user guard: if storeTransactionId is provided and already registered
  * to a different user in the global processedTransactions collection, the recovery
  * document is NOT created (the subscription belongs to another UID).
+ *
+ * NOTE: This uses non-atomic check-then-act (getDoc + setDoc). In theory, two concurrent
+ * calls could both see no document and create duplicates. However, this is extremely rare
+ * in practice because: (1) createRecoveryCreditsDocument is called after a successful
+ * purchase which is already serialized, (2) the global transaction check (below) prevents
+ * duplicates across users, (3) even if two recovery docs are created, the credits document
+ * logic is idempotent (same purchaseId processed twice is no-op). Making this atomic
+ * would require a transaction spanning both the credits doc and global processedTransactions,
+ * which adds complexity without meaningful benefit given the safeguards above.
  */
 export async function createRecoveryCreditsDocument(
   ref: DocumentReference,

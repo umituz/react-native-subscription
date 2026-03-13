@@ -45,10 +45,6 @@ export const useDeductCredit = ({
     }
   }, [onCreditsExhausted, userId]);
 
-  const deductCredits = useCallback(async (cost: number): Promise<boolean> => {
-    return await deductCredit(cost);
-  }, [deductCredit]);
-
   const checkCredits = useCallback(async (cost: number = 1): Promise<boolean> => {
     if (!userId) return false;
     return repository.hasCredits(userId, cost);
@@ -77,7 +73,6 @@ export const useDeductCredit = ({
   return {
     checkCredits,
     deductCredit,
-    deductCredits,
     refundCredits,
     isDeducting: mutation.isPending
   };

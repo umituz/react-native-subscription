@@ -10,6 +10,12 @@ import {
 } from "./creditOperationUtils.types";
 import { PURCHASE_ID_PREFIXES, PROCESSED_PURCHASES_WINDOW } from "../core/CreditsConstants";
 
+// Helper to check if purchaseId is a purchase or renewal (used for setting lastPurchaseAt)
+function isPurchaseOrRenewal(purchaseId: string): boolean {
+  return purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) ||
+         purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL);
+}
+
 
 export function calculateNewCredits({ metadata, existingData, creditLimit }: CalculateCreditsParams): number {
   const isExpired = metadata.expirationDate ? isPast(metadata.expirationDate) : false;
@@ -48,9 +54,6 @@ export function buildCreditsData({
     periodType: metadata.periodType ?? undefined,
   });
 
-  const isPurchaseOrRenewal = purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) ||
-                              purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL);
-
   const expirationTimestamp = metadata.expirationDate ? toTimestamp(metadata.expirationDate) : null;
   const canceledAtTimestamp = metadata.unsubscribeDetectedAt ? toTimestamp(metadata.unsubscribeDetectedAt) : null;
   const billingIssueTimestamp = metadata.billingIssueDetectedAt ? toTimestamp(metadata.billingIssueDetectedAt) : null;
@@ -65,7 +68,7 @@ export function buildCreditsData({
     productId,
     platform,
     ...(purchaseHistory.length > 0 && { purchaseHistory }),
-    ...(isPurchaseOrRenewal && { lastPurchaseAt: serverTimestamp() }),
+    ...(isPurchaseOrRenewal(purchaseId) && { lastPurchaseAt: serverTimestamp() }),
     ...(expirationTimestamp && { expirationDate: expirationTimestamp }),
     ...(metadata.willRenew !== undefined && { willRenew: metadata.willRenew }),
     ...(metadata.storeTransactionId && { storeTransactionId: metadata.storeTransactionId }),

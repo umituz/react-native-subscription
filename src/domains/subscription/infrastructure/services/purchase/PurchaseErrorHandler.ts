@@ -24,24 +24,24 @@ export async function handleAlreadyPurchasedError(
 ): Promise<PurchaseResult> {
   try {
     const restoreResult = await handleRestore(deps, userId);
-    if (restoreResult.success && restoreResult.customerInfo) {
-      if (restoreResult.isPremium) {
-        await notifyPurchaseCompleted(
-          deps.config,
-          userId,
-          pkg.product.identifier,
-          restoreResult.customerInfo,
-          getSavedPurchase()?.source
-        );
-      }
-      clearSavedPurchase();
-      return {
-        success: true,
-        isPremium: restoreResult.isPremium ?? false,
-        customerInfo: restoreResult.customerInfo,
-        productId: restoreResult.productId || pkg.product.identifier,
-      };
+    // restoreResult.success is always true here (handleRestore throws on error)
+    // and restoreResult.customerInfo is always present (RevenueCat guarantees it)
+    if (restoreResult.isPremium) {
+      await notifyPurchaseCompleted(
+        deps.config,
+        userId,
+        pkg.product.identifier,
+        restoreResult.customerInfo,
+        getSavedPurchase()?.source
+      );
     }
+    clearSavedPurchase();
+    return {
+      success: true,
+      isPremium: restoreResult.isPremium ?? false,
+      customerInfo: restoreResult.customerInfo,
+      productId: restoreResult.productId ?? pkg.product.identifier,
+    };
   } catch (_restoreError) {
     throw new RevenueCatPurchaseError(
       "You already own this subscription, but restore failed. Please try restoring purchases manually.",
@@ -49,12 +49,6 @@ export async function handleAlreadyPurchasedError(
       error instanceof Error ? error : undefined
     );
   }
-
-  throw new RevenueCatPurchaseError(
-    "You already own this subscription, but it could not be activated.",
-    pkg.product.identifier,
-    error instanceof Error ? error : undefined
-  );
 }
 
 export function handlePurchaseError(

@@ -2,12 +2,18 @@ export type DateLike = Date | string | number;
 
 export function isPast(date: DateLike): boolean {
   const d = new Date(date);
-  return d.getTime() < Date.now();
+  const time = d.getTime();
+  // Invalid dates (NaN) are not considered past - they're invalid
+  if (isNaN(time)) return false;
+  return time < Date.now();
 }
 
 export function isFuture(date: DateLike): boolean {
   const d = new Date(date);
-  return d.getTime() > Date.now();
+  const time = d.getTime();
+  // Invalid dates (NaN) are not considered future - they're invalid
+  if (isNaN(time)) return false;
+  return time > Date.now();
 }
 
 export function isNow(date: DateLike, marginMs: number = 1000): boolean {

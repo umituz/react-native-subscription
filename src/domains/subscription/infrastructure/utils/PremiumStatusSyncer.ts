@@ -3,7 +3,6 @@ import type { RevenueCatConfig } from "../../../revenuecat/core/types";
 import type { PurchaseSource } from "../../core/SubscriptionConstants";
 import type { PackageType } from "../../../revenuecat/core/types";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types";
-import type { PeriodType } from "../../core/SubscriptionConstants";
 
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
@@ -38,8 +37,8 @@ export async function syncPremiumStatus(
                 productId: premiumEntitlement.productIdentifier,
                 expirationDate: premiumEntitlement.expirationDate ?? null,
                 willRenew: premiumEntitlement.willRenew,
-                periodType: premiumEntitlement.periodType as PeriodType | undefined,
-                storeTransactionId: subscription?.storeTransactionId ?? undefined,
+                periodType: premiumEntitlement.periodType,
+                storeTransactionId: subscription?.storeTransactionId ?? null,
                 unsubscribeDetectedAt: premiumEntitlement.unsubscribeDetectedAt ?? null,
                 billingIssueDetectedAt: premiumEntitlement.billingIssueDetectedAt ?? null,
                 store: premiumEntitlement.store ?? null,
