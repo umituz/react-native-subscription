@@ -26,7 +26,7 @@ export async function handleAlreadyPurchasedError(
     const restoreResult = await handleRestore(deps, userId);
     // restoreResult.success is always true here (handleRestore throws on error)
     // and restoreResult.customerInfo is always present (RevenueCat guarantees it)
-    if (restoreResult.isPremium) {
+    if (restoreResult.isPremium && restoreResult.customerInfo) {
       await notifyPurchaseCompleted(
         deps.config,
         userId,

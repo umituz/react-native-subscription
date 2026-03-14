@@ -35,14 +35,14 @@ export async function syncPremiumStatus(
                 userId,
                 isPremium: true,
                 productId: premiumEntitlement.productIdentifier,
-                expirationDate: premiumEntitlement.expirationDate ?? null,
+                expirationDate: premiumEntitlement.expirationDate ?? undefined,
                 willRenew: premiumEntitlement.willRenew,
                 periodType: premiumEntitlement.periodType,
-                storeTransactionId: subscription?.storeTransactionId ?? null,
-                unsubscribeDetectedAt: premiumEntitlement.unsubscribeDetectedAt ?? null,
-                billingIssueDetectedAt: premiumEntitlement.billingIssueDetectedAt ?? null,
-                store: premiumEntitlement.store ?? null,
-                ownershipType: premiumEntitlement.ownershipType ?? null,
+                storeTransactionId: subscription?.storeTransactionId ?? undefined,
+                unsubscribeDetectedAt: premiumEntitlement.unsubscribeDetectedAt ?? undefined,
+                billingIssueDetectedAt: premiumEntitlement.billingIssueDetectedAt ?? undefined,
+                store: premiumEntitlement.store ?? undefined,
+                ownershipType: premiumEntitlement.ownershipType ?? undefined,
             });
         } else {
             await config.onPremiumStatusChanged({ userId, isPremium: false });
