@@ -78,7 +78,14 @@ export async function deductCreditsOperation(
       ? message
       : CREDIT_ERROR_CODES.DEDUCT_ERR;
 
-    if (__DEV__) console.error('[DeductCreditsCommand] transaction FAILED:', { code, message });
+    // Use console.warn instead of console.error for "no credits" - this is expected behavior, not a system error
+    if (__DEV__) {
+      if (code === CREDIT_ERROR_CODES.NO_CREDITS || code === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED) {
+        console.warn('[DeductCreditsCommand] ⚠️ User has no credits - paywall should open', { code, message });
+      } else {
+        console.error('[DeductCreditsCommand] ❌ Unexpected transaction error:', { code, message });
+      }
+    }
 
     return {
       success: false,

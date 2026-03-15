@@ -28,7 +28,9 @@ export const useDeductCredit = ({
       if (__DEV__) console.log('[useDeductCredit] mutation result:', JSON.stringify(res));
       if (!res.success) {
         if (__DEV__) console.log('[useDeductCredit] deduction FAILED:', res.error?.code, res.error?.message);
-        if (res.error?.code === "CREDITS_EXHAUSTED") {
+        // Call onCreditsExhausted for any credit-related error codes
+        if (res.error?.code === "CREDITS_EXHAUSTED" || res.error?.code === "DEDUCT_ERR" || res.error?.code === "NO_CREDITS") {
+          if (__DEV__) console.log('[useDeductCredit] Credits exhausted, calling onCreditsExhausted callback');
           onCreditsExhausted?.();
         }
         return false;
