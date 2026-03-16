@@ -18,10 +18,8 @@ export const PurchaseLoadingOverlay: React.FC<PurchaseLoadingOverlayProps> = Rea
     const tokens = useAppDesignTokens();
     const isPurchasing = usePurchaseLoadingStore(selectIsPurchasing);
 
-    if (!isPurchasing) return null;
-
     return (
-      <Modal visible transparent animationType="none" statusBarTranslucent>
+      <Modal visible={isPurchasing} transparent animationType="none" statusBarTranslucent>
         <View style={[styles.container, { backgroundColor: "rgba(0, 0, 0, 0.7)" }]}>
           <View style={[styles.content, { backgroundColor: tokens.colors.surface }]}>
             <AtomicSpinner size="lg" color="primary" />
