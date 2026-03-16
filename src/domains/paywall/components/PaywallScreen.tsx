@@ -160,29 +160,38 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
               return (
                 <PlanCard
                   key={pid}
-                  package={pkg}
-                  selected={isSelected}
-                  isBestValue={isBestValue}
-                  credits={credits}
+                  pkg={pkg}
+                  isSelected={isSelected}
+                  badge={isBestValue ? translations.bestValueBadgeText : undefined}
+                  creditAmount={credits}
                   creditsLabel={creditsLabel}
-                  onPress={() => setSelectedPlanId(pid)}
+                  onSelect={() => setSelectedPlanId(pid)}
                 />
               );
             })
           )}
         </View>
 
-        {/* Footer - CTA and Legal */}
-        <PaywallFooter
-          selectedPlanId={selectedPlanId}
-          packages={packages}
-          isProcessing={isProcessing}
-          onPurchase={handlePurchase}
-          onRestore={handleRestore}
-          legalUrls={legalUrls}
-          translations={translations}
-          onLegalUrl={handleLegalUrl}
-        />
+        {/* Sticky footer — always visible, never hidden behind scroll content */}
+        <View style={[styles.stickyFooter, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+          <TouchableOpacity
+            onPress={handlePurchase}
+            disabled={isProcessing || isLoadingPackages || !selectedPlanId}
+            style={[styles.cta, { backgroundColor: tokens.colors.primary }, (isProcessing || isLoadingPackages || !selectedPlanId) && styles.ctaDisabled]}
+            activeOpacity={0.75}
+          >
+            <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
+              {isProcessing ? translations.processingText : translations.purchaseButtonText}
+            </AtomicText>
+          </TouchableOpacity>
+          <PaywallFooter
+            translations={translations}
+            legalUrls={legalUrls}
+            isProcessing={isProcessing}
+            onRestore={onRestore ? handleRestore : undefined}
+            onLegalClick={handleLegalUrl}
+          />
+        </View>
       </ScrollView>
     </View>
   );
