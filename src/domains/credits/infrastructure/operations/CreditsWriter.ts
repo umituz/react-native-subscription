@@ -7,7 +7,7 @@ import type { SubscriptionMetadata } from "../../../subscription/core/types/Subs
 import { toTimestamp } from "../../../../shared/utils/dateConverter";
 import { isPast } from "../../../../utils/dateUtils";
 import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
-import { GLOBAL_TRANSACTION_COLLECTION } from "../../core/CreditsConstants";
+import { TRANSACTION_SUBCOLLECTION } from "../../core/CreditsConstants";
 
 // Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction so concurrent
 // initializeCreditsTransaction and deductCreditsOperation no longer see stale
@@ -67,17 +67,13 @@ export async function syncPremiumMetadata(
  * This handles edge cases like test store purchases, reinstalls, or failed initializations.
  * Returns true if a new document was created, false if one already existed.
  *
- * Cross-user guard: if storeTransactionId is provided and already registered
- * to a different user in the global processedTransactions collection, the recovery
- * document is NOT created (the subscription belongs to another UID).
- *
  * NOTE: This uses non-atomic check-then-act (getDoc + setDoc). In theory, two concurrent
  * calls could both see no document and create duplicates. However, this is extremely rare
  * in practice because: (1) createRecoveryCreditsDocument is called after a successful
- * purchase which is already serialized, (2) the global transaction check (below) prevents
- * duplicates across users, (3) even if two recovery docs are created, the credits document
+ * purchase which is already serialized, (2) the user-specific transaction check (below) prevents
+ * duplicates, (3) even if two recovery docs are created, the credits document
  * logic is idempotent (same purchaseId processed twice is no-op). Making this atomic
- * would require a transaction spanning both the credits doc and global processedTransactions,
+ * would require a transaction spanning both the credits doc and transaction subcollection,
  * which adds complexity without meaningful benefit given the safeguards above.
  */
 export async function createRecoveryCreditsDocument(
@@ -94,24 +90,25 @@ export async function createRecoveryCreditsDocument(
   const existingDoc = await getDoc(ref);
   if (existingDoc.exists()) return false;
 
-  // Cross-user deduplication: if this transaction was already processed by another
-  // user, skip recovery to prevent double credit allocation across UIDs.
+  // User-specific deduplication: if this transaction was already processed
+  // for this user, skip recovery to prevent duplicate credit allocation.
   if (db && userId && storeTransactionId) {
     try {
-      const globalRef = doc(db, GLOBAL_TRANSACTION_COLLECTION, storeTransactionId);
-      const globalDoc = await getDoc(globalRef);
-      if (globalDoc.exists()) {
-        const globalData = globalDoc.data();
-        if (globalData?.ownerUserId && globalData.ownerUserId !== userId) {
-          console.warn(
-            `[CreditsWriter] Recovery skipped: transaction ${storeTransactionId} belongs to user ${globalData.ownerUserId}, not ${userId}`
+      const transactionRef = doc(db, ref.path, TRANSACTION_SUBCOLLECTION, storeTransactionId);
+      const transactionDoc = await getDoc(transactionRef);
+      if (transactionDoc.exists()) {
+        if (__DEV__) {
+          console.log(
+            `[CreditsWriter] Recovery skipped: transaction ${storeTransactionId} already processed for user ${userId}`
           );
-          return false;
         }
+        return false;
       }
     } catch (error) {
-      // Non-fatal: if global check fails, still create recovery doc as safety net
-      console.warn('[CreditsWriter] Global transaction check failed during recovery:', error);
+      // Non-fatal: if transaction check fails, still create recovery doc as safety net
+      if (__DEV__) {
+        console.warn('[CreditsWriter] Transaction check failed during recovery:', error);
+      }
     }
   }
 

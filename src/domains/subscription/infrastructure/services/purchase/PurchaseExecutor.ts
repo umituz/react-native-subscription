@@ -57,7 +57,7 @@ async function executeSubscriptionPurchase(
   const source = savedPurchase?.source;
 
   if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] executeSubscriptionPurchase:", {
+    console.log("[PurchaseExecutor] 🔵 executeSubscriptionPurchase: START", {
       userId,
       productId,
       isPremium,
@@ -65,13 +65,27 @@ async function executeSubscriptionPurchase(
       activeEntitlements: Object.keys(customerInfo.entitlements.active),
       source,
       packageType,
+      timestamp: new Date().toISOString(),
     });
   }
 
   try {
     await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log("[PurchaseExecutor] 🟢 executeSubscriptionPurchase: SUCCESS", {
+        userId,
+        productId,
+        isPremium,
+        timestamp: new Date().toISOString(),
+      });
+    }
   } catch (syncError) {
-    console.error('[PurchaseExecutor] Post-purchase sync failed, attempting recovery:', syncError);
+    console.error('[PurchaseExecutor] 🔴 Post-purchase sync failed, attempting recovery:', {
+      userId,
+      productId,
+      error: syncError instanceof Error ? syncError.message : String(syncError),
+      timestamp: new Date().toISOString(),
+    });
     await attemptRecovery(config, userId, customerInfo);
   } finally {
     if (savedPurchase) {

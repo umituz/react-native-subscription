@@ -8,7 +8,7 @@ import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
 import { calculateCreditLimit } from "./CreditLimitCalculator";
 import { generatePurchaseMetadata } from "./PurchaseMetadataGenerator";
-import { PURCHASE_ID_PREFIXES, GLOBAL_TRANSACTION_COLLECTION } from "../core/CreditsConstants";
+import { PURCHASE_ID_PREFIXES, TRANSACTION_SUBCOLLECTION } from "../core/CreditsConstants";
 
 export async function initializeCreditsTransaction(
     _db: Firestore,
@@ -18,6 +18,20 @@ export async function initializeCreditsTransaction(
     metadata: InitializeCreditsMetadata,
     userId: string
 ): Promise<InitializationResult> {
+
+    if (__DEV__) {
+        console.log('[CreditsInitializer] 🔵 initializeCreditsTransaction: START', {
+            userId,
+            purchaseId,
+            productId: metadata.productId,
+            source: metadata.source,
+            type: metadata.type,
+            isPremium: metadata.isPremium,
+            willRenew: metadata.willRenew,
+            storeTransactionId: metadata.storeTransactionId,
+            timestamp: new Date().toISOString(),
+        });
+    }
 
     if (!purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) && !purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL)) {
         throw new Error(`[CreditsInitializer] Only purchase and renewal operations can allocate credits. Received: ${purchaseId}`);
@@ -32,6 +46,14 @@ export async function initializeCreditsTransaction(
         const existingData = getCreditDocumentOrDefault(creditsDoc, platform);
 
         if (existingData.processedPurchases.includes(purchaseId)) {
+            if (__DEV__) {
+                console.log('[CreditsInitializer] 🟡 Transaction already processed, skipping', {
+                    userId,
+                    purchaseId,
+                    existingCredits: existingData.credits,
+                    processedPurchasesCount: existingData.processedPurchases.length,
+                });
+            }
             return {
                 credits: existingData.credits,
                 alreadyProcessed: true,
@@ -39,24 +61,35 @@ export async function initializeCreditsTransaction(
             };
         }
 
-        // Global cross-user deduplication: prevent the same Apple/Google transaction
-        // from allocating credits under multiple Firebase UIDs.
+        // User-specific transaction deduplication: prevent the same Apple/Google transaction
+        // from allocating credits multiple times for the same user.
+        // Path: users/{userId}/credits/processedTransactions/{transactionId}
         if (metadata.storeTransactionId) {
-            const globalRef = doc(_db, GLOBAL_TRANSACTION_COLLECTION, metadata.storeTransactionId);
-            const globalDoc = await transaction.get(globalRef);
-            if (globalDoc.exists()) {
-                const globalData = globalDoc.data();
-                if (globalData?.ownerUserId && globalData.ownerUserId !== userId) {
-                    console.warn(
-                        `[CreditsInitializer] Transaction ${metadata.storeTransactionId} already processed by user ${globalData.ownerUserId}, skipping for ${userId}`
-                    );
-                    return {
-                        credits: existingData.credits,
-                        alreadyProcessed: true,
-                        finalData: existingData
-                    };
+            const transactionRef = doc(_db, creditsRef.path, TRANSACTION_SUBCOLLECTION, metadata.storeTransactionId);
+            const transactionDoc = await transaction.get(transactionRef);
+            if (transactionDoc.exists()) {
+                if (__DEV__) {
+                    console.log('[CreditsInitializer] 🟡 Store transaction already processed, skipping', {
+                        userId,
+                        storeTransactionId: metadata.storeTransactionId,
+                        existingCredits: existingData.credits,
+                    });
                 }
+                return {
+                    credits: existingData.credits,
+                    alreadyProcessed: true,
+                    finalData: existingData
+                };
             }
+        }
+
+        if (__DEV__) {
+            console.log('[CreditsInitializer] 🔵 Processing credit allocation', {
+                userId,
+                purchaseId,
+                existingCredits: existingData.credits,
+                productId: metadata.productId,
+            });
         }
 
         const creditLimit = calculateCreditLimit(metadata.productId, config);
@@ -88,14 +121,24 @@ export async function initializeCreditsTransaction(
 
         transaction.set(creditsRef, creditsData, { merge: true });
 
-        // Register transaction globally so other UIDs cannot claim the same purchase.
+        // Register transaction in user-specific subcollection to prevent duplicate processing.
         if (metadata.storeTransactionId) {
-            const globalRef = doc(_db, GLOBAL_TRANSACTION_COLLECTION, metadata.storeTransactionId);
-            transaction.set(globalRef, {
-                ownerUserId: userId,
+            const transactionRef = doc(_db, creditsRef.path, TRANSACTION_SUBCOLLECTION, metadata.storeTransactionId);
+            transaction.set(transactionRef, {
                 purchaseId,
                 productId: metadata.productId,
                 createdAt: serverTimestamp(),
+            });
+        }
+
+        if (__DEV__) {
+            console.log('[CreditsInitializer] 🟢 Credit allocation successful', {
+                userId,
+                purchaseId,
+                previousCredits: existingData.credits,
+                newCredits,
+                creditLimit,
+                productId: metadata.productId,
             });
         }
 

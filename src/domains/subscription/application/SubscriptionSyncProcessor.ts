@@ -26,52 +26,104 @@ export class SubscriptionSyncProcessor {
   // ─── Public API (replaces SubscriptionSyncService) ────────────────
 
   async handlePurchase(event: PurchaseCompletedEvent): Promise<void> {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🔵 PURCHASE START', {
+        userId: event.userId,
+        productId: event.productId,
+        source: event.source,
+        packageType: event.packageType,
+        timestamp: new Date().toISOString(),
+      });
+    }
     try {
       await this.processPurchase(event);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, {
         userId: event.userId,
         productId: event.productId,
       });
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log('[SubscriptionSyncProcessor] 🟢 PURCHASE SUCCESS', {
+          userId: event.userId,
+          productId: event.productId,
+          timestamp: new Date().toISOString(),
+        });
+      }
     } catch (error) {
-      console.error('[SubscriptionSyncProcessor] Purchase processing failed', {
+      console.error('[SubscriptionSyncProcessor] 🔴 PURCHASE FAILED', {
         userId: event.userId,
         productId: event.productId,
         error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
       });
       throw error;
     }
   }
 
   async handleRenewal(event: RenewalDetectedEvent): Promise<void> {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🔵 RENEWAL START', {
+        userId: event.userId,
+        productId: event.productId,
+        newExpirationDate: event.newExpirationDate,
+        timestamp: new Date().toISOString(),
+      });
+    }
     try {
       await this.processRenewal(event);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, {
         userId: event.userId,
         productId: event.productId,
       });
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log('[SubscriptionSyncProcessor] 🟢 RENEWAL SUCCESS', {
+          userId: event.userId,
+          productId: event.productId,
+          timestamp: new Date().toISOString(),
+        });
+      }
     } catch (error) {
-      console.error('[SubscriptionSyncProcessor] Renewal processing failed', {
+      console.error('[SubscriptionSyncProcessor] 🔴 RENEWAL FAILED', {
         userId: event.userId,
         productId: event.productId,
         error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
       });
       throw error;
     }
   }
 
   async handlePremiumStatusChanged(event: PremiumStatusChangedEvent): Promise<void> {
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🔵 STATUS CHANGE START', {
+        userId: event.userId,
+        isPremium: event.isPremium,
+        productId: event.productId,
+        willRenew: event.willRenew,
+        expirationDate: event.expirationDate,
+        timestamp: new Date().toISOString(),
+      });
+    }
     try {
       await this.processStatusChange(event);
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, {
         userId: event.userId,
         isPremium: event.isPremium,
       });
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log('[SubscriptionSyncProcessor] 🟢 STATUS CHANGE SUCCESS', {
+          userId: event.userId,
+          isPremium: event.isPremium,
+          productId: event.productId,
+          timestamp: new Date().toISOString(),
+        });
+      }
     } catch (error) {
-      console.error('[SubscriptionSyncProcessor] Status change processing failed', {
+      console.error('[SubscriptionSyncProcessor] 🔴 STATUS CHANGE FAILED', {
         userId: event.userId,
         isPremium: event.isPremium,
         productId: event.productId,
         error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
       });
       throw error;
     }
@@ -96,6 +148,14 @@ export class SubscriptionSyncProcessor {
 
   private async processPurchase(event: PurchaseCompletedEvent): Promise<void> {
     this.purchaseInProgress = true;
+    if (typeof __DEV__ !== "undefined" && __DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🔵 processPurchase: Starting credit initialization', {
+        productId: event.productId,
+        source: event.source,
+        packageType: event.packageType,
+        activeEntitlements: Object.keys(event.customerInfo.entitlements.active),
+      });
+    }
     try {
       const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
       revenueCatData.packageType = event.packageType ?? null;
@@ -104,6 +164,15 @@ export class SubscriptionSyncProcessor {
       const purchaseId = generatePurchaseId(revenueCatData.storeTransactionId, event.productId);
 
       const creditsUserId = await this.getCreditsUserId(event.userId);
+
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log('[SubscriptionSyncProcessor] 🔵 processPurchase: Calling initializeCredits', {
+          creditsUserId,
+          purchaseId,
+          productId: event.productId,
+          revenueCatUserId: revenueCatData.revenueCatUserId,
+        });
+      }
 
       const result = await getCreditsRepository().initializeCredits(
         creditsUserId,
@@ -119,6 +188,13 @@ export class SubscriptionSyncProcessor {
       }
 
       this.emitCreditsUpdated(creditsUserId);
+      if (typeof __DEV__ !== "undefined" && __DEV__) {
+        console.log('[SubscriptionSyncProcessor] 🟢 processPurchase: Credits initialized successfully', {
+          creditsUserId,
+          purchaseId,
+          credits: result.data?.credits,
+        });
+      }
     } finally {
       this.purchaseInProgress = false;
     }
@@ -198,6 +274,15 @@ export class SubscriptionSyncProcessor {
   private async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
     const repo = getCreditsRepository();
 
+    if (__DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🔵 syncPremiumStatus: Starting', {
+        userId,
+        isPremium: event.isPremium,
+        productId: event.productId,
+        willRenew: event.willRenew,
+      });
+    }
+
     if (event.isPremium) {
       const created = await repo.ensurePremiumCreditsExist(
         userId,
@@ -208,7 +293,7 @@ export class SubscriptionSyncProcessor {
         event.storeTransactionId,
       );
       if (__DEV__ && created) {
-        console.log('[SubscriptionSyncProcessor] Recovery: created missing credits document for premium user', {
+        console.log('[SubscriptionSyncProcessor] 🟢 Recovery: created missing credits document for premium user', {
           userId,
           productId: event.productId,
         });
@@ -227,6 +312,14 @@ export class SubscriptionSyncProcessor {
       ownershipType: event.ownershipType ?? null,
     });
     this.emitCreditsUpdated(userId);
+
+    if (__DEV__) {
+      console.log('[SubscriptionSyncProcessor] 🟢 syncPremiumStatus: Completed', {
+        userId,
+        isPremium: event.isPremium,
+        productId: event.productId,
+      });
+    }
   }
 
   private emitCreditsUpdated(userId: string): void {

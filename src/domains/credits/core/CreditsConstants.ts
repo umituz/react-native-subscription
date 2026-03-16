@@ -16,8 +16,9 @@ export const PROCESSED_PURCHASES_WINDOW = 50;
 export const MAX_SINGLE_DEDUCTION = 10000;
 
 /**
- * Global Firestore collection for cross-user transaction deduplication.
- * Prevents the same Apple/Google transaction from allocating credits
- * under multiple Firebase UIDs (e.g., anonymous + converted accounts).
+ * User-specific Firestore sub-collection for transaction deduplication.
+ * Changed from global root-level collection to user-scoped collection
+ * to match vivoim_app pattern and avoid Firestore permission issues.
+ * Path: users/{userId}/credits/processedTransactions/{transactionId}
  */
-export const GLOBAL_TRANSACTION_COLLECTION = 'processedTransactions';
+export const TRANSACTION_SUBCOLLECTION = 'processedTransactions';
