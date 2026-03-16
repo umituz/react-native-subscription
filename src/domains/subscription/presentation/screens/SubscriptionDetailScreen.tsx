@@ -39,7 +39,7 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
               onPress={config.onClose}
               style={({ pressed }) => ({
                 width: 44, height: 44, justifyContent: "center", alignItems: "center",
-                backgroundColor: pressed ? tokens.colors.surfaceVariant : tokens.colors.surface,
+                backgroundColor: pressed ? tokens.colors.surfaceSecondary : tokens.colors.surface,
                 borderRadius: tokens.radius.full,
               })}
             >

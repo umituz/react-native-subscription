@@ -21,7 +21,7 @@ export const FeedbackOption: React.FC<FeedbackOptionProps> = React.memo(({
 
   const containerStyle = {
     marginBottom: tokens.spacing.sm,
-    backgroundColor: tokens.colors.surfaceVariant,
+    backgroundColor: tokens.colors.surfaceSecondary,
     borderRadius: tokens.borderRadius.md,
     overflow: "hidden" as const,
   };

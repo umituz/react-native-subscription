@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, ScrollView, TouchableOpacity } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
@@ -114,7 +114,7 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
                     style={[
                         screenStyles.submitButton,
                         {
-                            backgroundColor: canSubmit ? tokens.colors.primary : tokens.colors.surfaceVariant,
+                            backgroundColor: canSubmit ? tokens.colors.primary : tokens.colors.surfaceSecondary,
                             opacity: canSubmit ? 1 : 0.6,
                         }
                     ]}
@@ -139,7 +139,7 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
 
 PaywallFeedbackScreen.displayName = "PaywallFeedbackScreen";
 
-const createScreenStyles = (tokens: any, insets: any) => ({
+const createScreenStyles = (tokens: any, _insets: any) => ({
     container: {
         flex: 1,
     },
