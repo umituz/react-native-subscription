@@ -5,6 +5,7 @@ export interface PlanCardProps {
     isSelected: boolean;
     onSelect: () => void;
     badge?: string;
-    creditAmount?: number;
+    creditAmount?: number | null;
     creditsLabel?: string;
-}
+    disabled?: boolean;
+    }

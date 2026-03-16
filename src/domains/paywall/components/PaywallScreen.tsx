@@ -20,6 +20,7 @@ import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFooter } from "./PaywallFooter";
+import { PurchaseLoadingOverlay } from "../../subscription/presentation/components/overlay/PurchaseLoadingOverlay";
 import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallScreenProps } from "./PaywallScreen.types";
 import { 
@@ -50,7 +51,14 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
 
-  const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore } = usePaywallActions({
+  const { 
+    selectedPlanId, 
+    setSelectedPlanId, 
+    isProcessing, 
+    handlePurchase, 
+    handleRestore,
+    resetState
+  } = usePaywallActions({
     packages,
     onPurchase,
     onRestore,
@@ -60,6 +68,13 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     onAuthRequired,
     onClose
   });
+
+  // Reset state when screen is closed to avoid lockups
+  useEffect(() => {
+    return () => {
+      resetState();
+    };
+  }, [resetState]);
 
   // Auto-select first package
   useEffect(() => {

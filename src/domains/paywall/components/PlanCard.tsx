@@ -6,13 +6,18 @@ import { formatPriceWithPeriod } from '../../../utils/priceUtils';
 import { PlanCardProps } from "./PlanCard.types";
 
 export const PlanCard: React.FC<PlanCardProps> = React.memo(
-  ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel }) => {
+  ({ pkg, isSelected, onSelect, badge, creditAmount, creditsLabel, disabled }) => {
     const tokens = useAppDesignTokens();
     const title = pkg.product.title;
     const price = formatPriceWithPeriod(pkg.product.price, pkg.product.currencyCode, pkg.identifier);
 
     return (
-      <TouchableOpacity onPress={onSelect} activeOpacity={0.7} style={styles.touchable}>
+      <TouchableOpacity 
+        onPress={onSelect} 
+        disabled={disabled}
+        activeOpacity={0.7} 
+        style={[styles.touchable, disabled && { opacity: 0.8 }]}
+      >
         <View style={[styles.container, { 
           backgroundColor: tokens.colors.surface, 
           borderColor: isSelected ? tokens.colors.primary : tokens.colors.border,
