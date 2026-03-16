@@ -77,145 +77,157 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     }
   }, []);
 
-  // Close button for header
-  const closeButton = (
-    <TouchableOpacity
-      onPress={onClose}
-      style={[screenStyles.closeBtn, { backgroundColor: tokens.colors.surfaceSecondary }]}
-      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-    >
-      <AtomicIcon name="close-outline" size="md" customColor={tokens.colors.textPrimary} />
-    </TouchableOpacity>
-  );
-
-  // Sticky footer with CTA and restore/legal links
-  const footerContent = (
-    <View style={[styles.stickyFooter, { paddingBottom: insets.bottom || 16 }]}>
-      <TouchableOpacity
-        onPress={handlePurchase}
-        disabled={isProcessing || isLoadingPackages || !selectedPlanId}
-        style={[
-          styles.cta,
-          { backgroundColor: tokens.colors.primary },
-          (isProcessing || isLoadingPackages || !selectedPlanId) && styles.ctaDisabled
-        ]}
-        activeOpacity={0.75}
-      >
-        <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
-          {isProcessing ? translations.processingText : translations.purchaseButtonText}
-        </AtomicText>
-      </TouchableOpacity>
-      <PaywallFooter
-        translations={translations}
-        legalUrls={legalUrls}
-        isProcessing={isProcessing}
-        onRestore={onRestore ? handleRestore : undefined}
-        onLegalClick={handleLegalUrl}
-      />
-    </View>
-  );
-
   return (
-    <ScreenLayout
-      scrollable={true}
-      backgroundColor={tokens.colors.backgroundPrimary}
-      header={closeButton}
-      footer={footerContent}
-      contentContainerStyle={screenStyles.contentContainer}
-    >
-      {/* Hero Image */}
-      {heroImage && (
-        <View style={styles.heroContainer}>
-          <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={0} />
-        </View>
-      )}
-
-      {/* Header */}
-      <View style={styles.header}>
-        <AtomicText
-          type="headlineMedium"
-          adjustsFontSizeToFit
-          numberOfLines={2}
-          minimumFontScale={0.75}
-          style={[styles.title, { color: tokens.colors.textPrimary }]}
+    <View style={[screenStyles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}>
+      {/* Close button - positioned absolutely at top */}
+      <View style={[screenStyles.headerContainer, { paddingTop: insets.top }]}>
+        <TouchableOpacity
+          onPress={onClose}
+          style={[screenStyles.closeBtn, { backgroundColor: tokens.colors.surfaceSecondary }]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          {translations.title}
-        </AtomicText>
-        {translations.subtitle && (
-          <AtomicText
-            type="bodyMedium"
-            adjustsFontSizeToFit
-            numberOfLines={3}
-            minimumFontScale={0.8}
-            style={[styles.subtitle, { color: tokens.colors.textSecondary }]}
-          >
-            {translations.subtitle}
-          </AtomicText>
-        )}
+          <AtomicIcon name="close-outline" size="md" customColor={tokens.colors.textPrimary} />
+        </TouchableOpacity>
       </View>
 
-      {/* Features */}
-      <PaywallFeatures features={features} />
-
-      {/* Plans */}
-      <View style={styles.plans}>
-        {isLoadingPackages ? (
-          <View style={styles.loading}>
-            <AtomicSpinner size="md" />
-            {translations.processingText && (
-              <AtomicText
-                type="bodySmall"
-                style={[styles.loadingText, { color: tokens.colors.textSecondary }]}
-              >
-                {translations.processingText}
-              </AtomicText>
-            )}
+      {/* Scrollable content */}
+      <ScreenLayout
+        scrollable={true}
+        backgroundColor="transparent"
+        contentContainerStyle={{ ...screenStyles.contentContainer, paddingBottom: 120 }}
+      >
+        {/* Hero Image */}
+        {heroImage && (
+          <View style={styles.heroContainer}>
+            <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={0} />
           </View>
-        ) : packages.length === 0 ? (
-          <View style={styles.loading}>
+        )}
+
+        {/* Header */}
+        <View style={styles.header}>
+          <AtomicText
+            type="headlineMedium"
+            adjustsFontSizeToFit
+            numberOfLines={2}
+            minimumFontScale={0.75}
+            style={[styles.title, { color: tokens.colors.textPrimary }]}
+          >
+            {translations.title}
+          </AtomicText>
+          {translations.subtitle && (
             <AtomicText
               type="bodyMedium"
-              style={{ color: tokens.colors.textSecondary, textAlign: "center" }}
+              adjustsFontSizeToFit
+              numberOfLines={3}
+              minimumFontScale={0.8}
+              style={[styles.subtitle, { color: tokens.colors.textSecondary }]}
             >
-              {translations.emptyText ?? "No packages available"}
+              {translations.subtitle}
             </AtomicText>
-          </View>
-        ) : (
-          packages.map((pkg) => {
-            const pid = pkg.product.identifier;
-            const isSelected = selectedPlanId === pid;
-            const isBestValue = bestValueIdentifier === pid;
-            const credits = creditAmounts?.[pid];
+          )}
+        </View>
 
-            return (
-              <PlanCard
-                key={pid}
-                pkg={pkg}
-                isSelected={isSelected}
-                badge={isBestValue ? translations.bestValueBadgeText : undefined}
-                creditAmount={credits}
-                creditsLabel={creditsLabel}
-                onSelect={() => setSelectedPlanId(pid)}
-              />
-            );
-          })
-        )}
+        {/* Features */}
+        <PaywallFeatures features={features} />
+
+        {/* Plans */}
+        <View style={styles.plans}>
+          {isLoadingPackages ? (
+            <View style={styles.loading}>
+              <AtomicSpinner size="md" />
+              {translations.processingText && (
+                <AtomicText
+                  type="bodySmall"
+                  style={[styles.loadingText, { color: tokens.colors.textSecondary }]}
+                >
+                  {translations.processingText}
+                </AtomicText>
+              )}
+            </View>
+          ) : packages.length === 0 ? (
+            <View style={styles.loading}>
+              <AtomicText
+                type="bodyMedium"
+                style={{ color: tokens.colors.textSecondary, textAlign: "center" }}
+              >
+                {translations.emptyText ?? "No packages available"}
+              </AtomicText>
+            </View>
+          ) : (
+            packages.map((pkg) => {
+              const pid = pkg.product.identifier;
+              const isSelected = selectedPlanId === pid;
+              const isBestValue = bestValueIdentifier === pid;
+              const credits = creditAmounts?.[pid];
+
+              return (
+                <PlanCard
+                  key={pid}
+                  pkg={pkg}
+                  isSelected={isSelected}
+                  badge={isBestValue ? translations.bestValueBadgeText : undefined}
+                  creditAmount={credits}
+                  creditsLabel={creditsLabel}
+                  onSelect={() => setSelectedPlanId(pid)}
+                />
+              );
+            })
+          )}
+        </View>
+      </ScreenLayout>
+
+      {/* Fixed footer overlay - always visible at bottom */}
+      <View style={[styles.stickyFooter, { backgroundColor: tokens.colors.backgroundPrimary, paddingBottom: Math.max(insets.bottom, 16) }]}>
+        <TouchableOpacity
+          onPress={handlePurchase}
+          disabled={isProcessing || isLoadingPackages || !selectedPlanId}
+          style={[
+            styles.cta,
+            { backgroundColor: tokens.colors.primary },
+            (isProcessing || isLoadingPackages || !selectedPlanId) && styles.ctaDisabled
+          ]}
+          activeOpacity={0.75}
+        >
+          <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
+            {isProcessing ? translations.processingText : translations.purchaseButtonText}
+          </AtomicText>
+        </TouchableOpacity>
+        <PaywallFooter
+          translations={translations}
+          legalUrls={legalUrls}
+          isProcessing={isProcessing}
+          onRestore={onRestore ? handleRestore : undefined}
+          onLegalClick={handleLegalUrl}
+        />
       </View>
-    </ScreenLayout>
+    </View>
   );
 });
 
 PaywallScreen.displayName = "PaywallScreen";
 
 const screenStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    paddingHorizontal: 12,
+    paddingTop: 12,
+  },
   closeBtn: {
     width: 36,
     height: 36,
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'flex-end',
   },
   contentContainer: {
-    paddingBottom: 16,
+    paddingTop: 60, // Space for close button
   },
 });

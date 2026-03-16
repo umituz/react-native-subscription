@@ -139,7 +139,13 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
 
 PaywallFeedbackScreen.displayName = "PaywallFeedbackScreen";
 
-const createScreenStyles = (tokens: any, _insets: any) => ({
+const createScreenStyles = (
+    tokens: {
+        colors: { backgroundPrimary: string; border: string };
+        spacing: { xl: number; sm: number; md: number };
+    },
+    _insets: { top: number; bottom: number }
+) => ({
     container: {
         flex: 1,
     },
