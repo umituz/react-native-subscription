@@ -290,7 +290,6 @@ export class SubscriptionSyncProcessor {
         event.willRenew ?? false,
         event.expirationDate ?? null,
         event.periodType ?? null,
-        event.storeTransactionId,
       );
       if (__DEV__ && created) {
         console.log('[SubscriptionSyncProcessor] 🟢 Recovery: created missing credits document for premium user', {
