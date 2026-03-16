@@ -61,6 +61,8 @@ export type {
   UpgradePromptConfig,
 } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
 export * from "./domains/paywall/components/PaywallContainer";
+export { PaywallScreen } from "./domains/paywall/components/PaywallScreen";
+export type { PaywallScreenProps } from "./domains/paywall/components/PaywallScreen.types";
 
 export type {
   CreditType,
