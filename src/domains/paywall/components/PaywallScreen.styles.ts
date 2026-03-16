@@ -35,13 +35,10 @@ export const paywallScreenStyles = StyleSheet.create({
     marginTop: 12,
   },
   stickyFooter: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: "#000",
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
   },
   cta: {
     borderRadius: 14,
