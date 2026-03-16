@@ -7,13 +7,17 @@
  */
 
 import React, { useMemo, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, StyleSheet, Linking } from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { FeedbackOption } from "./FeedbackOption";
 import type { PaywallFeedbackScreenProps } from "./PaywallFeedbackScreen.types";
+import type { PaywallFeedbackTranslations } from "./PaywallFeedbackModal.types";
+
+// Re-export translations type for convenience
+export type { PaywallFeedbackTranslations, PaywallFeedbackScreenProps };
 
 const FEEDBACK_OPTION_IDS = [
     "too_expensive",
