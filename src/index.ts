@@ -53,6 +53,7 @@ export { PremiumStatusBadge } from "./domains/subscription/presentation/componen
 export type { PremiumStatusBadgeProps } from "./domains/subscription/presentation/components/details/PremiumStatusBadge.types";
 export * from "./domains/subscription/presentation/components/sections/SubscriptionSection";
 export * from "./domains/subscription/presentation/components/feedback/PaywallFeedbackModal";
+export * from "./domains/subscription/presentation/components/feedback/PaywallFeedbackScreen";
 export * from "./domains/subscription/presentation/screens/SubscriptionDetailScreen";
 export type {
   SubscriptionDetailConfig,

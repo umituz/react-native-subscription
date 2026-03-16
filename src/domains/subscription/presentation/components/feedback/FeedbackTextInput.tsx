@@ -23,6 +23,7 @@ export const FeedbackTextInput: React.FC<FeedbackTextInputProps> = ({ placeholde
             borderRadius: tokens.borderRadius.sm,
             padding: tokens.spacing.sm,
             color: tokens.colors.textPrimary,
+            borderColor: tokens.colors.border,
             minHeight: FEEDBACK_INPUT_MIN_HEIGHT,
             textAlignVertical: "top",
           },
