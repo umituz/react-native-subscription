@@ -5,12 +5,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from "react";
-import { 
-  View, 
-  TouchableOpacity, 
-  Linking, 
-  FlatList, 
-  ListRenderItem, 
+import {
+  View,
+  TouchableOpacity,
+  Linking,
+  FlatList,
+  ListRenderItem,
   StatusBar,
 } from "react-native";
 import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
@@ -20,13 +20,13 @@ import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFooter } from "./PaywallFooter";
-import { PurchaseLoadingOverlay } from "../../subscription/presentation/components/overlay/PurchaseLoadingOverlay";
 import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallScreenProps } from "./PaywallScreen.types";
-import { 
-  calculatePaywallItemLayout, 
-  type PaywallListItem 
+import {
+  calculatePaywallItemLayout,
+  type PaywallListItem
 } from "../utils/paywallLayoutUtils";
+import { hasItems } from "../../../shared/utils/arrayUtils";
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
   const {
@@ -78,7 +78,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
 
   // Auto-select first package
   useEffect(() => {
-    if (packages.length > 0 && !selectedPlanId) {
+    if (hasItems(packages) && !selectedPlanId) {
       setSelectedPlanId(packages[0].product.identifier);
     }
   }, [packages, selectedPlanId, setSelectedPlanId]);
@@ -100,7 +100,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     data.push({ type: 'HEADER' });
 
     // 2. Features Section
-    if (features.length > 0) {
+    if (hasItems(features)) {
       data.push({ type: 'FEATURE_HEADER' });
       features.forEach(feature => {
         data.push({ type: 'FEATURE', feature });
@@ -108,7 +108,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     }
 
     // 3. Plans Section
-    if (packages.length > 0) {
+    if (hasItems(packages)) {
       data.push({ type: 'PLAN_HEADER' });
       packages.forEach(pkg => {
         data.push({ type: 'PLAN', pkg });

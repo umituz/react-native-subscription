@@ -3,8 +3,9 @@ import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { UpgradePromptProps } from "./UpgradePrompt.types";
+import { hasItems } from "../../../../../shared/utils/arrayUtils";
 
-export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ title, subtitle, benefits, upgradeButtonLabel, onUpgrade }) => {
+export const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ title, subtitle, benefits, upgradeButtonLabel, onUpgrade }) => {
   const tokens = useAppDesignTokens();
   const styles = useMemo(() => StyleSheet.create({
     container: { gap: tokens.spacing.lg },
@@ -39,7 +40,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ title, subtitle, b
         <AtomicText type="headlineSmall" style={[styles.title, { color: tokens.colors.textPrimary }]}>{title}</AtomicText>
         {subtitle && <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>{subtitle}</AtomicText>}
       </View>
-      {benefits && benefits.length > 0 && (
+      {hasItems(benefits) && (
         <View style={styles.benefitsCard}>
           {benefits.map((benefit) => (
             <View key={benefit.text} style={styles.benefitItem}>
@@ -58,4 +59,4 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = ({ title, subtitle, b
       )}
     </View>
   );
-};
+});

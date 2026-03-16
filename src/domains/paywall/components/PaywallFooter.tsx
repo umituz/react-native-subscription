@@ -13,7 +13,7 @@ interface PaywallFooterProps {
   onLegalClick: (url: string | undefined) => void;
 }
 
-export const PaywallFooter: React.FC<PaywallFooterProps> = ({
+export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
   translations,
   legalUrls,
   isProcessing,
@@ -49,4 +49,4 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = ({
       </View>
     </View>
   );
-};
+});

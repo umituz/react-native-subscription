@@ -8,15 +8,15 @@ interface LoadingStateProps {
   message: string;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({ message }) => (
+export const LoadingState: React.FC<LoadingStateProps> = React.memo(({ message }) => (
   <AtomicSpinner size="lg" color="primary" text={message} style={transactionListStyles.stateContainer} />
-);
+));
 
 interface EmptyStateProps {
   message: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
+export const EmptyState: React.FC<EmptyStateProps> = React.memo(({ message }) => {
   const tokens = useAppDesignTokens();
   return (
     <View style={transactionListStyles.stateContainer}>
@@ -26,4 +26,4 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
       </AtomicText>
     </View>
   );
-};
+});

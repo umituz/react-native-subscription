@@ -2,7 +2,7 @@ import type { CreditsConfig } from "../core/Credits";
 import { getAppVersion, validatePlatform } from "../../../utils/appUtils";
 
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
-import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
+import { runTransaction, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
 import { calculateCreditLimit } from "./CreditLimitCalculator";

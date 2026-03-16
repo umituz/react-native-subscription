@@ -8,6 +8,7 @@ import { View, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { CreditRow } from "../../components/details/CreditRow";
+import { isEmptyArray } from "../../../../../shared/utils/arrayUtils";
 
 interface CreditItem {
   id: string;
@@ -23,7 +24,7 @@ interface CreditsListProps {
   remainingLabel?: string;
 }
 
-export const CreditsList: React.FC<CreditsListProps> = ({
+export const CreditsList: React.FC<CreditsListProps> = React.memo(({
   credits,
   title,
   description,
@@ -53,7 +54,7 @@ export const CreditsList: React.FC<CreditsListProps> = ({
     [tokens]
   );
 
-  if (!credits || credits.length === 0) return null;
+  if (!credits || isEmptyArray(credits)) return null;
 
   return (
     <View style={styles.container}>
@@ -86,4 +87,4 @@ export const CreditsList: React.FC<CreditsListProps> = ({
       </View>
     </View>
   );
-};
+});

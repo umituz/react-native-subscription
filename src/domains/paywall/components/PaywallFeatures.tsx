@@ -4,10 +4,11 @@ import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import type { SubscriptionFeature } from "../entities/types";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
+import { isEmptyArray } from "../../../shared/utils/arrayUtils";
 
-export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({ features }) => {
+export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = React.memo(({ features }) => {
   const tokens = useAppDesignTokens();
-  if (!features.length) return null;
+  if (isEmptyArray(features)) return null;
 
   return (
     <View style={[styles.featuresContainer, { backgroundColor: tokens.colors.surfaceSecondary }]}>
@@ -23,4 +24,4 @@ export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({
       ))}
     </View>
   );
-};
+});

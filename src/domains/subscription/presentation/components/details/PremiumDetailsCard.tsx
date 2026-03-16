@@ -9,10 +9,11 @@ import type { PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 import { PremiumDetailsCardHeader } from "./PremiumDetailsCardHeader";
 import { PremiumDetailsCardActions } from "./PremiumDetailsCardActions";
 import { shouldHighlightExpiration } from "../../../../subscription/utils/expirationHelpers";
+import { hasItems } from "../../../../../shared/utils/arrayUtils";
 
 export type { CreditInfo, PremiumDetailsTranslations, PremiumDetailsCardProps } from "./PremiumDetailsCardTypes";
 
-export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
+export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = React.memo(({
   statusType,
   isPremium,
   expirationDate,
@@ -24,7 +25,7 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
   onUpgrade,
 }) => {
   const tokens = useAppDesignTokens();
-  const showCredits = isPremium && credits && credits.length > 0;
+  const showCredits = isPremium && hasItems(credits);
 
   return (
     <View style={[styles.card, { backgroundColor: tokens.colors.surface }]}>
@@ -67,4 +68,4 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = ({
       />
     </View>
   );
-};
+});

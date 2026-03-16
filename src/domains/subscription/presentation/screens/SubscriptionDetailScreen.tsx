@@ -15,7 +15,7 @@ import { SubscriptionDetailScreenProps } from "./SubscriptionDetailScreen.types"
 
 const IS_DEV = typeof __DEV__ !== "undefined" && __DEV__;
 
-export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> = ({ config }) => {
+export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> = React.memo(({ config }) => {
   const tokens = useAppDesignTokens();
   const { showHeader, showCredits, showUpgradePrompt, showExpirationDate } = config.display;
 
@@ -91,7 +91,7 @@ export const SubscriptionDetailScreen: React.FC<SubscriptionDetailScreenProps> =
       </View>
     </ScreenLayout>
   );
-};
+});
 
 /* ─── DEV TEST PANEL ─── Only rendered in __DEV__ ─── */
 

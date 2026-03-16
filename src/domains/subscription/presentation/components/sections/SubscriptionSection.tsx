@@ -11,7 +11,7 @@ import type { SubscriptionSectionConfig, SubscriptionSectionProps } from "./Subs
 
 export type { SubscriptionSectionConfig, SubscriptionSectionProps };
 
-export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
+export const SubscriptionSection: React.FC<SubscriptionSectionProps> = React.memo(({
   config,
   containerStyle,
 }) => {
@@ -42,4 +42,4 @@ export const SubscriptionSection: React.FC<SubscriptionSectionProps> = ({
   }
 
   return <View style={containerStyle}>{content}</View>;
-};
+});

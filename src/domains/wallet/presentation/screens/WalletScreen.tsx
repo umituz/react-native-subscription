@@ -10,7 +10,7 @@ import { BalanceCard } from "../components/BalanceCard";
 import { TransactionList } from "../components/TransactionList";
 import { WalletScreenProps } from "./WalletScreen.types";
 
-export const WalletScreen: React.FC<WalletScreenProps> = ({ translations, onBack, dateFormatter, footer }) => {
+export const WalletScreen: React.FC<WalletScreenProps> = React.memo(({ translations, onBack, dateFormatter, footer }) => {
   const tokens = useAppDesignTokens();
   const navigation = useNavigation();
   const config = getWalletConfig();
@@ -57,7 +57,7 @@ export const WalletScreen: React.FC<WalletScreenProps> = ({ translations, onBack
       />
     </ScreenLayout>
   );
-};
+});
 
 const styles = StyleSheet.create({
   content: { paddingBottom: 24 },

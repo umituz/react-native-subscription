@@ -14,7 +14,7 @@ import type { BalanceCardTranslations, BalanceCardProps } from "./BalanceCard.ty
 
 export type { BalanceCardTranslations };
 
-export const BalanceCard: React.FC<BalanceCardProps> = ({
+export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
   balance,
   translations,
   iconName = "wallet",
@@ -58,7 +58,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

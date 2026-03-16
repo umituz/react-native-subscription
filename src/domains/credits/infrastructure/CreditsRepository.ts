@@ -93,7 +93,7 @@ export class CreditsRepository extends BaseRepository {
     willRenew: boolean,
     expirationDate: string | null,
     periodType: string | null,
-    storeTransactionId?: string | null,
+    _storeTransactionId?: string | null,
   ): Promise<boolean> {
     const db = requireFirestore();
     const creditLimit = calculateCreditLimit(productId, this.config);

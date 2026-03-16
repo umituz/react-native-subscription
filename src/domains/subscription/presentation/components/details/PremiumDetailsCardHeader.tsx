@@ -12,7 +12,7 @@ interface PremiumDetailsCardHeaderProps {
   translations: PremiumDetailsTranslations;
 }
 
-export const PremiumDetailsCardHeader: React.FC<PremiumDetailsCardHeaderProps> = ({ statusType, translations }) => {
+export const PremiumDetailsCardHeader: React.FC<PremiumDetailsCardHeaderProps> = React.memo(({ statusType, translations }) => {
   const tokens = useAppDesignTokens();
 
   return (
@@ -31,4 +31,4 @@ export const PremiumDetailsCardHeader: React.FC<PremiumDetailsCardHeaderProps> =
       />
     </View>
   );
-};
+});

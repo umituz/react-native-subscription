@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { View, StyleSheet } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { calculatePercentage, getProgressColor } from "../../../utils/progressCalculations";
 
 interface CreditRowProps {
   label: string;
@@ -10,20 +11,18 @@ interface CreditRowProps {
   remainingLabel?: string;
 }
 
-export const CreditRow: React.FC<CreditRowProps> = ({
+export const CreditRow: React.FC<CreditRowProps> = React.memo(({
   label,
   current,
   total,
   remainingLabel,
 }) => {
   const tokens = useAppDesignTokens();
-  const percentage = total > 0 ? (current / total) * 100 : 0;
-  
+  const percentage = useMemo(() => calculatePercentage(current, total), [current, total]);
+
   // Progress color based on percentage
   const progressColor = useMemo(() => {
-    if (percentage <= 20) return tokens.colors.error;
-    if (percentage <= 50) return tokens.colors.warning;
-    return tokens.colors.success;
+    return getProgressColor(percentage, tokens.colors);
   }, [percentage, tokens.colors]);
 
   return (
@@ -56,7 +55,7 @@ export const CreditRow: React.FC<CreditRowProps> = ({
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -17,7 +17,7 @@ interface DetailRowProps {
   valueStyle?: TextStyle;
 }
 
-export const DetailRow: React.FC<DetailRowProps> = ({
+export const DetailRow: React.FC<DetailRowProps> = React.memo(({
   label,
   value,
   highlight = false,
@@ -49,7 +49,7 @@ export const DetailRow: React.FC<DetailRowProps> = ({
       </AtomicText>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

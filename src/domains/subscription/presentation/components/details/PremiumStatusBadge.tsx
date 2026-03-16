@@ -13,7 +13,7 @@ import type { SubscriptionStatusType } from "../../../core/SubscriptionConstants
 
 export type { PremiumStatusBadgeProps };
 
-export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
+export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = React.memo(({
   status,
   activeLabel,
   expiredLabel,
@@ -63,4 +63,4 @@ export const PremiumStatusBadge: React.FC<PremiumStatusBadgeProps> = ({
       </AtomicText>
     </View>
   );
-};
+});

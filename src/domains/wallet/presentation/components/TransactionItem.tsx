@@ -7,7 +7,7 @@ import { transactionItemStyles } from "./TransactionItem.styles";
 import type { TransactionItemProps } from "./TransactionItem.types";
 import { defaultDateFormatter, getReasonLabel, getChangePrefix } from "./transactionItemHelpers";
 
-export const TransactionItem: React.FC<TransactionItemProps> = ({
+export const TransactionItem: React.FC<TransactionItemProps> = React.memo(({
   transaction,
   translations,
   dateFormatter = defaultDateFormatter,
@@ -44,4 +44,4 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
       </AtomicText>
     </View>
   );
-};
+});

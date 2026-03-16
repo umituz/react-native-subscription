@@ -12,7 +12,7 @@ interface PremiumDetailsCardActionsProps {
   translations: PremiumDetailsTranslations;
 }
 
-export const PremiumDetailsCardActions: React.FC<PremiumDetailsCardActionsProps> = ({
+export const PremiumDetailsCardActions: React.FC<PremiumDetailsCardActionsProps> = React.memo(({
   isPremium,
   onManageSubscription,
   onUpgrade,
@@ -44,4 +44,4 @@ export const PremiumDetailsCardActions: React.FC<PremiumDetailsCardActionsProps>
       )}
     </View>
   );
-};
+});

@@ -9,7 +9,7 @@ import { SubscriptionHeaderContent } from "./SubscriptionHeaderContent";
 
 const EXPIRING_SOON_THRESHOLD_DAYS = 7;
 
-export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
+export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = React.memo(({
   statusType,
   showExpirationDate,
   expirationDate,
@@ -67,4 +67,4 @@ export const SubscriptionHeader: React.FC<SubscriptionHeaderProps> = ({
       />
     </View>
   );
-};
+});
