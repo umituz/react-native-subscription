@@ -16,6 +16,16 @@ export const PaywallModal: React.FC<PaywallModalProps> = React.memo((props) => {
   const { visible, onClose, translations, packages = [], features = [], legalUrls = {}, bestValueIdentifier, creditAmounts, creditsLabel, heroImage, onPurchase, onRestore, onPurchaseSuccess, onPurchaseError, onAuthRequired, source, isLoadingPackages } = props;
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
+
+  if (__DEV__) {
+    console.log("[PaywallModal] Render:", {
+      visible,
+      packagesCount: packages.length,
+      isLoadingPackages,
+      source,
+    });
+  }
+
   const { selectedPlanId, setSelectedPlanId, isProcessing, handlePurchase, handleRestore, resetState } = usePaywallActions({
     packages,
     onPurchase,

@@ -28,6 +28,17 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
   const isVisible = visible ?? showPaywall;
   const handleClose = onClose ?? closePaywall;
 
+  if (__DEV__) {
+    console.log("[PaywallContainer] Render:", {
+      visibleProp: visible,
+      showPaywall,
+      isVisible,
+      currentSource,
+      hasTranslations: !!translations,
+      hasFeatures: !!features,
+    });
+  }
+
   const purchaseSource = source ?? currentSource ?? "settings";
 
   const { data: packages = [], isLoading: isLoadingPackages } = useSubscriptionPackages();
@@ -48,7 +59,20 @@ export const PaywallContainer: React.FC<PaywallContainerProps> = (props) => {
     return packages.filter((pkg) => creditAmounts[pkg.product.identifier] != null);
   }, [packages, creditAmounts]);
 
-  if (!isVisible) return null;
+  if (__DEV__) {
+    console.log("[PaywallContainer] Before early return:", {
+      isVisible,
+      displayPackagesCount: displayPackages.length,
+      isLoadingPackages,
+    });
+  }
+
+  if (!isVisible) {
+    if (__DEV__) {
+      console.log("[PaywallContainer] Early returning (isVisible = false)");
+    }
+    return null;
+  }
 
   return (
     <PaywallModal
