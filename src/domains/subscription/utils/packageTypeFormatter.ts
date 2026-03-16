@@ -1,4 +1,4 @@
-import type { PackageType } from "../../revenuecat/core/types";
+import type { PackageType } from "../../revenuecat/core/types/RevenueCatTypes";
 
 export function formatPackageTypeForDisplay(packageType: PackageType | string | null | undefined): string {
   if (!packageType) {

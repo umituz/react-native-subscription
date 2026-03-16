@@ -1,12 +1,10 @@
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
-import {
-  fetchPackages,
-  executePurchase,
-  restorePurchases,
-  type RestoreResultInfo,
-} from "./package-operations";
+import { fetchPackages } from "./package-operations/PackageFetcher";
+import { executePurchase } from "./package-operations/PackagePurchaser";
+import { restorePurchases } from "./package-operations/PackageRestorer";
+import type { RestoreResultInfo } from "./package-operations/types";
 
 export class PackageHandler {
   constructor(

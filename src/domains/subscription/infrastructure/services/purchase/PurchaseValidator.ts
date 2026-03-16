@@ -1,5 +1,5 @@
 import type { PurchasesPackage } from "react-native-purchases";
-import { RevenueCatInitializationError } from "../../../../revenuecat/core/errors";
+import { RevenueCatInitializationError } from "../../../../revenuecat/core/errors/RevenueCatError";
 
 export function validatePurchaseReady(isInitialized: boolean): void {
   if (!isInitialized) {

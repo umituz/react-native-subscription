@@ -1,4 +1,4 @@
-import { buildCollectionRef, type CollectionConfig } from "../../../../../shared/infrastructure/firestore";
+import { buildCollectionRef, type CollectionConfig } from "../../../../../shared/infrastructure/firestore/collectionUtils";
 import type { Firestore } from "@umituz/react-native-firebase";
 import type { TransactionRepositoryConfig } from "../../../domain/types/transaction.types";
 

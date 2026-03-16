@@ -17,20 +17,15 @@ import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-desi
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { Image } from "expo-image";
-import type { PurchasesPackage } from "react-native-purchases";
 import { PlanCard } from "./PlanCard";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFooter } from "./PaywallFooter";
 import { usePaywallActions } from "../hooks/usePaywallActions";
 import { PaywallScreenProps } from "./PaywallScreen.types";
-import type { SubscriptionFeature } from "../entities/types";
-
-type PaywallListItem = 
-  | { type: 'HEADER' }
-  | { type: 'FEATURE_HEADER' }
-  | { type: 'FEATURE'; feature: SubscriptionFeature }
-  | { type: 'PLAN_HEADER' }
-  | { type: 'PLAN'; pkg: PurchasesPackage };
+import { 
+  calculatePaywallItemLayout, 
+  type PaywallListItem 
+} from "../utils/paywallLayoutUtils";
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
   const {
@@ -186,24 +181,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
 
   // Performance Optimization: getItemLayout for FlatList
   const getItemLayout = useCallback((_data: any, index: number) => {
-    // Estimated heights for different item types
-    // HEADER: ~300, FEATURE_HEADER: ~60, FEATURE: ~46, PLAN_HEADER: ~60, PLAN: ~80
-    let offset = 0;
-    for (let i = 0; i < index; i++) {
-      const item = flatData[i];
-      if (item.type === 'HEADER') offset += 300;
-      else if (item.type === 'FEATURE_HEADER' || item.type === 'PLAN_HEADER') offset += 60;
-      else if (item.type === 'FEATURE') offset += 46;
-      else if (item.type === 'PLAN') offset += 80;
-    }
-    
-    const currentItem = flatData[index];
-    let length = 80;
-    if (currentItem.type === 'HEADER') length = 300;
-    else if (currentItem.type === 'FEATURE_HEADER' || currentItem.type === 'PLAN_HEADER') length = 60;
-    else if (currentItem.type === 'FEATURE') length = 46;
-    
-    return { length, offset, index };
+    return calculatePaywallItemLayout(flatData, index);
   }, [flatData]);
 
   const keyExtractor = useCallback((item: PaywallListItem, index: number) => {

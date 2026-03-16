@@ -3,14 +3,14 @@ import type { PurchaseResult } from "../../../../../shared/application/ports/IRe
 import {
   RevenueCatPurchaseError,
   RevenueCatNetworkError,
-} from "../../../../revenuecat/core/errors";
+} from "../../../../revenuecat/core/errors/RevenueCatError";
 import {
   isUserCancelledError,
   isNetworkError,
   isInvalidCredentialsError,
   getRawErrorMessage,
   getErrorCode,
-} from "../../../../revenuecat/core/types";
+} from "../../../../revenuecat/core/types/RevenueCatTypes";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useAuthAwarePurchase";
 import { notifyPurchaseCompleted } from "../../utils/PremiumStatusSyncer";
 import { handleRestore } from "../RestoreHandler";
@@ -80,7 +80,7 @@ export function handlePurchaseError(
   }
 
   const errorCode = getErrorCode(error);
-  const errorMessage = getRawErrorMessage(error, "Purchase failed");
+  const errorMessage = getRawErrorMessage(error);
   const enhancedMessage = errorCode
     ? `${errorMessage} (Code: ${errorCode})`
     : errorMessage;

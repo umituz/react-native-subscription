@@ -88,9 +88,9 @@ export function isInvalidCredentialsError(error: unknown): boolean {
   return code === "INVALID_CREDENTIALS_ERROR" || code === "9";
 }
 
-export function getRawErrorMessage(error: unknown, fallback: string): string {
+export function getRawErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
-  return fallback;
+  return "Unknown error";
 }

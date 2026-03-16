@@ -1,7 +1,7 @@
 import Purchases from "react-native-purchases";
 import type { PurchasesOffering, PurchasesPackage, CustomerInfo } from "react-native-purchases";
 import type { IRevenueCatService, InitializeResult, PurchaseResult, RestoreResult } from "../../../../shared/application/ports/IRevenueCatService";
-import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import { initializeSDK } from "../../../revenuecat/infrastructure/services/RevenueCatInitializer";
 import { fetchOfferings } from "./OfferingsFetcher";
 import { handlePurchase } from "./PurchaseHandler";

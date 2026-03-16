@@ -1,5 +1,13 @@
+import { 
+    canExecuteAuthAction as canAuth, 
+    canExecutePurchaseAction as canPurchase 
+} from "../../utils/featureGateUtils";
+
 export const DEFAULT_REQUIRED_CREDITS = 1;
 
+/**
+ * Business rule for executing auth-related actions.
+ */
 export function canExecuteAuthAction(
   isWaitingForAuthCredits: boolean,
   isCreditsLoaded: boolean,
@@ -8,12 +16,19 @@ export function canExecuteAuthAction(
   creditBalance: number,
   requiredCredits: number
 ): boolean {
-  if (!isWaitingForAuthCredits || !isCreditsLoaded || !hasPendingAction) {
-    return false;
-  }
-  return hasSubscription || creditBalance >= requiredCredits;
+  return canAuth(
+    isWaitingForAuthCredits, 
+    isCreditsLoaded, 
+    hasPendingAction, 
+    hasSubscription, 
+    creditBalance, 
+    requiredCredits
+  );
 }
 
+/**
+ * Business rule for executing purchase-related actions.
+ */
 export function canExecutePurchaseAction(
   isWaitingForPurchase: boolean,
   creditBalance: number,
@@ -22,10 +37,12 @@ export function canExecutePurchaseAction(
   prevHasSubscription: boolean,
   hasPendingAction: boolean
 ): boolean {
-  if (!isWaitingForPurchase || !hasPendingAction) {
-    return false;
-  }
-  const creditsIncreased = creditBalance > prevBalance;
-  const subscriptionAcquired = hasSubscription && !prevHasSubscription;
-  return creditsIncreased || subscriptionAcquired;
+  return canPurchase(
+    isWaitingForPurchase,
+    creditBalance,
+    prevBalance,
+    hasSubscription,
+    prevHasSubscription,
+    hasPendingAction
+  );
 }

@@ -1,4 +1,4 @@
-import type { PremiumStatus } from "../core/types";
+import type { PremiumStatus } from "../core/types/PremiumStatus";
 
 export interface SubscriptionStatusResult extends PremiumStatus {
   isLoading: boolean;

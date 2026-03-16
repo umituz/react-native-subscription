@@ -1,4 +1,3 @@
-import Purchases from "react-native-purchases";
 import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
 import type { PremiumStatusChangedEvent, PurchaseCompletedEvent, RenewalDetectedEvent } from "../core/SubscriptionEvents";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
@@ -80,14 +79,6 @@ export class SubscriptionSyncProcessor {
 
   // ─── Internal Processing ──────────────────────────────────────────
 
-  private async getRevenueCatAppUserId(): Promise<string | null> {
-    try {
-      return await Purchases.getAppUserID();
-    } catch {
-      return null;
-    }
-  }
-
   private async getCreditsUserId(revenueCatUserId: string | null | undefined): Promise<string> {
     const trimmed = revenueCatUserId?.trim();
     if (trimmed && trimmed.length > 0 && trimmed !== 'undefined' && trimmed !== 'null') {
@@ -108,8 +99,8 @@ export class SubscriptionSyncProcessor {
     try {
       const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
       revenueCatData.packageType = event.packageType ?? null;
-      const revenueCatAppUserId = await this.getRevenueCatAppUserId();
-      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? event.userId;
+      // Use the event.userId instead of polling the SDK to avoid race conditions during rapid user switching
+      revenueCatData.revenueCatUserId = event.userId;
       const purchaseId = generatePurchaseId(revenueCatData.storeTransactionId, event.productId);
 
       const creditsUserId = await this.getCreditsUserId(event.userId);
@@ -138,8 +129,8 @@ export class SubscriptionSyncProcessor {
     try {
       const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
       revenueCatData.expirationDate = event.newExpirationDate ?? revenueCatData.expirationDate;
-      const revenueCatAppUserId = await this.getRevenueCatAppUserId();
-      revenueCatData.revenueCatUserId = revenueCatAppUserId ?? event.userId;
+      // Use the event.userId instead of polling the SDK to avoid race conditions during rapid user switching
+      revenueCatData.revenueCatUserId = event.userId;
       const purchaseId = generateRenewalId(revenueCatData.storeTransactionId, event.productId, event.newExpirationDate);
 
       const creditsUserId = await this.getCreditsUserId(event.userId);
@@ -164,9 +155,6 @@ export class SubscriptionSyncProcessor {
   }
 
   private async processStatusChange(event: PremiumStatusChangedEvent): Promise<void> {
-    // If a purchase is in progress, skip metadata sync (purchase handler does it)
-    // but still allow recovery to run — the purchase handler's credit initialization
-    // might have failed, and this is the safety net.
     if (this.purchaseInProgress) {
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log("[SubscriptionSyncProcessor] Purchase in progress - running recovery only");
@@ -186,9 +174,6 @@ export class SubscriptionSyncProcessor {
     }
 
     if (!event.isPremium && !event.productId) {
-      // No entitlement and no productId — could be:
-      // 1. Free user who never purchased (no credits doc) → skip
-      // 2. Previously premium user whose entitlement was removed → expire
       const hasDoc = await getCreditsRepository().creditsDocumentExists(creditsUserId);
       if (hasDoc) {
         await this.expireSubscription(creditsUserId);
@@ -203,7 +188,7 @@ export class SubscriptionSyncProcessor {
     await this.syncPremiumStatus(creditsUserId, event);
   }
 
-  // ─── Credit Document Operations (replaces statusChangeHandlers) ───
+  // ─── Credit Document Operations ───
 
   private async expireSubscription(userId: string): Promise<void> {
     await getCreditsRepository().syncExpiredStatus(userId);
@@ -213,8 +198,6 @@ export class SubscriptionSyncProcessor {
   private async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
     const repo = getCreditsRepository();
 
-    // Recovery: if premium user has no credits document, create one.
-    // Handles edge cases like test store, reinstalls, or failed purchase initialization.
     if (event.isPremium) {
       const created = await repo.ensurePremiumCreditsExist(
         userId,

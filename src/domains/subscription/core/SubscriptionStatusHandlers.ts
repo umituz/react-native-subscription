@@ -13,10 +13,6 @@ abstract class BaseStatusHandler {
     }
 
     abstract handle(input: StatusResolverInput): SubscriptionStatusType;
-
-    protected nextOrFallback(input: StatusResolverInput, fallback: SubscriptionStatusType): SubscriptionStatusType {
-        return this.next ? this.next.handle(input) : fallback;
-    }
 }
 
 export class InactiveStatusHandler extends BaseStatusHandler {
@@ -26,7 +22,7 @@ export class InactiveStatusHandler extends BaseStatusHandler {
         if (!input.isPremium || isExpired) {
             return isExpired ? SUBSCRIPTION_STATUS.EXPIRED : SUBSCRIPTION_STATUS.NONE;
         }
-        return this.nextOrFallback(input, SUBSCRIPTION_STATUS.NONE);
+        return this.next ? this.next.handle(input) : SUBSCRIPTION_STATUS.NONE;
     }
 }
 

@@ -1,7 +1,7 @@
 import type { CreditsConfig } from "../../credits/core/Credits";
 import type { UserCreditsDocumentRead } from "../../credits/core/UserCreditsDocument";
 import type { PurchaseSource, PurchaseType } from "../core/SubscriptionConstants";
-import type { SubscriptionMetadata } from "../core/types";
+import type { SubscriptionMetadata } from "../core/types/SubscriptionMetadata";
 
 export interface FirebaseAuthLike {
   currentUser: { uid: string; isAnonymous: boolean } | null;

@@ -1,6 +1,7 @@
 import Purchases, { type PurchasesPackage, type CustomerInfo } from "react-native-purchases";
 import type { PurchaseResult } from "../../../../../shared/application/ports/IRevenueCatService";
-import type { RevenueCatConfig, PackageType } from "../../../../revenuecat/core/types";
+import type { RevenueCatConfig } from "../../../../revenuecat/core/types/RevenueCatConfig";
+import type { PackageType } from "../../../../revenuecat/core/types/RevenueCatTypes";
 import { notifyPurchaseCompleted, syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useAuthAwarePurchase";
 

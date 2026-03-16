@@ -1,71 +1,64 @@
+interface CacheEntry {
+    promise: Promise<boolean>;
+    resolvedUserId: string | null;
+    completed: boolean;
+}
+
 export class InitializationCache {
-    private initPromise: Promise<boolean> | null = null;
-    private cacheKey: string | null = null;
-    private promiseCacheKey: string | null = null;
-    private resolvedUserId: string | null = null;
-    private promiseCompleted = true;
-    private pendingQueue: Map<string, Promise<boolean>> = new Map();
+    private entries: Map<string, CacheEntry> = new Map();
 
     tryAcquireInitialization(cacheKey: string): { shouldInit: boolean; existingPromise: Promise<boolean> | null } {
-        const queuedPromise = this.pendingQueue.get(cacheKey);
-        if (queuedPromise) {
-            return { shouldInit: false, existingPromise: queuedPromise };
-        }
-
-        if (
-            this.initPromise &&
-            this.cacheKey === cacheKey &&
-            this.promiseCompleted &&
-            this.promiseCacheKey === cacheKey
-        ) {
-            return { shouldInit: false, existingPromise: this.initPromise };
+        const entry = this.entries.get(cacheKey);
+        if (entry) {
+            return { shouldInit: false, existingPromise: entry.promise };
         }
 
         return { shouldInit: true, existingPromise: null };
     }
 
     setPromise(promise: Promise<boolean>, cacheKey: string, realUserId: string | null): void {
-        this.promiseCacheKey = cacheKey;
-        this.promiseCompleted = false;
+        const entry: CacheEntry = {
+            promise: null as any, // Placeholder to be assigned immediately
+            resolvedUserId: realUserId,
+            completed: false,
+        };
 
         const chain: Promise<boolean> = promise
             .then((result) => {
-                if (result && this.promiseCacheKey === cacheKey) {
-                    this.cacheKey = cacheKey;
-                    this.resolvedUserId = realUserId;
+                const currentEntry = this.entries.get(cacheKey);
+                if (currentEntry === entry) {
+                    currentEntry.completed = true;
+                    if (!result) {
+                        this.entries.delete(cacheKey);
+                    }
                 }
-                this.promiseCompleted = true;
                 return result;
             })
             .catch((error) => {
-                if (this.promiseCacheKey === cacheKey) {
-                    this.initPromise = null;
-                    this.promiseCacheKey = null;
-                    this.cacheKey = null;
-                    this.resolvedUserId = null;
+                if (this.entries.get(cacheKey) === entry) {
+                    this.entries.delete(cacheKey);
                 }
-                this.promiseCompleted = true;
                 console.error('[InitializationCache] Initialization failed', { cacheKey, error });
                 return false;
-            })
-            .finally(() => {
-                this.pendingQueue.delete(cacheKey);
             });
 
-        this.initPromise = chain;
-        this.pendingQueue.set(cacheKey, chain);
+        entry.promise = chain;
+        this.entries.set(cacheKey, entry);
     }
 
     getCurrentUserId(): string | null {
-        return this.resolvedUserId;
+        // Find the first completed entry. This assumes we usually only have one active at a time,
+        // but it's much safer than shared state variables. 
+        // In reality, SubscriptionManager.reset() clears this map on user switch.
+        for (const entry of this.entries.values()) {
+            if (entry.completed) {
+                return entry.resolvedUserId;
+            }
+        }
+        return null;
     }
 
     reset(): void {
-        this.initPromise = null;
-        this.cacheKey = null;
-        this.promiseCacheKey = null;
-        this.resolvedUserId = null;
-        this.promiseCompleted = true;
-        this.pendingQueue.clear();
+        this.entries.clear();
     }
 }

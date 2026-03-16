@@ -1,6 +1,8 @@
 // Domain Layer - Constants & Types
 export * from "./domains/subscription/core/SubscriptionConstants";
-export type { SubscriptionMetadata, PremiumStatus, CreditInfo } from "./domains/subscription/core/types";
+export type { SubscriptionMetadata } from "./domains/subscription/core/types/SubscriptionMetadata";
+export type { PremiumStatus } from "./domains/subscription/core/types/PremiumStatus";
+export type { CreditInfo } from "./domains/subscription/core/types/CreditInfo";
 export {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
@@ -25,7 +27,8 @@ export {
 export type { Result, Success, Failure } from "./shared/utils/Result";
 
 // Infrastructure Layer (Services & Repositories)
-export { initializeSubscription, type SubscriptionInitConfig, type CreditPackageConfig } from "./domains/subscription/application/initializer";
+export { initializeSubscription } from "./domains/subscription/application/initializer/SubscriptionInitializer";
+export type { SubscriptionInitConfig, CreditPackageConfig } from "./domains/subscription/application/SubscriptionInitializerTypes";
 
 export { CreditsRepository } from "./domains/credits/infrastructure/CreditsRepository";
 export { 

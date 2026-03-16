@@ -5,7 +5,7 @@ import type {
   PackageType,
   Platform
 } from "../../subscription/core/SubscriptionConstants";
-import type { Store, OwnershipType } from "../../revenuecat/core/types";
+import type { Store, OwnershipType } from "../../revenuecat/core/types/RevenueCatTypes";
 
 export type {
   PurchaseSource,

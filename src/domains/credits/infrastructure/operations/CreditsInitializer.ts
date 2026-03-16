@@ -3,7 +3,7 @@ import type { CreditsConfig, CreditsResult } from "../../core/Credits";
 import type { PurchaseSource } from "../../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../../application/CreditsInitializer";
 import { mapCreditsDocumentToEntity } from "../../core/CreditsMapper";
-import type { RevenueCatData } from "../../../revenuecat/core/types";
+import type { RevenueCatData } from "../../../revenuecat/core/types/RevenueCatData";
 import { calculateCreditLimit } from "../../application/CreditLimitCalculator";
 import { PURCHASE_TYPE, type PurchaseType } from "../../../subscription/core/SubscriptionConstants";
 

@@ -1,5 +1,5 @@
 import type { SubscriptionStatusType } from "../../core/SubscriptionConstants";
-import type { CreditInfo } from "../../core/types";
+import type { CreditInfo } from "../../core/types/CreditInfo";
 
 export type { CreditInfo };
 

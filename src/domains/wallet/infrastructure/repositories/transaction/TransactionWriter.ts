@@ -7,7 +7,8 @@ import type {
   TransactionReason,
 } from "../../../domain/types/transaction.types";
 import { TransactionMapper } from "../../../domain/mappers/TransactionMapper";
-import { requireFirestore, mapErrorToResult } from "../../../../../shared/infrastructure/firestore";
+import { requireFirestore } from "../../../../../shared/infrastructure/firestore/collectionUtils";
+import { mapErrorToResult } from "../../../../../shared/infrastructure/firestore/resultUtils";
 import { getCollectionRef } from "./CollectionBuilder";
 
 export async function addTransaction(

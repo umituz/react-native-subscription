@@ -1,6 +1,6 @@
 import type { CustomerInfo } from "react-native-purchases";
 import type { PurchaseSource } from "./SubscriptionConstants";
-import type { SubscriptionMetadata } from "./types";
+import type { SubscriptionMetadata } from "./types/SubscriptionMetadata";
 import type { PackageType } from "../../revenuecat/core/types/RevenueCatTypes";
 
 export interface PurchaseCompletedEvent {

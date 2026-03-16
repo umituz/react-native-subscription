@@ -3,7 +3,7 @@ import type { InitializeResult } from "../../../../shared/application/ports/IRev
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { UserSwitchMutex } from "./UserSwitchMutex";
-import { getPremiumEntitlement } from "../../core/types";
+import { getPremiumEntitlement } from "../../core/types/RevenueCatTypes";
 import { ANONYMOUS_CACHE_KEY, type PeriodType } from "../../../subscription/core/SubscriptionConstants";
 
 declare const __DEV__: boolean;

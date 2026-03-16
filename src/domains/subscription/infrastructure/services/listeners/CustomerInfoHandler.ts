@@ -1,7 +1,9 @@
 import type { CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../../../revenuecat/core/types";
+import type { RevenueCatConfig } from "../../../../revenuecat/core/types/RevenueCatConfig";
 import { syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
-import { detectRenewal, updateRenewalState, type RenewalState } from "../../utils/renewal";
+import { detectRenewal } from "../../utils/renewal/RenewalDetector";
+import { updateRenewalState } from "../../utils/renewal/RenewalStateUpdater";
+import type { RenewalState } from "../../utils/renewal/types";
 
 async function handleRenewal(
   userId: string,

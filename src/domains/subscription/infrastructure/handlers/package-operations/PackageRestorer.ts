@@ -1,5 +1,5 @@
 import type { IRevenueCatService } from "../../../../../shared/application/ports/IRevenueCatService";
-import { getPremiumEntitlement } from "../../../../revenuecat/core/types";
+import { getPremiumEntitlement } from "../../../../revenuecat/core/types/RevenueCatTypes";
 import type { RestoreResultInfo } from "./types";
 
 export async function restorePurchases(

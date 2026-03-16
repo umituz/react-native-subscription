@@ -10,7 +10,7 @@ export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({
   if (!features.length) return null;
 
   return (
-    <View style={[styles.features, { backgroundColor: tokens.colors.surfaceSecondary }]}>
+    <View style={[styles.featuresContainer, { backgroundColor: tokens.colors.surfaceSecondary }]}>
       {features.map((feature) => (
         <View key={`${feature.icon}-${feature.text}`} style={styles.featureRow}>
           <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primary }]}>

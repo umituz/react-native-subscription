@@ -1,5 +1,5 @@
 import { RevenueCatService } from "./RevenueCatService.types";
-import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 
 let revenueCatServiceInstance: RevenueCatService | null = null;
 

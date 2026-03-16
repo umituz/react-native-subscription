@@ -2,14 +2,14 @@ import type { Firestore, DocumentReference } from "@umituz/react-native-firebase
 import { BaseRepository } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { PurchaseSource } from "../core/UserCreditsDocument";
-import type { RevenueCatData } from "../../revenuecat/core/types";
+import type { RevenueCatData } from "../../revenuecat/core/types/RevenueCatData";
 import { deductCreditsOperation } from "../application/DeductCreditsCommand";
 import { refundCreditsOperation } from "../application/RefundCreditsCommand";
 import { PURCHASE_TYPE, type PurchaseType } from "../../subscription/core/SubscriptionConstants";
-import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore";
+import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore/collectionUtils";
 import { fetchCredits, checkHasCredits, documentExists } from "./operations/CreditsFetcher";
 import { syncExpiredStatus, syncPremiumMetadata, createRecoveryCreditsDocument } from "./operations/CreditsWriter";
-import type { SubscriptionMetadata } from "../../subscription/core/types";
+import type { SubscriptionMetadata } from "../../subscription/core/types/SubscriptionMetadata";
 import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
 import { calculateCreditLimit } from "../application/CreditLimitCalculator";
 

@@ -1,5 +1,5 @@
 import type { CustomerInfoUpdateListener } from "react-native-purchases";
-import type { RenewalState } from "../../utils/renewal";
+import type { RenewalState } from "../../utils/renewal/types";
 
 export class ListenerState {
   listener: CustomerInfoUpdateListener | null = null;

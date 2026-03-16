@@ -25,7 +25,7 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = ({
   return (
     <View style={styles.footer}>
       {onRestore && (
-        <TouchableOpacity onPress={onRestore} disabled={isProcessing} style={[styles.restoreButton, isProcessing && styles.restoreButtonDisabled]}>
+        <TouchableOpacity onPress={onRestore} disabled={isProcessing} style={[styles.restoreButton, isProcessing && styles.ctaDisabled]}>
           <AtomicText type="bodySmall" style={[styles.footerLink, { color: tokens.colors.textSecondary }]}>
             {isProcessing ? translations.processingText : translations.restoreButtonText}
           </AtomicText>

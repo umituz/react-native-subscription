@@ -1,5 +1,5 @@
 import Purchases, { type CustomerInfo } from "react-native-purchases";
-import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import { ListenerState } from "./listeners/ListenerState";
 import { processCustomerInfo } from "./listeners/CustomerInfoHandler";
 

@@ -9,7 +9,7 @@ import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionM
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
 import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
-import { getErrorMessage } from "../../../revenuecat/core/errors";
+import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
 
 interface PurchaseMutationResult {
   success: boolean;

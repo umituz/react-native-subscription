@@ -4,14 +4,14 @@ import {
   RevenueCatRestoreError,
   RevenueCatInitializationError,
   RevenueCatNetworkError,
-} from "../../../revenuecat/core/errors";
-import type { RevenueCatConfig } from "../../../revenuecat/core/types";
+} from "../../../revenuecat/core/errors/RevenueCatError";
+import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import {
   getRawErrorMessage,
   getErrorCode,
   isNetworkError,
   isInvalidCredentialsError,
-} from "../../../revenuecat/core/types";
+} from "../../../revenuecat/core/types/RevenueCatTypes";
 import { notifyRestoreCompleted } from "../utils/PremiumStatusSyncer";
 
 interface RestoreHandlerDeps {
@@ -50,7 +50,7 @@ export async function handleRestore(deps: RestoreHandlerDeps, userId: string): P
 
     // Generic error with code
     const errorCode = getErrorCode(error);
-    const errorMessage = getRawErrorMessage(error, "Restore failed");
+    const errorMessage = getRawErrorMessage(error);
     const enhancedMessage = errorCode
       ? `${errorMessage} (Code: ${errorCode})`
       : errorMessage;

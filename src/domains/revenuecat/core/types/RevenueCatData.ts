@@ -1,4 +1,4 @@
-import type { SubscriptionMetadata } from "../../../subscription/core/types";
+import type { SubscriptionMetadata } from "../../../subscription/core/types/SubscriptionMetadata";
 import type { PackageType } from "./RevenueCatTypes";
 
 export interface RevenueCatData extends Omit<SubscriptionMetadata, 'willRenew' | 'productId'> {

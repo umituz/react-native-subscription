@@ -1,5 +1,6 @@
 import type { InitModule } from '@umituz/react-native-design-system/init';
-import { initializeSubscription, type SubscriptionInitConfig } from '../domains/subscription/application/initializer';
+import { initializeSubscription } from "../domains/subscription/application/initializer/SubscriptionInitializer";
+import type { SubscriptionInitConfig } from "../domains/subscription/application/SubscriptionInitializerTypes";
 
 export interface SubscriptionInitModuleConfig extends Omit<SubscriptionInitConfig, 'apiKey'> {
   getApiKey: () => string | undefined;
