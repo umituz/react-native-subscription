@@ -74,14 +74,33 @@ export function usePaywallActions({
       return;
     }
 
+    if (__DEV__) {
+      console.log('[usePaywallActions] Starting purchase', {
+        productId: pkg.product.identifier,
+        hasOnClose: !!onCloseRef.current,
+        hasOnSuccess: !!onPurchaseSuccessRef.current,
+      });
+    }
+
     setIsLocalProcessing(true);
     startPurchase(currentSelectedId, "manual");
 
     try {
       const success = await onPurchaseRef.current(pkg);
+      if (__DEV__) {
+        console.log('[usePaywallActions] Purchase completed', { success });
+      }
       if (success === true) {
+        if (__DEV__) {
+          console.log('[usePaywallActions] Purchase successful, calling onPurchaseSuccess and onClose');
+        }
         onPurchaseSuccessRef.current?.();
+        // Always close paywall on successful purchase
         onCloseRef.current?.();
+      } else {
+        if (__DEV__) {
+          console.warn('[usePaywallActions] Purchase returned false, not closing');
+        }
       }
     } catch (error) {
       onPurchaseErrorRef.current?.(error instanceof Error ? error : new Error(String(error)));
@@ -99,12 +118,29 @@ export function usePaywallActions({
 
     if (isProcessingRef.current) return;
 
+    if (__DEV__) {
+      console.log('[usePaywallActions] Starting restore', {
+        hasOnClose: !!onCloseRef.current,
+        hasOnSuccess: !!onPurchaseSuccessRef.current,
+      });
+    }
+
     setIsLocalProcessing(true);
     try {
       const success = await onRestoreRef.current();
+      if (__DEV__) {
+        console.log('[usePaywallActions] Restore completed', { success });
+      }
       if (success === true) {
+        if (__DEV__) {
+          console.log('[usePaywallActions] Restore successful, calling onPurchaseSuccess and onClose');
+        }
         onPurchaseSuccessRef.current?.();
         onCloseRef.current?.();
+      } else {
+        if (__DEV__) {
+          console.warn('[usePaywallActions] Restore returned false, not closing');
+        }
       }
     } catch (error) {
       onPurchaseErrorRef.current?.(error instanceof Error ? error : new Error(String(error)));
