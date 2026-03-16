@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area"
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
-import { paywallModalStyles as styles } from "./PaywallModal.styles";
+import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFeatures } from "./PaywallFeatures";
 import { PaywallFooter } from "./PaywallFooter";
 import { usePaywallActions } from "../hooks/usePaywallActions";

@@ -13,10 +13,9 @@ import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area"
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import { FeedbackOption } from "./FeedbackOption";
-import type { PaywallFeedbackScreenProps } from "./PaywallFeedbackScreen.types";
-import type { PaywallFeedbackTranslations } from "./PaywallFeedbackModal.types";
+import type { PaywallFeedbackScreenProps, PaywallFeedbackTranslations } from "./PaywallFeedbackScreen.types";
 
-// Re-export translations type for convenience
+// Re-export types for convenience
 export type { PaywallFeedbackTranslations, PaywallFeedbackScreenProps };
 
 const FEEDBACK_OPTION_IDS = [
@@ -192,6 +191,6 @@ const createScreenStyles = (tokens: any, insets: any) => ({
         alignItems: 'center' as const,
     },
     submitText: {
-        fontWeight: 600,
+        fontWeight: "600",
     },
 });

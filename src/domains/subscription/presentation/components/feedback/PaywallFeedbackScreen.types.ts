@@ -1,4 +1,16 @@
-import type { PaywallFeedbackTranslations } from "./PaywallFeedbackModal.types";
+export interface PaywallFeedbackTranslations {
+  title: string;
+  subtitle: string;
+  submit: string;
+  otherPlaceholder: string;
+  reasons: {
+    too_expensive: string;
+    no_need: string;
+    trying_out: string;
+    technical_issues: string;
+    other: string;
+  };
+}
 
 export interface PaywallFeedbackScreenProps {
   onClose: () => void;
