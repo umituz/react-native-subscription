@@ -104,9 +104,6 @@ export class CreditsRepository extends BaseRepository {
       willRenew,
       expirationDate,
       periodType,
-      db,
-      userId,
-      storeTransactionId,
     );
   }
 }

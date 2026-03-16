@@ -3,12 +3,11 @@ import { getAppVersion, validatePlatform } from "../../../utils/appUtils";
 
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
 import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
-import { doc } from "firebase/firestore";
 import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
 import { calculateCreditLimit } from "./CreditLimitCalculator";
 import { generatePurchaseMetadata } from "./PurchaseMetadataGenerator";
-import { PURCHASE_ID_PREFIXES, TRANSACTION_SUBCOLLECTION } from "../core/CreditsConstants";
+import { PURCHASE_ID_PREFIXES } from "../core/CreditsConstants";
 
 export async function initializeCreditsTransaction(
     _db: Firestore,
@@ -61,28 +60,6 @@ export async function initializeCreditsTransaction(
             };
         }
 
-        // User-specific transaction deduplication: prevent the same Apple/Google transaction
-        // from allocating credits multiple times for the same user.
-        // Path: users/{userId}/credits/processedTransactions/{transactionId}
-        if (metadata.storeTransactionId) {
-            const transactionRef = doc(_db, creditsRef.path, TRANSACTION_SUBCOLLECTION, metadata.storeTransactionId);
-            const transactionDoc = await transaction.get(transactionRef);
-            if (transactionDoc.exists()) {
-                if (__DEV__) {
-                    console.log('[CreditsInitializer] 🟡 Store transaction already processed, skipping', {
-                        userId,
-                        storeTransactionId: metadata.storeTransactionId,
-                        existingCredits: existingData.credits,
-                    });
-                }
-                return {
-                    credits: existingData.credits,
-                    alreadyProcessed: true,
-                    finalData: existingData
-                };
-            }
-        }
-
         if (__DEV__) {
             console.log('[CreditsInitializer] 🔵 Processing credit allocation', {
                 userId,
@@ -120,16 +97,6 @@ export async function initializeCreditsTransaction(
         });
 
         transaction.set(creditsRef, creditsData, { merge: true });
-
-        // Register transaction in user-specific subcollection to prevent duplicate processing.
-        if (metadata.storeTransactionId) {
-            const transactionRef = doc(_db, creditsRef.path, TRANSACTION_SUBCOLLECTION, metadata.storeTransactionId);
-            transaction.set(transactionRef, {
-                purchaseId,
-                productId: metadata.productId,
-                createdAt: serverTimestamp(),
-            });
-        }
 
         if (__DEV__) {
             console.log('[CreditsInitializer] 🟢 Credit allocation successful', {

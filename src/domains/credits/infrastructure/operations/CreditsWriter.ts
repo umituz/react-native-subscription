@@ -1,13 +1,12 @@
-import type { DocumentReference, Transaction, Firestore } from "@umituz/react-native-firebase";
+import type { DocumentReference, Transaction } from "@umituz/react-native-firebase";
 import { runTransaction, serverTimestamp } from "@umituz/react-native-firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { getDoc, setDoc } from "firebase/firestore";
 import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionConstants";
 import { resolveSubscriptionStatus } from "../../../subscription/core/SubscriptionStatus";
 import type { SubscriptionMetadata } from "../../../subscription/core/types/SubscriptionMetadata";
 import { toTimestamp } from "../../../../shared/utils/dateConverter";
 import { isPast } from "../../../../utils/dateUtils";
 import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
-import { TRANSACTION_SUBCOLLECTION } from "../../core/CreditsConstants";
 
 // Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction so concurrent
 // initializeCreditsTransaction and deductCreditsOperation no longer see stale
@@ -70,11 +69,8 @@ export async function syncPremiumMetadata(
  * NOTE: This uses non-atomic check-then-act (getDoc + setDoc). In theory, two concurrent
  * calls could both see no document and create duplicates. However, this is extremely rare
  * in practice because: (1) createRecoveryCreditsDocument is called after a successful
- * purchase which is already serialized, (2) the user-specific transaction check (below) prevents
- * duplicates, (3) even if two recovery docs are created, the credits document
- * logic is idempotent (same purchaseId processed twice is no-op). Making this atomic
- * would require a transaction spanning both the credits doc and transaction subcollection,
- * which adds complexity without meaningful benefit given the safeguards above.
+ * purchase which is already serialized, (2) the credits document logic is idempotent
+ * (same purchaseId processed twice is no-op).
  */
 export async function createRecoveryCreditsDocument(
   ref: DocumentReference,
@@ -83,34 +79,9 @@ export async function createRecoveryCreditsDocument(
   willRenew: boolean,
   expirationDate: string | null,
   periodType: string | null,
-  db?: Firestore,
-  userId?: string,
-  storeTransactionId?: string | null,
 ): Promise<boolean> {
   const existingDoc = await getDoc(ref);
   if (existingDoc.exists()) return false;
-
-  // User-specific deduplication: if this transaction was already processed
-  // for this user, skip recovery to prevent duplicate credit allocation.
-  if (db && userId && storeTransactionId) {
-    try {
-      const transactionRef = doc(db, ref.path, TRANSACTION_SUBCOLLECTION, storeTransactionId);
-      const transactionDoc = await getDoc(transactionRef);
-      if (transactionDoc.exists()) {
-        if (__DEV__) {
-          console.log(
-            `[CreditsWriter] Recovery skipped: transaction ${storeTransactionId} already processed for user ${userId}`
-          );
-        }
-        return false;
-      }
-    } catch (error) {
-      // Non-fatal: if transaction check fails, still create recovery doc as safety net
-      if (__DEV__) {
-        console.warn('[CreditsWriter] Transaction check failed during recovery:', error);
-      }
-    }
-  }
 
   const platform = validatePlatform();
   const appVersion = getAppVersion();
