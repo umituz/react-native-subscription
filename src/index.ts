@@ -60,7 +60,6 @@ export type {
   SubscriptionDisplayFlags,
   UpgradePromptConfig,
 } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
-export * from "./domains/paywall/components/PaywallContainer";
 export { PaywallScreen } from "./domains/paywall/components/PaywallScreen";
 export type { PaywallScreenProps } from "./domains/paywall/components/PaywallScreen.types";
 
@@ -86,7 +85,6 @@ export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKey
 
 // Paywall Types
 export type { PaywallTranslations, PaywallLegalUrls } from "./domains/paywall/entities/types";
-export type { PaywallContainerProps } from "./domains/paywall/components/PaywallContainer.types";
 
 // Purchase Loading Overlay
 export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
