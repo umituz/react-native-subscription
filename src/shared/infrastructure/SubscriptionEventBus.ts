@@ -2,7 +2,7 @@ type EventCallback<T = unknown> = (data: T) => void;
 
 class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
-  private listeners: Record<string, EventCallback[]> = {};
+  private listeners: Map<string, Set<EventCallback>> = new Map();
 
   private constructor() {}
 
@@ -14,52 +14,58 @@ class SubscriptionEventBus {
   }
 
   on<T>(event: string, callback: EventCallback<T>): () => void {
-    if (!this.listeners[event]) {
-      this.listeners[event] = [];
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
     }
-    this.listeners[event].push(callback as EventCallback);
+    
+    const eventSet = this.listeners.get(event)!;
+    eventSet.add(callback as EventCallback);
 
     return () => {
-      const listeners = this.listeners[event];
+      const listeners = this.listeners.get(event);
       if (listeners) {
-        this.listeners[event] = listeners.filter(l => l !== callback);
-
-        if (this.listeners[event].length === 0) {
-          delete this.listeners[event];
+        listeners.delete(callback as EventCallback);
+        if (listeners.size === 0) {
+          this.listeners.delete(event);
         }
       }
     };
   }
 
   emit<T>(event: string, data: T): void {
-    if (!this.listeners[event]) return;
+    const listeners = this.listeners.get(event);
+    if (!listeners || listeners.size === 0) return;
 
-    this.listeners[event].forEach(callback => {
-      Promise.resolve().then(() => {
+    // Use microtask for async execution to not block main thread
+    // but keep it fast.
+    listeners.forEach(callback => {
+      queueMicrotask(() => {
         try {
           callback(data);
         } catch (error) {
           console.error('[SubscriptionEventBus] Listener error for event:', event, { error });
         }
-      }).catch(error => {
-        console.error('[SubscriptionEventBus] Async listener error for event:', event, { error });
       });
     });
   }
 
   clear(event?: string): void {
     if (event) {
-      delete this.listeners[event];
+      this.listeners.delete(event);
     } else {
-      this.listeners = {};
+      this.listeners.clear();
     }
   }
 
   getListenerCount(event?: string): number {
     if (event) {
-      return this.listeners[event]?.length ?? 0;
+      return this.listeners.get(event)?.size ?? 0;
     }
-    return Object.values(this.listeners).reduce((total, arr) => total + arr.length, 0);
+    let total = 0;
+    this.listeners.forEach(set => {
+      total += set.size;
+    });
+    return total;
   }
 }
 

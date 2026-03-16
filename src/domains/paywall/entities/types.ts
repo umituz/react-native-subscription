@@ -6,6 +6,8 @@ export interface SubscriptionFeature {
 export interface PaywallTranslations {
     title: string;
     subtitle?: string;
+    featuresTitle?: string;
+    plansTitle?: string;
     purchaseButtonText: string;
     restoreButtonText: string;
     loadingText: string;
