@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
 import { usePurchaseLoadingStore, selectIsPurchasing } from "../../subscription/presentation/stores/purchaseLoadingStore";
 import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
+import { useSubscriptionStatus } from "../../subscription/presentation/useSubscriptionStatus";
+import { useCredits } from "../../credits/presentation/useCredits";
 
 interface UsePaywallActionsParams {
   packages?: PurchasesPackage[];
@@ -28,6 +30,10 @@ export function usePaywallActions({
 
   // Use optimized selector for global purchasing state
   const isGlobalPurchasing = usePurchaseLoadingStore(selectIsPurchasing);
+  
+  // Get premium and credits status for fallback success checks
+  const { refetch: refetchStatus } = useSubscriptionStatus();
+  const { refetch: refetchCredits } = useCredits();
   
   // Combine processing states
   const isProcessing = isLocalProcessing || isGlobalPurchasing;
@@ -90,7 +96,39 @@ export function usePaywallActions({
       if (__DEV__) {
         console.log('[usePaywallActions] Purchase completed', { success });
       }
-      if (success === true) {
+
+      // Check if purchase was successful
+      // We consider it success if:
+      // 1. Handler returns true
+      // 2. Handler returns void (undefined) but user is now premium (fallback for misconfigured handlers)
+      let isActuallySuccessful = success === true;
+      
+      if (success === undefined) {
+        if (__DEV__) {
+          console.log('[usePaywallActions] Handler returned undefined, checking premium status as fallback...');
+        }
+        
+        // Use Promise.all to fetch both in parallel
+        const [statusResult, creditsResult] = await Promise.all([
+          refetchStatus(),
+          refetchCredits()
+        ]);
+        
+        const isSubscriptionPremium = statusResult.data?.isPremium ?? false;
+        const isCreditsPremium = creditsResult.data?.isPremium ?? false;
+        
+        isActuallySuccessful = isSubscriptionPremium || isCreditsPremium;
+        
+        if (__DEV__) {
+          console.log('[usePaywallActions] Fallback check result:', { 
+            isSubscriptionPremium, 
+            isCreditsPremium, 
+            isActuallySuccessful 
+          });
+        }
+      }
+
+      if (isActuallySuccessful) {
         if (__DEV__) {
           console.log('[usePaywallActions] Purchase successful, calling onPurchaseSuccess and onClose');
         }
@@ -99,7 +137,7 @@ export function usePaywallActions({
         onCloseRef.current?.();
       } else {
         if (__DEV__) {
-          console.warn('[usePaywallActions] Purchase returned false, not closing');
+          console.warn('[usePaywallActions] Purchase did not indicate success, not closing');
         }
       }
     } catch (error) {
@@ -108,7 +146,7 @@ export function usePaywallActions({
       setIsLocalProcessing(false);
       endPurchase(currentSelectedId);
     }
-  }, [selectedPlanId, startPurchase, endPurchase]); // Only depend on state that must trigger re-creation if changed
+  }, [selectedPlanId, startPurchase, endPurchase, refetchStatus, refetchCredits]); // Only depend on state that must trigger re-creation if changed
 
   const handleRestore = useCallback(async () => {
     if (!onRestoreRef.current) {
@@ -131,7 +169,19 @@ export function usePaywallActions({
       if (__DEV__) {
         console.log('[usePaywallActions] Restore completed', { success });
       }
-      if (success === true) {
+
+      // Check success with same fallback as purchase
+      let isActuallySuccessful = success === true;
+      
+      if (success === undefined) {
+        const [statusResult, creditsResult] = await Promise.all([
+          refetchStatus(),
+          refetchCredits()
+        ]);
+        isActuallySuccessful = (statusResult.data?.isPremium ?? false) || (creditsResult.data?.isPremium ?? false);
+      }
+
+      if (isActuallySuccessful) {
         if (__DEV__) {
           console.log('[usePaywallActions] Restore successful, calling onPurchaseSuccess and onClose');
         }
@@ -139,7 +189,7 @@ export function usePaywallActions({
         onCloseRef.current?.();
       } else {
         if (__DEV__) {
-          console.warn('[usePaywallActions] Restore returned false, not closing');
+          console.warn('[usePaywallActions] Restore did not indicate success, not closing');
         }
       }
     } catch (error) {
@@ -147,7 +197,7 @@ export function usePaywallActions({
     } finally {
       setIsLocalProcessing(false);
     }
-  }, []); // Truly stable callback
+  }, [refetchStatus, refetchCredits]); // Truly stable callback
 
   const resetState = useCallback(() => {
     setSelectedPlanId(null);
