@@ -3,7 +3,7 @@ import { View, TouchableOpacity } from "react-native";
 import { AtomicText } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import type { PaywallTranslations, PaywallLegalUrls } from "../entities/types";
-import { paywallModalStyles as styles } from "./PaywallModal.styles";
+import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 
 interface PaywallFooterProps {
   translations: PaywallTranslations;

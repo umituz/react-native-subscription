@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import type { SubscriptionFeature } from "../entities/types";
-import { paywallModalStyles as styles } from "./PaywallModal.styles";
+import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 
 export const PaywallFeatures: React.FC<{ features: SubscriptionFeature[] }> = ({ features }) => {
   const tokens = useAppDesignTokens();

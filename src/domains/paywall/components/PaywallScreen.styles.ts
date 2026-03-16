@@ -54,4 +54,43 @@ export const paywallScreenStyles = StyleSheet.create({
   ctaText: {
     fontWeight: "600",
   },
+  features: {
+    padding: 16,
+  },
+  featureRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  featureIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  featureText: {
+    flex: 1,
+  },
+  footer: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  restoreButton: {
+    paddingVertical: 8,
+  },
+  restoreButtonDisabled: {
+    opacity: 0.5,
+  },
+  footerLink: {
+    fontSize: 12,
+  },
+  legalRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 8,
+    gap: 16,
+  },
 });
