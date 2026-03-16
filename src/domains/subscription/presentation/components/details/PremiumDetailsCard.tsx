@@ -41,7 +41,7 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = React.memo(
         </View>
       )}
 
-      {showCredits && (
+      {showCredits && credits && (
         <View style={[styles.creditsSection, { borderTopColor: tokens.colors.border }]}>
           {translations.creditsTitle && (
             <AtomicText type="labelMedium" style={[styles.sectionTitle, { color: tokens.colors.textPrimary }]}>

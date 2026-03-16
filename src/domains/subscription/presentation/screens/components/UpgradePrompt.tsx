@@ -40,7 +40,7 @@ export const UpgradePrompt: React.FC<UpgradePromptProps> = React.memo(({ title, 
         <AtomicText type="headlineSmall" style={[styles.title, { color: tokens.colors.textPrimary }]}>{title}</AtomicText>
         {subtitle && <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>{subtitle}</AtomicText>}
       </View>
-      {hasItems(benefits) && (
+      {hasItems(benefits) && benefits && (
         <View style={styles.benefitsCard}>
           {benefits.map((benefit) => (
             <View key={benefit.text} style={styles.benefitItem}>
