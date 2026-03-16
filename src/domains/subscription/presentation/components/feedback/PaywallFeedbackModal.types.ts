@@ -16,5 +16,6 @@ export interface PaywallFeedbackModalProps {
     translations: PaywallFeedbackTranslations;
     visible: boolean;
     onClose: () => void;
-    onSubmit: (reason: string) => void;
+    onSubmit: (data: { reason: string; otherText?: string }) => void;
 }
+

@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 interface UsePaywallFeedbackProps {
-    onSubmit: (reason: string) => void;
+    onSubmit: (data: { reason: string; otherText?: string }) => void;
     onClose: () => void;
 }
 
@@ -15,12 +15,10 @@ export const usePaywallFeedback = ({
     const handleSubmit = useCallback(() => {
         if (!selectedReason) return;
 
-        const finalReason =
-            selectedReason === "other" && otherText.trim().length > 0
-                ? `other: ${otherText.trim()}`
-                : selectedReason;
-
-        onSubmit(finalReason);
+        onSubmit({
+            reason: selectedReason,
+            otherText: selectedReason === "other" ? otherText.trim() : undefined,
+        });
         setSelectedReason(null);
         setOtherText("");
         onClose();

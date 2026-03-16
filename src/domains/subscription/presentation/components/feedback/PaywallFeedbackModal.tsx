@@ -7,8 +7,9 @@ import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/u
 import { createPaywallFeedbackStyles } from "./paywallFeedbackStyles";
 import { FeedbackOption } from "./FeedbackOption";
 import type { PaywallFeedbackTranslations, PaywallFeedbackModalProps } from "./PaywallFeedbackModal.types";
+import type { PaywallFeedbackScreenProps } from "./PaywallFeedbackScreen.types";
 
-export type { PaywallFeedbackTranslations, PaywallFeedbackModalProps };
+export type { PaywallFeedbackTranslations, PaywallFeedbackModalProps, PaywallFeedbackScreenProps };
 
 const FEEDBACK_OPTION_IDS = [
     "too_expensive",

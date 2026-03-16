@@ -188,6 +188,6 @@ const createScreenStyles = (tokens: any, insets: any) => ({
         alignItems: 'center' as const,
     },
     submitText: {
-        fontWeight: "600",
+        fontWeight: 600,
     },
 });
