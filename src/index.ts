@@ -45,6 +45,8 @@ export { useDeductCredit } from "./domains/credits/presentation/deduct-credit/us
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
 export { usePremium } from "./domains/subscription/presentation/usePremium";
+export { useSubscriptionFlow, useSubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
+export type { SubscriptionFlowState, SubscriptionFlowActions, SubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
 export { useSubscriptionStatus } from "./domains/subscription/presentation/useSubscriptionStatus";
 export * from "./domains/subscription/presentation/useSubscriptionStatus.types";
 export * from "./presentation/hooks/feedback/usePaywallFeedback";
@@ -65,6 +67,8 @@ export type {
 } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
 export { PaywallScreen } from "./domains/paywall/components/PaywallScreen";
 export type { PaywallScreenProps } from "./domains/paywall/components/PaywallScreen.types";
+export { usePaywallOrchestrator } from "./domains/paywall/hooks/usePaywallOrchestrator";
+export type { PaywallOrchestratorOptions } from "./domains/paywall/hooks/usePaywallOrchestrator";
 
 export type {
   CreditType,
@@ -86,8 +90,9 @@ export { toDate, toISOString, toTimestamp, getCurrentISOString } from "./shared/
 // Credits Query Keys
 export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKeys";
 
-// Paywall Types
-export type { PaywallTranslations, PaywallLegalUrls } from "./domains/paywall/entities/types";
+// Paywall Types & Utils
+export type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "./domains/paywall/entities/types";
+export { createPaywallTranslations } from "./domains/paywall/utils/paywallTranslationUtils";
 
 // Purchase Loading Overlay
 export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";

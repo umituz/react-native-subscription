@@ -51,6 +51,12 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
 
+  // Defensive check for translations to prevent crashes
+  if (!translations) {
+    if (__DEV__) console.warn("[PaywallScreen] Translations prop is missing");
+    return null;
+  }
+
   const { 
     selectedPlanId, 
     setSelectedPlanId, 
