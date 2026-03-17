@@ -13,9 +13,9 @@ export interface ManagedSubscriptionFlowProps {
   children: React.ReactNode;
   navigation: any;
   islocalizationReady: boolean;
-  
+
   // Splash Configuration
-  splash: {
+  splash?: {
     appName: string;
     tagline: string;
     duration?: number;
@@ -81,8 +81,8 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
   offline,
 }) => {
   const tokens = useAppDesignTokens();
-  const { isInitialized: isSplashComplete } = useSplashFlow({ 
-    duration: splash.duration || 1500 
+  const { isInitialized: isSplashComplete } = useSplashFlow({
+    duration: splash?.duration || 0,
   });
   
   const [isNavReady, setIsNavReady] = useState(false);
@@ -124,7 +124,7 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
   };
 
   // 1. Loading / Splash State
-  if (!isSplashComplete || !flowState.isInitialized || !islocalizationReady) {
+  if (splash && (!isSplashComplete || !flowState.isInitialized || !islocalizationReady)) {
     return (
       <SplashScreen
         appName={splash.appName}
@@ -132,6 +132,11 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
         colors={tokens.colors}
       />
     );
+  }
+
+  // If no splash and not ready, show minimal loading
+  if (!splash && (!flowState.isInitialized || !islocalizationReady)) {
+    return null;
   }
 
   // 2. Onboarding State
