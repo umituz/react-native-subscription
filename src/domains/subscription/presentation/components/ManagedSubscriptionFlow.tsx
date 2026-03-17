@@ -7,7 +7,7 @@ import { usePaywallOrchestrator } from "../../../paywall/hooks/usePaywallOrchest
 import { PaywallFeedbackScreen } from "../../../subscription/presentation/components/feedback/PaywallFeedbackScreen";
 import { PaywallFeedbackTranslations } from "../../../subscription/presentation/components/feedback/PaywallFeedbackScreen.types";
 import { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../../../paywall/entities/types";
-import { usePaywallFeedbackSubmit } from "../../../../presentation/hooks/feedback/useFeedbackSubmit.ts";
+import { usePaywallFeedbackSubmit } from "../../../../presentation/hooks/feedback/useFeedbackSubmit";
 
 export interface ManagedSubscriptionFlowProps {
   children: React.ReactNode;
