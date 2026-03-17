@@ -68,7 +68,7 @@
     "@typescript-eslint/eslint-plugin": "^8.50.1",
     "@typescript-eslint/parser": "^8.50.1",
     "@umituz/react-native-auth": "*",
-    "@umituz/react-native-design-system": "*",
+    "@umituz/react-native-design-system": "^4.27.0",
     "@umituz/react-native-firebase": "*",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
