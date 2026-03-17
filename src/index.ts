@@ -92,7 +92,11 @@ export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKey
 
 // Paywall Types & Utils
 export type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "./domains/paywall/entities/types";
-export { createPaywallTranslations } from "./domains/paywall/utils/paywallTranslationUtils";
+export { createPaywallTranslations, createFeedbackTranslations } from "./domains/paywall/utils/paywallTranslationUtils";
+
+// Root Flow Components
+export { ManagedSubscriptionFlow } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow";
+export type { ManagedSubscriptionFlowProps } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow";
 
 // Purchase Loading Overlay
 export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
