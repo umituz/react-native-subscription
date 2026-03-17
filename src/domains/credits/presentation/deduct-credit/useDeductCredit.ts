@@ -63,11 +63,13 @@ export const useDeductCredit = ({
       }
       return false;
     } catch (error) {
-      console.error('[useDeductCredit] Unexpected error during credit refund', {
-        amount,
-        userId,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      if (__DEV__) {
+        console.error('[useDeductCredit] Unexpected error during credit refund', {
+          amount,
+          userId,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       return false;
     }
   }, [userId, repository, queryClient]);

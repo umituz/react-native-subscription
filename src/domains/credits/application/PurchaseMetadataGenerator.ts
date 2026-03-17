@@ -8,6 +8,9 @@ import type {
 import { detectPackageType } from "../../../utils/packageTypeDetector";
 import { PACKAGE_TYPE, PURCHASE_TYPE, type Platform } from "../../subscription/core/SubscriptionConstants";
 
+/** Maximum number of purchase history entries to retain per user */
+const MAX_PURCHASE_HISTORY_SIZE = 10;
+
 interface MetadataGeneratorConfig {
   productId: string;
   source: PurchaseSource;
@@ -44,7 +47,7 @@ export function generatePurchaseMetadata(
     timestamp: Timestamp.fromDate(new Date()),
   };
 
-  const purchaseHistory = [...existingData.purchaseHistory, newMetadata].slice(-10);
+  const purchaseHistory = [...existingData.purchaseHistory, newMetadata].slice(-MAX_PURCHASE_HISTORY_SIZE);
 
   return { purchaseType, purchaseHistory };
 }

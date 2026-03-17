@@ -70,7 +70,13 @@ export interface ManagedSubscriptionFlowProps {
  * 
  * Use this to reduce AppNavigator boilerplate to nearly zero.
  */
-export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = ({
+import { 
+  SubscriptionFlowProvider, 
+  useSubscriptionFlowStatus 
+} from "../providers/SubscriptionFlowProvider";
+import { SubscriptionFlowStatus } from "../useSubscriptionFlow";
+
+const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   children,
   navigation,
   islocalizationReady,
@@ -81,6 +87,7 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
   offline,
 }) => {
   const tokens = useAppDesignTokens();
+  const status = useSubscriptionFlowStatus();
   const { isInitialized: isSplashComplete } = useSplashFlow({
     duration: splash?.duration || 0,
   });
@@ -97,7 +104,8 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
 
   const { 
     flowState, 
-    setShowFeedback 
+    setShowFeedback,
+    completeOnboarding 
   } = usePaywallOrchestrator({
     navigation,
     isNavReady,
@@ -123,28 +131,42 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
     }
   };
 
-  // 1. Loading / Splash State
-  if (splash && (!isSplashComplete || !flowState.isInitialized || !islocalizationReady)) {
+  // 1. Loading / Initialization View
+  if (status === SubscriptionFlowStatus.INITIALIZING || !islocalizationReady) {
+    if (__DEV__) {
+       console.log('[ManagedSubscriptionFlow] ⏳ Rendering Initialization state', {
+         status,
+         islocalizationReady,
+         hasSplashConfig: !!splash,
+         isSplashComplete
+       });
+    }
+
+    // Even if no splash config provided, we should show a basic splash to avoid white screen
     return (
       <SplashScreen
-        appName={splash.appName}
-        tagline={splash.tagline}
+        appName={splash?.appName || "Loading..."}
+        tagline={splash?.tagline || "Please wait while we set things up"}
         colors={tokens.colors}
       />
     );
   }
 
-  // If no splash and not ready, show minimal loading
-  if (!splash && (!flowState.isInitialized || !islocalizationReady)) {
-    return null;
+  if (__DEV__) {
+    console.log('[ManagedSubscriptionFlow] 🔄 Rendering Main state', {
+      status,
+      isSplashComplete,
+      islocalizationReady,
+      showFeedback: flowState.showFeedback
+    });
   }
 
-  // 2. Onboarding State
-  if (!flowState.isOnboardingComplete) {
+  // 2. Onboarding View
+  if (status === SubscriptionFlowStatus.ONBOARDING) {
     return (
       <OnboardingScreen
         slides={onboarding.slides}
-        onComplete={flowState.completeOnboarding}
+        onComplete={completeOnboarding}
         showSkipButton={onboarding.showSkipButton ?? true}
         showBackButton={onboarding.showBackButton ?? true}
         showProgressBar={onboarding.showProgressBar ?? true}
@@ -154,7 +176,7 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
     );
   }
 
-  // 3. Main Application State
+  // 3. Application Content + Overlays
   return (
     <>
       {children}
@@ -176,5 +198,13 @@ export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (
         />
       )}
     </>
+  );
+});
+
+export const ManagedSubscriptionFlow: React.FC<ManagedSubscriptionFlowProps> = (props) => {
+  return (
+    <SubscriptionFlowProvider>
+      <ManagedSubscriptionFlowInner {...props} />
+    </SubscriptionFlowProvider>
   );
 };

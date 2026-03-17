@@ -1,7 +1,7 @@
 import { useQuery } from "@umituz/react-native-design-system/tanstack";
 import { useMemo } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
-import { NO_CACHE_QUERY_CONFIG } from "../../../../shared/infrastructure/react-query/queryConfig";
+import { MEDIUM_CACHE_CONFIG } from "../../../../shared/infrastructure/react-query/queryConfig";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
@@ -56,7 +56,7 @@ export function useTransactionHistory({
       return result.data ?? [];
     },
     enabled: hasUser,
-    ...NO_CACHE_QUERY_CONFIG,
+    ...MEDIUM_CACHE_CONFIG,
   });
 
   const transactions = data ?? [];

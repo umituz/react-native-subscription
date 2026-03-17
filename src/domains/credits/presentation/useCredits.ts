@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tan
 import { useCallback, useMemo, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
-import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
+import { SHORT_CACHE_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 import {
   getCreditsRepository,
@@ -13,6 +13,7 @@ import { calculateSafePercentage, canAffordAmount } from "../utils/creditValidat
 import { isAuthenticated } from "../../subscription/utils/authGuards";
 import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
+import type { UserCredits } from "../core/Credits";
 
 const deriveLoadStatus = (
   queryStatus: "pending" | "error" | "success",
@@ -32,7 +33,7 @@ export const useCredits = (): UseCreditsResult => {
   const hasUser = isAuthenticated(userId);
   const queryEnabled = hasUser && isConfigured;
 
-  const { data, status, error, refetch } = useQuery({
+  const { data, status, error, refetch } = useQuery<UserCredits | null, Error>({
     queryKey: creditsQueryKeys.user(userId),
     queryFn: async () => {
       if (!hasUser || !isConfigured) return null;
@@ -47,7 +48,7 @@ export const useCredits = (): UseCreditsResult => {
       return result.data ?? null;
     },
     enabled: queryEnabled,
-    ...NO_CACHE_QUERY_CONFIG,
+    ...SHORT_CACHE_CONFIG,
   });
 
   const queryClient = useQueryClient();

@@ -49,10 +49,12 @@ export async function syncPremiumStatus(
         }
         return { success: true };
     } catch (error) {
-        console.error('[PremiumStatusSyncer] Premium status callback failed:', {
-            userId,
-            error: error instanceof Error ? error.message : String(error)
-        });
+        if (__DEV__) {
+            console.error('[PremiumStatusSyncer] Premium status callback failed:', {
+                userId,
+                error: error instanceof Error ? error.message : String(error)
+            });
+        }
 
         return {
             success: false,
@@ -85,6 +87,8 @@ export async function notifyRestoreCompleted(
     try {
         await config.onRestoreCompleted({ userId, isPremium, customerInfo });
     } catch (error) {
-        console.error('[PremiumStatusSyncer] Restore callback failed:', error instanceof Error ? error.message : String(error));
+        if (__DEV__) {
+            console.error('[PremiumStatusSyncer] Restore callback failed:', error instanceof Error ? error.message : String(error));
+        }
     }
 }

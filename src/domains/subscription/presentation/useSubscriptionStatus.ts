@@ -6,7 +6,7 @@ import { initializationState } from "../infrastructure/state/initializationState
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
 import { isAuthenticated } from "../utils/authGuards";
-import { NO_CACHE_QUERY_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
+import { SHORT_CACHE_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
 import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 
 export const subscriptionStatusQueryKeys = {
@@ -43,7 +43,7 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       return SubscriptionManager.checkPremiumStatus();
     },
     enabled: queryEnabled,
-    ...NO_CACHE_QUERY_CONFIG,
+    ...SHORT_CACHE_CONFIG,
   });
 
   usePreviousUserCleanup(userId, queryClient, subscriptionStatusQueryKeys.user);

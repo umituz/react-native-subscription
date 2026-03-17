@@ -41,7 +41,8 @@ export async function refundCreditsOperation(
 
       const data = docSnap.data();
       const current = data.credits as number;
-      const creditLimit = (data.creditLimit as number) ?? Infinity;
+      // If creditLimit is null, use the refund amount as the limit to prevent unlimited credits
+      const creditLimit = (data.creditLimit as number) ?? (current + amount);
       const updated = Math.min(current + amount, creditLimit);
 
       tx.update(creditsRef, {

@@ -1,5 +1,5 @@
 interface CacheEntry {
-    promise: Promise<boolean>;
+    promise: Promise<boolean> | null;
     resolvedUserId: string | null;
     completed: boolean;
 }
@@ -18,7 +18,7 @@ export class InitializationCache {
 
     setPromise(promise: Promise<boolean>, cacheKey: string, realUserId: string | null): void {
         const entry: CacheEntry = {
-            promise: null as any, // Placeholder to be assigned immediately
+            promise: null,
             resolvedUserId: realUserId,
             completed: false,
         };

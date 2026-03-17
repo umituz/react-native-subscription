@@ -7,7 +7,25 @@
 import { DeviceEventEmitter } from "react-native";
 import { createStore } from "@umituz/react-native-design-system/storage";
 
+export enum SubscriptionFlowStatus {
+  INITIALIZING = "INITIALIZING",
+  ONBOARDING = "ONBOARDING",
+  PAYWALL = "PAYWALL",
+  READY = "READY",
+  POST_ONBOARDING_PAYWALL = "POST_ONBOARDING_PAYWALL",
+}
+
+export enum SyncStatus {
+  IDLE = "IDLE",
+  SYNCING = "SYNCING",
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
+}
+
 export interface SubscriptionFlowState {
+  status: SubscriptionFlowStatus;
+  syncStatus: SyncStatus;
+  syncError: string | null;
   isInitialized: boolean;
   isOnboardingComplete: boolean;
   showPostOnboardingPaywall: boolean;
@@ -25,11 +43,16 @@ export interface SubscriptionFlowActions {
   setShowFeedback: (show: boolean) => void;
   resetFlow: () => Promise<void>;
   setInitialized: (initialized: boolean) => void;
+  setStatus: (status: SubscriptionFlowStatus) => void;
+  setSyncStatus: (status: SyncStatus, error?: string | null) => void;
 }
 
 export type SubscriptionFlowStore = SubscriptionFlowState & SubscriptionFlowActions;
 
 const initialState: SubscriptionFlowState = {
+  status: SubscriptionFlowStatus.INITIALIZING,
+  syncStatus: SyncStatus.IDLE,
+  syncError: null,
   isInitialized: false,
   isOnboardingComplete: false,
   showPostOnboardingPaywall: false,
@@ -41,20 +64,18 @@ const initialState: SubscriptionFlowState = {
 export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, SubscriptionFlowActions>({
   name: "subscription-flow-storage",
   initialState,
-  persist: true,
-  // Only persist onboarding and paywall status, other states are transient
-  partialize: (state) => ({
-    isOnboardingComplete: state.isOnboardingComplete,
-    paywallShown: state.paywallShown,
-  }),
+  persist: false,
   onRehydrate: (state) => {
-    state.setInitialized(true);
+    if (!state.isInitialized) {
+      state.setInitialized(true);
+    }
   },
   actions: (set) => ({
     completeOnboarding: async () => {
       set({
         isOnboardingComplete: true,
         showPostOnboardingPaywall: true,
+        status: SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL,
       });
       DeviceEventEmitter.emit("onboarding-complete");
     },
@@ -62,15 +83,29 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
       set({
         showPostOnboardingPaywall: false,
         paywallShown: true,
+        status: SubscriptionFlowStatus.READY,
       });
     },
     closeFeedback: () => set({ showFeedback: false }),
     setAuthModalOpen: (open: boolean) => set({ isAuthModalOpen: open }),
     setShowFeedback: (show: boolean) => set({ showFeedback: show }),
     markPaywallShown: async () => set({ paywallShown: true }),
-    setInitialized: (initialized: boolean) => set({ isInitialized: initialized }),
+    setInitialized: (initialized: boolean) => set((state) => {
+      if (state.isInitialized === initialized) return state;
+      return { isInitialized: initialized };
+    }),
+    setStatus: (status: SubscriptionFlowStatus) => set((state) => {
+      if (state.status === status) return state;
+      return { status };
+    }),
+    setSyncStatus: (syncStatus: SyncStatus, syncError: string | null = null) => 
+      set({ syncStatus, syncError }),
     resetFlow: async () => {
       set({
+        status: SubscriptionFlowStatus.INITIALIZING,
+        syncStatus: SyncStatus.IDLE,
+        syncError: null,
+        isInitialized: false, // Reset isInitialized to allow fresh initialization
         isOnboardingComplete: false,
         showPostOnboardingPaywall: false,
         showFeedback: false,
@@ -80,22 +115,3 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
     },
   }),
 });
-
-/**
- * Hook for backward compatibility and easier consumption.
- * Provides a unified object structure matching the previous implementation.
- */
-export function useSubscriptionFlow(_userId?: string) {
-  const store = useSubscriptionFlowStore();
-  
-  return {
-    state: store,
-    completeOnboarding: store.completeOnboarding,
-    closePostOnboardingPaywall: store.closePostOnboardingPaywall,
-    closeFeedback: store.closeFeedback,
-    setAuthModalOpen: store.setAuthModalOpen,
-    markPaywallShown: store.markPaywallShown,
-    setShowFeedback: store.setShowFeedback,
-    resetFlow: store.resetFlow,
-  };
-}

@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { usePremium } from "../../subscription/presentation/usePremium";
-import { useSubscriptionFlow } from "../../subscription/presentation/useSubscriptionFlow";
+import { useSubscriptionFlowStore } from "../../subscription/presentation/useSubscriptionFlow";
 import { usePaywallVisibility } from "../../subscription/presentation/usePaywallVisibility";
 import { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities/types";
 
@@ -36,34 +36,39 @@ export function usePaywallOrchestrator({
   bestValueIdentifier = "yearly",
   creditsLabel,
 }: PaywallOrchestratorOptions) {
-  const { 
-    isPremium, 
-    packages, 
-    purchasePackage, 
-    restorePurchase 
+  const {
+    isPremium,
+    packages,
+    purchasePackage,
+    restorePurchase
   } = usePremium();
-  
-  const { 
-    state, 
-    markPaywallShown, 
-    closePostOnboardingPaywall, 
-    setShowFeedback 
-  } = useSubscriptionFlow();
-  
+
+  // Selectors for stable references and fine-grained updates
+  const isOnboardingComplete = useSubscriptionFlowStore((state) => state.isOnboardingComplete);
+  const showPostOnboardingPaywall = useSubscriptionFlowStore((state) => state.showPostOnboardingPaywall);
+  const paywallShown = useSubscriptionFlowStore((state) => state.paywallShown);
+  const isAuthModalOpen = useSubscriptionFlowStore((state) => state.isAuthModalOpen);
+  const showFeedback = useSubscriptionFlowStore((state) => state.showFeedback);
+  const markPaywallShown = useSubscriptionFlowStore((state) => state.markPaywallShown);
+  const closePostOnboardingPaywall = useSubscriptionFlowStore((state) => state.closePostOnboardingPaywall);
+  const setShowFeedback = useSubscriptionFlowStore((state) => state.setShowFeedback);
+
   const { showPaywall, closePaywall } = usePaywallVisibility();
   const purchasedRef = useRef(false);
+  const hasNavigatedRef = useRef(false);
 
   const handleClose = useCallback(async () => {
     await closePostOnboardingPaywall();
     closePaywall();
-    
+
     // Trigger feedback if user declined and isn't premium
     if (!isPremium && !purchasedRef.current) {
       setTimeout(() => setShowFeedback(true), 300);
     }
-    
+
     purchasedRef.current = false;
-    
+    hasNavigatedRef.current = false;
+
     if (navigation.canGoBack()) {
       navigation.goBack();
     }
@@ -73,9 +78,9 @@ export function usePaywallOrchestrator({
     purchasedRef.current = true;
     await markPaywallShown();
     await closePostOnboardingPaywall();
-    
+
     onPurchaseSuccess?.();
-    
+
     if (navigation.canGoBack()) {
       navigation.goBack();
     }
@@ -84,16 +89,24 @@ export function usePaywallOrchestrator({
   useEffect(() => {
     if (!isNavReady || !isLocalizationReady) return;
 
-    const shouldShowPostOnboarding = 
-      state.isOnboardingComplete && 
-      state.showPostOnboardingPaywall && 
-      !state.paywallShown && 
-      !state.isAuthModalOpen && 
+    const shouldShowPostOnboarding =
+      isOnboardingComplete &&
+      showPostOnboardingPaywall &&
+      !paywallShown &&
+      !isAuthModalOpen &&
       !isPremium;
 
-    const shouldShowManual = showPaywall && !isPremium && !state.isAuthModalOpen;
+    const shouldShowManual = showPaywall && !isPremium && !isAuthModalOpen;
 
     if (shouldShowPostOnboarding || shouldShowManual) {
+      // Guard against double navigation in same render cycle
+      if (hasNavigatedRef.current) return;
+      hasNavigatedRef.current = true;
+
+      if (__DEV__) console.log('[usePaywallOrchestrator] 🚀 Navigating to Paywall', { 
+        source: shouldShowPostOnboarding ? "onboarding" : "manual" 
+      });
+
       navigation.navigate("PaywallScreen", {
         onClose: handleClose,
         translations,
@@ -117,14 +130,17 @@ export function usePaywallOrchestrator({
       if (showPaywall) {
         closePaywall();
       }
+    } else {
+      // Reset navigation flag if conditions no longer met
+      hasNavigatedRef.current = false;
     }
   }, [
     isNavReady,
     isLocalizationReady,
-    state.isOnboardingComplete,
-    state.showPostOnboardingPaywall,
-    state.paywallShown,
-    state.isAuthModalOpen,
+    isOnboardingComplete,
+    showPostOnboardingPaywall,
+    paywallShown,
+    isAuthModalOpen,
     isPremium,
     showPaywall,
     navigation,
@@ -144,12 +160,21 @@ export function usePaywallOrchestrator({
     onAuthRequired
   ]);
 
-  return { 
-    isPremium, 
-    packages, 
-    flowState: state,
+  const completeOnboarding = useSubscriptionFlowStore((state) => state.completeOnboarding);
+
+  return {
+    isPremium,
+    packages,
+    flowState: {
+      isOnboardingComplete,
+      showPostOnboardingPaywall,
+      paywallShown,
+      isAuthModalOpen,
+      showFeedback
+    },
     markPaywallShown,
     closePostOnboardingPaywall,
+    completeOnboarding,
     setShowFeedback
   };
 }

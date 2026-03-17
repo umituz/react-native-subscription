@@ -4,6 +4,7 @@ import { getCreditsRepository } from "../../credits/infrastructure/CreditsReposi
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import { useSubscriptionFlowStore, SyncStatus } from "../presentation/useSubscriptionFlow";
 
 /**
  * Central processor for all subscription sync operations.
@@ -26,6 +27,9 @@ export class SubscriptionSyncProcessor {
   // ─── Public API (replaces SubscriptionSyncService) ────────────────
 
   async handlePurchase(event: PurchaseCompletedEvent): Promise<void> {
+    const store = useSubscriptionFlowStore.getState();
+    store.setSyncStatus(SyncStatus.SYNCING);
+    
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log('[SubscriptionSyncProcessor] 🔵 PURCHASE START', {
         userId: event.userId,
@@ -41,6 +45,7 @@ export class SubscriptionSyncProcessor {
         userId: event.userId,
         productId: event.productId,
       });
+      store.setSyncStatus(SyncStatus.SUCCESS);
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log('[SubscriptionSyncProcessor] 🟢 PURCHASE SUCCESS', {
           userId: event.userId,
@@ -49,10 +54,12 @@ export class SubscriptionSyncProcessor {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      store.setSyncStatus(SyncStatus.ERROR, errorMsg);
       console.error('[SubscriptionSyncProcessor] 🔴 PURCHASE FAILED', {
         userId: event.userId,
         productId: event.productId,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMsg,
         timestamp: new Date().toISOString(),
       });
       throw error;
@@ -60,6 +67,9 @@ export class SubscriptionSyncProcessor {
   }
 
   async handleRenewal(event: RenewalDetectedEvent): Promise<void> {
+    const store = useSubscriptionFlowStore.getState();
+    store.setSyncStatus(SyncStatus.SYNCING);
+
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log('[SubscriptionSyncProcessor] 🔵 RENEWAL START', {
         userId: event.userId,
@@ -74,6 +84,7 @@ export class SubscriptionSyncProcessor {
         userId: event.userId,
         productId: event.productId,
       });
+      store.setSyncStatus(SyncStatus.SUCCESS);
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log('[SubscriptionSyncProcessor] 🟢 RENEWAL SUCCESS', {
           userId: event.userId,
@@ -82,10 +93,12 @@ export class SubscriptionSyncProcessor {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      store.setSyncStatus(SyncStatus.ERROR, errorMsg);
       console.error('[SubscriptionSyncProcessor] 🔴 RENEWAL FAILED', {
         userId: event.userId,
         productId: event.productId,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMsg,
         timestamp: new Date().toISOString(),
       });
       throw error;
@@ -118,14 +131,16 @@ export class SubscriptionSyncProcessor {
         });
       }
     } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[SubscriptionSyncProcessor] 🔴 STATUS CHANGE FAILED', {
         userId: event.userId,
         isPremium: event.isPremium,
         productId: event.productId,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMsg,
         timestamp: new Date().toISOString(),
       });
-      throw error;
+      // We don't set global sync error here for passive status changes to avoid UI noise
+      // throw error; 
     }
   }
 

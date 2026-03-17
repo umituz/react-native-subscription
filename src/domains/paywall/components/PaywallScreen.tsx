@@ -51,12 +51,6 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
 
-  // Defensive check for translations to prevent crashes
-  if (!translations) {
-    if (__DEV__) console.warn("[PaywallScreen] Translations prop is missing");
-    return null;
-  }
-
   const { 
     selectedPlanId, 
     setSelectedPlanId, 
@@ -125,6 +119,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   }, [features, packages]);
 
   const renderItem: ListRenderItem<PaywallListItem> = useCallback(({ item }) => {
+    if (!translations) return null;
     switch (item.type) {
       case 'HEADER':
         return (
@@ -163,7 +158,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         return (
           <View key={`feat-${item.feature.text}`} style={[styles.featureRow, { marginHorizontal: 24, marginBottom: 16 }]}>
             <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primary }]}>
-              <AtomicIcon name={item.feature.icon as any} customSize={16} customColor={tokens.colors.onPrimary} />
+              <AtomicIcon name={item.feature.icon} customSize={16} customColor={tokens.colors.onPrimary} />
             </View>
             <AtomicText type="bodyMedium" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
               {item.feature.text}
@@ -200,6 +195,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     }
   }, [heroImage, translations, tokens, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
 
+
   // Performance Optimization: getItemLayout for FlatList
   const getItemLayout = useCallback((_data: any, index: number) => {
     return calculatePaywallItemLayout(flatData, index);
@@ -210,6 +206,12 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     if (item.type === 'PLAN') return `plan-${item.pkg.product.identifier}`;
     return `${item.type}-${index}`;
   }, []);
+
+  // Defensive check for translations moved to the end of hooks
+  if (!translations) {
+    if (__DEV__) console.warn("[PaywallScreen] Translations prop is missing");
+    return null;
+  }
 
   if (isLoadingPackages) {
     return (

@@ -85,20 +85,28 @@ export async function processCustomerInfo(
   );
 
   if (renewalResult.isRenewal) {
+    if (!renewalResult.productId || !renewalResult.newExpirationDate) {
+      console.error('[CustomerInfoHandler] Invalid renewal state: missing productId or expirationDate');
+      return renewalState;
+    }
     await handleRenewal(
       userId,
-      renewalResult.productId!,
-      renewalResult.newExpirationDate!,
+      renewalResult.productId,
+      renewalResult.newExpirationDate,
       customerInfo,
       config.onRenewalDetected
     );
   }
 
   if (renewalResult.isPlanChange) {
+    if (!renewalResult.productId || !renewalResult.previousProductId) {
+      console.error('[CustomerInfoHandler] Invalid plan change state: missing productId(s)');
+      return renewalState;
+    }
     await handlePlanChange(
       userId,
-      renewalResult.productId!,
-      renewalResult.previousProductId!,
+      renewalResult.productId,
+      renewalResult.previousProductId,
       renewalResult.isUpgrade,
       customerInfo,
       config.onPlanChanged
