@@ -1,366 +1,154 @@
-import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
+/**
+ * Subscription Sync Processor (Refactored)
+ *
+ * Facade for subscription sync operations.
+ * Delegates to specialized handlers for better maintainability.
+ *
+ * Architecture:
+ * - SyncProcessorLogger: Centralized logging
+ * - UserIdResolver: User ID resolution
+ * - PurchaseSyncHandler: Purchase processing
+ * - RenewalSyncHandler: Renewal processing
+ * - StatusChangeSyncHandler: Status change processing
+ * - CreditDocumentOperations: Credit doc operations
+ */
+
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "../core/SubscriptionEvents";
-import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
-import { extractRevenueCatData } from "./SubscriptionSyncUtils";
-import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
+import { SyncProcessorLogger } from "./sync/SyncProcessorLogger";
+import { UserIdResolver } from "./sync/UserIdResolver";
+import { PurchaseSyncHandler } from "./sync/PurchaseSyncHandler";
+import { RenewalSyncHandler } from "./sync/RenewalSyncHandler";
+import { StatusChangeSyncHandler } from "./sync/StatusChangeSyncHandler";
+import { CreditDocumentOperations } from "./sync/CreditDocumentOperations";
 
-/**
- * Central processor for all subscription sync operations.
- * Handles purchases, renewals, and status changes with credit allocation.
- *
- * Responsibilities:
- * - Purchase: allocate initial credits via atomic Firestore transaction
- * - Renewal: allocate renewal credits
- * - Status change: sync metadata (no credit allocation) or mark expired
- * - Recovery: create missing credits document for premium users
- */
 export class SubscriptionSyncProcessor {
-  private purchaseInProgress = false;
+  private logger: SyncProcessorLogger;
+  private userIdResolver: UserIdResolver;
+  private purchaseHandler: PurchaseSyncHandler;
+  private renewalHandler: RenewalSyncHandler;
+  private statusChangeHandler: StatusChangeSyncHandler;
+  private creditOps: CreditDocumentOperations;
 
   constructor(
-    private entitlementId: string,
-    private getAnonymousUserId: () => Promise<string>
-  ) {}
+    entitlementId: string,
+    getAnonymousUserId: () => Promise<string>
+  ) {
+    // Initialize dependencies
+    this.logger = new SyncProcessorLogger();
+    this.userIdResolver = new UserIdResolver(getAnonymousUserId);
+    this.creditOps = new CreditDocumentOperations();
+    this.purchaseHandler = new PurchaseSyncHandler(entitlementId, this.userIdResolver);
+    this.renewalHandler = new RenewalSyncHandler(entitlementId, this.userIdResolver);
+    this.statusChangeHandler = new StatusChangeSyncHandler(
+      this.userIdResolver,
+      this.creditOps,
+      this.purchaseHandler
+    );
+  }
 
-  // ─── Public API (replaces SubscriptionSyncService) ────────────────
+  // ─────────────────────────────────────────────────────────────
+  // PUBLIC API
+  // ─────────────────────────────────────────────────────────────
 
   async handlePurchase(event: PurchaseCompletedEvent): Promise<{ success: boolean; error?: string }> {
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-      status: 'syncing',
-      phase: 'purchase',
+    this.logger.emitSyncStatus('purchase', 'syncing', {
       userId: event.userId,
       productId: event.productId,
     });
 
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🔵 PURCHASE START', {
-        userId: event.userId,
-        productId: event.productId,
-        source: event.source,
-        packageType: event.packageType,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    this.logger.logPurchaseStart(event);
+
     try {
-      await this.processPurchase(event);
+      await this.purchaseHandler.processPurchase(event);
+
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PURCHASE_COMPLETED, {
         userId: event.userId,
         productId: event.productId,
       });
-      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-        status: 'success',
-        phase: 'purchase',
+
+      this.logger.emitSyncStatus('purchase', 'success', {
         userId: event.userId,
         productId: event.productId,
       });
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[SubscriptionSyncProcessor] 🟢 PURCHASE SUCCESS', {
-          userId: event.userId,
-          productId: event.productId,
-          timestamp: new Date().toISOString(),
-        });
-      }
+
+      this.logger.logPurchaseSuccess(event.userId, event.productId);
+
       return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-        status: 'error',
-        phase: 'purchase',
+
+      this.logger.emitSyncStatus('purchase', 'error', {
         userId: event.userId,
         productId: event.productId,
         error: errorMsg,
       });
-      console.error('[SubscriptionSyncProcessor] 🔴 PURCHASE FAILED', {
-        userId: event.userId,
-        productId: event.productId,
-        error: errorMsg,
-        timestamp: new Date().toISOString(),
-      });
+
+      this.logger.logPurchaseError(event.userId, event.productId, errorMsg);
+
       return { success: false, error: errorMsg };
     }
   }
 
   async handleRenewal(event: RenewalDetectedEvent): Promise<{ success: boolean; error?: string }> {
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-      status: 'syncing',
-      phase: 'renewal',
+    this.logger.emitSyncStatus('renewal', 'syncing', {
       userId: event.userId,
       productId: event.productId,
     });
 
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🔵 RENEWAL START', {
-        userId: event.userId,
-        productId: event.productId,
-        newExpirationDate: event.newExpirationDate,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    this.logger.logRenewalStart(event);
+
     try {
-      await this.processRenewal(event);
+      await this.renewalHandler.processRenewal(event);
+
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.RENEWAL_DETECTED, {
         userId: event.userId,
         productId: event.productId,
       });
-      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-        status: 'success',
-        phase: 'renewal',
+
+      this.logger.emitSyncStatus('renewal', 'success', {
         userId: event.userId,
         productId: event.productId,
       });
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[SubscriptionSyncProcessor] 🟢 RENEWAL SUCCESS', {
-          userId: event.userId,
-          productId: event.productId,
-          timestamp: new Date().toISOString(),
-        });
-      }
+
+      this.logger.logRenewalSuccess(event.userId, event.productId);
+
       return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
-        status: 'error',
-        phase: 'renewal',
+
+      this.logger.emitSyncStatus('renewal', 'error', {
         userId: event.userId,
         productId: event.productId,
         error: errorMsg,
       });
-      console.error('[SubscriptionSyncProcessor] 🔴 RENEWAL FAILED', {
-        userId: event.userId,
-        productId: event.productId,
-        error: errorMsg,
-        timestamp: new Date().toISOString(),
-      });
+
+      this.logger.logRenewalError(event.userId, event.productId, errorMsg);
+
       return { success: false, error: errorMsg };
     }
   }
 
   async handlePremiumStatusChanged(event: PremiumStatusChangedEvent): Promise<{ success: boolean; error?: string }> {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🔵 STATUS CHANGE START', {
-        userId: event.userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-        willRenew: event.willRenew,
-        expirationDate: event.expirationDate,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    this.logger.logStatusChangeStart(event);
+
     try {
-      await this.processStatusChange(event);
+      await this.statusChangeHandler.processStatusChange(event);
+
       subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED, {
         userId: event.userId,
         isPremium: event.isPremium,
       });
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[SubscriptionSyncProcessor] 🟢 STATUS CHANGE SUCCESS', {
-          userId: event.userId,
-          isPremium: event.isPremium,
-          productId: event.productId,
-          timestamp: new Date().toISOString(),
-        });
-      }
+
+      this.logger.logStatusChangeSuccess(event.userId, event.isPremium, event.productId);
+
       return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[SubscriptionSyncProcessor] 🔴 STATUS CHANGE FAILED', {
-        userId: event.userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-        error: errorMsg,
-        timestamp: new Date().toISOString(),
-      });
-      // We don't emit sync status change here for passive status changes to avoid UI noise
+
+      this.logger.logStatusChangeError(event.userId, event.isPremium, event.productId, errorMsg);
+
       return { success: false, error: errorMsg };
-    }
-  }
-
-  // ─── Internal Processing ──────────────────────────────────────────
-
-  private async getCreditsUserId(revenueCatUserId: string | null | undefined): Promise<string> {
-    const trimmed = revenueCatUserId?.trim();
-    if (trimmed && trimmed.length > 0 && trimmed !== 'undefined' && trimmed !== 'null') {
-      return trimmed;
-    }
-
-    console.warn("[SubscriptionSyncProcessor] revenueCatUserId is empty/null, falling back to anonymousUserId");
-    const anonymousId = await this.getAnonymousUserId();
-    const trimmedAnonymous = anonymousId?.trim();
-    if (!trimmedAnonymous || trimmedAnonymous.length === 0 || trimmedAnonymous === 'undefined' || trimmedAnonymous === 'null') {
-      throw new Error("[SubscriptionSyncProcessor] Cannot resolve credits userId: both revenueCatUserId and anonymousUserId are empty");
-    }
-    return trimmedAnonymous;
-  }
-
-  private async processPurchase(event: PurchaseCompletedEvent): Promise<void> {
-    this.purchaseInProgress = true;
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🔵 processPurchase: Starting credit initialization', {
-        productId: event.productId,
-        source: event.source,
-        packageType: event.packageType,
-        activeEntitlements: Object.keys(event.customerInfo.entitlements.active),
-      });
-    }
-    try {
-      const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
-      revenueCatData.packageType = event.packageType ?? null;
-      // Use the event.userId instead of polling the SDK to avoid race conditions during rapid user switching
-      revenueCatData.revenueCatUserId = event.userId;
-      const purchaseId = generatePurchaseId(revenueCatData.storeTransactionId, event.productId);
-
-      const creditsUserId = await this.getCreditsUserId(event.userId);
-
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[SubscriptionSyncProcessor] 🔵 processPurchase: Calling initializeCredits', {
-          creditsUserId,
-          purchaseId,
-          productId: event.productId,
-          revenueCatUserId: revenueCatData.revenueCatUserId,
-        });
-      }
-
-      const result = await getCreditsRepository().initializeCredits(
-        creditsUserId,
-        purchaseId,
-        event.productId,
-        event.source ?? PURCHASE_SOURCE.SETTINGS,
-        revenueCatData,
-        PURCHASE_TYPE.INITIAL
-      );
-
-      if (!result.success) {
-        throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for purchase: ${result.error?.message ?? 'unknown'}`);
-      }
-
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[SubscriptionSyncProcessor] 🟢 processPurchase: Credits initialized successfully', {
-          creditsUserId,
-          purchaseId,
-          credits: result.data?.credits,
-        });
-      }
-    } finally {
-      this.purchaseInProgress = false;
-    }
-  }
-
-  private async processRenewal(event: RenewalDetectedEvent): Promise<void> {
-    this.purchaseInProgress = true;
-    try {
-      const revenueCatData = extractRevenueCatData(event.customerInfo, this.entitlementId);
-      revenueCatData.expirationDate = event.newExpirationDate ?? revenueCatData.expirationDate;
-      // Use the event.userId instead of polling the SDK to avoid race conditions during rapid user switching
-      revenueCatData.revenueCatUserId = event.userId;
-      const purchaseId = generateRenewalId(revenueCatData.storeTransactionId, event.productId, event.newExpirationDate);
-
-      const creditsUserId = await this.getCreditsUserId(event.userId);
-
-      const result = await getCreditsRepository().initializeCredits(
-        creditsUserId,
-        purchaseId,
-        event.productId,
-        PURCHASE_SOURCE.RENEWAL,
-        revenueCatData,
-        PURCHASE_TYPE.RENEWAL
-      );
-
-      if (!result.success) {
-        throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for renewal: ${result.error?.message ?? 'unknown'}`);
-      }
-
-    } finally {
-      this.purchaseInProgress = false;
-    }
-  }
-
-  private async processStatusChange(event: PremiumStatusChangedEvent): Promise<void> {
-    if (this.purchaseInProgress) {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[SubscriptionSyncProcessor] Purchase in progress - running recovery only");
-      }
-      if (event.isPremium && event.productId) {
-        const creditsUserId = await this.getCreditsUserId(event.userId);
-        await this.syncPremiumStatus(creditsUserId, event);
-      }
-      return;
-    }
-
-    const creditsUserId = await this.getCreditsUserId(event.userId);
-
-    if (!event.isPremium && event.productId) {
-      await this.expireSubscription(creditsUserId);
-      return;
-    }
-
-    if (!event.isPremium && !event.productId) {
-      const hasDoc = await getCreditsRepository().creditsDocumentExists(creditsUserId);
-      if (hasDoc) {
-        await this.expireSubscription(creditsUserId);
-      }
-      return;
-    }
-
-    if (!event.productId) {
-      return;
-    }
-
-    await this.syncPremiumStatus(creditsUserId, event);
-  }
-
-  // ─── Credit Document Operations ───
-
-  private async expireSubscription(userId: string): Promise<void> {
-    await getCreditsRepository().syncExpiredStatus(userId);
-  }
-
-  private async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
-    const repo = getCreditsRepository();
-
-    if (__DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🔵 syncPremiumStatus: Starting', {
-        userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-        willRenew: event.willRenew,
-      });
-    }
-
-    if (event.isPremium) {
-      const created = await repo.ensurePremiumCreditsExist(
-        userId,
-        event.productId!,
-        event.willRenew ?? false,
-        event.expirationDate ?? null,
-        event.periodType ?? null,
-      );
-      if (__DEV__ && created) {
-        console.log('[SubscriptionSyncProcessor] 🟢 Recovery: created missing credits document for premium user', {
-          userId,
-          productId: event.productId,
-        });
-      }
-    }
-
-    await repo.syncPremiumMetadata(userId, {
-      isPremium: event.isPremium,
-      willRenew: event.willRenew ?? false,
-      expirationDate: event.expirationDate ?? null,
-      productId: event.productId!,
-      periodType: event.periodType ?? null,
-      unsubscribeDetectedAt: event.unsubscribeDetectedAt ?? null,
-      billingIssueDetectedAt: event.billingIssueDetectedAt ?? null,
-      store: event.store ?? null,
-      ownershipType: event.ownershipType ?? null,
-    });
-
-    if (__DEV__) {
-      console.log('[SubscriptionSyncProcessor] 🟢 syncPremiumStatus: Completed', {
-        userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-      });
     }
   }
 }

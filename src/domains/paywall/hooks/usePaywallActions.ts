@@ -1,14 +1,19 @@
+/**
+ * Paywall Actions Hook
+ *
+ * Handles purchase and restore operations with premium verification.
+ * Ref management and success checking extracted to utilities.
+ */
+
 import { useState, useCallback, useRef, useMemo } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
-import type { PurchaseSource } from "../../subscription/core/SubscriptionConstants";
-import { useSubscriptionStatus } from "../../subscription/presentation/useSubscriptionStatus";
-import { useCredits } from "../../credits/presentation/useCredits";
+import { usePremiumVerification } from "./usePaywallActions.utils";
 
 interface UsePaywallActionsParams {
   packages?: PurchasesPackage[];
   purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
   restorePurchase: () => Promise<boolean>;
-  source?: PurchaseSource;
+  source?: string; // PurchaseSource
   onPurchaseSuccess?: () => void;
   onPurchaseError?: (error: Error | string) => void;
   onAuthRequired?: () => void;
@@ -30,34 +35,42 @@ export function usePaywallActions({
   const isProcessingRef = useRef(isProcessing);
   isProcessingRef.current = isProcessing;
 
-  const { refetch: refetchStatus } = useSubscriptionStatus();
-  const { refetch: refetchCredits } = useCredits();
+  const { verifyPremiumStatus } = usePremiumVerification();
 
-  const purchasePackageRef = useRef(purchasePackage);
-  const restorePurchaseRef = useRef(restorePurchase);
-  const onPurchaseSuccessRef = useRef(onPurchaseSuccess);
-  const onPurchaseErrorRef = useRef(onPurchaseError);
-  const onAuthRequiredRef = useRef(onAuthRequired);
-  const onCloseRef = useRef(onClose);
-  const packagesRef = useRef(packages);
+  // Ref management
+  const callbacksRef = useRef({
+    purchasePackage,
+    restorePurchase,
+    onPurchaseSuccess,
+    onPurchaseError,
+    onAuthRequired,
+    onClose,
+    packages,
+  });
 
-  purchasePackageRef.current = purchasePackage;
-  restorePurchaseRef.current = restorePurchase;
-  onPurchaseSuccessRef.current = onPurchaseSuccess;
-  onPurchaseErrorRef.current = onPurchaseError;
-  onAuthRequiredRef.current = onAuthRequired;
-  onCloseRef.current = onClose;
-  packagesRef.current = packages;
+  // Update refs
+  callbacksRef.current = {
+    purchasePackage,
+    restorePurchase,
+    onPurchaseSuccess,
+    onPurchaseError,
+    onAuthRequired,
+    onClose,
+    packages,
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // PURCHASE HANDLER
+  // ─────────────────────────────────────────────────────────────
 
   const handlePurchase = useCallback(async () => {
     const currentSelectedId = selectedPlanId;
     if (!currentSelectedId) return;
-
     if (isProcessingRef.current) return;
 
-    const pkg = packagesRef.current.find((p) => p.product.identifier === currentSelectedId);
+    const pkg = callbacksRef.current.packages.find((p) => p.product.identifier === currentSelectedId);
     if (!pkg) {
-      onPurchaseErrorRef.current?.(new Error(`Package not found: ${currentSelectedId}`));
+      callbacksRef.current.onPurchaseError?.(new Error(`Package not found: ${currentSelectedId}`));
       return;
     }
 
@@ -70,7 +83,7 @@ export function usePaywallActions({
     setIsProcessing(true);
 
     try {
-      const success = await purchasePackageRef.current(pkg);
+      const success = await callbacksRef.current.purchasePackage(pkg);
 
       if (__DEV__) {
         console.log('[usePaywallActions] ✅ Purchase completed', { success });
@@ -78,36 +91,17 @@ export function usePaywallActions({
 
       let isActuallySuccessful = success === true;
 
+      // Fallback verification if success is undefined
       if (success === undefined) {
-        if (__DEV__) {
-          console.log('[usePaywallActions] 🔍 Checking premium status as fallback...');
-        }
-
-        const [statusResult, creditsResult] = await Promise.all([
-          refetchStatus(),
-          refetchCredits()
-        ]);
-
-        const isSubscriptionPremium = statusResult.data?.isPremium ?? false;
-        const isCreditsPremium = creditsResult.data?.isPremium ?? false;
-
-        isActuallySuccessful = isSubscriptionPremium || isCreditsPremium;
-
-        if (__DEV__) {
-          console.log('[usePaywallActions] 📊 Fallback check result:', {
-            isSubscriptionPremium,
-            isCreditsPremium,
-            isActuallySuccessful
-          });
-        }
+        isActuallySuccessful = await verifyPremiumStatus();
       }
 
       if (isActuallySuccessful) {
         if (__DEV__) {
           console.log('[usePaywallActions] 🎉 Purchase successful, closing paywall');
         }
-        onPurchaseSuccessRef.current?.();
-        onCloseRef.current?.();
+        callbacksRef.current.onPurchaseSuccess?.();
+        callbacksRef.current.onClose?.();
       } else {
         if (__DEV__) {
           console.warn('[usePaywallActions] ⚠️ Purchase did not indicate success');
@@ -117,11 +111,15 @@ export function usePaywallActions({
       if (__DEV__) {
         console.error('[usePaywallActions] ❌ Purchase error:', error);
       }
-      onPurchaseErrorRef.current?.(error instanceof Error ? error : new Error(String(error)));
+      callbacksRef.current.onPurchaseError?.(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsProcessing(false);
     }
-  }, [selectedPlanId, refetchStatus, refetchCredits]);
+  }, [selectedPlanId, verifyPremiumStatus]);
+
+  // ─────────────────────────────────────────────────────────────
+  // RESTORE HANDLER
+  // ─────────────────────────────────────────────────────────────
 
   const handleRestore = useCallback(async () => {
     if (isProcessingRef.current) return;
@@ -131,8 +129,9 @@ export function usePaywallActions({
     }
 
     setIsProcessing(true);
+
     try {
-      const success = await restorePurchaseRef.current();
+      const success = await callbacksRef.current.restorePurchase();
 
       if (__DEV__) {
         console.log('[usePaywallActions] ✅ Restore completed', { success });
@@ -140,20 +139,17 @@ export function usePaywallActions({
 
       let isActuallySuccessful = success === true;
 
+      // Fallback verification if success is undefined
       if (success === undefined) {
-        const [statusResult, creditsResult] = await Promise.all([
-          refetchStatus(),
-          refetchCredits()
-        ]);
-        isActuallySuccessful = (statusResult.data?.isPremium ?? false) || (creditsResult.data?.isPremium ?? false);
+        isActuallySuccessful = await verifyPremiumStatus();
       }
 
       if (isActuallySuccessful) {
         if (__DEV__) {
           console.log('[usePaywallActions] 🎉 Restore successful, closing paywall');
         }
-        onPurchaseSuccessRef.current?.();
-        onCloseRef.current?.();
+        callbacksRef.current.onPurchaseSuccess?.();
+        callbacksRef.current.onClose?.();
       } else {
         if (__DEV__) {
           console.warn('[usePaywallActions] ⚠️ Restore did not indicate success');
@@ -163,11 +159,15 @@ export function usePaywallActions({
       if (__DEV__) {
         console.error('[usePaywallActions] ❌ Restore error:', error);
       }
-      onPurchaseErrorRef.current?.(error instanceof Error ? error : new Error(String(error)));
+      callbacksRef.current.onPurchaseError?.(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsProcessing(false);
     }
-  }, [refetchStatus, refetchCredits]);
+  }, [verifyPremiumStatus]);
+
+  // ─────────────────────────────────────────────────────────────
+  // RESET
+  // ─────────────────────────────────────────────────────────────
 
   const resetState = useCallback(() => {
     if (__DEV__) {
@@ -176,6 +176,10 @@ export function usePaywallActions({
     setSelectedPlanId(null);
     setIsProcessing(false);
   }, []);
+
+  // ─────────────────────────────────────────────────────────────
+  // RETURN
+  // ─────────────────────────────────────────────────────────────
 
   return useMemo(() => ({
     selectedPlanId,
