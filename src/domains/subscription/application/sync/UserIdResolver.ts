@@ -9,7 +9,7 @@ export class UserIdResolver {
   async resolveCreditsUserId(revenueCatUserId: string | null | undefined): Promise<string> {
     // Try revenueCatUserId first
     const trimmed = revenueCatUserId?.trim();
-    if (this.isValidUserId(trimmed)) {
+    if (trimmed && this.isValidUserId(trimmed)) {
       return trimmed;
     }
 

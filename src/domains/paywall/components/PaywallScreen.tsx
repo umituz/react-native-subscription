@@ -144,7 +144,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         tokens={tokens}
         translations={translations}
         heroImage={heroImage}
-        selectedPlanId={selectedPlanId}
+        selectedPlanId={selectedPlanId ?? undefined}
         bestValueIdentifier={bestValueIdentifier}
         creditAmounts={creditAmounts}
         creditsLabel={creditsLabel}
@@ -154,7 +154,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   }, [tokens, translations, heroImage, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
 
   // Performance Optimization: getItemLayout for FlatList
-  const getItemLayout = useCallback((_data: ArrayLike<PaywallListItem> | null, index: number) => {
+  const getItemLayout = useCallback((_data: ArrayLike<PaywallListItem> | null | undefined, index: number) => {
     return calculatePaywallItemLayout(flatData, index);
   }, [flatData]);
 

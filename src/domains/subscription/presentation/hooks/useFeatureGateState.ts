@@ -69,8 +69,8 @@ export function updateLiveRefs(
   const { creditBalance, hasSubscription, onShowPaywall, requiredCredits, isCreditsLoaded } = params;
 
   state.creditBalanceRef.current = creditBalance;
-  state.hasSubscriptionRef.current = hasSubscription;
+  state.hasSubscriptionRef.current = hasSubscription ?? false;
   state.onShowPaywallRef.current = onShowPaywall;
-  state.requiredCreditsRef.current = requiredCredits;
+  state.requiredCreditsRef.current = requiredCredits ?? 0;
   state.isCreditsLoadedRef.current = isCreditsLoaded;
 }
