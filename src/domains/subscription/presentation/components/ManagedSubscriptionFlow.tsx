@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import type { NavigationProp } from "@react-navigation/native";
 import type { ImageSourcePropType } from "react-native";
 import { SplashScreen, useSplashFlow } from "@umituz/react-native-design-system/molecules";
@@ -99,8 +99,25 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   // Hooks for paywall (called at component level, not inside conditional render)
   const { isPremium, isSyncing, credits } = usePremiumStatus();
   const { packages } = usePremiumPackages();
-  const { purchasePackage, restorePurchase } = usePremiumActions();
+  const { purchasePackage: originalPurchasePackage, restorePurchase } = usePremiumActions();
   const { closePostOnboardingPaywall } = useSubscriptionFlowStore();
+
+  // Track if purchase was successful to avoid showing feedback
+  const [purchaseSuccessful, setPurchaseSuccessful] = useState(false);
+
+  // Wrap purchasePackage to track success
+  const purchasePackage = useCallback(async (pkgId: string) => {
+    const result = await originalPurchasePackage(pkgId);
+    if (result?.success) {
+      setPurchaseSuccessful(true);
+    }
+    return result;
+  }, [originalPurchasePackage]);
+
+  // Wrap onClose to pass purchase status
+  const handleClose = useCallback(() => {
+    closePostOnboardingPaywall({ purchased: purchaseSuccessful });
+  }, [closePostOnboardingPaywall, purchaseSuccessful]);
 
   const [isNavReady, setIsNavReady] = useState(false);
 
@@ -208,7 +225,7 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
         isSyncing={isSyncing}
         onPurchase={purchasePackage}
         onRestore={restorePurchase}
-        onClose={closePostOnboardingPaywall}
+        onClose={handleClose}
       />
     );
   }

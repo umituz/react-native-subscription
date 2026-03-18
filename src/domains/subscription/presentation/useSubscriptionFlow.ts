@@ -36,7 +36,7 @@ export interface SubscriptionFlowState {
 
 export interface SubscriptionFlowActions {
   completeOnboarding: () => Promise<void>;
-  closePostOnboardingPaywall: () => Promise<void>;
+  closePostOnboardingPaywall: (params?: { purchased: boolean }) => Promise<void>;
   closeFeedback: () => void;
   setAuthModalOpen: (open: boolean) => void;
   markPaywallShown: () => Promise<void>;
@@ -79,14 +79,18 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
       });
       subscriptionEventBus.emit(FLOW_EVENTS.ONBOARDING_COMPLETED, { timestamp: Date.now() });
     },
-    closePostOnboardingPaywall: async () => {
+    closePostOnboardingPaywall: async (params?: { purchased: boolean }) => {
+      const purchased = params?.purchased ?? false;
       set({
         showPostOnboardingPaywall: false,
         paywallShown: true,
         status: SubscriptionFlowStatus.READY,
-        showFeedback: true, // Show feedback screen when paywall is closed
+        showFeedback: !purchased, // Only show feedback if NOT purchased
       });
-      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_CLOSED, { timestamp: Date.now() });
+      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_CLOSED, {
+        timestamp: Date.now(),
+        purchased
+      });
     },
     closeFeedback: () => set({ showFeedback: false }),
     setAuthModalOpen: (open: boolean) => set({ isAuthModalOpen: open }),
