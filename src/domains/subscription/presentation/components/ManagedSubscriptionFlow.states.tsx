@@ -4,10 +4,10 @@
  */
 
 import React from "react";
-import type { NavigationProp } from "@react-navigation/native";
+import type { PurchasesPackage } from "react-native-purchases";
+import type { UserCredits } from "../../../credits/core/Credits";
 import { SplashScreen } from "@umituz/react-native-design-system/molecules";
 import { OnboardingScreen } from "@umituz/react-native-design-system/onboarding";
-import { useSubscriptionFlowStore } from "../useSubscriptionFlow";
 import type { ManagedSubscriptionFlowProps } from "./ManagedSubscriptionFlow";
 import { PaywallScreen } from "../../../paywall/components/PaywallScreen";
 import { PaywallFeedbackScreen } from "./feedback/PaywallFeedbackScreen";
@@ -57,12 +57,12 @@ export const OnboardingState: React.FC<OnboardingStateProps> = ({ config, onComp
 
 interface PaywallStateProps {
   config: ManagedSubscriptionFlowProps["paywall"];
-  packages: any[];
+  packages: PurchasesPackage[];
   isPremium: boolean;
-  credits: number | null;
+  credits: UserCredits | null;
   isSyncing: boolean;
-  onPurchase: (pkgId: string) => Promise<any>;
-  onRestore: () => Promise<any>;
+  onPurchase: (pkg: PurchasesPackage) => Promise<boolean>;
+  onRestore: () => Promise<boolean>;
   onClose: (purchased: boolean) => void;
 }
 
@@ -78,9 +78,9 @@ export const PaywallState: React.FC<PaywallStateProps> = ({
 }) => {
   const [purchaseSuccessful, setPurchaseSuccessful] = React.useState(false);
 
-  const handlePurchase = async (pkgId: string) => {
-    const result = await onPurchase(pkgId);
-    if (result?.success) {
+  const handlePurchase = async (pkg: PurchasesPackage) => {
+    const result = await onPurchase(pkg);
+    if (result) {
       setPurchaseSuccessful(true);
     }
     return result;

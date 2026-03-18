@@ -91,7 +91,7 @@ const ManagedSubscriptionFlowInner: React.FC<ManagedSubscriptionFlowProps> = ({
   const status = useSubscriptionFlowStatus();
 
   // Premium hooks
-  const { isPremium, isSyncing, credits, isLoading: isPremiumLoading } = usePremiumStatus();
+  const { isPremium, isSyncing, credits } = usePremiumStatus();
   const { packages } = usePremiumPackages();
   const { purchasePackage, restorePurchase } = usePremiumActions();
 
@@ -108,7 +108,7 @@ const ManagedSubscriptionFlowInner: React.FC<ManagedSubscriptionFlowProps> = ({
   // ========================================================================
 
   useEffect(() => {
-    if (status === SubscriptionFlowStatus.CHECK_PREMIUM && !isPremiumLoading) {
+    if (status === SubscriptionFlowStatus.CHECK_PREMIUM && !isSyncing) {
       const paywallShown = useSubscriptionFlowStore.getState().paywallShown;
 
       if (isPremium) {
@@ -119,7 +119,7 @@ const ManagedSubscriptionFlowInner: React.FC<ManagedSubscriptionFlowProps> = ({
         completePaywall(false);
       }
     }
-  }, [status, isPremium, isPremiumLoading, showPaywall, completePaywall]);
+  }, [status, isPremium, isSyncing, showPaywall, completePaywall]);
 
   useEffect(() => {
     if (status === SubscriptionFlowStatus.READY && showFeedback) {

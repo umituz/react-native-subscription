@@ -75,7 +75,6 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     selectedPlanId,
     setSelectedPlanId,
     isProcessing,
-    handlePurchase,
     handleRestore,
     resetState
   } = usePaywallActions({
@@ -228,14 +227,8 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         translations={translations}
         legalUrls={legalUrls}
         isProcessing={isProcessing}
-        selectedPlanId={selectedPlanId}
-        packages={packages}
-        onPurchase={handlePurchase}
         onRestore={handleRestore}
-        onLegalUrl={handleLegalUrl}
-        insets={insets}
-        tokens={tokens}
-        styles={styles}
+        onLegalClick={handleLegalUrl}
       />
     </View>
   );

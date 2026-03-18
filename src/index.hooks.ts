@@ -35,7 +35,3 @@ export type {
   SettingsFeedbackData,
   UseSettingsFeedbackSubmitOptions,
 } from "./presentation/hooks/feedback/useFeedbackSubmit";
-
-// Paywall Hooks
-export { usePaywallOrchestrator } from "./domains/paywall/hooks/usePaywallOrchestrator";
-export type { PaywallOrchestratorOptions } from "./domains/paywall/hooks/usePaywallOrchestrator";

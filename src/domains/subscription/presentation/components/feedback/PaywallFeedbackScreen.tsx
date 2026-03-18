@@ -38,7 +38,7 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
     canSubmit,
   } = usePaywallFeedback({ onSubmit, onClose });
 
-  const screenStyles = useMemo(() => createScreenStyles(insets), [insets]);
+  const screenStyles = useMemo(() => createScreenStyles(), []);
 
   return (
     <View style={[screenStyles.container, { backgroundColor: 'white', opacity: 1 }]}>
@@ -96,7 +96,7 @@ PaywallFeedbackScreen.displayName = "PaywallFeedbackScreen";
 // STYLES
 // ============================================================================
 
-const createScreenStyles = (insets: { top: number; bottom: number }) => ({
+const createScreenStyles = () => ({
   container: {
     flex: 1,
   },

@@ -4,9 +4,8 @@
  */
 
 import React from "react";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
-import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { FeedbackOption } from "./FeedbackOption";
 import type { PaywallFeedbackTranslations } from "./PaywallFeedbackScreen.types";
 

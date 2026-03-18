@@ -16,7 +16,6 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
   // Selectors for stable references and only what we need
   const isInitialized = useSubscriptionFlowStore((state) => state.isInitialized);
   const isOnboardingComplete = useSubscriptionFlowStore((state) => state.isOnboardingComplete);
-  const showPostOnboardingPaywall = useSubscriptionFlowStore((state) => state.showPostOnboardingPaywall);
   const status = useSubscriptionFlowStore((state) => state.status);
   const setInitialized = useSubscriptionFlowStore((state) => state.setInitialized);
   const setStatus = useSubscriptionFlowStore((state) => state.setStatus);
@@ -49,7 +48,6 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
        console.log('[SubscriptionFlowProvider] 🧠 Calculating Status Transition', {
          isInitialized,
          isOnboardingComplete,
-         showPostOnboardingPaywall,
          currentStatus: status
        });
     }
@@ -60,8 +58,9 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
       nextStatus = SubscriptionFlowStatus.INITIALIZING;
     } else if (!isOnboardingComplete) {
       nextStatus = SubscriptionFlowStatus.ONBOARDING;
-    } else if (showPostOnboardingPaywall) {
-      nextStatus = SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL;
+    } else {
+      // Onboarding complete - let ManagedSubscriptionFlow handle CHECK_PREMIUM
+      nextStatus = SubscriptionFlowStatus.CHECK_PREMIUM;
     }
 
     if (nextStatus !== status) {
@@ -71,7 +70,6 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
   }, [
     isInitialized,
     isOnboardingComplete,
-    showPostOnboardingPaywall,
     status,
     setStatus
   ]);
