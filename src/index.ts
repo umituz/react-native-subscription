@@ -113,6 +113,8 @@ export type {
   SubscriptionDisplayFlags,
   UpgradePromptConfig,
 } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
+export { SubscriptionDetailScreen } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen";
+export type { SubscriptionDetailScreenProps } from "./domains/subscription/presentation/screens/SubscriptionDetailScreen.types";
 export { PaywallScreen } from "./domains/paywall/components/PaywallScreen";
 export type { PaywallScreenProps } from "./domains/paywall/components/PaywallScreen.types";
 export { usePaywallOrchestrator } from "./domains/paywall/hooks/usePaywallOrchestrator";
