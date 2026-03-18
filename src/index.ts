@@ -10,12 +10,6 @@ export {
   ANONYMOUS_CACHE_KEY,
 } from "./domains/subscription/core/SubscriptionConstants";
 
-// Domain Events
-export { SUBSCRIPTION_EVENTS } from "./domains/subscription/core/events/SubscriptionEvents";
-export type { SubscriptionEventType, SyncStatusChangedEvent } from "./domains/subscription/core/events/SubscriptionEvents";
-export type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "./domains/subscription/core/SubscriptionEvents";
-export { FLOW_EVENTS } from "./domains/subscription/core/events/FlowEvents";
-export type { FlowEventType, OnboardingCompletedEvent, PaywallShownEvent, PaywallClosedEvent } from "./domains/subscription/core/events/FlowEvents";
 export type {
   UserTierType,
   SubscriptionStatusType,
@@ -25,15 +19,24 @@ export type {
   PurchaseSource,
   PurchaseType,
 } from "./domains/subscription/core/SubscriptionConstants";
-export type { SubscriptionMetadata } from "./domains/subscription/core/types/SubscriptionMetadata";
-export type { PremiumStatus as PremiumStatusMetadata } from "./domains/subscription/core/types/PremiumStatus";
-export type { CreditInfo } from "./domains/subscription/core/types/CreditInfo";
+
 export {
   createDefaultSubscriptionStatus,
   isSubscriptionValid,
   resolveSubscriptionStatus,
 } from "./domains/subscription/core/SubscriptionStatus";
 export type { SubscriptionStatus, StatusResolverInput } from "./domains/subscription/core/SubscriptionStatus";
+
+// Domain Events
+export { SUBSCRIPTION_EVENTS } from "./domains/subscription/core/events/SubscriptionEvents";
+export type { SubscriptionEventType, SyncStatusChangedEvent } from "./domains/subscription/core/events/SubscriptionEvents";
+export type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "./domains/subscription/core/SubscriptionEvents";
+export { FLOW_EVENTS } from "./domains/subscription/core/events/FlowEvents";
+export type { FlowEventType, OnboardingCompletedEvent, PaywallShownEvent, PaywallClosedEvent } from "./domains/subscription/core/events/FlowEvents";
+
+export type { SubscriptionMetadata } from "./domains/subscription/core/types/SubscriptionMetadata";
+export type { PremiumStatus as PremiumStatusMetadata } from "./domains/subscription/core/types/PremiumStatus";
+export type { CreditInfo } from "./domains/subscription/core/types/CreditInfo";
 
 // Application Layer - Ports
 export type { ISubscriptionRepository } from "./shared/application/ports/ISubscriptionRepository";
@@ -51,17 +54,19 @@ export {
 } from "./shared/utils/Result";
 export type { Result, Success, Failure } from "./shared/utils/Result";
 
-// Infrastructure Layer (Services & Repositories)
+// Infrastructure Layer
 export { initializeSubscription } from "./domains/subscription/application/initializer/SubscriptionInitializer";
 export type { SubscriptionInitConfig, CreditPackageConfig } from "./domains/subscription/application/SubscriptionInitializerTypes";
 
 export { CreditsRepository } from "./domains/credits/infrastructure/CreditsRepository";
-export { 
-  configureCreditsRepository, 
-  getCreditsRepository, 
-  getCreditsConfig, 
-  isCreditsRepositoryConfigured 
+export {
+  configureCreditsRepository,
+  getCreditsRepository,
+  getCreditsConfig,
+  isCreditsRepositoryConfigured
 } from "./domains/credits/infrastructure/CreditsRepositoryManager";
+
+export { CreditLimitService, calculateCreditLimit } from "./domains/credits/domain/services/CreditLimitService";
 
 // Presentation Layer - Hooks
 export { useAuthAwarePurchase } from "./domains/subscription/presentation/useAuthAwarePurchase";
@@ -69,11 +74,9 @@ export { useCredits } from "./domains/credits/presentation/useCredits";
 export { useDeductCredit } from "./domains/credits/presentation/deduct-credit/useDeductCredit";
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
-export { usePremium } from "./domains/subscription/presentation/usePremium";
 export { usePremiumStatus } from "./domains/subscription/presentation/usePremiumStatus";
 export { usePremiumPackages } from "./domains/subscription/presentation/usePremiumPackages";
 export { usePremiumActions } from "./domains/subscription/presentation/usePremiumActions";
-export type { UsePremiumResult } from "./domains/subscription/presentation/usePremium.types";
 export type { PremiumStatus } from "./domains/subscription/presentation/usePremiumStatus";
 export type { PremiumPackages } from "./domains/subscription/presentation/usePremiumPackages";
 export type { PremiumActions } from "./domains/subscription/presentation/usePremiumActions";
@@ -81,7 +84,6 @@ export { useSubscriptionFlowStore } from "./domains/subscription/presentation/us
 export type { SubscriptionFlowState, SubscriptionFlowActions, SubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
 export { useSubscriptionStatus } from "./domains/subscription/presentation/useSubscriptionStatus";
 export type { SubscriptionStatusResult } from "./domains/subscription/presentation/useSubscriptionStatus.types";
-export { useSyncStatusListener } from "./domains/subscription/presentation/useSyncStatusListener";
 export { usePaywallFeedback } from "./presentation/hooks/feedback/usePaywallFeedback";
 export {
   usePaywallFeedbackSubmit,
@@ -123,7 +125,6 @@ export type {
   CreditsResult,
   DeductCreditsResult,
 } from "./domains/credits/core/Credits";
-export { CreditLimitService, calculateCreditLimit } from "./domains/credits/domain/services/CreditLimitService";
 
 // Utils
 export {
@@ -169,9 +170,6 @@ export {
 } from "./utils/dateUtils.math";
 export { getAppVersion, validatePlatform } from "./utils/appUtils";
 export { toDate, toISOString, toTimestamp, getCurrentISOString } from "./shared/utils/dateConverter";
-
-// Credits Query Keys
-export { creditsQueryKeys } from "./domains/credits/presentation/creditsQueryKeys";
 
 // Paywall Types & Utils
 export type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "./domains/paywall/entities/types";

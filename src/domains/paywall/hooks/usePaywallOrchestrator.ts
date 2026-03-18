@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import type { NavigationProp } from "@react-navigation/native";
 import type { ImageSourcePropType } from "react-native";
-import { usePremium } from "../../subscription/presentation/usePremium";
+import { usePremiumStatus } from "../../subscription/presentation/usePremiumStatus";
+import { usePremiumPackages } from "../../subscription/presentation/usePremiumPackages";
+import { usePremiumActions } from "../../subscription/presentation/usePremiumActions";
 import { useSubscriptionFlowStore } from "../../subscription/presentation/useSubscriptionFlow";
 import { usePaywallVisibility } from "../../subscription/presentation/usePaywallVisibility";
 import { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities/types";
@@ -18,11 +20,6 @@ export interface PaywallOrchestratorOptions {
   creditsLabel?: string;
 }
 
-/**
- * High-level orchestrator for Paywall navigation.
- * Handles automatic triggers (post-onboarding) and manual triggers (showPaywall state).
- * Centralizes handlers for success, close, and feedback triggers.
- */
 export function usePaywallOrchestrator({
   navigation,
   translations,
@@ -34,17 +31,10 @@ export function usePaywallOrchestrator({
   bestValueIdentifier = "yearly",
   creditsLabel,
 }: PaywallOrchestratorOptions) {
-  // Get all premium data and actions from usePremium
-  const {
-    isPremium,
-    packages,
-    credits,
-    isSyncing,
-    purchasePackage,
-    restorePurchase,
-  } = usePremium();
+  const { isPremium, isSyncing, credits } = usePremiumStatus();
+  const { packages } = usePremiumPackages();
+  const { purchasePackage, restorePurchase } = usePremiumActions();
 
-  // Selectors for stable references and fine-grained updates
   const isOnboardingComplete = useSubscriptionFlowStore((state) => state.isOnboardingComplete);
   const showPostOnboardingPaywall = useSubscriptionFlowStore((state) => state.showPostOnboardingPaywall);
   const paywallShown = useSubscriptionFlowStore((state) => state.paywallShown);
@@ -74,7 +64,6 @@ export function usePaywallOrchestrator({
     const shouldShowManual = showPaywall && !isPremium && !isAuthModalOpen;
 
     if (shouldShowPostOnboarding || shouldShowManual) {
-      // Guard against double navigation in same render cycle
       if (hasNavigatedRef.current) return;
       hasNavigatedRef.current = true;
 
@@ -84,7 +73,6 @@ export function usePaywallOrchestrator({
       });
 
       navigation.navigate("PaywallScreen", {
-        // UI Props
         translations,
         legalUrls,
         features,
@@ -92,14 +80,10 @@ export function usePaywallOrchestrator({
         creditsLabel,
         heroImage,
         source: shouldShowPostOnboarding ? "onboarding" : "manual",
-
-        // Data Props
         packages,
         isPremium,
         credits,
         isSyncing,
-
-        // Action Props
         onPurchase: purchasePackage,
         onRestore: restorePurchase,
         onClose: handleClose,
@@ -108,12 +92,11 @@ export function usePaywallOrchestrator({
       if (shouldShowPostOnboarding) {
         markPaywallShown();
       }
-      
+
       if (showPaywall) {
         closePaywall();
       }
     } else {
-      // Reset navigation flag if conditions no longer met
       hasNavigatedRef.current = false;
     }
   }, [

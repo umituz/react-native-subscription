@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { PurchasesPackage } from "react-native-purchases";
-import { usePremium } from "./usePremium";
+import { usePremiumActions } from "./usePremiumActions";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
 import { authPurchaseStateManager } from "../infrastructure/utils/authPurchaseState";
 import { requireAuthentication } from "./utils/authCheckUtils";
@@ -27,14 +27,10 @@ interface UseAuthAwarePurchaseResult {
   executeSavedPurchase: () => Promise<boolean>;
 }
 
-/**
- * Hook for purchase operations that handle authentication.
- * Automatically saves pending purchases and shows auth modal when needed.
- */
 export const useAuthAwarePurchase = (
   params?: UseAuthAwarePurchaseParams
 ): UseAuthAwarePurchaseResult => {
-  const { purchasePackage, restorePurchase } = usePremium();
+  const { purchasePackage, restorePurchase } = usePremiumActions();
   const isExecutingSavedRef = useRef(false);
 
   const executeSavedPurchase = useCallback(async (): Promise<boolean> => {
@@ -55,7 +51,6 @@ export const useAuthAwarePurchase = (
     }
   }, [purchasePackage]);
 
-  // Auto-execute saved purchase when user authenticates
   useEffect(() => {
     const authProvider = authPurchaseStateManager.getProvider();
     const hasUser = authProvider && authProvider.hasFirebaseUser();
@@ -74,12 +69,10 @@ export const useAuthAwarePurchase = (
       const authProvider = authPurchaseStateManager.getProvider();
 
       if (!requireAuthentication(authProvider)) {
-        // User not authenticated, purchase saved and auth modal shown
         authPurchaseStateManager.savePurchase(pkg, source || params?.source || "settings");
         return false;
       }
 
-      // User authenticated, proceed with purchase
       const result = await purchasePackage(pkg);
       return result;
     },
