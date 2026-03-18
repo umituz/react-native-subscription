@@ -42,6 +42,7 @@ export const useSubscriptionPackages = () => {
     prevUserIdRef.current = userId;
 
     if (prevUserId !== userId) {
+      // Clean up previous user's cache to prevent data leakage
       if (prevUserId) {
         queryClient.cancelQueries({
           queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, prevUserId],
@@ -58,9 +59,8 @@ export const useSubscriptionPackages = () => {
         });
       }
 
-      queryClient.invalidateQueries({
-        queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, userId ?? "anonymous"],
-      });
+      // No need to invalidate - removeQueries already cleared cache
+      // Query will refetch automatically on mount if needed
     }
   }, [userId, queryClient]);
 

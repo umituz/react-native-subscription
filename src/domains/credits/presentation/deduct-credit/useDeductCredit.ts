@@ -4,7 +4,6 @@ import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryMana
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
 import type { DeductCreditsResult } from "../../core/Credits";
 import { createDeductCreditMutationConfig, type MutationContext } from "./mutationConfig";
-import { creditsQueryKeys } from "../creditsQueryKeys";
 
 export const useDeductCredit = ({
   userId,
@@ -57,8 +56,7 @@ export const useDeductCredit = ({
     try {
       const result = await repository.refundCredit(userId, amount);
       if (result.success) {
-        // Invalidate queries to refresh credit balance
-        await queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+        // CREDITS_UPDATED event emitted by RefundCreditsCommand handles invalidation
         return true;
       }
       return false;

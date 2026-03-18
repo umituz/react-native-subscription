@@ -5,8 +5,6 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
-import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
 
@@ -31,12 +29,13 @@ export const useRestorePurchase = () => {
     },
     onSuccess: (result) => {
       if (result.success) {
-        // Invalidate caches after successful restore
+        // Invalidate packages cache (no event listener for packages)
         queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
-        if (userId) {
-          queryClient.invalidateQueries({ queryKey: subscriptionStatusQueryKeys.user(userId) });
-          queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
-        }
+
+        // Credits and subscription status are invalidated via events:
+        // - CREDITS_UPDATED event (SubscriptionSyncProcessor → useCredits)
+        // - PREMIUM_STATUS_CHANGED event (SubscriptionSyncProcessor → useSubscriptionStatus)
+        // No manual invalidation needed here
 
         if (result.productId) {
           showSuccess("Restore Successful", "Your subscription has been restored!");

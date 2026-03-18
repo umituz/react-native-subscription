@@ -72,11 +72,7 @@ export function createDeductCreditMutationConfig(
         );
       }
     },
-    onSuccess: (_data: unknown, _cost: number, context: MutationContext | undefined) => {
-      const targetUserId = context?.capturedUserId ?? userId;
-      if (targetUserId) {
-        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(targetUserId) });
-      }
-    },
+    // onSuccess removed - CREDITS_UPDATED event handles invalidation
+    // Optimistic update already applied, event will trigger refetch if needed
   };
 }

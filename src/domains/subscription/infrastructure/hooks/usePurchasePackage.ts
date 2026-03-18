@@ -6,8 +6,6 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
-import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
 import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
 
@@ -40,12 +38,13 @@ export const usePurchasePackage = () => {
       if (result.success) {
         showSuccess("Purchase Successful", "Your subscription is now active!");
 
-        // Invalidate caches after successful purchase
+        // Invalidate packages cache (no event listener for packages)
         queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
-        if (userId) {
-          queryClient.invalidateQueries({ queryKey: subscriptionStatusQueryKeys.user(userId) });
-          queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
-        }
+
+        // Credits and subscription status are invalidated via events:
+        // - CREDITS_UPDATED event (SubscriptionSyncProcessor → useCredits)
+        // - PREMIUM_STATUS_CHANGED event (SubscriptionSyncProcessor → useSubscriptionStatus)
+        // No manual invalidation needed here
       } else {
         showError("Purchase Failed", "Unable to complete purchase. Please try again.");
       }
