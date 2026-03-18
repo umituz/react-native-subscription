@@ -13,6 +13,7 @@ import { PaywallFeedbackScreen } from "../../../subscription/presentation/compon
 import { PaywallFeedbackTranslations } from "../../../subscription/presentation/components/feedback/PaywallFeedbackScreen.types";
 import { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../../../paywall/entities/types";
 import { usePaywallFeedbackSubmit } from "../../../../presentation/hooks/feedback/useFeedbackSubmit";
+import { PaywallScreen } from "../../../paywall/components/PaywallScreen";
 
 export interface ManagedSubscriptionFlowProps {
   children: React.ReactNode;
@@ -187,10 +188,7 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
       });
     }
 
-    const { PaywallScreen } = require("../../../paywall/components/PaywallScreen");
-
-    // We need to wrap this in a component that can use hooks
-    const InlinePaywall = () => {
+    const PostOnboardingPaywall = () => {
       const { isPremium, isSyncing, credits } = usePremiumStatus();
       const { packages } = usePremiumPackages();
       const { purchasePackage, restorePurchase } = usePremiumActions();
@@ -216,7 +214,7 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
       );
     };
 
-    return <InlinePaywall />;
+    return <PostOnboardingPaywall />;
   }
 
   // 3. Application Content + Overlays
