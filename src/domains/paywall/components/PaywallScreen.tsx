@@ -2,6 +2,7 @@
  * Paywall Screen Component
  *
  * Full-screen paywall with optimized FlatList for performance and modern design.
+ * This is a "dumb" component that receives all data and actions via props.
  */
 
 import React, { useCallback, useEffect, useMemo } from "react";
@@ -13,6 +14,7 @@ import {
   ListRenderItem,
   StatusBar,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
@@ -29,8 +31,17 @@ import {
 import { hasItems } from "../../../shared/utils/arrayUtils";
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
+  const navigation = useNavigation();
+
+  if (__DEV__) {
+    console.log('[PaywallScreen] 📱 Rendering PaywallScreen', {
+      hasPackages: !!props.packages?.length,
+      packagesCount: props.packages?.length || 0,
+      isPremium: props.isPremium,
+    });
+  }
+
   const {
-    onClose,
     translations,
     packages = [],
     features = [],
@@ -39,39 +50,49 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     creditAmounts,
     creditsLabel,
     heroImage,
+    isSyncing,
     onPurchase,
     onRestore,
+    onClose,
     onPurchaseSuccess,
     onPurchaseError,
     onAuthRequired,
     source,
-    isLoadingPackages
   } = props;
 
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
 
-  const { 
-    selectedPlanId, 
-    setSelectedPlanId, 
-    isProcessing, 
-    handlePurchase, 
+  const handleClose = useCallback(() => {
+    if (__DEV__) console.log('[PaywallScreen] 🔙 Closing paywall');
+    if (onClose) {
+      onClose();
+    } else if (navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  }, [onClose, navigation]);
+
+  const {
+    selectedPlanId,
+    setSelectedPlanId,
+    isProcessing,
+    handlePurchase,
     handleRestore,
     resetState
   } = usePaywallActions({
     packages,
-    onPurchase,
-    onRestore,
+    purchasePackage: onPurchase,
+    restorePurchase: onRestore,
     source,
     onPurchaseSuccess,
     onPurchaseError,
     onAuthRequired,
-    onClose
+    onClose: handleClose
   });
 
-  // Reset state when screen is closed to avoid lockups
   useEffect(() => {
     return () => {
+      if (__DEV__) console.log('[PaywallScreen] 🧹 Cleanup: resetting state');
       resetState();
     };
   }, [resetState]);
@@ -197,7 +218,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
 
 
   // Performance Optimization: getItemLayout for FlatList
-  const getItemLayout = useCallback((_data: any, index: number) => {
+  const getItemLayout = useCallback((_data: ArrayLike<PaywallListItem> | null, index: number) => {
     return calculatePaywallItemLayout(flatData, index);
   }, [flatData]);
 
@@ -213,7 +234,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     return null;
   }
 
-  if (isLoadingPackages) {
+  if (isSyncing) {
     return (
       <View style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary, paddingTop: insets.top }]}>
         <View style={styles.loadingContainer}>
@@ -235,7 +256,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         zIndex: 10,
       }}>
         <TouchableOpacity
-          onPress={onClose}
+          onPress={handleClose}
           style={[styles.closeBtn, { backgroundColor: tokens.colors.surfaceSecondary }]}
           activeOpacity={0.7}
         >
@@ -291,7 +312,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
           translations={translations}
           legalUrls={legalUrls}
           isProcessing={isProcessing}
-          onRestore={onRestore ? handleRestore : undefined}
+          onRestore={handleRestore}
           onLegalClick={handleLegalUrl}
         />
       </View>

@@ -4,7 +4,6 @@ import { getCreditsRepository } from "../../credits/infrastructure/CreditsReposi
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
-import { useSubscriptionFlowStore, SyncStatus } from "../presentation/useSubscriptionFlow";
 
 /**
  * Central processor for all subscription sync operations.
@@ -26,10 +25,14 @@ export class SubscriptionSyncProcessor {
 
   // ─── Public API (replaces SubscriptionSyncService) ────────────────
 
-  async handlePurchase(event: PurchaseCompletedEvent): Promise<void> {
-    const store = useSubscriptionFlowStore.getState();
-    store.setSyncStatus(SyncStatus.SYNCING);
-    
+  async handlePurchase(event: PurchaseCompletedEvent): Promise<{ success: boolean; error?: string }> {
+    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+      status: 'syncing',
+      phase: 'purchase',
+      userId: event.userId,
+      productId: event.productId,
+    });
+
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log('[SubscriptionSyncProcessor] 🔵 PURCHASE START', {
         userId: event.userId,
@@ -45,7 +48,12 @@ export class SubscriptionSyncProcessor {
         userId: event.userId,
         productId: event.productId,
       });
-      store.setSyncStatus(SyncStatus.SUCCESS);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+        status: 'success',
+        phase: 'purchase',
+        userId: event.userId,
+        productId: event.productId,
+      });
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log('[SubscriptionSyncProcessor] 🟢 PURCHASE SUCCESS', {
           userId: event.userId,
@@ -53,22 +61,33 @@ export class SubscriptionSyncProcessor {
           timestamp: new Date().toISOString(),
         });
       }
+      return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      store.setSyncStatus(SyncStatus.ERROR, errorMsg);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+        status: 'error',
+        phase: 'purchase',
+        userId: event.userId,
+        productId: event.productId,
+        error: errorMsg,
+      });
       console.error('[SubscriptionSyncProcessor] 🔴 PURCHASE FAILED', {
         userId: event.userId,
         productId: event.productId,
         error: errorMsg,
         timestamp: new Date().toISOString(),
       });
-      throw error;
+      return { success: false, error: errorMsg };
     }
   }
 
-  async handleRenewal(event: RenewalDetectedEvent): Promise<void> {
-    const store = useSubscriptionFlowStore.getState();
-    store.setSyncStatus(SyncStatus.SYNCING);
+  async handleRenewal(event: RenewalDetectedEvent): Promise<{ success: boolean; error?: string }> {
+    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+      status: 'syncing',
+      phase: 'renewal',
+      userId: event.userId,
+      productId: event.productId,
+    });
 
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log('[SubscriptionSyncProcessor] 🔵 RENEWAL START', {
@@ -84,7 +103,12 @@ export class SubscriptionSyncProcessor {
         userId: event.userId,
         productId: event.productId,
       });
-      store.setSyncStatus(SyncStatus.SUCCESS);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+        status: 'success',
+        phase: 'renewal',
+        userId: event.userId,
+        productId: event.productId,
+      });
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log('[SubscriptionSyncProcessor] 🟢 RENEWAL SUCCESS', {
           userId: event.userId,
@@ -92,20 +116,27 @@ export class SubscriptionSyncProcessor {
           timestamp: new Date().toISOString(),
         });
       }
+      return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      store.setSyncStatus(SyncStatus.ERROR, errorMsg);
+      subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.SYNC_STATUS_CHANGED, {
+        status: 'error',
+        phase: 'renewal',
+        userId: event.userId,
+        productId: event.productId,
+        error: errorMsg,
+      });
       console.error('[SubscriptionSyncProcessor] 🔴 RENEWAL FAILED', {
         userId: event.userId,
         productId: event.productId,
         error: errorMsg,
         timestamp: new Date().toISOString(),
       });
-      throw error;
+      return { success: false, error: errorMsg };
     }
   }
 
-  async handlePremiumStatusChanged(event: PremiumStatusChangedEvent): Promise<void> {
+  async handlePremiumStatusChanged(event: PremiumStatusChangedEvent): Promise<{ success: boolean; error?: string }> {
     if (typeof __DEV__ !== "undefined" && __DEV__) {
       console.log('[SubscriptionSyncProcessor] 🔵 STATUS CHANGE START', {
         userId: event.userId,
@@ -130,6 +161,7 @@ export class SubscriptionSyncProcessor {
           timestamp: new Date().toISOString(),
         });
       }
+      return { success: true };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[SubscriptionSyncProcessor] 🔴 STATUS CHANGE FAILED', {
@@ -139,8 +171,8 @@ export class SubscriptionSyncProcessor {
         error: errorMsg,
         timestamp: new Date().toISOString(),
       });
-      // We don't set global sync error here for passive status changes to avoid UI noise
-      // throw error; 
+      // We don't emit sync status change here for passive status changes to avoid UI noise
+      return { success: false, error: errorMsg };
     }
   }
 

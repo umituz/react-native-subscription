@@ -23,9 +23,15 @@ export function configureServices(config: SubscriptionInitConfig, apiKey: string
       apiKey,
       entitlementIdentifier: entitlementId,
       consumableProductIdentifiers: [creditPackages.identifierPattern],
-      onPurchaseCompleted: (event) => syncProcessor.handlePurchase(event),
-      onRenewalDetected: (event) => syncProcessor.handleRenewal(event),
-      onPremiumStatusChanged: (event) => syncProcessor.handlePremiumStatusChanged(event),
+      onPurchaseCompleted: async (event) => {
+        await syncProcessor.handlePurchase(event);
+      },
+      onRenewalDetected: async (event) => {
+        await syncProcessor.handleRenewal(event);
+      },
+      onPremiumStatusChanged: async (event) => {
+        await syncProcessor.handlePremiumStatusChanged(event);
+      },
       onCreditsUpdated,
     },
     apiKey,

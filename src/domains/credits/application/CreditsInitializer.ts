@@ -5,7 +5,7 @@ import type { InitializeCreditsMetadata, InitializationResult } from "../../subs
 import { runTransaction, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
-import { calculateCreditLimit } from "./CreditLimitCalculator";
+import { CreditLimitService } from "../domain/services/CreditLimitService";
 import { generatePurchaseMetadata } from "./PurchaseMetadataGenerator";
 import { PURCHASE_ID_PREFIXES } from "../core/CreditsConstants";
 
@@ -69,7 +69,8 @@ export async function initializeCreditsTransaction(
             });
         }
 
-        const creditLimit = calculateCreditLimit(metadata.productId, config);
+        const creditLimitService = new CreditLimitService(config);
+        const creditLimit = creditLimitService.calculate(metadata.productId);
         const { purchaseHistory } = generatePurchaseMetadata({
             productId: metadata.productId,
             source: metadata.source,

@@ -1,91 +1,38 @@
-import { useCallback, useMemo } from 'react';
-import type { PurchasesPackage } from 'react-native-purchases';
-import { useCredits } from '../../credits/presentation/useCredits';
-import { useSubscriptionStatus } from './useSubscriptionStatus';
-import {
-  useSubscriptionPackages,
-  usePurchasePackage,
-  useRestorePurchase,
-} from '../infrastructure/hooks/useSubscriptionQueries';
-import { usePaywallVisibility } from './usePaywallVisibility';
-import { isPremiumSyncPending } from '../utils/syncStatus';
+import { useMemo } from 'react';
+import { usePremiumStatus } from './usePremiumStatus';
+import { usePremiumPackages } from './usePremiumPackages';
+import { usePremiumActions } from './usePremiumActions';
 import { UsePremiumResult } from './usePremium.types';
 
-const EMPTY_PACKAGES: PurchasesPackage[] = [];
-
+/**
+ * Facade hook that combines status, packages, and actions.
+ *
+ * This provides backward compatibility with existing code while allowing
+ * components to use more focused hooks (usePremiumStatus, usePremiumPackages, usePremiumActions)
+ * for better performance and testability.
+ *
+ * For new components, consider using the focused hooks:
+ * - usePremiumStatus() - when you only need premium status
+ * - usePremiumPackages() - when you only need package data
+ * - usePremiumActions() - when you only need actions
+ *
+ * This facade re-renders when ANY of the sub-hooks change, whereas focused hooks
+ * only re-render when their specific data changes.
+ */
 export const usePremium = (): UsePremiumResult => {
-
-  const { isPremium: subscriptionActive, isLoading: statusLoading } = useSubscriptionStatus();
-  const { credits, isLoading: creditsLoading } = useCredits();
-
-  const { data: packages = EMPTY_PACKAGES, isLoading: packagesLoading } = useSubscriptionPackages();
-
-  const purchaseMutation = usePurchasePackage();
-  const restoreMutation = useRestorePurchase();
-
-  const { showPaywall, setShowPaywall, closePaywall, openPaywall } = usePaywallVisibility();
-
-  const isPremium = subscriptionActive || (credits?.isPremium ?? false);
-  const isSyncing = isPremiumSyncPending({
-    statusLoading,
-    creditsLoading,
-    subscriptionActive,
-    credits,
-  });
-
-  const handlePurchase = useCallback(
-    async (pkg: PurchasesPackage): Promise<boolean> => {
-      try {
-        const result = await purchaseMutation.mutateAsync(pkg);
-        return result.success;
-      } catch {
-        return false;
-      }
-    },
-    [purchaseMutation],
-  );
-
-  const handleRestore = useCallback(async (): Promise<boolean> => {
-    try {
-      const result = await restoreMutation.mutateAsync();
-      return result.success;
-    } catch {
-      return false;
-    }
-  }, [restoreMutation]);
+  const status = usePremiumStatus();
+  const packages = usePremiumPackages();
+  const actions = usePremiumActions();
 
   return useMemo(() => ({
-    isPremium,
-    isLoading:
-      statusLoading ||
-      creditsLoading ||
-      packagesLoading ||
-      purchaseMutation.isPending ||
-      restoreMutation.isPending,
-    packages,
-    credits,
-    showPaywall,
-    isSyncing,
-    purchasePackage: handlePurchase,
-    restorePurchase: handleRestore,
-    setShowPaywall,
-    closePaywall,
-    openPaywall,
+    ...status,
+    ...packages,
+    ...actions,
+    // Merge loading states for backward compatibility
+    isLoading: status.isSyncing || packages.isLoading || actions.isLoading,
   }), [
-    isPremium,
-    statusLoading,
-    creditsLoading,
-    packagesLoading,
-    purchaseMutation.isPending,
-    restoreMutation.isPending,
+    status,
     packages,
-    credits,
-    showPaywall,
-    isSyncing,
-    handlePurchase,
-    handleRestore,
-    setShowPaywall,
-    closePaywall,
-    openPaywall,
+    actions,
   ]);
 };

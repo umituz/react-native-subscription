@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect } from "react";
 import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
+import { useSyncStatusListener } from "../useSyncStatusListener";
 import { initializationState } from "../../infrastructure/state/initializationState";
 
 interface SubscriptionFlowContextType {
@@ -9,6 +10,9 @@ interface SubscriptionFlowContextType {
 const SubscriptionFlowContext = createContext<SubscriptionFlowContextType | undefined>(undefined);
 
 export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Listen to sync status events from application layer
+  useSyncStatusListener();
+
   // Selectors for stable references and only what we need
   const isInitialized = useSubscriptionFlowStore((state) => state.isInitialized);
   const isOnboardingComplete = useSubscriptionFlowStore((state) => state.isOnboardingComplete);

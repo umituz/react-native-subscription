@@ -11,11 +11,18 @@ import { fetchCredits, checkHasCredits, documentExists } from "./operations/Cred
 import { syncExpiredStatus, syncPremiumMetadata, createRecoveryCreditsDocument } from "./operations/CreditsWriter";
 import type { SubscriptionMetadata } from "../../subscription/core/types/SubscriptionMetadata";
 import { initializeCreditsWithRetry } from "./operations/CreditsInitializer";
-import { calculateCreditLimit } from "../application/CreditLimitCalculator";
+import { CreditLimitService } from "../domain/services/CreditLimitService";
 
 export class CreditsRepository extends BaseRepository {
-  constructor(private config: CreditsConfig) {
+  private creditLimitService: CreditLimitService;
+
+  constructor(
+    private config: CreditsConfig,
+    creditLimitService?: CreditLimitService
+  ) {
     super(config.collectionName);
+    // Allow dependency injection or create default instance
+    this.creditLimitService = creditLimitService ?? new CreditLimitService(config);
   }
 
   private getCollectionConfig(): CollectionConfig {
@@ -96,7 +103,7 @@ export class CreditsRepository extends BaseRepository {
     _storeTransactionId?: string | null,
   ): Promise<boolean> {
     const db = requireFirestore();
-    const creditLimit = calculateCreditLimit(productId, this.config);
+    const creditLimit = this.creditLimitService.calculate(productId);
     return createRecoveryCreditsDocument(
       this.getRef(db, userId),
       creditLimit,

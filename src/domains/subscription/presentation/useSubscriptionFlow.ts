@@ -4,8 +4,8 @@
  * Uses @umituz/react-native-design-system's storage utility for standardized persistence.
  */
 
-import { DeviceEventEmitter } from "react-native";
 import { createStore } from "@umituz/react-native-design-system/storage";
+import { subscriptionEventBus, FLOW_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 export enum SubscriptionFlowStatus {
   INITIALIZING = "INITIALIZING",
@@ -77,7 +77,7 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
         showPostOnboardingPaywall: true,
         status: SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL,
       });
-      DeviceEventEmitter.emit("onboarding-complete");
+      subscriptionEventBus.emit(FLOW_EVENTS.ONBOARDING_COMPLETED, { timestamp: Date.now() });
     },
     closePostOnboardingPaywall: async () => {
       set({
@@ -85,11 +85,15 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
         paywallShown: true,
         status: SubscriptionFlowStatus.READY,
       });
+      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_CLOSED, { timestamp: Date.now() });
     },
     closeFeedback: () => set({ showFeedback: false }),
     setAuthModalOpen: (open: boolean) => set({ isAuthModalOpen: open }),
     setShowFeedback: (show: boolean) => set({ showFeedback: show }),
-    markPaywallShown: async () => set({ paywallShown: true }),
+    markPaywallShown: async () => {
+      set({ paywallShown: true });
+      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_SHOWN, { timestamp: Date.now() });
+    },
     setInitialized: (initialized: boolean) => set((state) => {
       if (state.isInitialized === initialized) return state;
       return { isInitialized: initialized };

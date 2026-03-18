@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import type { NavigationProp } from "@react-navigation/native";
+import type { ImageSourcePropType } from "react-native";
 import { SplashScreen, useSplashFlow } from "@umituz/react-native-design-system/molecules";
 import { OnboardingScreen } from "@umituz/react-native-design-system/onboarding";
 import { OfflineBanner } from "@umituz/react-native-design-system/offline";
@@ -11,7 +13,7 @@ import { usePaywallFeedbackSubmit } from "../../../../presentation/hooks/feedbac
 
 export interface ManagedSubscriptionFlowProps {
   children: React.ReactNode;
-  navigation: any;
+  navigation: NavigationProp<any>;
   islocalizationReady: boolean;
 
   // Splash Configuration
@@ -40,11 +42,9 @@ export interface ManagedSubscriptionFlowProps {
     translations: PaywallTranslations;
     features: SubscriptionFeature[];
     legalUrls: PaywallLegalUrls;
-    heroImage: any;
+    heroImage: ImageSourcePropType;
     bestValueIdentifier?: string;
     creditsLabel?: string;
-    onAuthRequired?: () => void;
-    onPurchaseSuccess?: () => void;
   };
 
   // Feedback Configuration
@@ -53,7 +53,7 @@ export interface ManagedSubscriptionFlowProps {
     onSubmit?: (data: { reason: string; otherText?: string }) => void | Promise<void>;
   };
 
-  // Offline Configuration
+  // Offline Configuration (optional)
   offline?: {
     isOffline: boolean;
     message: string;
@@ -102,10 +102,10 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
     }
   }, [isSplashComplete, islocalizationReady]);
 
-  const { 
-    flowState, 
+  const {
+    flowState,
     setShowFeedback,
-    completeOnboarding 
+    completeOnboarding
   } = usePaywallOrchestrator({
     navigation,
     isNavReady,
@@ -114,8 +114,6 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
     features: paywall.features,
     legalUrls: paywall.legalUrls,
     heroImage: paywall.heroImage,
-    onAuthRequired: paywall.onAuthRequired,
-    onPurchaseSuccess: paywall.onPurchaseSuccess,
     bestValueIdentifier: paywall.bestValueIdentifier,
     creditsLabel: paywall.creditsLabel,
   });

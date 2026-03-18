@@ -19,7 +19,7 @@ export type {
   PurchaseType,
 } from "./domains/subscription/core/SubscriptionConstants";
 export type { SubscriptionMetadata } from "./domains/subscription/core/types/SubscriptionMetadata";
-export type { PremiumStatus } from "./domains/subscription/core/types/PremiumStatus";
+export type { PremiumStatus as PremiumStatusMetadata } from "./domains/subscription/core/types/PremiumStatus";
 export type { CreditInfo } from "./domains/subscription/core/types/CreditInfo";
 export {
   createDefaultSubscriptionStatus,
@@ -63,10 +63,18 @@ export { useDeductCredit } from "./domains/credits/presentation/deduct-credit/us
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
 export { usePremium } from "./domains/subscription/presentation/usePremium";
+export { usePremiumStatus } from "./domains/subscription/presentation/usePremiumStatus";
+export { usePremiumPackages } from "./domains/subscription/presentation/usePremiumPackages";
+export { usePremiumActions } from "./domains/subscription/presentation/usePremiumActions";
+export type { UsePremiumResult } from "./domains/subscription/presentation/usePremium.types";
+export type { PremiumStatus } from "./domains/subscription/presentation/usePremiumStatus";
+export type { PremiumPackages } from "./domains/subscription/presentation/usePremiumPackages";
+export type { PremiumActions } from "./domains/subscription/presentation/usePremiumActions";
 export { useSubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
 export type { SubscriptionFlowState, SubscriptionFlowActions, SubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
 export { useSubscriptionStatus } from "./domains/subscription/presentation/useSubscriptionStatus";
 export type { SubscriptionStatusResult } from "./domains/subscription/presentation/useSubscriptionStatus.types";
+export { useSyncStatusListener } from "./domains/subscription/presentation/useSyncStatusListener";
 export { usePaywallFeedback } from "./presentation/hooks/feedback/usePaywallFeedback";
 export {
   usePaywallFeedbackSubmit,
@@ -108,6 +116,7 @@ export type {
   CreditsResult,
   DeductCreditsResult,
 } from "./domains/credits/core/Credits";
+export { CreditLimitService, calculateCreditLimit } from "./domains/credits/domain/services/CreditLimitService";
 
 // Utils
 export {

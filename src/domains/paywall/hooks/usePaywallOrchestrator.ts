@@ -1,19 +1,19 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useRef } from "react";
+import type { NavigationProp } from "@react-navigation/native";
+import type { ImageSourcePropType } from "react-native";
 import { usePremium } from "../../subscription/presentation/usePremium";
 import { useSubscriptionFlowStore } from "../../subscription/presentation/useSubscriptionFlow";
 import { usePaywallVisibility } from "../../subscription/presentation/usePaywallVisibility";
 import { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../entities/types";
 
 export interface PaywallOrchestratorOptions {
-  navigation: any;
+  navigation: NavigationProp<any>;
   translations: PaywallTranslations;
   features: SubscriptionFeature[];
   legalUrls: PaywallLegalUrls;
-  heroImage: any;
+  heroImage: ImageSourcePropType;
   isNavReady?: boolean;
   isLocalizationReady?: boolean;
-  onAuthRequired?: () => void;
-  onPurchaseSuccess?: () => void;
   bestValueIdentifier?: string;
   creditsLabel?: string;
 }
@@ -22,6 +22,9 @@ export interface PaywallOrchestratorOptions {
  * High-level orchestrator for Paywall navigation.
  * Handles automatic triggers (post-onboarding) and manual triggers (showPaywall state).
  * Centralizes handlers for success, close, and feedback triggers.
+ *
+ * This orchestrator fetches all subscription data and passes it to PaywallScreen as props.
+ * PaywallScreen is now a "dumb" component that doesn't call usePremium internally.
  */
 export function usePaywallOrchestrator({
   navigation,
@@ -31,16 +34,17 @@ export function usePaywallOrchestrator({
   heroImage,
   isNavReady = true,
   isLocalizationReady = true,
-  onAuthRequired,
-  onPurchaseSuccess,
   bestValueIdentifier = "yearly",
   creditsLabel,
 }: PaywallOrchestratorOptions) {
+  // Get all premium data and actions from usePremium
   const {
     isPremium,
     packages,
+    credits,
+    isSyncing,
     purchasePackage,
-    restorePurchase
+    restorePurchase,
   } = usePremium();
 
   // Selectors for stable references and fine-grained updates
@@ -54,37 +58,11 @@ export function usePaywallOrchestrator({
   const setShowFeedback = useSubscriptionFlowStore((state) => state.setShowFeedback);
 
   const { showPaywall, closePaywall } = usePaywallVisibility();
-  const purchasedRef = useRef(false);
   const hasNavigatedRef = useRef(false);
 
-  const handleClose = useCallback(async () => {
-    await closePostOnboardingPaywall();
+  const handleClose = () => {
     closePaywall();
-
-    // Trigger feedback if user declined and isn't premium
-    if (!isPremium && !purchasedRef.current) {
-      setTimeout(() => setShowFeedback(true), 300);
-    }
-
-    purchasedRef.current = false;
-    hasNavigatedRef.current = false;
-
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  }, [closePostOnboardingPaywall, closePaywall, isPremium, navigation, setShowFeedback]);
-
-  const handleSuccess = useCallback(async () => {
-    purchasedRef.current = true;
-    await markPaywallShown();
-    await closePostOnboardingPaywall();
-
-    onPurchaseSuccess?.();
-
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    }
-  }, [markPaywallShown, closePostOnboardingPaywall, onPurchaseSuccess, navigation]);
+  };
 
   useEffect(() => {
     if (!isNavReady || !isLocalizationReady) return;
@@ -103,24 +81,32 @@ export function usePaywallOrchestrator({
       if (hasNavigatedRef.current) return;
       hasNavigatedRef.current = true;
 
-      if (__DEV__) console.log('[usePaywallOrchestrator] 🚀 Navigating to Paywall', { 
-        source: shouldShowPostOnboarding ? "onboarding" : "manual" 
+      if (__DEV__) console.log('[usePaywallOrchestrator] 🚀 Navigating to Paywall', {
+        source: shouldShowPostOnboarding ? "onboarding" : "manual",
+        packagesCount: packages.length
       });
 
+      // Pass all data and actions as props - PaywallScreen is now a dumb component
       navigation.navigate("PaywallScreen", {
-        onClose: handleClose,
+        // UI Props
         translations,
         legalUrls,
         features,
         bestValueIdentifier,
         creditsLabel,
-        onAuthRequired,
-        onPurchaseSuccess: handleSuccess,
         heroImage,
         source: shouldShowPostOnboarding ? "onboarding" : "manual",
+
+        // Data Props
         packages,
+        isPremium,
+        credits,
+        isSyncing,
+
+        // Action Props
         onPurchase: purchasePackage,
         onRestore: restorePurchase,
+        onClose: handleClose,
       });
 
       if (shouldShowPostOnboarding) {
@@ -144,27 +130,25 @@ export function usePaywallOrchestrator({
     isPremium,
     showPaywall,
     navigation,
-    handleClose,
-    handleSuccess,
     translations,
     legalUrls,
     features,
     heroImage,
     packages,
-    purchasePackage,
-    restorePurchase,
     markPaywallShown,
     closePaywall,
     bestValueIdentifier,
     creditsLabel,
-    onAuthRequired
+    credits,
+    isSyncing,
+    purchasePackage,
+    restorePurchase,
+    handleClose,
   ]);
 
   const completeOnboarding = useSubscriptionFlowStore((state) => state.completeOnboarding);
 
   return {
-    isPremium,
-    packages,
     flowState: {
       isOnboardingComplete,
       showPostOnboardingPaywall,

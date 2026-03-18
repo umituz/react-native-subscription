@@ -76,4 +76,14 @@ export const SUBSCRIPTION_EVENTS = {
   PURCHASE_COMPLETED: "purchase_completed",
   RENEWAL_DETECTED: "renewal_detected",
   PREMIUM_STATUS_CHANGED: "premium_status_changed",
-};
+  SYNC_STATUS_CHANGED: "sync_status_changed",
+} as const;
+
+export const FLOW_EVENTS = {
+  ONBOARDING_COMPLETED: "flow_onboarding_completed",
+  PAYWALL_SHOWN: "flow_paywall_shown",
+  PAYWALL_CLOSED: "flow_paywall_closed",
+} as const;
+
+export type SubscriptionEventType = typeof SUBSCRIPTION_EVENTS[keyof typeof SUBSCRIPTION_EVENTS];
+export type FlowEventType = typeof FLOW_EVENTS[keyof typeof FLOW_EVENTS];

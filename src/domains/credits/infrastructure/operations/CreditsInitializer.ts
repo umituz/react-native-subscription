@@ -4,7 +4,7 @@ import type { PurchaseSource } from "../../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../../application/CreditsInitializer";
 import { mapCreditsDocumentToEntity } from "../../core/CreditsMapper";
 import type { RevenueCatData } from "../../../revenuecat/core/types/RevenueCatData";
-import { calculateCreditLimit } from "../../application/CreditLimitCalculator";
+import { CreditLimitService } from "../../domain/services/CreditLimitService";
 import { PURCHASE_TYPE, type PurchaseType } from "../../../subscription/core/SubscriptionConstants";
 
 interface InitializeCreditsParams {
@@ -45,7 +45,8 @@ function isTransientError(error: unknown): boolean {
 export async function initializeCreditsWithRetry(params: InitializeCreditsParams): Promise<CreditsResult> {
   const { db, ref, config, userId, purchaseId, productId, source, revenueCatData, type = PURCHASE_TYPE.INITIAL } = params;
 
-  const creditLimit = calculateCreditLimit(productId, config);
+  const creditLimitService = new CreditLimitService(config);
+  const creditLimit = creditLimitService.calculate(productId);
   const cfg = { ...config, creditLimit };
 
   const maxRetries = 3;
