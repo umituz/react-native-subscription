@@ -1,7 +1,8 @@
 /**
- * Subscription Flow Store
- * Manages the high-level application flow: Splash -> Onboarding -> Paywall -> Main App.
- * Uses @umituz/react-native-design-system's storage utility for standardized persistence.
+ * Subscription Flow State Machine
+ *
+ * Single source of truth for app flow state.
+ * Clean state transitions without complex if/else logic.
  */
 
 import { createStore } from "@umituz/react-native-design-system/storage";
@@ -10,9 +11,9 @@ import { subscriptionEventBus, FLOW_EVENTS } from "../../../shared/infrastructur
 export enum SubscriptionFlowStatus {
   INITIALIZING = "INITIALIZING",
   ONBOARDING = "ONBOARDING",
-  PAYWALL = "PAYWALL",
-  READY = "READY",
+  CHECK_PREMIUM = "CHECK_PREMIUM",
   POST_ONBOARDING_PAYWALL = "POST_ONBOARDING_PAYWALL",
+  READY = "READY",
 }
 
 export enum SyncStatus {
@@ -23,28 +24,46 @@ export enum SyncStatus {
 }
 
 export interface SubscriptionFlowState {
+  // Flow state
   status: SubscriptionFlowStatus;
+
+  // Sync state
   syncStatus: SyncStatus;
   syncError: string | null;
-  isInitialized: boolean;
+
+  // Onboarding state
   isOnboardingComplete: boolean;
-  showPostOnboardingPaywall: boolean;
-  showFeedback: boolean;
+
+  // Paywall state
   paywallShown: boolean;
+
+  // Feedback state
+  showFeedback: boolean;
+
+  // Auth modal state
   isAuthModalOpen: boolean;
+
+  // Initialization flag
+  isInitialized: boolean;
 }
 
 export interface SubscriptionFlowActions {
-  completeOnboarding: () => Promise<void>;
-  closePostOnboardingPaywall: (params?: { purchased: boolean }) => Promise<void>;
-  closeFeedback: () => void;
+  // Flow actions
+  completeOnboarding: () => void;
+  checkPremiumStatus: () => void;
+  showPaywall: () => void;
+  completePaywall: (purchased: boolean) => void;
+  showFeedbackScreen: () => void;
+  hideFeedback: () => void;
+
+  // Auth actions
   setAuthModalOpen: (open: boolean) => void;
-  markPaywallShown: () => Promise<void>;
-  setShowFeedback: (show: boolean) => void;
-  resetFlow: () => Promise<void>;
-  setInitialized: (initialized: boolean) => void;
-  setStatus: (status: SubscriptionFlowStatus) => void;
+
+  // Sync actions
   setSyncStatus: (status: SyncStatus, error?: string | null) => void;
+
+  // Reset
+  resetFlow: () => void;
 }
 
 export type SubscriptionFlowStore = SubscriptionFlowState & SubscriptionFlowActions;
@@ -53,73 +72,103 @@ const initialState: SubscriptionFlowState = {
   status: SubscriptionFlowStatus.INITIALIZING,
   syncStatus: SyncStatus.IDLE,
   syncError: null,
-  isInitialized: false,
   isOnboardingComplete: false,
-  showPostOnboardingPaywall: false,
-  showFeedback: false,
   paywallShown: false,
+  showFeedback: false,
   isAuthModalOpen: false,
+  isInitialized: false,
 };
 
+/**
+ * State transition rules:
+ *
+ * INITIALIZING -> ONBOARDING (first launch)
+ * INITIALIZING -> CHECK_PREMIUM (onboarding already done)
+ *
+ * ONBOARDING -> CHECK_PREMIUM (onboarding completed)
+ *
+ * CHECK_PREMIUM -> READY (user is premium)
+ * CHECK_PREMIUM -> POST_ONBOARDING_PAYWALL (user not premium, paywall not shown)
+ * CHECK_PREMIUM -> READY (user not premium but paywall already shown)
+ *
+ * POST_ONBOARDING_PAYWALL -> READY (paywall closed)
+ *
+ * READY -> READY (stays ready, shows overlays when needed)
+ */
 export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, SubscriptionFlowActions>({
   name: "subscription-flow-storage",
   initialState,
-  persist: false,
+  persist: true,
   onRehydrate: (state) => {
     if (!state.isInitialized) {
       state.setInitialized(true);
+
+      // First time: show onboarding
+      state.setStatus(SubscriptionFlowStatus.INITIALIZING);
+    } else if (state.isOnboardingComplete) {
+      // Onboarding done, check premium status
+      state.setStatus(SubscriptionFlowStatus.CHECK_PREMIUM);
+    } else {
+      // Show onboarding
+      state.setStatus(SubscriptionFlowStatus.ONBOARDING);
     }
   },
   actions: (set) => ({
-    completeOnboarding: async () => {
+    setInitialized: (initialized: boolean) => set({ isInitialized: initialized }),
+    setStatus: (status: SubscriptionFlowStatus) => set({ status }),
+
+    completeOnboarding: () => {
       set({
         isOnboardingComplete: true,
-        showPostOnboardingPaywall: true,
-        status: SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL,
+        status: SubscriptionFlowStatus.CHECK_PREMIUM,
       });
       subscriptionEventBus.emit(FLOW_EVENTS.ONBOARDING_COMPLETED, { timestamp: Date.now() });
     },
-    closePostOnboardingPaywall: async (params?: { purchased: boolean }) => {
-      const purchased = params?.purchased ?? false;
+
+    checkPremiumStatus: () => {
+      // This is a transient state - the component will check isPremium
+      // and transition accordingly
+      set({ status: SubscriptionFlowStatus.CHECK_PREMIUM });
+    },
+
+    showPaywall: () => {
       set({
-        showPostOnboardingPaywall: false,
+        status: SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL,
         paywallShown: true,
+      });
+      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_SHOWN, { timestamp: Date.now() });
+    },
+
+    completePaywall: (purchased: boolean) => {
+      set({
         status: SubscriptionFlowStatus.READY,
-        showFeedback: !purchased, // Only show feedback if NOT purchased
+        paywallShown: true,
+        showFeedback: !purchased, // Only show feedback if not purchased
       });
       subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_CLOSED, {
         timestamp: Date.now(),
         purchased
       });
     },
-    closeFeedback: () => set({ showFeedback: false }),
+
+    showFeedbackScreen: () => set({ showFeedback: true }),
+    hideFeedback: () => set({ showFeedback: false }),
+
     setAuthModalOpen: (open: boolean) => set({ isAuthModalOpen: open }),
-    setShowFeedback: (show: boolean) => set({ showFeedback: show }),
-    markPaywallShown: async () => {
-      set({ paywallShown: true });
-      subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_SHOWN, { timestamp: Date.now() });
-    },
-    setInitialized: (initialized: boolean) => set((state) => {
-      if (state.isInitialized === initialized) return state;
-      return { isInitialized: initialized };
-    }),
-    setStatus: (status: SubscriptionFlowStatus) => set((state) => {
-      if (state.status === status) return state;
-      return { status };
-    }),
-    setSyncStatus: (syncStatus: SyncStatus, syncError: string | null = null) => 
+
+    setSyncStatus: (syncStatus: SyncStatus, syncError: string | null = null) =>
       set({ syncStatus, syncError }),
-    resetFlow: async () => {
+
+    resetFlow: () => {
       set({
         status: SubscriptionFlowStatus.INITIALIZING,
         syncStatus: SyncStatus.IDLE,
         syncError: null,
-        isInitialized: false, // Reset isInitialized to allow fresh initialization
         isOnboardingComplete: false,
-        showPostOnboardingPaywall: false,
-        showFeedback: false,
         paywallShown: false,
+        showFeedback: false,
         isAuthModalOpen: false,
+        isInitialized: false,
       });
     },
   }),
