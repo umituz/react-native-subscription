@@ -18,6 +18,8 @@ export interface PaywallOrchestratorOptions {
   isLocalizationReady?: boolean;
   bestValueIdentifier?: string;
   creditsLabel?: string;
+  /** Disable manual navigation (used when paywall is rendered inline) */
+  disableNavigation?: boolean;
 }
 
 export function usePaywallOrchestrator({
@@ -30,6 +32,7 @@ export function usePaywallOrchestrator({
   isLocalizationReady = true,
   bestValueIdentifier = "yearly",
   creditsLabel,
+  disableNavigation = false,
 }: PaywallOrchestratorOptions) {
   const { isPremium, isSyncing, credits } = usePremiumStatus();
   const { packages } = usePremiumPackages();
@@ -66,6 +69,25 @@ export function usePaywallOrchestrator({
     if (shouldShowPostOnboarding || shouldShowManual) {
       if (hasNavigatedRef.current) return;
       hasNavigatedRef.current = true;
+
+      // Skip navigation if disabled (paywall rendered inline)
+      if (disableNavigation) {
+        if (__DEV__) {
+          console.log('[usePaywallOrchestrator] ⏭️ Skipping navigation (disableNavigation=true)', {
+            source: shouldShowPostOnboarding ? "onboarding" : "manual",
+          });
+        }
+
+        if (shouldShowPostOnboarding) {
+          markPaywallShown();
+        }
+
+        if (showPaywall) {
+          closePaywall();
+        }
+
+        return;
+      }
 
       if (__DEV__) console.log('[usePaywallOrchestrator] 🚀 Navigating to Paywall', {
         source: shouldShowPostOnboarding ? "onboarding" : "manual",
@@ -123,6 +145,7 @@ export function usePaywallOrchestrator({
     purchasePackage,
     restorePurchase,
     handleClose,
+    disableNavigation,
   ]);
 
   const completeOnboarding = useSubscriptionFlowStore((state) => state.completeOnboarding);

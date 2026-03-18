@@ -5,6 +5,9 @@ import { SplashScreen, useSplashFlow } from "@umituz/react-native-design-system/
 import { OnboardingScreen } from "@umituz/react-native-design-system/onboarding";
 import { OfflineBanner } from "@umituz/react-native-design-system/offline";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { usePremiumStatus } from "../../presentation/usePremiumStatus";
+import { usePremiumPackages } from "../../presentation/usePremiumPackages";
+import { usePremiumActions } from "../../presentation/usePremiumActions";
 import { usePaywallOrchestrator } from "../../../paywall/hooks/usePaywallOrchestrator";
 import { PaywallFeedbackScreen } from "../../../subscription/presentation/components/feedback/PaywallFeedbackScreen";
 import { PaywallFeedbackTranslations } from "../../../subscription/presentation/components/feedback/PaywallFeedbackScreen.types";
@@ -70,9 +73,10 @@ export interface ManagedSubscriptionFlowProps {
  * 
  * Use this to reduce AppNavigator boilerplate to nearly zero.
  */
-import { 
-  SubscriptionFlowProvider, 
-  useSubscriptionFlowStatus 
+import {
+  SubscriptionFlowProvider,
+  useSubscriptionFlowStatus,
+  useSubscriptionFlowStore
 } from "../providers/SubscriptionFlowProvider";
 import { SubscriptionFlowStatus } from "../useSubscriptionFlow";
 
@@ -116,6 +120,7 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
     heroImage: paywall.heroImage,
     bestValueIdentifier: paywall.bestValueIdentifier,
     creditsLabel: paywall.creditsLabel,
+    disableNavigation: true, // Paywall is rendered inline, don't navigate
   });
 
   const { submit: internalSubmit } = usePaywallFeedbackSubmit();
@@ -172,6 +177,46 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
         translations={onboarding.translations}
       />
     );
+  }
+
+  // 2.5. Post-Onboarding Paywall View
+  if (status === SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL) {
+    if (__DEV__) {
+      console.log('[ManagedSubscriptionFlow] 💳 Rendering Post-Onboarding Paywall', {
+        hasPackages: flowState.showPostOnboardingPaywall
+      });
+    }
+
+    const { PaywallScreen } = require("../../../paywall/components/PaywallScreen");
+
+    // We need to wrap this in a component that can use hooks
+    const InlinePaywall = () => {
+      const { isPremium, isSyncing, credits } = usePremiumStatus();
+      const { packages } = usePremiumPackages();
+      const { purchasePackage, restorePurchase } = usePremiumActions();
+      const { closePostOnboardingPaywall } = useSubscriptionFlowStore();
+
+      return (
+        <PaywallScreen
+          translations={paywall.translations}
+          legalUrls={paywall.legalUrls}
+          features={paywall.features}
+          bestValueIdentifier={paywall.bestValueIdentifier}
+          creditsLabel={paywall.creditsLabel}
+          heroImage={paywall.heroImage}
+          source="onboarding"
+          packages={packages}
+          isPremium={isPremium}
+          credits={credits}
+          isSyncing={isSyncing}
+          onPurchase={purchasePackage}
+          onRestore={restorePurchase}
+          onClose={closePostOnboardingPaywall}
+        />
+      );
+    };
+
+    return <InlinePaywall />;
   }
 
   // 3. Application Content + Overlays
