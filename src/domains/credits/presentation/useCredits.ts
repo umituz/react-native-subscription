@@ -1,27 +1,22 @@
-import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
-import { SHORT_CACHE_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
-import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
 import {
-  getCreditsRepository,
   getCreditsConfig,
   isCreditsRepositoryConfigured,
 } from "../infrastructure/CreditsRepositoryManager";
 import { calculateSafePercentage, canAffordAmount } from "../utils/creditValidation";
 import { isAuthenticated } from "../../subscription/utils/authGuards";
-import { creditsQueryKeys } from "./creditsQueryKeys";
 import type { UseCreditsResult, CreditsLoadStatus } from "./useCredits.types";
-import type { UserCredits } from "../core/Credits";
+import { useCreditsRealTime } from "./useCreditsRealTime";
 
 const deriveLoadStatus = (
-  queryStatus: "pending" | "error" | "success",
+  isLoading: boolean,
+  error: Error | null,
   queryEnabled: boolean
 ): CreditsLoadStatus => {
   if (!queryEnabled) return "idle";
-  if (queryStatus === "pending") return "loading";
-  if (queryStatus === "error") return "error";
+  if (isLoading) return "loading";
+  if (error) return "error";
   return "ready";
 };
 
@@ -33,41 +28,7 @@ export const useCredits = (): UseCreditsResult => {
   const hasUser = isAuthenticated(userId);
   const queryEnabled = hasUser && isConfigured;
 
-  const { data, status, error, refetch } = useQuery<UserCredits | null, Error>({
-    queryKey: creditsQueryKeys.user(userId),
-    queryFn: async () => {
-      if (!hasUser || !isConfigured) return null;
-
-      const repository = getCreditsRepository();
-      const result = await repository.getCredits(userId);
-
-      if (!result.success) {
-        throw new Error(result.error?.message || "Failed to fetch credits");
-      }
-
-      return result.data ?? null;
-    },
-    enabled: queryEnabled,
-    ...SHORT_CACHE_CONFIG,
-  });
-
-  const queryClient = useQueryClient();
-
-  usePreviousUserCleanup(userId, queryClient, creditsQueryKeys.user);
-
-  useEffect(() => {
-    if (!hasUser) return undefined;
-
-    const unsubscribe = subscriptionEventBus.on(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, (updatedUserId) => {
-      if (updatedUserId === userId) {
-        queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
-      }
-    });
-
-    return unsubscribe;
-  }, [userId, hasUser, queryClient]);
-
-  const credits = data ?? null;
+  const { credits, isLoading, error } = useCreditsRealTime(userId);
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
@@ -81,19 +42,18 @@ export const useCredits = (): UseCreditsResult => {
     [credits]
   );
 
-  const loadStatus = deriveLoadStatus(status, queryEnabled);
+  const loadStatus = deriveLoadStatus(isLoading, error, queryEnabled);
   const isCreditsLoaded = loadStatus === "ready";
-  const isLoading = loadStatus === "loading";
 
   return {
     credits,
     isLoading,
     isCreditsLoaded,
     loadStatus,
-    error: error instanceof Error ? error : null,
+    error,
     hasCredits: derivedValues.hasCredits,
     creditsPercent: derivedValues.creditsPercent,
-    refetch,
+    refetch: async () => {},
     canAfford,
   };
 };

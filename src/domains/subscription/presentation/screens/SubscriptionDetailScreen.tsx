@@ -7,7 +7,6 @@ import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { ScreenLayout } from "../../../../shared/presentation/layouts/ScreenLayout";
 import { getCreditsRepository } from "../../../credits/infrastructure/CreditsRepositoryManager";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../../shared/infrastructure/SubscriptionEventBus";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";
 import { UpgradePrompt } from "./components/UpgradePrompt";
@@ -116,7 +115,6 @@ const DevTestPanel: React.FC<{ statusType: string }> = ({ statusType }) => {
     const userId = selectUserId(useAuthStore.getState());
     if (!userId) throw new Error("No userId found");
     await getCreditsRepository().syncExpiredStatus(userId);
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
   }), [run]);
 
   const handleRestore = useCallback(() => run("Restore", async () => {

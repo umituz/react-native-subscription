@@ -1,7 +1,6 @@
 import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 export async function refundCreditsOperation(
   _db: Firestore,
@@ -52,8 +51,6 @@ export async function refundCreditsOperation(
 
       return updated;
     });
-
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
 
     return {
       success: true,

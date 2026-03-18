@@ -72,7 +72,7 @@ export function createDeductCreditMutationConfig(
         );
       }
     },
-    // onSuccess removed - CREDITS_UPDATED event handles invalidation
-    // Optimistic update already applied, event will trigger refetch if needed
+    // onSuccess removed - real-time sync (onSnapshot) handles automatic updates
+    // Optimistic update already applied, real-time listener will confirm actual value
   };
 }

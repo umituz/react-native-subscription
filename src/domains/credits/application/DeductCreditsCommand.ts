@@ -1,7 +1,6 @@
 import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES, MAX_SINGLE_DEDUCTION } from "../core/CreditsConstants";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 export async function deductCreditsOperation(
   _db: Firestore,
@@ -64,8 +63,6 @@ export async function deductCreditsOperation(
     });
 
     if (__DEV__) console.log('[DeductCreditsCommand] transaction SUCCESS, remaining:', remaining);
-
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
 
     return {
       success: true,

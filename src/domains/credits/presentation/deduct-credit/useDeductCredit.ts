@@ -56,7 +56,7 @@ export const useDeductCredit = ({
     try {
       const result = await repository.refundCredit(userId, amount);
       if (result.success) {
-        // CREDITS_UPDATED event emitted by RefundCreditsCommand handles invalidation
+        // Real-time sync (onSnapshot) handles automatic update
         return true;
       }
       return false;
@@ -70,7 +70,7 @@ export const useDeductCredit = ({
       }
       return false;
     }
-  }, [userId, repository, queryClient]);
+  }, [userId, repository]);
 
   return {
     checkCredits,

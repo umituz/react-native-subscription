@@ -234,7 +234,6 @@ export class SubscriptionSyncProcessor {
         throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for purchase: ${result.error?.message ?? 'unknown'}`);
       }
 
-      this.emitCreditsUpdated(creditsUserId);
       if (typeof __DEV__ !== "undefined" && __DEV__) {
         console.log('[SubscriptionSyncProcessor] 🟢 processPurchase: Credits initialized successfully', {
           creditsUserId,
@@ -271,7 +270,6 @@ export class SubscriptionSyncProcessor {
         throw new Error(`[SubscriptionSyncProcessor] Credit initialization failed for renewal: ${result.error?.message ?? 'unknown'}`);
       }
 
-      this.emitCreditsUpdated(creditsUserId);
     } finally {
       this.purchaseInProgress = false;
     }
@@ -315,7 +313,6 @@ export class SubscriptionSyncProcessor {
 
   private async expireSubscription(userId: string): Promise<void> {
     await getCreditsRepository().syncExpiredStatus(userId);
-    this.emitCreditsUpdated(userId);
   }
 
   private async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
@@ -357,7 +354,6 @@ export class SubscriptionSyncProcessor {
       store: event.store ?? null,
       ownershipType: event.ownershipType ?? null,
     });
-    this.emitCreditsUpdated(userId);
 
     if (__DEV__) {
       console.log('[SubscriptionSyncProcessor] 🟢 syncPremiumStatus: Completed', {
@@ -366,9 +362,5 @@ export class SubscriptionSyncProcessor {
         productId: event.productId,
       });
     }
-  }
-
-  private emitCreditsUpdated(userId: string): void {
-    subscriptionEventBus.emit(SUBSCRIPTION_EVENTS.CREDITS_UPDATED, userId);
   }
 }

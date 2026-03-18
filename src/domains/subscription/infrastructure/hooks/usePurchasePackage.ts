@@ -41,9 +41,9 @@ export const usePurchasePackage = () => {
         // Invalidate packages cache (no event listener for packages)
         queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
 
-        // Credits and subscription status are invalidated via events:
-        // - CREDITS_UPDATED event (SubscriptionSyncProcessor → useCredits)
-        // - PREMIUM_STATUS_CHANGED event (SubscriptionSyncProcessor → useSubscriptionStatus)
+        // Credits and subscription status updated via real-time sync:
+        // - Credits: Firestore onSnapshot (useCreditsRealTime)
+        // - Subscription status: PREMIUM_STATUS_CHANGED event (RevenueCat)
         // No manual invalidation needed here
       } else {
         showError("Purchase Failed", "Unable to complete purchase. Please try again.");
