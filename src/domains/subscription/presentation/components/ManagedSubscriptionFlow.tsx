@@ -95,7 +95,13 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   const { isInitialized: isSplashComplete } = useSplashFlow({
     duration: splash?.duration || 0,
   });
-  
+
+  // Hooks for paywall (called at component level, not inside conditional render)
+  const { isPremium, isSyncing, credits } = usePremiumStatus();
+  const { packages } = usePremiumPackages();
+  const { purchasePackage, restorePurchase } = usePremiumActions();
+  const { closePostOnboardingPaywall } = useSubscriptionFlowStore();
+
   const [isNavReady, setIsNavReady] = useState(false);
 
   // Mark navigation tree as ready after splash and localization
@@ -187,33 +193,24 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
       });
     }
 
-    const PostOnboardingPaywall = () => {
-      const { isPremium, isSyncing, credits } = usePremiumStatus();
-      const { packages } = usePremiumPackages();
-      const { purchasePackage, restorePurchase } = usePremiumActions();
-      const { closePostOnboardingPaywall } = useSubscriptionFlowStore();
-
-      return (
-        <PaywallScreen
-          translations={paywall.translations}
-          legalUrls={paywall.legalUrls}
-          features={paywall.features}
-          bestValueIdentifier={paywall.bestValueIdentifier}
-          creditsLabel={paywall.creditsLabel}
-          heroImage={paywall.heroImage}
-          source="onboarding"
-          packages={packages}
-          isPremium={isPremium}
-          credits={credits}
-          isSyncing={isSyncing}
-          onPurchase={purchasePackage}
-          onRestore={restorePurchase}
-          onClose={closePostOnboardingPaywall}
-        />
-      );
-    };
-
-    return <PostOnboardingPaywall />;
+    return (
+      <PaywallScreen
+        translations={paywall.translations}
+        legalUrls={paywall.legalUrls}
+        features={paywall.features}
+        bestValueIdentifier={paywall.bestValueIdentifier}
+        creditsLabel={paywall.creditsLabel}
+        heroImage={paywall.heroImage}
+        source="onboarding"
+        packages={packages}
+        isPremium={isPremium}
+        credits={credits}
+        isSyncing={isSyncing}
+        onPurchase={purchasePackage}
+        onRestore={restorePurchase}
+        onClose={closePostOnboardingPaywall}
+      />
+    );
   }
 
   // 3. Application Content + Overlays
