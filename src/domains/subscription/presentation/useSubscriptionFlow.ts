@@ -50,7 +50,6 @@ export interface SubscriptionFlowState {
 export interface SubscriptionFlowActions {
   // Flow actions
   completeOnboarding: () => void;
-  checkPremiumStatus: () => void;
   showPaywall: () => void;
   completePaywall: (purchased: boolean) => void;
   showFeedbackScreen: () => void;
@@ -61,6 +60,10 @@ export interface SubscriptionFlowActions {
 
   // Sync actions
   setSyncStatus: (status: SyncStatus, error?: string | null) => void;
+
+  // State setters (for internal use)
+  setInitialized: (initialized: boolean) => void;
+  setStatus: (status: SubscriptionFlowStatus) => void;
 
   // Reset
   resetFlow: () => void;

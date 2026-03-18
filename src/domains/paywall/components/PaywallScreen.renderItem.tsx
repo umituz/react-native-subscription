@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { View, ListRenderItem } from "react-native";
+import { View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
 import { Image } from "expo-image";

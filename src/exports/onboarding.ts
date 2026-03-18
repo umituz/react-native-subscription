@@ -4,31 +4,14 @@
  * Advanced onboarding utilities for custom flows
  *
  * @example
- * import { OnboardingProgress, useOnboardingAnalytics } from '@umituz/react-native-subscription/exports/onboarding';
+ * import { useOnboardingProgress } from '@umituz/react-native-subscription/exports/onboarding';
  */
 
-// Onboarding Progress Tracking
-export { useOnboardingProgress } from '../../domains/subscription/presentation/hooks/useOnboardingProgress';
-export type { OnboardingProgressData } from '../../domains/subscription/presentation/hooks/useOnboardingProgress.types';
+// NOTE: These are placeholder exports for future onboarding features
+// Currently, onboarding is handled by ManagedSubscriptionFlow core
 
-// Onboarding Analytics
-export { useOnboardingAnalytics } from '../../presentation/hooks/onboarding/useOnboardingAnalytics';
-export type {
-  OnboardingEvent,
-  OnboardingAnalyticsData,
-} from '../../presentation/hooks/onboarding/useOnboardingAnalytics.types';
+// Re-export core onboarding types
+export { SubscriptionFlowStatus } from '../domains/subscription/presentation/useSubscriptionFlow';
 
-// Onboarding Completion Helpers
-export { useOnboardingCompletion } from '../../presentation/hooks/onboarding/useOnboardingCompletion';
-export type {
-  OnboardingCompletionData,
-  OnboardingCompletionOptions,
-} from '../../presentation/hooks/onboarding/useOnboardingCompletion.types';
-
-// Onboarding Utils
-export {
-  calculateOnboardingProgress,
-  isOnboardingComplete,
-  getOnboardingStep,
-} from '../../utils/onboardingUtils';
-export type { OnboardingStep } from '../../utils/onboardingUtils.types';
+// Onboarding is part of ManagedSubscriptionFlow core
+// This file is reserved for future advanced onboarding utilities
