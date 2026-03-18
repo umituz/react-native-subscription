@@ -1,5 +1,5 @@
-import type { DocumentReference, Transaction } from "@umituz/react-native-firebase";
-import { runTransaction, serverTimestamp } from "@umituz/react-native-firebase";
+import { runTransaction, serverTimestamp, type DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import { getDoc, setDoc } from "firebase/firestore";
 import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionConstants";
 import { resolveSubscriptionStatus } from "../../../subscription/core/SubscriptionStatus";
@@ -11,8 +11,8 @@ import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
 // Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction so concurrent
 // initializeCreditsTransaction and deductCreditsOperation no longer see stale
 // updateTime preconditions that produce failed-precondition errors.
-export async function syncExpiredStatus(ref: DocumentReference): Promise<void> {
-  await runTransaction(async (tx: Transaction) => {
+export async function syncExpiredStatus(db: Firestore, ref: DocumentReference): Promise<void> {
+  await runTransaction(db, async (tx) => {
     const doc = await tx.get(ref);
     if (!doc.exists()) return;
 
@@ -27,10 +27,11 @@ export async function syncExpiredStatus(ref: DocumentReference): Promise<void> {
 
 // Fix: was getDoc+setDoc (non-atomic) — now uses runTransaction.
 export async function syncPremiumMetadata(
+  db: Firestore,
   ref: DocumentReference,
   metadata: SubscriptionMetadata
 ): Promise<void> {
-  await runTransaction(async (tx: Transaction) => {
+  await runTransaction(db, async (tx) => {
     const doc = await tx.get(ref);
     if (!doc.exists()) return;
 

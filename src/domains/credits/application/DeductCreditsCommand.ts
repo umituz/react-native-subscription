@@ -1,4 +1,5 @@
-import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
+import { runTransaction, serverTimestamp, type DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES, MAX_SINGLE_DEDUCTION } from "../core/CreditsConstants";
 
@@ -33,7 +34,7 @@ export async function deductCreditsOperation(
   try {
     if (__DEV__) console.log('[DeductCreditsCommand] >>> starting transaction', { userId, cost, creditsRefPath: creditsRef.path });
 
-    const remaining = await runTransaction(async (tx: Transaction) => {
+    const remaining = await runTransaction(_db, async (tx) => {
       const docSnap = await tx.get(creditsRef);
 
       if (__DEV__) console.log('[DeductCreditsCommand] doc exists:', docSnap.exists());
@@ -66,7 +67,7 @@ export async function deductCreditsOperation(
 
     return {
       success: true,
-      remainingCredits: remaining,
+      remainingCredits: remaining as number,
       error: null
     };
   } catch (e: unknown) {

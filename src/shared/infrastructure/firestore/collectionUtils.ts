@@ -1,10 +1,5 @@
-import { collection, doc } from "firebase/firestore";
-import {
-  getFirestore,
-  type CollectionReference,
-  type DocumentReference,
-  type Firestore,
-} from "@umituz/react-native-firebase";
+import { collection, doc, type CollectionReference, type DocumentReference } from "firebase/firestore";
+import { getFirestore, type Firestore } from "@umituz/react-native-firebase";
 
 export interface CollectionConfig {
   collectionName: string;

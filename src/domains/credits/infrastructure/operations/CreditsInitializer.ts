@@ -1,4 +1,5 @@
-import type { Firestore, DocumentReference } from "@umituz/react-native-firebase";
+import type { DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult } from "../../core/Credits";
 import type { PurchaseSource } from "../../core/UserCreditsDocument";
 import { initializeCreditsTransaction } from "../../application/CreditsInitializer";

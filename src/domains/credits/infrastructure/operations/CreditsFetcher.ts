@@ -1,5 +1,4 @@
-import { getDoc } from "firebase/firestore";
-import type { DocumentReference } from "@umituz/react-native-firebase";
+import { getDoc, type DocumentReference } from "firebase/firestore";
 import type { CreditsResult } from "../../core/Credits";
 import type { UserCreditsDocumentRead } from "../../core/UserCreditsDocument";
 import { mapCreditsDocumentToEntity } from "../../core/CreditsMapper";

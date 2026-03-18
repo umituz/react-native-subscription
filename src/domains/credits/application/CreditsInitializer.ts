@@ -2,7 +2,8 @@ import type { CreditsConfig } from "../core/Credits";
 import { getAppVersion, validatePlatform } from "../../../utils/appUtils";
 
 import type { InitializeCreditsMetadata, InitializationResult } from "../../subscription/application/SubscriptionInitializerTypes";
-import { runTransaction, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
+import { runTransaction, type DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import { getCreditDocumentOrDefault } from "./creditDocumentHelpers";
 import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
 import { CreditLimitService } from "../domain/services/CreditLimitService";
@@ -39,7 +40,7 @@ export async function initializeCreditsTransaction(
     const platform = validatePlatform();
     const appVersion = getAppVersion();
 
-    return runTransaction(async (transaction: Transaction) => {
+    return runTransaction(_db, async (transaction) => {
         const creditsDoc = await transaction.get(creditsRef);
 
         const existingData = getCreditDocumentOrDefault(creditsDoc, platform);

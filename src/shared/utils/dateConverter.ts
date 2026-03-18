@@ -1,4 +1,4 @@
-import { Timestamp } from "@umituz/react-native-firebase";
+import { Timestamp } from "firebase/firestore";
 
 type FirestoreTimestamp = ReturnType<typeof Timestamp.fromDate>;
 

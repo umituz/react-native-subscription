@@ -1,5 +1,6 @@
 import type { UserCreditsDocumentRead, FirestoreTimestamp } from "../core/UserCreditsDocument";
-import { serverTimestamp, type DocumentSnapshot } from "@umituz/react-native-firebase";
+import { serverTimestamp } from "firebase/firestore";
+import type { DocumentSnapshot } from "firebase/firestore";
 import { SUBSCRIPTION_STATUS, type Platform } from "../../subscription/core/SubscriptionConstants";
 
 export function getCreditDocumentOrDefault(

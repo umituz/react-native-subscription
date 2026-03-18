@@ -1,4 +1,5 @@
-import type { Firestore, DocumentReference } from "@umituz/react-native-firebase";
+import type { DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import { BaseRepository } from "@umituz/react-native-firebase";
 import type { CreditsConfig, CreditsResult, DeductCreditsResult } from "../core/Credits";
 import type { PurchaseSource } from "../core/UserCreditsDocument";
@@ -86,12 +87,12 @@ export class CreditsRepository extends BaseRepository {
 
   async syncExpiredStatus(userId: string): Promise<void> {
     const db = requireFirestore();
-    await syncExpiredStatus(this.getRef(db, userId));
+    await syncExpiredStatus(db, this.getRef(db, userId));
   }
 
   async syncPremiumMetadata(userId: string, metadata: SubscriptionMetadata): Promise<void> {
     const db = requireFirestore();
-    await syncPremiumMetadata(this.getRef(db, userId), metadata);
+    await syncPremiumMetadata(db, this.getRef(db, userId), metadata);
   }
 
   async ensurePremiumCreditsExist(

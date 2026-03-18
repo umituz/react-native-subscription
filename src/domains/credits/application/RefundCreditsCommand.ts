@@ -1,4 +1,5 @@
-import { runTransaction, serverTimestamp, type Transaction, type DocumentReference, type Firestore } from "@umituz/react-native-firebase";
+import { runTransaction, serverTimestamp, type DocumentReference } from "firebase/firestore";
+import type { Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES } from "../core/CreditsConstants";
 
@@ -31,7 +32,7 @@ export async function refundCreditsOperation(
   }
 
   try {
-    const remaining = await runTransaction(async (tx: Transaction) => {
+    const remaining = await runTransaction(_db, async (tx) => {
       const docSnap = await tx.get(creditsRef);
 
       if (!docSnap.exists()) {
@@ -54,7 +55,7 @@ export async function refundCreditsOperation(
 
     return {
       success: true,
-      remainingCredits: remaining,
+      remainingCredits: remaining as number,
       error: null
     };
   } catch (e: unknown) {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { onSnapshot } from "firebase/firestore";
+import { onSnapshot, type DocumentSnapshot } from "firebase/firestore";
 import type { UserCredits } from "../core/Credits";
 import { getCreditsConfig } from "../infrastructure/CreditsRepositoryManager";
 import { mapCreditsDocumentToEntity } from "../core/CreditsMapper";
@@ -50,7 +50,7 @@ export function useCreditsRealTime(userId: string | null | undefined) {
       // Real-time listener
       const unsubscribe = onSnapshot(
         docRef,
-        (snapshot) => {
+        (snapshot: DocumentSnapshot) => {
           if (snapshot.exists()) {
             const entity = mapCreditsDocumentToEntity(snapshot.data() as UserCreditsDocumentRead);
             setCredits(entity);
@@ -59,9 +59,9 @@ export function useCreditsRealTime(userId: string | null | undefined) {
           }
           setIsLoading(false);
         },
-        (err) => {
+        (err: Error) => {
           console.error("[useCreditsRealTime] Snapshot error:", err);
-          setError(err as Error);
+          setError(err);
           setIsLoading(false);
         }
       );
