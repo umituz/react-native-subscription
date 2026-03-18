@@ -6,8 +6,10 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
+import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
+import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
+import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
-import { invalidateSubscriptionCaches } from "../../../../shared/infrastructure/react-query/utils";
 
 interface PurchaseMutationResult {
   success: boolean;
@@ -37,7 +39,13 @@ export const usePurchasePackage = () => {
     onSuccess: (result) => {
       if (result.success) {
         showSuccess("Purchase Successful", "Your subscription is now active!");
-        invalidateSubscriptionCaches(queryClient, userId);
+
+        // Invalidate caches after successful purchase
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
+        if (userId) {
+          queryClient.invalidateQueries({ queryKey: subscriptionStatusQueryKeys.user(userId) });
+          queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+        }
       } else {
         showError("Purchase Failed", "Unable to complete purchase. Please try again.");
       }

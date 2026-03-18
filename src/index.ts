@@ -51,14 +51,6 @@ export {
 } from "./shared/utils/Result";
 export type { Result, Success, Failure } from "./shared/utils/Result";
 
-// Cache Invalidation Utilities
-export {
-  invalidateSubscriptionCaches,
-  invalidateSubscriptionStatus,
-  invalidateCredits,
-  invalidateAllUserData,
-} from "./shared/infrastructure/react-query/utils";
-
 // Infrastructure Layer (Services & Repositories)
 export { initializeSubscription } from "./domains/subscription/application/initializer/SubscriptionInitializer";
 export type { SubscriptionInitConfig, CreditPackageConfig } from "./domains/subscription/application/SubscriptionInitializerTypes";

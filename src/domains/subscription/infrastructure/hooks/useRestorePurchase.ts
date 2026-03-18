@@ -5,8 +5,10 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
+import { subscriptionStatusQueryKeys } from "../../presentation/useSubscriptionStatus";
+import { creditsQueryKeys } from "../../../credits/presentation/creditsQueryKeys";
+import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
-import { invalidateSubscriptionCaches } from "../../../../shared/infrastructure/react-query/utils";
 
 interface RestoreResult {
   success: boolean;
@@ -29,7 +31,12 @@ export const useRestorePurchase = () => {
     },
     onSuccess: (result) => {
       if (result.success) {
-        invalidateSubscriptionCaches(queryClient, userId);
+        // Invalidate caches after successful restore
+        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
+        if (userId) {
+          queryClient.invalidateQueries({ queryKey: subscriptionStatusQueryKeys.user(userId) });
+          queryClient.invalidateQueries({ queryKey: creditsQueryKeys.user(userId) });
+        }
 
         if (result.productId) {
           showSuccess("Restore Successful", "Your subscription has been restored!");
