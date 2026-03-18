@@ -1,27 +1,26 @@
 /**
  * ManagedSubscriptionFlow
  *
- * State machine-based flow orchestration.
- * No complex if/else - clean state transitions.
+ * Clean state machine-based flow orchestration.
+ * All state components separated to individual files.
  */
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import type { NavigationProp } from "@react-navigation/native";
 import type { ImageSourcePropType } from "react-native";
-import { View } from "react-native";
-import { SplashScreen, useSplashFlow } from "@umituz/react-native-design-system/molecules";
-import { OnboardingScreen } from "@umituz/react-native-design-system/onboarding";
-import { OfflineBanner } from "@umituz/react-native-design-system/offline";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePremiumStatus } from "../../presentation/usePremiumStatus";
 import { usePremiumPackages } from "../../presentation/usePremiumPackages";
 import { usePremiumActions } from "../../presentation/usePremiumActions";
 import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
-import { PaywallFeedbackScreen } from "./feedback/PaywallFeedbackScreen";
 import type { PaywallFeedbackTranslations } from "./feedback/PaywallFeedbackScreen.types";
 import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../../../paywall/entities/types";
-import { usePaywallFeedbackSubmit } from "../../../../presentation/hooks/feedback/useFeedbackSubmit";
-import { PaywallScreen } from "../../../paywall/components/PaywallScreen";
+import {
+  InitializingState,
+  OnboardingState,
+  PaywallState,
+  ReadyState,
+} from "./ManagedSubscriptionFlow.states";
 
 export interface ManagedSubscriptionFlowProps {
   children: React.ReactNode;
@@ -79,123 +78,8 @@ import {
   useSubscriptionFlowStatus
 } from "../providers/SubscriptionFlowProvider";
 
-// ============================================================================
-// STATE MACHINE COMPONENTS
-// ============================================================================
-
-interface StateComponentProps {
-  status: SubscriptionFlowStatus;
-  tokens: any;
-  onboardingConfig: ManagedSubscriptionFlowProps["onboarding"];
-  paywallConfig: ManagedSubscriptionFlowProps["paywall"];
-  feedbackConfig: ManagedSubscriptionFlowProps["feedback"];
-  isPremium: boolean;
-  packages: any[];
-  credits: number | null;
-  isSyncing: boolean;
-  onPurchasePackage: (pkgId: string) => Promise<any>;
-  onRestorePurchase: () => Promise<any>;
-  navigation: NavigationProp<any>;
-}
-
-const InitializingState: React.FC<{ tokens: any; splash?: ManagedSubscriptionFlowProps["splash"] }> = ({ tokens, splash }) => (
-  <SplashScreen
-    appName={splash?.appName || "Loading..."}
-    tagline={splash?.tagline || "Please wait while we set things up"}
-    colors={tokens.colors}
-  />
-);
-
-const OnboardingState: React.FC<{
-  config: ManagedSubscriptionFlowProps["onboarding"];
-  onComplete: () => void;
-}> = ({ config, onComplete }) => (
-  <OnboardingScreen
-    slides={config.slides}
-    onComplete={onComplete}
-    showSkipButton={config.showSkipButton ?? true}
-    showBackButton={config.showBackButton ?? true}
-    showProgressBar={config.showProgressBar ?? true}
-    themeColors={config.themeColors}
-    translations={config.translations}
-  />
-);
-
-const PaywallState: React.FC<{
-  config: ManagedSubscriptionFlowProps["paywall"];
-  packages: any[];
-  isPremium: boolean;
-  credits: number | null;
-  isSyncing: boolean;
-  onPurchase: (pkgId: string) => Promise<any>;
-  onRestore: () => Promise<any>;
-  onClose: (purchased: boolean) => void;
-}> = ({ config, packages, isPremium, credits, isSyncing, onPurchase, onRestore, onClose }) => {
-  const [purchaseSuccessful, setPurchaseSuccessful] = React.useState(false);
-
-  const handlePurchase = async (pkgId: string) => {
-    const result = await onPurchase(pkgId);
-    if (result?.success) {
-      setPurchaseSuccessful(true);
-    }
-    return result;
-  };
-
-  const handleClose = () => {
-    onClose(purchaseSuccessful);
-  };
-
-  return (
-    <PaywallScreen
-      translations={config.translations}
-      legalUrls={config.legalUrls}
-      features={config.features}
-      bestValueIdentifier={config.bestValueIdentifier}
-      creditsLabel={config.creditsLabel}
-      heroImage={config.heroImage}
-      source="onboarding"
-      packages={packages}
-      isPremium={isPremium}
-      credits={credits}
-      isSyncing={isSyncing}
-      onPurchase={handlePurchase}
-      onRestore={onRestore}
-      onClose={handleClose}
-    />
-  );
-};
-
-const FeedbackState: React.FC<{
-  config: ManagedSubscriptionFlowProps["feedback"];
-  onClose: () => void;
-}> = ({ config, onClose }) => {
-  const { submit: internalSubmit } = usePaywallFeedbackSubmit();
-
-  const handleSubmit = async (data: { reason: string; otherText?: string }) => {
-    if (config.onSubmit) {
-      await config.onSubmit(data);
-    } else {
-      const description = data.otherText ? `${data.reason}: ${data.otherText}` : data.reason;
-      await internalSubmit(description);
-    }
-  };
-
-  return (
-    <PaywallFeedbackScreen
-      onClose={onClose}
-      onSubmit={handleSubmit}
-      translations={config.translations}
-    />
-  );
-};
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
-const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
+const ManagedSubscriptionFlowInner: React.FC<ManagedSubscriptionFlowProps> = ({
   children,
-  navigation,
   islocalizationReady,
   splash,
   onboarding,
@@ -205,9 +89,6 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
 }) => {
   const tokens = useAppDesignTokens();
   const status = useSubscriptionFlowStatus();
-  const { isInitialized: isSplashComplete } = useSplashFlow({
-    duration: splash?.duration || 0,
-  });
 
   // Premium hooks
   const { isPremium, isSyncing, credits, isLoading: isPremiumLoading } = usePremiumStatus();
@@ -220,32 +101,26 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   const completePaywall = useSubscriptionFlowStore((s) => s.completePaywall);
   const hideFeedback = useSubscriptionFlowStore((s) => s.hideFeedback);
   const showFeedbackScreen = useSubscriptionFlowStore((s) => s.showFeedbackScreen);
-
   const showFeedback = useSubscriptionFlowStore((s) => s.showFeedback);
 
   // ========================================================================
   // STATE TRANSITIONS
   // ========================================================================
 
-  // CHECK_PREMIUM state transition logic
   useEffect(() => {
     if (status === SubscriptionFlowStatus.CHECK_PREMIUM && !isPremiumLoading) {
       const paywallShown = useSubscriptionFlowStore.getState().paywallShown;
 
       if (isPremium) {
-        // User is premium, go to ready
         completePaywall(true);
       } else if (!paywallShown) {
-        // User not premium and paywall not shown, show paywall
         showPaywall();
       } else {
-        // Paywall already shown, go to ready
         completePaywall(false);
       }
     }
   }, [status, isPremium, isPremiumLoading, showPaywall, completePaywall]);
 
-  // Show feedback when needed
   useEffect(() => {
     if (status === SubscriptionFlowStatus.READY && showFeedback) {
       showFeedbackScreen();
@@ -253,21 +128,18 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   }, [status, showFeedback, showFeedbackScreen]);
 
   // ========================================================================
-  // RENDER
+  // RENDER BY STATE
   // ========================================================================
 
-  // Wait for localization
   if (!islocalizationReady || status === SubscriptionFlowStatus.INITIALIZING) {
     return <InitializingState tokens={tokens} splash={splash} />;
   }
 
-  // Render by state
   switch (status) {
     case SubscriptionFlowStatus.ONBOARDING:
       return <OnboardingState config={onboarding} onComplete={completeOnboarding} />;
 
     case SubscriptionFlowStatus.CHECK_PREMIUM:
-      // Show loading while checking premium
       return <InitializingState tokens={tokens} splash={splash} />;
 
     case SubscriptionFlowStatus.POST_ONBOARDING_PAYWALL:
@@ -286,31 +158,20 @@ const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
 
     case SubscriptionFlowStatus.READY:
       return (
-        <>
-          {children}
-
-          {offline && (
-            <OfflineBanner
-              visible={offline.isOffline}
-              message={offline.message}
-              backgroundColor={offline.backgroundColor || tokens.colors.error}
-              position={offline.position || "top"}
-            />
-          )}
-
-          {showFeedback && (
-            <FeedbackState
-              config={feedback}
-              onClose={hideFeedback}
-            />
-          )}
-        </>
+        <ReadyState
+          children={children}
+          offline={offline}
+          feedbackConfig={feedback}
+          showFeedback={showFeedback}
+          tokens={tokens}
+          onFeedbackClose={hideFeedback}
+        />
       );
 
     default:
       return <InitializingState tokens={tokens} splash={splash} />;
   }
-});
+};
 
 ManagedSubscriptionFlowInner.displayName = "ManagedSubscriptionFlowInner";
 

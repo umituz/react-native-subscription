@@ -2,6 +2,7 @@
  * Paywall Screen Component
  *
  * Full-screen paywall with optimized FlatList for performance and modern design.
+ * Render logic separated to PaywallScreen.renderItem.tsx for better maintainability.
  */
 
 import React, { useCallback, useEffect, useMemo } from "react";
@@ -14,11 +15,9 @@ import {
   StatusBar,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
+import { AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
-import { Image } from "expo-image";
-import { PlanCard } from "./PlanCard";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFooter } from "./PaywallFooter";
 import { usePaywallActions } from "../hooks/usePaywallActions";
@@ -28,6 +27,7 @@ import {
   type PaywallListItem
 } from "../utils/paywallLayoutUtils";
 import { hasItems } from "../../../shared/utils/arrayUtils";
+import { PaywallRenderItem } from "./PaywallScreen.renderItem";
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
   const navigation = useNavigation();
@@ -115,7 +115,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   // Prepare flat data for the list
   const flatData = useMemo(() => {
     const data: PaywallListItem[] = [];
-    
+
     // 1. Header (Hero, Title, Subtitle)
     data.push({ type: 'HEADER' });
 
@@ -139,82 +139,20 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   }, [features, packages]);
 
   const renderItem: ListRenderItem<PaywallListItem> = useCallback(({ item }) => {
-    if (!translations) return null;
-    switch (item.type) {
-      case 'HEADER':
-        return (
-          <View key="header">
-            {/* Hero Image */}
-            {heroImage && (
-              <View style={styles.heroContainer}>
-                <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={200} />
-              </View>
-            )}
-
-            {/* Header Text */}
-            <View style={styles.header}>
-              <AtomicText type="headlineLarge" style={[styles.title, { color: tokens.colors.textPrimary }]}>
-                {translations.title}
-              </AtomicText>
-              {translations.subtitle && (
-                <AtomicText type="bodyMedium" style={[styles.subtitle, { color: tokens.colors.textSecondary }]}>
-                  {translations.subtitle}
-                </AtomicText>
-              )}
-            </View>
-          </View>
-        );
-
-      case 'FEATURE_HEADER':
-        return (
-          <View key="feat-header" style={styles.sectionHeader}>
-            <AtomicText type="labelLarge" style={[styles.sectionTitle, { color: tokens.colors.textSecondary }]}>
-              {translations.featuresTitle || "WHAT'S INCLUDED"}
-            </AtomicText>
-          </View>
-        );
-
-      case 'FEATURE':
-        return (
-          <View key={`feat-${item.feature.text}`} style={[styles.featureRow, { marginHorizontal: 24, marginBottom: 16 }]}>
-            <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primary }]}>
-              <AtomicIcon name={item.feature.icon} customSize={16} customColor={tokens.colors.onPrimary} />
-            </View>
-            <AtomicText type="bodyMedium" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
-              {item.feature.text}
-            </AtomicText>
-          </View>
-        );
-
-      case 'PLAN_HEADER':
-        return (
-          <View key="plan-header" style={styles.sectionHeader}>
-            <AtomicText type="labelLarge" style={[styles.sectionTitle, { color: tokens.colors.textSecondary }]}>
-              {translations.plansTitle || "CHOOSE YOUR PLAN"}
-            </AtomicText>
-          </View>
-        );
-
-      case 'PLAN': {
-        const pid = item.pkg.product.identifier;
-        return (
-          <PlanCard
-            key={pid}
-            pkg={item.pkg}
-            isSelected={selectedPlanId === pid}
-            badge={bestValueIdentifier === pid ? translations.bestValueBadgeText : undefined}
-            creditAmount={creditAmounts?.[pid]}
-            creditsLabel={creditsLabel}
-            onSelect={() => setSelectedPlanId(pid)}
-          />
-        );
-      }
-
-      default:
-        return null;
-    }
-  }, [heroImage, translations, tokens, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
-
+    return (
+      <PaywallRenderItem
+        item={item}
+        tokens={tokens}
+        translations={translations}
+        heroImage={heroImage}
+        selectedPlanId={selectedPlanId}
+        bestValueIdentifier={bestValueIdentifier}
+        creditAmounts={creditAmounts}
+        creditsLabel={creditsLabel}
+        onSelectPlan={setSelectedPlanId}
+      />
+    );
+  }, [tokens, translations, heroImage, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
 
   // Performance Optimization: getItemLayout for FlatList
   const getItemLayout = useCallback((_data: ArrayLike<PaywallListItem> | null, index: number) => {
@@ -227,12 +165,13 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     return `${item.type}-${index}`;
   }, []);
 
-  // Defensive check for translations moved to the end of hooks
+  // Defensive check for translations
   if (!translations) {
     if (__DEV__) console.warn("[PaywallScreen] Translations prop is missing");
     return null;
   }
 
+  // Loading state
   if (isSyncing) {
     return (
       <View style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary, paddingTop: insets.top }]}>
@@ -246,12 +185,12 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   return (
     <View style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}>
       <StatusBar barStyle="light-content" />
-      
+
       {/* Absolute Close Button */}
-      <View style={{ 
-        position: 'absolute', 
-        top: Math.max(insets.top, 16), 
-        right: 0, 
+      <View style={{
+        position: 'absolute',
+        top: Math.max(insets.top, 16),
+        right: 0,
         zIndex: 10,
       }}>
         <TouchableOpacity
@@ -275,46 +214,29 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         maxToRenderPerBatch={10}
         updateCellsBatchingPeriod={50}
         contentContainerStyle={[
-          styles.listContent, 
-          { 
+          styles.listContent,
+          {
             paddingTop: Math.max(insets.top, 20) + 40,
-            paddingBottom: 220 
+            paddingBottom: 220
           }
         ]}
         showsVerticalScrollIndicator={false}
       />
 
       {/* Fixed Footer */}
-      <View style={[
-        styles.stickyFooter, 
-        { 
-          backgroundColor: tokens.colors.backgroundPrimary,
-          paddingBottom: Math.max(insets.bottom, 24)
-        }
-      ]}>
-        <TouchableOpacity
-          onPress={handlePurchase}
-          disabled={isProcessing || !selectedPlanId}
-          style={[
-            styles.cta,
-            { backgroundColor: tokens.colors.primary },
-            (isProcessing || !selectedPlanId) && styles.ctaDisabled
-          ]}
-          activeOpacity={0.8}
-        >
-          <AtomicText type="titleLarge" style={[styles.ctaText, { color: tokens.colors.onPrimary }]}>
-            {isProcessing ? translations.processingText : translations.purchaseButtonText}
-          </AtomicText>
-        </TouchableOpacity>
-
-        <PaywallFooter
-          translations={translations}
-          legalUrls={legalUrls}
-          isProcessing={isProcessing}
-          onRestore={handleRestore}
-          onLegalClick={handleLegalUrl}
-        />
-      </View>
+      <PaywallFooter
+        translations={translations}
+        legalUrls={legalUrls}
+        isProcessing={isProcessing}
+        selectedPlanId={selectedPlanId}
+        packages={packages}
+        onPurchase={handlePurchase}
+        onRestore={handleRestore}
+        onLegalUrl={handleLegalUrl}
+        insets={insets}
+        tokens={tokens}
+        styles={styles}
+      />
     </View>
   );
 });
