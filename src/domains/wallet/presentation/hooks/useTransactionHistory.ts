@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
-import { collection, onSnapshot, query, orderBy, limit, Query } from "firebase/firestore";
+import { collection, query, orderBy, limit } from "firebase/firestore";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
 } from "../../domain/types/transaction.types";
 import { requireFirestore } from "../../../../shared/infrastructure/firestore/collectionUtils";
+import { useFirestoreCollectionRealTime } from "../../../../shared/presentation/hooks/useFirestoreRealTime";
 
 export interface UseTransactionHistoryParams {
   config: TransactionRepositoryConfig;
@@ -20,78 +21,51 @@ interface UseTransactionHistoryResult {
   isEmpty: boolean;
 }
 
+/**
+ * Mapper to convert Firestore document to CreditLog entity.
+ */
+function mapTransactionLog(doc: any, docId: string): CreditLog {
+  return {
+    id: docId,
+    ...doc,
+  } as CreditLog;
+}
+
 export function useTransactionHistory({
   config,
   limit: limitCount = 50,
 }: UseTransactionHistoryParams): UseTransactionHistoryResult {
   const userId = useAuthStore(selectUserId);
-  const [transactions, setTransactions] = useState<CreditLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (!userId) {
-      setTransactions([]);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
+  // Build collection query
+  const queryRef = useMemo(() => {
+    if (!userId) return null;
 
-    setIsLoading(true);
-    setError(null);
+    const db = requireFirestore();
+    const collectionPath = config.useUserSubcollection
+      ? `users/${userId}/${config.collectionName}`
+      : config.collectionName;
 
-    try {
-      const db = requireFirestore();
-      const collectionPath = config.useUserSubcollection
-        ? `users/${userId}/${config.collectionName}`
-        : config.collectionName;
-
-      const q = query(
-        collection(db, collectionPath),
-        orderBy("timestamp", "desc"),
-        limit(limitCount)
-      ) as Query;
-
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const logs: CreditLog[] = [];
-          snapshot.forEach((doc) => {
-            logs.push({
-              id: doc.id,
-              ...doc.data(),
-            } as CreditLog);
-          });
-          setTransactions(logs);
-          setIsLoading(false);
-        },
-        (err) => {
-          console.error("[useTransactionHistory] Snapshot error:", err);
-          setError(err as Error);
-          setIsLoading(false);
-        }
-      );
-
-      return () => unsubscribe();
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error("[useTransactionHistory] Setup error:", err);
-      setError(error);
-      setIsLoading(false);
-    }
+    return query(
+      collection(db, collectionPath),
+      orderBy("timestamp", "desc"),
+      limit(limitCount)
+    );
   }, [userId, config.collectionName, config.useUserSubcollection, limitCount]);
 
-  const refetch = () => {
-    if (__DEV__) {
-      console.warn("[useTransactionHistory] Refetch called - not needed for real-time sync");
-    }
-  };
+  // Use generic real-time sync hook
+  const { data, isLoading, error, refetch, isEmpty } = useFirestoreCollectionRealTime(
+    userId,
+    queryRef,
+    mapTransactionLog,
+    "useTransactionHistory"
+  );
 
   return {
-    transactions,
+    transactions: data,
     isLoading,
     error,
     refetch,
-    isEmpty: transactions.length === 0,
+    isEmpty,
   };
 }

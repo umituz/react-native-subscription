@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
-import { onSnapshot, type DocumentSnapshot } from "firebase/firestore";
-import type { UserCredits } from "../core/Credits";
+import { useMemo } from "react";
+import type { DocumentReference } from "firebase/firestore";
+import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
 import { getCreditsConfig } from "../infrastructure/CreditsRepositoryManager";
 import { mapCreditsDocumentToEntity } from "../core/CreditsMapper";
-import { requireFirestore, buildDocRef, type CollectionConfig } from "../../../shared/infrastructure/firestore/collectionUtils";
-import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
+import { requireFirestore, buildDocRef } from "../../../shared/infrastructure/firestore/collectionUtils";
+import { useFirestoreDocumentRealTime } from "../../../shared/presentation/hooks/useFirestoreRealTime";
 
 /**
  * Real-time sync for credits using Firestore onSnapshot.
@@ -20,76 +20,29 @@ import type { UserCreditsDocumentRead } from "../core/UserCreditsDocument";
  * @returns Credits state and loading status
  */
 export function useCreditsRealTime(userId: string | null | undefined) {
-  const [credits, setCredits] = useState<UserCredits | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  // Build document reference
+  const docRef = useMemo(() => {
+    if (!userId) return null;
 
-  useEffect(() => {
-    // Reset state when userId changes
-    if (!userId) {
-      setCredits(null);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const db = requireFirestore();
-      const config = getCreditsConfig();
-
-      // Build doc ref using same logic as repository
-      const collectionConfig: CollectionConfig = {
-        collectionName: config.collectionName,
-        useUserSubcollection: config.useUserSubcollection,
-      };
-      const docRef = buildDocRef(db, userId, "balance", collectionConfig);
-
-      // Real-time listener
-      const unsubscribe = onSnapshot(
-        docRef,
-        (snapshot: DocumentSnapshot) => {
-          if (snapshot.exists()) {
-            const entity = mapCreditsDocumentToEntity(snapshot.data() as UserCreditsDocumentRead);
-            setCredits(entity);
-          } else {
-            setCredits(null);
-          }
-          setIsLoading(false);
-        },
-        (err: Error) => {
-          console.error("[useCreditsRealTime] Snapshot error:", err);
-          setError(err);
-          setIsLoading(false);
-        }
-      );
-
-      return () => {
-        unsubscribe();
-      };
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      console.error("[useCreditsRealTime] Setup error:", err);
-      setError(error);
-      setIsLoading(false);
-    }
+    const db = requireFirestore();
+    const config = getCreditsConfig();
+    const ref = buildDocRef(db, userId, "balance", config);
+    return ref as DocumentReference<UserCreditsDocumentRead>;
   }, [userId]);
 
-  const refetch = useCallback(() => {
-    // Real-time sync doesn't need refetch, but keep for API compatibility
-    // The snapshot listener will automatically update when data changes
-    if (__DEV__) {
-      console.warn("[useCreditsRealTime] Refetch called - not needed for real-time sync");
-    }
-  }, []);
+  // Use generic real-time sync hook
+  const { data, isLoading, error, refetch } = useFirestoreDocumentRealTime(
+    userId,
+    docRef,
+    mapCreditsDocumentToEntity,
+    "useCreditsRealTime"
+  );
 
   return {
-    credits,
+    credits: data,
     isLoading,
     error,
-    refetch, // No-op but kept for compatibility
+    refetch,
   };
 }
 

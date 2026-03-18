@@ -5,6 +5,9 @@ import {
   useRestorePurchase,
 } from '../infrastructure/hooks/useSubscriptionQueries';
 import { usePaywallVisibility } from './usePaywallVisibility';
+import { createLogger } from '../../../shared/utils/logger';
+
+const logger = createLogger('usePremiumActions');
 
 export interface PremiumActions {
   purchasePackage: (pkg: PurchasesPackage) => Promise<boolean>;
@@ -38,9 +41,7 @@ export function usePremiumActions(): PremiumActions {
         const result = await purchaseMutation.mutateAsync(pkg);
         return result.success;
       } catch (error) {
-        if (__DEV__) {
-          console.error('[usePremiumActions] Purchase failed:', error);
-        }
+        logger.error('Purchase failed', error, { packageId: pkg.identifier });
         return false;
       }
     },
@@ -52,9 +53,7 @@ export function usePremiumActions(): PremiumActions {
       const result = await restoreMutation.mutateAsync();
       return result.success;
     } catch (error) {
-      if (__DEV__) {
-        console.error('[usePremiumActions] Restore failed:', error);
-      }
+      logger.error('Restore failed', error);
       return false;
     }
   }, [restoreMutation]);

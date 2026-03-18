@@ -3,109 +3,35 @@
  *
  * Single source of truth for app flow state.
  * Clean state transitions without complex if/else logic.
+ *
+ * State transition rules:
+ * - INITIALIZING -> ONBOARDING (first launch)
+ * - INITIALIZING -> CHECK_PREMIUM (onboarding already done)
+ * - ONBOARDING -> CHECK_PREMIUM (onboarding completed)
+ * - CHECK_PREMIUM -> READY (user is premium)
+ * - CHECK_PREMIUM -> POST_ONBOARDING_PAYWALL (user not premium, paywall not shown)
+ * - CHECK_PREMIUM -> READY (user not premium but paywall already shown)
+ * - POST_ONBOARDING_PAYWALL -> READY (paywall closed)
+ * - READY -> READY (stays ready, shows overlays when needed)
  */
 
 import { createStore } from "@umituz/react-native-design-system/storage";
 import { subscriptionEventBus, FLOW_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import {
+  SubscriptionFlowStatus,
+  SyncStatus,
+  type SubscriptionFlowState,
+  type SubscriptionFlowActions,
+} from "./flowTypes";
+import { initialFlowState } from "./flowInitialState";
 
-export enum SubscriptionFlowStatus {
-  INITIALIZING = "INITIALIZING",
-  ONBOARDING = "ONBOARDING",
-  CHECK_PREMIUM = "CHECK_PREMIUM",
-  POST_ONBOARDING_PAYWALL = "POST_ONBOARDING_PAYWALL",
-  READY = "READY",
-}
-
-export enum SyncStatus {
-  IDLE = "IDLE",
-  SYNCING = "SYNCING",
-  SUCCESS = "SUCCESS",
-  ERROR = "ERROR",
-}
-
-export interface SubscriptionFlowState {
-  // Flow state
-  status: SubscriptionFlowStatus;
-
-  // Sync state
-  syncStatus: SyncStatus;
-  syncError: string | null;
-
-  // Onboarding state
-  isOnboardingComplete: boolean;
-
-  // Paywall state
-  paywallShown: boolean;
-
-  // Feedback state
-  showFeedback: boolean;
-
-  // Auth modal state
-  isAuthModalOpen: boolean;
-
-  // Initialization flag
-  isInitialized: boolean;
-}
-
-export interface SubscriptionFlowActions {
-  // Flow actions
-  completeOnboarding: () => void;
-  showPaywall: () => void;
-  completePaywall: (purchased: boolean) => void;
-  showFeedbackScreen: () => void;
-  hideFeedback: () => void;
-
-  // Auth actions
-  setAuthModalOpen: (open: boolean) => void;
-
-  // Sync actions
-  setSyncStatus: (status: SyncStatus, error?: string | null) => void;
-
-  // State setters (for internal use)
-  setInitialized: (initialized: boolean) => void;
-  setStatus: (status: SubscriptionFlowStatus) => void;
-
-  // Reset
-  resetFlow: () => void;
-}
-
-export type SubscriptionFlowStore = SubscriptionFlowState & SubscriptionFlowActions;
-
-const initialState: SubscriptionFlowState = {
-  status: SubscriptionFlowStatus.INITIALIZING,
-  syncStatus: SyncStatus.IDLE,
-  syncError: null,
-  isOnboardingComplete: false,
-  paywallShown: false,
-  showFeedback: false,
-  isAuthModalOpen: false,
-  isInitialized: false,
-};
-
-/**
- * State transition rules:
- *
- * INITIALIZING -> ONBOARDING (first launch)
- * INITIALIZING -> CHECK_PREMIUM (onboarding already done)
- *
- * ONBOARDING -> CHECK_PREMIUM (onboarding completed)
- *
- * CHECK_PREMIUM -> READY (user is premium)
- * CHECK_PREMIUM -> POST_ONBOARDING_PAYWALL (user not premium, paywall not shown)
- * CHECK_PREMIUM -> READY (user not premium but paywall already shown)
- *
- * POST_ONBOARDING_PAYWALL -> READY (paywall closed)
- *
- * READY -> READY (stays ready, shows overlays when needed)
- */
 export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, SubscriptionFlowActions>({
   name: "subscription-flow-storage",
-  initialState,
+  initialState: initialFlowState,
   persist: true,
   onRehydrate: (state) => {
     if (!state.isInitialized) {
       state.setInitialized(true);
-
       // First time: show onboarding
       state.setStatus(SubscriptionFlowStatus.INITIALIZING);
     } else if (state.isOnboardingComplete) {
@@ -176,3 +102,10 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
     },
   }),
 });
+
+// Re-export types for convenience
+export type { SubscriptionFlowState, SubscriptionFlowActions } from "./flowTypes";
+export { SubscriptionFlowStatus, SyncStatus } from "./flowTypes";
+
+// Re-export store type inferred from createStore
+export type SubscriptionFlowStore = ReturnType<typeof useSubscriptionFlowStore>;
