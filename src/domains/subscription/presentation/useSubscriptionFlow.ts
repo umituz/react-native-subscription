@@ -84,6 +84,7 @@ export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, Subsc
         showPostOnboardingPaywall: false,
         paywallShown: true,
         status: SubscriptionFlowStatus.READY,
+        showFeedback: true, // Show feedback screen when paywall is closed
       });
       subscriptionEventBus.emit(FLOW_EVENTS.PAYWALL_CLOSED, { timestamp: Date.now() });
     },
