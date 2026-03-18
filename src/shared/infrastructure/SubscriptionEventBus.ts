@@ -17,7 +17,7 @@ class SubscriptionEventBus {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    
+
     const eventSet = this.listeners.get(event)!;
     eventSet.add(callback as EventCallback);
 
@@ -36,8 +36,6 @@ class SubscriptionEventBus {
     const listeners = this.listeners.get(event);
     if (!listeners || listeners.size === 0) return;
 
-    // Use microtask for async execution to not block main thread
-    // but keep it fast.
     listeners.forEach(callback => {
       queueMicrotask(() => {
         try {
@@ -71,19 +69,9 @@ class SubscriptionEventBus {
 
 export const subscriptionEventBus = SubscriptionEventBus.getInstance();
 
-export const SUBSCRIPTION_EVENTS = {
-  CREDITS_UPDATED: "credits_updated",
-  PURCHASE_COMPLETED: "purchase_completed",
-  RENEWAL_DETECTED: "renewal_detected",
-  PREMIUM_STATUS_CHANGED: "premium_status_changed",
-  SYNC_STATUS_CHANGED: "sync_status_changed",
-} as const;
+// Re-export event constants for external use
+export { SUBSCRIPTION_EVENTS } from "../../domains/subscription/core/events/SubscriptionEvents";
+export { FLOW_EVENTS } from "../../domains/subscription/core/events/FlowEvents";
+export type { SubscriptionEventType } from "../../domains/subscription/core/events/SubscriptionEvents";
+export type { FlowEventType } from "../../domains/subscription/core/events/FlowEvents";
 
-export const FLOW_EVENTS = {
-  ONBOARDING_COMPLETED: "flow_onboarding_completed",
-  PAYWALL_SHOWN: "flow_paywall_shown",
-  PAYWALL_CLOSED: "flow_paywall_closed",
-} as const;
-
-export type SubscriptionEventType = typeof SUBSCRIPTION_EVENTS[keyof typeof SUBSCRIPTION_EVENTS];
-export type FlowEventType = typeof FLOW_EVENTS[keyof typeof FLOW_EVENTS];

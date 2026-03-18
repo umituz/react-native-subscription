@@ -36,6 +36,3 @@ export const LONG_CACHE_CONFIG = {
   refetchOnWindowFocus: false,
   refetchOnReconnect: true,
 };
-
-/** @deprecated Use SHORT_CACHE_CONFIG instead */
-export const NO_CACHE_QUERY_CONFIG = SHORT_CACHE_CONFIG;

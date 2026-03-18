@@ -22,9 +22,6 @@ export interface PaywallOrchestratorOptions {
  * High-level orchestrator for Paywall navigation.
  * Handles automatic triggers (post-onboarding) and manual triggers (showPaywall state).
  * Centralizes handlers for success, close, and feedback triggers.
- *
- * This orchestrator fetches all subscription data and passes it to PaywallScreen as props.
- * PaywallScreen is now a "dumb" component that doesn't call usePremium internally.
  */
 export function usePaywallOrchestrator({
   navigation,
@@ -86,7 +83,6 @@ export function usePaywallOrchestrator({
         packagesCount: packages.length
       });
 
-      // Pass all data and actions as props - PaywallScreen is now a dumb component
       navigation.navigate("PaywallScreen", {
         // UI Props
         translations,

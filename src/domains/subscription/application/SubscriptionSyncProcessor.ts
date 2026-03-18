@@ -1,9 +1,9 @@
 import { PURCHASE_SOURCE, PURCHASE_TYPE } from "../core/SubscriptionConstants";
-import type { PremiumStatusChangedEvent, PurchaseCompletedEvent, RenewalDetectedEvent } from "../core/SubscriptionEvents";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "../core/SubscriptionEvents";
 import { getCreditsRepository } from "../../credits/infrastructure/CreditsRepositoryManager";
 import { extractRevenueCatData } from "./SubscriptionSyncUtils";
 import { generatePurchaseId, generateRenewalId } from "./syncIdGenerators";
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 
 /**
  * Central processor for all subscription sync operations.

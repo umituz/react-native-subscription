@@ -2,7 +2,6 @@
  * Paywall Screen Component
  *
  * Full-screen paywall with optimized FlatList for performance and modern design.
- * This is a "dumb" component that receives all data and actions via props.
  */
 
 import React, { useCallback, useEffect, useMemo } from "react";

@@ -7,11 +7,7 @@ import { UsePremiumResult } from './usePremium.types';
 /**
  * Facade hook that combines status, packages, and actions.
  *
- * This provides backward compatibility with existing code while allowing
- * components to use more focused hooks (usePremiumStatus, usePremiumPackages, usePremiumActions)
- * for better performance and testability.
- *
- * For new components, consider using the focused hooks:
+ * Consider using the focused hooks for better performance:
  * - usePremiumStatus() - when you only need premium status
  * - usePremiumPackages() - when you only need package data
  * - usePremiumActions() - when you only need actions
@@ -28,7 +24,6 @@ export const usePremium = (): UsePremiumResult => {
     ...status,
     ...packages,
     ...actions,
-    // Merge loading states for backward compatibility
     isLoading: status.isSyncing || packages.isLoading || actions.isLoading,
   }), [
     status,

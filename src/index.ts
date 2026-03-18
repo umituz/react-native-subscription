@@ -9,6 +9,13 @@ export {
   PURCHASE_TYPE,
   ANONYMOUS_CACHE_KEY,
 } from "./domains/subscription/core/SubscriptionConstants";
+
+// Domain Events
+export { SUBSCRIPTION_EVENTS } from "./domains/subscription/core/events/SubscriptionEvents";
+export type { SubscriptionEventType, SyncStatusChangedEvent } from "./domains/subscription/core/events/SubscriptionEvents";
+export type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "./domains/subscription/core/SubscriptionEvents";
+export { FLOW_EVENTS } from "./domains/subscription/core/events/FlowEvents";
+export type { FlowEventType, OnboardingCompletedEvent, PaywallShownEvent, PaywallClosedEvent } from "./domains/subscription/core/events/FlowEvents";
 export type {
   UserTierType,
   SubscriptionStatusType,
@@ -175,10 +182,6 @@ export { ManagedSubscriptionFlow } from "./domains/subscription/presentation/com
 export type { ManagedSubscriptionFlowProps } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow";
 export { SubscriptionFlowStatus } from "./domains/subscription/presentation/useSubscriptionFlow";
 export { SubscriptionFlowProvider, useSubscriptionFlowStatus } from "./domains/subscription/presentation/providers/SubscriptionFlowProvider";
-
-// Purchase Loading Overlay
-export { PurchaseLoadingOverlay } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
-export type { PurchaseLoadingOverlayProps } from "./domains/subscription/presentation/components/overlay/PurchaseLoadingOverlay";
 
 // Init Module Factory
 export {
