@@ -20,10 +20,11 @@ export const FeedbackOption: React.FC<FeedbackOptionProps> = React.memo(({
   const tokens = useAppDesignTokens();
 
   const containerStyle = {
-    marginBottom: tokens.spacing.sm,
     backgroundColor: tokens.colors.surfaceSecondary,
     borderRadius: tokens.borderRadius.md,
     overflow: "hidden" as const,
+    borderWidth: 1,
+    borderColor: isSelected ? tokens.colors.primary : "transparent",
   };
 
   return (

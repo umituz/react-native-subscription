@@ -141,21 +141,22 @@ PaywallFeedbackScreen.displayName = "PaywallFeedbackScreen";
 
 const createScreenStyles = (
     tokens: {
-        colors: { backgroundPrimary: string; border: string };
-        spacing: { xl: number; sm: number; md: number };
+        colors: { backgroundPrimary: string; border: string; onPrimary: string; textDisabled: string; surfaceSecondary: string; primary: string };
+        spacing: { xl: number; sm: number; md: number; lg: number };
     },
     _insets: { top: number; bottom: number }
 ) => ({
     container: {
         flex: 1,
+        opacity: 1,
     },
     closeBtn: {
         position: 'absolute' as const,
         top: 12,
         right: 12,
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         zIndex: 1000,
         justifyContent: 'center' as const,
         alignItems: 'center' as const,
@@ -164,21 +165,22 @@ const createScreenStyles = (
         flex: 1,
     },
     scrollContent: {
-        paddingTop: 60,
-        paddingBottom: 100,
+        paddingTop: 80,
+        paddingBottom: 120,
     },
     header: {
         paddingHorizontal: tokens.spacing.xl,
-        marginBottom: tokens.spacing.xl,
+        marginBottom: tokens.spacing.xl + 8,
     },
     title: {
-        marginBottom: tokens.spacing.sm,
+        marginBottom: tokens.spacing.md + 4,
     },
     subtitle: {
-        lineHeight: 22,
+        lineHeight: 24,
     },
     optionsContainer: {
         paddingHorizontal: tokens.spacing.xl,
+        gap: tokens.spacing.md,
     },
     footer: {
         position: 'absolute' as const,
@@ -186,17 +188,26 @@ const createScreenStyles = (
         left: 0,
         right: 0,
         paddingHorizontal: tokens.spacing.xl,
-        paddingTop: tokens.spacing.md,
+        paddingTop: tokens.spacing.lg,
+        paddingBottom: tokens.spacing.lg,
         backgroundColor: tokens.colors.backgroundPrimary,
         borderTopWidth: 1,
         borderTopColor: tokens.colors.border,
+        opacity: 1,
     },
     submitButton: {
-        borderRadius: 14,
-        paddingVertical: 16,
+        borderRadius: 16,
+        paddingVertical: 18,
         alignItems: 'center' as const,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     submitText: {
-        fontWeight: "600" as const,
+        fontWeight: "700" as const,
+        fontSize: 17,
+        letterSpacing: 0.3,
     },
 });
