@@ -76,10 +76,9 @@ export interface ManagedSubscriptionFlowProps {
  */
 import {
   SubscriptionFlowProvider,
-  useSubscriptionFlowStatus,
-  useSubscriptionFlowStore
+  useSubscriptionFlowStatus
 } from "../providers/SubscriptionFlowProvider";
-import { SubscriptionFlowStatus } from "../useSubscriptionFlow";
+import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
 
 const ManagedSubscriptionFlowInner = React.memo<ManagedSubscriptionFlowProps>(({
   children,
