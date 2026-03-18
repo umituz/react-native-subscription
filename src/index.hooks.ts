@@ -6,7 +6,7 @@
 export { useAuthAwarePurchase } from "./domains/subscription/presentation/useAuthAwarePurchase";
 export { useFeatureGate } from "./domains/subscription/presentation/useFeatureGate";
 export { usePaywallVisibility, paywallControl } from "./domains/subscription/presentation/usePaywallVisibility";
-export { usePremiumStatus } from "./domains/subscription/presentation/usePremiumStatus";
+export { usePremiumStatus, usePremiumStatus as usePremium } from "./domains/subscription/presentation/usePremiumStatus";
 export { usePremiumPackages } from "./domains/subscription/presentation/usePremiumPackages";
 export { usePremiumActions } from "./domains/subscription/presentation/usePremiumActions";
 export { useSubscriptionFlowStore } from "./domains/subscription/presentation/useSubscriptionFlow";
