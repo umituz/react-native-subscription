@@ -1,17 +1,11 @@
-import { useQuery } from "@umituz/react-native-design-system/tanstack";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
-import { MEDIUM_CACHE_CONFIG } from "../../../../shared/infrastructure/react-query/queryConfig";
+import { collection, onSnapshot, query, orderBy, limit, Query } from "firebase/firestore";
 import type {
   CreditLog,
   TransactionRepositoryConfig,
 } from "../../domain/types/transaction.types";
-import { TransactionRepository } from "../../infrastructure/repositories/transaction/TransactionRepository";
-
-const transactionQueryKeys = {
-  all: ["transactions"] as const,
-  user: (userId: string) => ["transactions", userId] as const,
-};
+import { requireFirestore } from "../../../../shared/infrastructure/firestore/collectionUtils";
 
 export interface UseTransactionHistoryParams {
   config: TransactionRepositoryConfig;
@@ -28,43 +22,75 @@ interface UseTransactionHistoryResult {
 
 export function useTransactionHistory({
   config,
-  limit = 50,
+  limit: limitCount = 50,
 }: UseTransactionHistoryParams): UseTransactionHistoryResult {
   const userId = useAuthStore(selectUserId);
+  const [transactions, setTransactions] = useState<CreditLog[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  const repository = useMemo(
-    () => new TransactionRepository(config),
-    [config]
-  );
+  useEffect(() => {
+    if (!userId) {
+      setTransactions([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
 
-  const hasUser = !!userId;
+    setIsLoading(true);
+    setError(null);
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: [...transactionQueryKeys.user(userId ?? ""), limit],
-    queryFn: async () => {
-      if (!userId) return [];
+    try {
+      const db = requireFirestore();
+      const collectionPath = config.useUserSubcollection
+        ? `users/${userId}/${config.collectionName}`
+        : config.collectionName;
 
-      const result = await repository.getTransactions({
-        userId,
-        limit,
-      });
+      const q = query(
+        collection(db, collectionPath),
+        orderBy("timestamp", "desc"),
+        limit(limitCount)
+      ) as Query;
 
-      if (!result.success) {
-        throw new Error(result.error?.message || "Failed to fetch history");
-      }
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          const logs: CreditLog[] = [];
+          snapshot.forEach((doc) => {
+            logs.push({
+              id: doc.id,
+              ...doc.data(),
+            } as CreditLog);
+          });
+          setTransactions(logs);
+          setIsLoading(false);
+        },
+        (err) => {
+          console.error("[useTransactionHistory] Snapshot error:", err);
+          setError(err as Error);
+          setIsLoading(false);
+        }
+      );
 
-      return result.data ?? [];
-    },
-    enabled: hasUser,
-    ...MEDIUM_CACHE_CONFIG,
-  });
+      return () => unsubscribe();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error("[useTransactionHistory] Setup error:", err);
+      setError(error);
+      setIsLoading(false);
+    }
+  }, [userId, config.collectionName, config.useUserSubcollection, limitCount]);
 
-  const transactions = data ?? [];
+  const refetch = () => {
+    if (__DEV__) {
+      console.warn("[useTransactionHistory] Refetch called - not needed for real-time sync");
+    }
+  };
 
   return {
     transactions,
     isLoading,
-    error: error as Error | null,
+    error,
     refetch,
     isEmpty: transactions.length === 0,
   };

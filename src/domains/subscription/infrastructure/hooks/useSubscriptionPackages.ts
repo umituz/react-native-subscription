@@ -1,20 +1,19 @@
-import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore, useRef, useCallback } from "react";
 import {
   useAuthStore,
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from '../../infrastructure/managers/SubscriptionManager';
 import { initializationState } from "../../infrastructure/state/initializationState";
-import {
-  SUBSCRIPTION_QUERY_KEYS,
-} from "./subscriptionQueryKeys";
 
 export const useSubscriptionPackages = () => {
   const userId = useAuthStore(selectUserId);
   const isConfigured = SubscriptionManager.isConfigured();
-  const queryClient = useQueryClient();
   const prevUserIdRef = useRef(userId);
+
+  const [packages, setPackages] = useState<any[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const initState = useSyncExternalStore(
     initializationState.subscribe,
@@ -24,45 +23,48 @@ export const useSubscriptionPackages = () => {
 
   const isInitialized = initState.initialized || SubscriptionManager.isInitialized();
 
-  const query = useQuery({
-    queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, userId ?? "anonymous"] as const,
-    queryFn: async () => {
-      return SubscriptionManager.getPackages();
-    },
-    enabled: isConfigured && isInitialized,
-    gcTime: 5 * 60 * 1000,
-    staleTime: 2 * 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: true,
-  });
+  const fetchPackages = useCallback(async () => {
+    if (!isConfigured || !isInitialized) {
+      setPackages(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await SubscriptionManager.getPackages();
+      setPackages(result);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isConfigured, isInitialized]);
+
+  useEffect(() => {
+    fetchPackages();
+  }, [fetchPackages]);
 
   useEffect(() => {
     const prevUserId = prevUserIdRef.current;
     prevUserIdRef.current = userId;
 
     if (prevUserId !== userId) {
-      // Clean up previous user's cache to prevent data leakage
-      if (prevUserId) {
-        queryClient.cancelQueries({
-          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, prevUserId],
-        });
-        queryClient.removeQueries({
-          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, prevUserId],
-        });
-      } else {
-        queryClient.cancelQueries({
-          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, "anonymous"],
-        });
-        queryClient.removeQueries({
-          queryKey: [...SUBSCRIPTION_QUERY_KEYS.packages, "anonymous"],
-        });
-      }
-
-      // No need to invalidate - removeQueries already cleared cache
-      // Query will refetch automatically on mount if needed
+      fetchPackages();
     }
-  }, [userId, queryClient]);
+  }, [userId, fetchPackages]);
 
-  return query;
+  const refetch = useCallback(() => {
+    fetchPackages();
+  }, [fetchPackages]);
+
+  return {
+    data: packages,
+    isLoading,
+    error,
+    refetch,
+  };
 };

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@umituz/react-native-design-system/tanstack";
+import { useMutation } from "@umituz/react-native-design-system/tanstack";
 import type { PurchasesPackage } from "react-native-purchases";
 import { useAlert } from "@umituz/react-native-design-system/molecules";
 import {
@@ -6,7 +6,6 @@ import {
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
 
 interface PurchaseMutationResult {
@@ -16,7 +15,6 @@ interface PurchaseMutationResult {
 
 export const usePurchasePackage = () => {
   const userId = useAuthStore(selectUserId);
-  const queryClient = useQueryClient();
   const { showSuccess, showError } = useAlert();
 
   return useMutation({
@@ -37,14 +35,6 @@ export const usePurchasePackage = () => {
     onSuccess: (result) => {
       if (result.success) {
         showSuccess("Purchase Successful", "Your subscription is now active!");
-
-        // Invalidate packages cache (no event listener for packages)
-        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
-
-        // Credits and subscription status updated via real-time sync:
-        // - Credits: Firestore onSnapshot (useCreditsRealTime)
-        // - Subscription status: PREMIUM_STATUS_CHANGED event (RevenueCat)
-        // No manual invalidation needed here
       } else {
         showError("Purchase Failed", "Unable to complete purchase. Please try again.");
       }

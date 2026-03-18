@@ -1,11 +1,10 @@
-import { useMutation, useQueryClient } from "@umituz/react-native-design-system/tanstack";
+import { useMutation } from "@umituz/react-native-design-system/tanstack";
 import { useAlert } from "@umituz/react-native-design-system/molecules";
 import {
   useAuthStore,
   selectUserId,
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
-import { SUBSCRIPTION_QUERY_KEYS } from "./subscriptionQueryKeys";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
 
 interface RestoreResult {
@@ -15,7 +14,6 @@ interface RestoreResult {
 
 export const useRestorePurchase = () => {
   const userId = useAuthStore(selectUserId);
-  const queryClient = useQueryClient();
   const { showSuccess, showInfo, showError } = useAlert();
 
   return useMutation({
@@ -29,14 +27,6 @@ export const useRestorePurchase = () => {
     },
     onSuccess: (result) => {
       if (result.success) {
-        // Invalidate packages cache (no event listener for packages)
-        queryClient.invalidateQueries({ queryKey: SUBSCRIPTION_QUERY_KEYS.packages });
-
-        // Credits and subscription status updated via real-time sync:
-        // - Credits: Firestore onSnapshot (useCreditsRealTime)
-        // - Subscription status: PREMIUM_STATUS_CHANGED event (RevenueCat)
-        // No manual invalidation needed here
-
         if (result.productId) {
           showSuccess("Restore Successful", "Your subscription has been restored!");
         } else {

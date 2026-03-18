@@ -1,25 +1,20 @@
-import { useQuery, useQueryClient } from "@umituz/react-native-design-system/tanstack";
-import { useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect, useSyncExternalStore, useCallback } from "react";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../infrastructure/managers/SubscriptionManager";
 import { initializationState } from "../infrastructure/state/initializationState";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
-import { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
+import type { SubscriptionStatusResult } from "./useSubscriptionStatus.types";
+import type { PremiumStatus } from "../core/types/PremiumStatus";
 import { isAuthenticated } from "../utils/authGuards";
-import { SHORT_CACHE_CONFIG } from "../../../shared/infrastructure/react-query/queryConfig";
-import { usePreviousUserCleanup } from "../../../shared/infrastructure/react-query/hooks/usePreviousUserCleanup";
-
-export const subscriptionStatusQueryKeys = {
-  all: ["subscriptionStatus"] as const,
-  user: (userId: string | null | undefined) =>
-    userId ? (["subscriptionStatus", userId] as const) : (["subscriptionStatus"] as const),
-};
 
 export const useSubscriptionStatus = (): SubscriptionStatusResult => {
   const userId = useAuthStore(selectUserId);
-  const queryClient = useQueryClient();
   const isConfigured = SubscriptionManager.isConfigured();
   const hasUser = isAuthenticated(userId);
+
+  const [data, setData] = useState<PremiumStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   const initState = useSyncExternalStore(
     initializationState.subscribe,
@@ -31,22 +26,30 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
     ? initState.initialized && initState.userId === userId
     : false;
 
-  const queryEnabled = hasUser && isConfigured && isInitialized;
+  const fetchStatus = useCallback(async () => {
+    if (!hasUser || !isConfigured || !isInitialized) {
+      setData(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
 
-  const { data, status, error, refetch } = useQuery({
-    queryKey: subscriptionStatusQueryKeys.user(userId),
-    queryFn: async () => {
-      if (!hasUser) {
-        return null;
-      }
+    setIsLoading(true);
+    setError(null);
 
-      return SubscriptionManager.checkPremiumStatus();
-    },
-    enabled: queryEnabled,
-    ...SHORT_CACHE_CONFIG,
-  });
+    try {
+      const result = await SubscriptionManager.checkPremiumStatus();
+      setData(result);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasUser, isConfigured, isInitialized]);
 
-  usePreviousUserCleanup(userId, queryClient, subscriptionStatusQueryKeys.user);
+  useEffect(() => {
+    fetchStatus();
+  }, [fetchStatus]);
 
   useEffect(() => {
     if (!hasUser) return undefined;
@@ -55,34 +58,18 @@ export const useSubscriptionStatus = (): SubscriptionStatusResult => {
       SUBSCRIPTION_EVENTS.PREMIUM_STATUS_CHANGED,
       (event: { userId: string; isPremium: boolean }) => {
         if (event.userId === userId) {
-          queryClient.invalidateQueries({
-            queryKey: subscriptionStatusQueryKeys.user(userId),
-          });
+          fetchStatus();
         }
       }
     );
 
     return unsubscribe;
-  }, [userId, hasUser, queryClient]);
-
-  const isLoading = status === "pending";
+  }, [userId, hasUser, fetchStatus]);
 
   return {
-    isPremium: data?.isPremium ?? false,
-    expirationDate: data?.expirationDate ?? null,
-    willRenew: data?.willRenew ?? false,
-    productIdentifier: data?.productIdentifier ?? null,
-    originalPurchaseDate: data?.originalPurchaseDate ?? null,
-    latestPurchaseDate: data?.latestPurchaseDate ?? null,
-    billingIssuesDetected: data?.billingIssuesDetected ?? false,
-    isSandbox: data?.isSandbox ?? false,
-    periodType: data?.periodType ?? null,
-    packageType: data?.packageType ?? null,
-    store: data?.store ?? null,
-    gracePeriodExpiresDate: data?.gracePeriodExpiresDate ?? null,
-    unsubscribeDetectedAt: data?.unsubscribeDetectedAt ?? null,
+    ...data,
     isLoading,
-    error: error as Error | null,
-    refetch,
-  };
+    error,
+    refetch: fetchStatus,
+  } as SubscriptionStatusResult;
 };
