@@ -72,5 +72,5 @@ export function updateLiveRefs(
   state.hasSubscriptionRef.current = hasSubscription ?? false;
   state.onShowPaywallRef.current = onShowPaywall;
   state.requiredCreditsRef.current = requiredCredits ?? 0;
-  state.isCreditsLoadedRef.current = isCreditsLoaded;
+  state.isCreditsLoadedRef.current = isCreditsLoaded ?? false;
 }

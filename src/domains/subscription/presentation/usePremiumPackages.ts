@@ -16,10 +16,10 @@ export interface PremiumPackages {
  * Use this when you only need package information for display purposes.
  */
 export function usePremiumPackages(): PremiumPackages {
-  const { data: packages = EMPTY_PACKAGES, isLoading } = useSubscriptionPackages();
+  const { data: packages, isLoading } = useSubscriptionPackages();
 
   return useMemo(() => ({
-    packages,
+    packages: packages ?? EMPTY_PACKAGES,
     isLoading,
   }), [packages, isLoading]);
 }
