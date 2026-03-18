@@ -3,6 +3,7 @@ import type { PurchasesPackage } from "react-native-purchases";
 import { usePremium } from "./usePremium";
 import type { PurchaseSource } from "../core/SubscriptionConstants";
 import { authPurchaseStateManager } from "../infrastructure/utils/authPurchaseState";
+import { requireAuthentication } from "./utils/authCheckUtils";
 
 export const configureAuthProvider = (provider: import("../infrastructure/utils/authPurchaseState").PurchaseAuthProvider): void => {
   authPurchaseStateManager.configure(provider);
@@ -26,6 +27,10 @@ interface UseAuthAwarePurchaseResult {
   executeSavedPurchase: () => Promise<boolean>;
 }
 
+/**
+ * Hook for purchase operations that handle authentication.
+ * Automatically saves pending purchases and shows auth modal when needed.
+ */
 export const useAuthAwarePurchase = (
   params?: UseAuthAwarePurchaseParams
 ): UseAuthAwarePurchaseResult => {
@@ -50,11 +55,10 @@ export const useAuthAwarePurchase = (
     }
   }, [purchasePackage]);
 
+  // Auto-execute saved purchase when user authenticates
   useEffect(() => {
     const authProvider = authPurchaseStateManager.getProvider();
-    if (!authProvider) return;
-
-    const hasUser = authProvider.hasFirebaseUser();
+    const hasUser = authProvider && authProvider.hasFirebaseUser();
     const hasSavedPurchase = !!authPurchaseStateManager.getSavedPurchase();
 
     if (hasUser && hasSavedPurchase && !isExecutingSavedRef.current) {
@@ -69,18 +73,14 @@ export const useAuthAwarePurchase = (
     async (pkg: PurchasesPackage, source?: PurchaseSource): Promise<boolean> => {
       const authProvider = authPurchaseStateManager.getProvider();
 
-      if (!authProvider) {
-        return false;
-      }
-
-      if (!authProvider.hasFirebaseUser()) {
+      if (!requireAuthentication(authProvider)) {
+        // User not authenticated, purchase saved and auth modal shown
         authPurchaseStateManager.savePurchase(pkg, source || params?.source || "settings");
-        authProvider.showAuthModal();
         return false;
       }
 
+      // User authenticated, proceed with purchase
       const result = await purchasePackage(pkg);
-
       return result;
     },
     [purchasePackage, params?.source]
@@ -89,17 +89,11 @@ export const useAuthAwarePurchase = (
   const handleRestore = useCallback(async (): Promise<boolean> => {
     const authProvider = authPurchaseStateManager.getProvider();
 
-    if (!authProvider) {
-      return false;
-    }
-
-    if (!authProvider.hasFirebaseUser()) {
-      authProvider.showAuthModal();
+    if (!requireAuthentication(authProvider)) {
       return false;
     }
 
     const result = await restorePurchase();
-
     return result;
   }, [restorePurchase]);
 

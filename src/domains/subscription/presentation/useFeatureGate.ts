@@ -1,8 +1,8 @@
-import { useCallback, useRef, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import type { UseFeatureGateParams, UseFeatureGateResult } from "./useFeatureGate.types";
 import { DEFAULT_REQUIRED_CREDITS, canExecuteAuthAction, canExecutePurchaseAction } from "../application/featureGate/featureGateBusinessRules";
-import { useSyncedRefs } from "./featureGateRefs";
 import { executeFeatureAction } from "./featureGateActions";
+import { useFeatureGateRefs, updateLiveRefs } from "./hooks/useFeatureGateState";
 
 export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResult {
   const {
@@ -11,73 +11,64 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
     hasSubscription = false,
     creditBalance,
     requiredCredits = DEFAULT_REQUIRED_CREDITS,
-    onShowPaywall,
     isCreditsLoaded = true,
   } = params;
 
-  const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
-  const prevCreditBalanceRef = useRef(creditBalance);
-  // Separate ref to track previous subscription state for canExecutePurchaseAction.
-  // NOTE: Must NOT use hasSubscriptionRef from useSyncedRefs here because useSyncedRefs
-  // effects run BEFORE this effect (React runs effects in definition order), so
-  // hasSubscriptionRef.current would already be the NEW value when we check it.
-  const prevHasSubscriptionRef = useRef(hasSubscription);
-  const isWaitingForPurchaseRef = useRef(false);
-  const isWaitingForAuthCreditsRef = useRef(false);
+  const state = useFeatureGateRefs(params);
 
-  const { creditBalanceRef, hasSubscriptionRef, onShowPaywallRef, requiredCreditsRef, isCreditsLoadedRef } = useSyncedRefs(creditBalance, hasSubscription, onShowPaywall, requiredCredits, isCreditsLoaded);
+  // Update live refs when params change
+  useEffect(() => {
+    updateLiveRefs(state, params);
+  });
 
+  // Handle post-auth credit loading and action execution
   useEffect(() => {
     const shouldExecute = canExecuteAuthAction(
-      isWaitingForAuthCreditsRef.current,
+      state.isWaitingForAuthCreditsRef.current,
       isCreditsLoaded,
-      !!pendingActionRef.current,
+      !!state.pendingActionRef.current,
       hasSubscription,
       creditBalance,
       requiredCredits
     );
 
     if (shouldExecute) {
-      isWaitingForAuthCreditsRef.current = false;
-      const action = pendingActionRef.current!;
-      pendingActionRef.current = null;
+      state.isWaitingForAuthCreditsRef.current = false;
+      const action = state.pendingActionRef.current!;
+      state.pendingActionRef.current = null;
       action();
       return;
     }
 
-    if (isWaitingForAuthCreditsRef.current && isCreditsLoaded && pendingActionRef.current) {
-      isWaitingForAuthCreditsRef.current = false;
-      isWaitingForPurchaseRef.current = true;
-      // Use ref to avoid unstable callback dependency
-      onShowPaywallRef.current(requiredCreditsRef.current);
+    if (state.isWaitingForAuthCreditsRef.current && isCreditsLoaded && state.pendingActionRef.current) {
+      state.isWaitingForAuthCreditsRef.current = false;
+      state.isWaitingForPurchaseRef.current = true;
+      state.onShowPaywallRef.current(state.requiredCreditsRef.current);
     }
-    // Removed onShowPaywall from dependencies - using ref instead
-  }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, onShowPaywallRef, requiredCreditsRef]);
+  }, [isCreditsLoaded, creditBalance, hasSubscription, requiredCredits, state]);
 
+  // Handle post-purchase action execution
   useEffect(() => {
-    // Use prevHasSubscriptionRef (updated AFTER check) not hasSubscriptionRef from useSyncedRefs
-    // (which is already updated to new value before this effect runs - race condition fix)
     const shouldExecute = canExecutePurchaseAction(
-      isWaitingForPurchaseRef.current,
+      state.isWaitingForPurchaseRef.current,
       creditBalance,
-      prevCreditBalanceRef.current ?? 0,
+      state.prevCreditBalanceRef.current ?? 0,
       hasSubscription,
-      prevHasSubscriptionRef.current,
-      !!pendingActionRef.current
+      state.prevHasSubscriptionRef.current,
+      !!state.pendingActionRef.current
     );
 
     if (shouldExecute) {
-      const action = pendingActionRef.current!;
-      pendingActionRef.current = null;
-      isWaitingForPurchaseRef.current = false;
+      const action = state.pendingActionRef.current!;
+      state.pendingActionRef.current = null;
+      state.isWaitingForPurchaseRef.current = false;
       action();
     }
 
-    // Update AFTER check so next render has correct "prev" values
-    prevCreditBalanceRef.current = creditBalance;
-    prevHasSubscriptionRef.current = hasSubscription;
-     
-  }, [creditBalance, hasSubscription]);
+    // Update prev refs AFTER check for next render
+    state.prevCreditBalanceRef.current = creditBalance;
+    state.prevHasSubscriptionRef.current = hasSubscription;
+  }, [creditBalance, hasSubscription, state]);
 
   const requireFeature = useCallback(
     (action: () => void | Promise<void>): boolean => {
@@ -85,17 +76,10 @@ export function useFeatureGate(params: UseFeatureGateParams): UseFeatureGateResu
         action,
         isAuthenticated,
         onShowAuthModal,
-        hasSubscriptionRef,
-        creditBalanceRef,
-        requiredCreditsRef,
-        onShowPaywallRef,
-        pendingActionRef,
-        isWaitingForAuthCreditsRef,
-        isWaitingForPurchaseRef,
-        isCreditsLoadedRef
+        state
       );
     },
-    [isAuthenticated, onShowAuthModal, hasSubscriptionRef, creditBalanceRef, requiredCreditsRef, onShowPaywallRef, isCreditsLoadedRef]
+    [isAuthenticated, onShowAuthModal, state]
   );
 
   return {
