@@ -36,8 +36,10 @@ class SubscriptionEventBus {
     const listeners = this.listeners.get(event);
     if (!listeners || listeners.size === 0) return;
 
-    listeners.forEach(callback => {
-      queueMicrotask(() => {
+    // PERFORMANCE: Batch all callbacks in a single microtask to reduce call stack overhead
+    // This prevents UI jank when multiple listeners are registered
+    queueMicrotask(() => {
+      listeners.forEach(callback => {
         try {
           callback(data);
         } catch (error) {

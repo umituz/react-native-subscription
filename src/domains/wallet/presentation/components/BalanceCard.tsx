@@ -58,6 +58,13 @@ export const BalanceCard: React.FC<BalanceCardProps> = React.memo(({
       </View>
     </View>
   );
+}, (prevProps, nextProps) => {
+  // PERFORMANCE: Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.balance === nextProps.balance &&
+    prevProps.translations === nextProps.translations &&
+    prevProps.iconName === nextProps.iconName
+  );
 });
 
 const styles = StyleSheet.create({

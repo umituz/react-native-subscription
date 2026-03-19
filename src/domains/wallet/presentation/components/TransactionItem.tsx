@@ -44,4 +44,15 @@ export const TransactionItem: React.FC<TransactionItemProps> = React.memo(({
       </AtomicText>
     </View>
   );
+}, (prevProps, nextProps) => {
+  // PERFORMANCE: Custom comparison to prevent unnecessary re-renders
+  return (
+    prevProps.transaction.id === nextProps.transaction.id &&
+    prevProps.transaction.change === nextProps.transaction.change &&
+    prevProps.transaction.reason === nextProps.transaction.reason &&
+    prevProps.transaction.description === nextProps.transaction.description &&
+    prevProps.transaction.createdAt === nextProps.transaction.createdAt &&
+    prevProps.translations === nextProps.translations &&
+    prevProps.dateFormatter === nextProps.dateFormatter
+  );
 });

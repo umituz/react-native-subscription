@@ -3,7 +3,7 @@ import type { IRevenueCatService } from "../../../../shared/application/ports/IR
 import { getRevenueCatService } from "../services/revenueCatServiceInstance";
 import type { InitializationCache } from "../utils/InitializationCache";
 
-export function ensureConfigured(config: SubscriptionManagerConfig | null): void {
+export function ensureConfigured(config: SubscriptionManagerConfig | null): asserts config is SubscriptionManagerConfig {
     if (!config) {
         throw new Error("SubscriptionManager not configured");
     }
@@ -33,7 +33,7 @@ export function getOrCreateService(
     return serviceInstance;
 }
 
-export function ensureServiceAvailable(service: IRevenueCatService | null): void {
+export function ensureServiceAvailable(service: IRevenueCatService | null): asserts service is IRevenueCatService {
     if (!service) {
         throw new Error("Service instance not available");
     }

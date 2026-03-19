@@ -49,15 +49,20 @@ export function useCreditsRealTime(userId: string | null | undefined) {
 /**
  * Hook to get derived credit values with real-time sync.
  * This is the real-time equivalent of the computed values in useCredits.
+ *
+ * PERFORMANCE: Uses useMemo to avoid recalculating on every render
  */
 export function useCreditsRealTimeDerived(userId: string | null | undefined) {
   const { credits, isLoading } = useCreditsRealTime(userId);
 
-  const hasCredits = (credits?.credits ?? 0) > 0;
-  const creditsPercent = credits ? Math.min(
-    (credits.credits / credits.creditLimit) * 100,
-    100
-  ) : 0;
+  const { hasCredits, creditsPercent } = useMemo(() => {
+    const hasCredits = (credits?.credits ?? 0) > 0;
+    const creditsPercent = credits ? Math.min(
+      (credits.credits / credits.creditLimit) * 100,
+      100
+    ) : 0;
+    return { hasCredits, creditsPercent };
+  }, [credits]); // Include full credits object to catch all changes
 
   return {
     hasCredits,

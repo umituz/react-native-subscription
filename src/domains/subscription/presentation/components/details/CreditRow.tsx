@@ -55,6 +55,15 @@ export const CreditRow: React.FC<CreditRowProps> = React.memo(({
       )}
     </View>
   );
+}, (prevProps, nextProps) => {
+  // PERFORMANCE: Custom comparison to prevent unnecessary re-renders
+  // Only re-render if these values actually change
+  return (
+    prevProps.label === nextProps.label &&
+    prevProps.current === nextProps.current &&
+    prevProps.total === nextProps.total &&
+    prevProps.remainingLabel === nextProps.remainingLabel
+  );
 });
 
 const styles = StyleSheet.create({

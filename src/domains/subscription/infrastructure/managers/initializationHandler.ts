@@ -9,6 +9,6 @@ export const performServiceInitialization = async (config: RevenueCatConfig, use
 
   ensureServiceAvailable(service);
 
-  const result = await service!.initialize(userId);
-  return { service: service!, success: result.success };
+  const result = await service.initialize(userId);
+  return { service, success: result.success };
 };

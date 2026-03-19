@@ -14,7 +14,7 @@
  * - Support for both document and collection queries
  */
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   onSnapshot,
   type Query,
@@ -65,6 +65,8 @@ export type Mapper<TDocument, TEntity> = (
 /**
  * Generic hook for real-time document sync via Firestore onSnapshot.
  *
+ * PERFORMANCE: Uses useRef to stabilize mapper and prevent unnecessary re-subscriptions
+ *
  * @template TDocument - Firestore document type
  * @template TEntity - Domain entity type
  *
@@ -84,6 +86,10 @@ export function useFirestoreDocumentRealTime<TDocument, TEntity>(
   const [data, setData] = useState<TEntity | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  // Stabilize mapper to prevent re-subscriptions when parent re-renders
+  const mapperRef = useRef(mapper);
+  mapperRef.current = mapper;
 
   useEffect(() => {
     // Reset state when userId changes
@@ -106,7 +112,7 @@ export function useFirestoreDocumentRealTime<TDocument, TEntity>(
       docRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          const entity = mapper(snapshot.data() as TDocument, snapshot.id);
+          const entity = mapperRef.current(snapshot.data() as TDocument, snapshot.id);
           setData(entity);
         } else {
           setData(null);
@@ -123,7 +129,7 @@ export function useFirestoreDocumentRealTime<TDocument, TEntity>(
     return () => {
       unsubscribe();
     };
-  }, [userId, docRef, mapper, tag]);
+  }, [userId, docRef, tag]); // Removed mapper from deps
 
   const refetch = useCallback(() => {
     // Real-time sync doesn't need refetch, but keep for API compatibility
@@ -142,6 +148,8 @@ export function useFirestoreDocumentRealTime<TDocument, TEntity>(
 
 /**
  * Generic hook for real-time collection sync via Firestore onSnapshot.
+ *
+ * PERFORMANCE: Uses useRef to stabilize mapper and optimize snapshot processing
  *
  * @template TDocument - Firestore document type
  * @template TEntity - Domain entity type
@@ -163,6 +171,10 @@ export function useFirestoreCollectionRealTime<TDocument, TEntity>(
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Stabilize mapper to prevent re-subscriptions when parent re-renders
+  const mapperRef = useRef(mapper);
+  mapperRef.current = mapper;
+
   useEffect(() => {
     // Reset state when userId changes
     if (!userId) {
@@ -178,10 +190,14 @@ export function useFirestoreCollectionRealTime<TDocument, TEntity>(
     const unsubscribe = onSnapshot(
       query,
       (snapshot) => {
-        const entities: TEntity[] = [];
+        // PERFORMANCE: Pre-allocate array with known size for better memory efficiency
+        const entities: TEntity[] = new Array(snapshot.size);
+        let index = 0;
+
         snapshot.forEach((doc) => {
-          entities.push(mapper(doc.data() as TDocument, doc.id));
+          entities[index++] = mapperRef.current(doc.data() as TDocument, doc.id);
         });
+
         setData(entities);
         setIsLoading(false);
       },
@@ -195,7 +211,7 @@ export function useFirestoreCollectionRealTime<TDocument, TEntity>(
     return () => {
       unsubscribe();
     };
-  }, [userId, query, mapper, tag]);
+  }, [userId, query, tag]); // Removed mapper from deps
 
   const refetch = useCallback(() => {
     // Real-time sync doesn't need refetch, but keep for API compatibility

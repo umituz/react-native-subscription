@@ -68,4 +68,27 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = React.memo(
       />
     </View>
   );
+}, (prevProps, nextProps) => {
+  // PERFORMANCE: Custom comparison to prevent unnecessary re-renders
+  // Deep comparison for credits array since it's frequently updated
+  const creditsEqual = prevProps.credits === nextProps.credits ||
+    (prevProps.credits?.length === nextProps.credits?.length &&
+      prevProps.credits?.every((credit, i) =>
+        credit.id === nextProps.credits?.[i]?.id &&
+        credit.current === nextProps.credits?.[i]?.current &&
+        credit.total === nextProps.credits?.[i]?.total &&
+        credit.label === nextProps.credits?.[i]?.label
+      ));
+
+  return (
+    prevProps.statusType === nextProps.statusType &&
+    prevProps.isPremium === nextProps.isPremium &&
+    prevProps.expirationDate === nextProps.expirationDate &&
+    prevProps.purchaseDate === nextProps.purchaseDate &&
+    prevProps.daysRemaining === nextProps.daysRemaining &&
+    creditsEqual &&
+    prevProps.translations === nextProps.translations &&
+    prevProps.onManageSubscription === nextProps.onManageSubscription &&
+    prevProps.onUpgrade === nextProps.onUpgrade
+  );
 });

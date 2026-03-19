@@ -29,6 +29,9 @@ class SubscriptionManagerImpl {
 
   private ensurePackageHandlerInitialized(): void {
     if (this.packageHandler) return;
+    if (!this.serviceInstance || !this.managerConfig) {
+      throw new Error('[SubscriptionManager] Cannot create package handler without service and config');
+    }
     this.packageHandler = createPackageHandler(this.serviceInstance, this.managerConfig);
   }
 
@@ -70,7 +73,7 @@ class SubscriptionManagerImpl {
       });
     }
 
-    const { service, success } = await performServiceInitialization(this.managerConfig!.config, userId);
+    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
 
@@ -128,7 +131,7 @@ class SubscriptionManagerImpl {
     this.ensureConfigured();
     ensureServiceAvailable(this.serviceInstance);
     this.ensurePackageHandlerInitialized();
-    return checkPremiumStatusFromService(this.serviceInstance!, this.packageHandler!);
+    return checkPremiumStatusFromService(this.serviceInstance, this.packageHandler!);
   }
 
   async reset(): Promise<void> {
@@ -145,7 +148,7 @@ class SubscriptionManagerImpl {
 
   getEntitlementId(): string {
     this.ensureConfigured();
-    return this.managerConfig!.config.entitlementIdentifier;
+    return this.managerConfig.config.entitlementIdentifier;
   }
 }
 

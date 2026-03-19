@@ -35,6 +35,6 @@ export type { PaywallScreenProps } from "./domains/paywall/components/PaywallScr
 
 // Root Flow Components
 export { ManagedSubscriptionFlow } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow";
-export type { ManagedSubscriptionFlowProps } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow";
+export type { ManagedSubscriptionFlowProps } from "./domains/subscription/presentation/components/ManagedSubscriptionFlow.types";
 export { SubscriptionFlowStatus } from "./domains/subscription/presentation/useSubscriptionFlow";
 export { SubscriptionFlowProvider, useSubscriptionFlowStatus } from "./domains/subscription/presentation/providers/SubscriptionFlowProvider";

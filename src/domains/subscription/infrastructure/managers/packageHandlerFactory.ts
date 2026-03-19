@@ -11,7 +11,7 @@ export const createPackageHandler = (
   ensureConfigured(config);
 
   return new PackageHandler(
-    service!,
-    config!.config.entitlementIdentifier
+    service,
+    config.config.entitlementIdentifier
   );
 };

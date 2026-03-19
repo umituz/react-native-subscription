@@ -2,77 +2,21 @@
  * ManagedSubscriptionFlow
  *
  * Clean state machine-based flow orchestration.
- * All state components separated to individual files.
+ * State components and logic separated to individual modules.
  */
 
-import React, { useEffect } from "react";
-import type { NavigationProp } from "@react-navigation/native";
-import type { ImageSourcePropType } from "react-native";
+import React from "react";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePremiumStatus } from "../../presentation/usePremiumStatus";
 import { usePremiumPackages } from "../../presentation/usePremiumPackages";
 import { usePremiumActions } from "../../presentation/usePremiumActions";
 import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
-import type { PaywallFeedbackTranslations } from "./feedback/PaywallFeedbackScreen.types";
-import type { PaywallTranslations, PaywallLegalUrls, SubscriptionFeature } from "../../../paywall/entities/types";
-import {
-  InitializingState,
-  OnboardingState,
-  PaywallState,
-  ReadyState,
-} from "./ManagedSubscriptionFlow.states";
-
-export interface ManagedSubscriptionFlowProps {
-  children: React.ReactNode;
-  navigation: NavigationProp<any>;
-  islocalizationReady: boolean;
-
-  // Splash Configuration
-  splash?: {
-    appName: string;
-    tagline: string;
-    duration?: number;
-  };
-
-  // Onboarding Configuration
-  onboarding: {
-    slides: any[];
-    translations: {
-      nextButton: string;
-      getStartedButton: string;
-      of: string;
-    };
-    themeColors: any;
-    showSkipButton?: boolean;
-    showBackButton?: boolean;
-    showProgressBar?: boolean;
-  };
-
-  // Paywall Configuration
-  paywall: {
-    translations: PaywallTranslations;
-    features: SubscriptionFeature[];
-    legalUrls: PaywallLegalUrls;
-    heroImage: ImageSourcePropType;
-    bestValueIdentifier?: string;
-    creditsLabel?: string;
-  };
-
-  // Feedback Configuration
-  feedback: {
-    translations: PaywallFeedbackTranslations;
-    onSubmit?: (data: { reason: string; otherText?: string }) => void | Promise<void>;
-  };
-
-  // Offline Configuration (optional)
-  offline?: {
-    isOffline: boolean;
-    message: string;
-    backgroundColor?: string;
-    position?: "top" | "bottom";
-  };
-}
-
+import { useStateTransitions } from "./ManagedSubscriptionFlow.logic";
+import type { ManagedSubscriptionFlowProps } from "./ManagedSubscriptionFlow.types";
+import { InitializingState } from "./states/InitializingState";
+import { OnboardingState } from "./states/OnboardingState";
+import { PaywallState } from "./states/PaywallState";
+import { ReadyState } from "./states/ReadyState";
 import {
   SubscriptionFlowProvider,
   useSubscriptionFlowStatus
@@ -97,35 +41,17 @@ const ManagedSubscriptionFlowInner: React.FC<ManagedSubscriptionFlowProps> = ({
 
   // Store actions
   const completeOnboarding = useSubscriptionFlowStore((s) => s.completeOnboarding);
-  const showPaywall = useSubscriptionFlowStore((s) => s.showPaywall);
   const completePaywall = useSubscriptionFlowStore((s) => s.completePaywall);
   const hideFeedback = useSubscriptionFlowStore((s) => s.hideFeedback);
-  const showFeedbackScreen = useSubscriptionFlowStore((s) => s.showFeedbackScreen);
   const showFeedback = useSubscriptionFlowStore((s) => s.showFeedback);
 
-  // ========================================================================
-  // STATE TRANSITIONS
-  // ========================================================================
-
-  useEffect(() => {
-    if (status === SubscriptionFlowStatus.CHECK_PREMIUM && !isSyncing) {
-      const paywallShown = useSubscriptionFlowStore.getState().paywallShown;
-
-      if (isPremium) {
-        completePaywall(true);
-      } else if (!paywallShown) {
-        showPaywall();
-      } else {
-        completePaywall(false);
-      }
-    }
-  }, [status, isPremium, isSyncing, showPaywall, completePaywall]);
-
-  useEffect(() => {
-    if (status === SubscriptionFlowStatus.READY && showFeedback) {
-      showFeedbackScreen();
-    }
-  }, [status, showFeedback, showFeedbackScreen]);
+  // State transitions
+  useStateTransitions({
+    status,
+    isPremium,
+    isSyncing,
+    showFeedback,
+  });
 
   // ========================================================================
   // RENDER BY STATE
