@@ -15,7 +15,7 @@
  * - READY -> READY (stays ready, shows overlays when needed)
  */
 
-import { createStore, storageRepository } from "@umituz/react-native-design-system/storage";
+import { createStore } from "@umituz/react-native-design-system/storage";
 import { subscriptionEventBus, FLOW_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import {
   SubscriptionFlowStatus,
@@ -24,12 +24,13 @@ import {
   type SubscriptionFlowActions,
 } from "./flowTypes";
 import { initialFlowState } from "./flowInitialState";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useSubscriptionFlowStore = createStore<SubscriptionFlowState, SubscriptionFlowActions>({
   name: "subscription-flow-storage",
   initialState: initialFlowState,
   persist: true,
-  storage: storageRepository,
+  storage: AsyncStorage,
   onRehydrate: (state) => {
     if (!state.isInitialized) {
       state.setInitialized(true);
