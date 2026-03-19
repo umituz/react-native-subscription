@@ -58,9 +58,15 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
       nextStatus = SubscriptionFlowStatus.INITIALIZING;
     } else if (!isOnboardingComplete) {
       nextStatus = SubscriptionFlowStatus.ONBOARDING;
-    } else {
-      // Onboarding complete - let ManagedSubscriptionFlow handle CHECK_PREMIUM
+    } else if (
+      status === SubscriptionFlowStatus.ONBOARDING ||
+      status === SubscriptionFlowStatus.INITIALIZING
+    ) {
+      // First time completing onboarding - transition to CHECK_PREMIUM once
       nextStatus = SubscriptionFlowStatus.CHECK_PREMIUM;
+    } else {
+      // Already past onboarding - let ManagedSubscriptionFlow control the flow
+      nextStatus = status;
     }
 
     if (nextStatus !== status) {
