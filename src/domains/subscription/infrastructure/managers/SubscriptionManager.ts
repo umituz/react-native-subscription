@@ -73,7 +73,8 @@ class SubscriptionManagerImpl {
       });
     }
 
-    const { service, success } = await performServiceInitialization(this.managerConfig.config, userId);
+    const config = this.managerConfig!;
+    const { service, success } = await performServiceInitialization(config.config, userId);
     this.serviceInstance = service ?? null;
     this.ensurePackageHandlerInitialized();
 
@@ -95,11 +96,14 @@ class SubscriptionManagerImpl {
   async getPackages(): Promise<PurchasesPackage[]> {
     this.ensureConfigured();
     this.ensurePackageHandlerInitialized();
-    return getPackagesOperation(this.managerConfig, this.serviceInstance, this.packageHandler!);
+    const config = this.managerConfig!;
+    const handler = this.packageHandler!;
+    return getPackagesOperation(config, this.serviceInstance, handler);
   }
 
   async purchasePackage(pkg: PurchasesPackage, explicitUserId?: string): Promise<boolean> {
     this.ensureConfigured();
+    const config = this.managerConfig!;
     if (explicitUserId) {
         await this.initialize(explicitUserId);
     }
@@ -113,18 +117,21 @@ class SubscriptionManagerImpl {
     }
     this.ensurePackageHandlerInitialized();
     const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.initCache);
-    const result = await purchasePackageOperation(pkg, this.managerConfig, resolvedUserId, this.packageHandler!);
+    const handler = this.packageHandler!;
+    const result = await purchasePackageOperation(pkg, config, resolvedUserId, handler);
     return result;
   }
 
   async restore(explicitUserId?: string): Promise<RestoreResultInfo> {
     this.ensureConfigured();
+    const config = this.managerConfig!;
     if (explicitUserId) {
         await this.initialize(explicitUserId);
     }
     this.ensurePackageHandlerInitialized();
     const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.initCache);
-    return restoreOperation(this.managerConfig, resolvedUserId, this.packageHandler!);
+    const handler = this.packageHandler!;
+    return restoreOperation(config, resolvedUserId, handler);
   }
 
   async checkPremiumStatus(): Promise<PremiumStatus> {
@@ -148,7 +155,8 @@ class SubscriptionManagerImpl {
 
   getEntitlementId(): string {
     this.ensureConfigured();
-    return this.managerConfig.config.entitlementIdentifier;
+    const config = this.managerConfig!;
+    return config.config.entitlementIdentifier;
   }
 }
 
