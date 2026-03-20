@@ -75,13 +75,13 @@ export const PremiumDetailsCard: React.FC<PremiumDetailsCardProps> = React.memo(
     (!!prevProps.credits && !!nextProps.credits &&
       prevProps.credits.length === nextProps.credits.length &&
       prevProps.credits.every((credit, i) => {
-        const nextCredit = nextProps.credits[i];
+        const nextCredit = nextProps.credits![i];
         return nextCredit !== undefined &&
           credit.id === nextCredit.id &&
           credit.current === nextCredit.current &&
           credit.total === nextCredit.total &&
           credit.label === nextCredit.label;
-      });
+      }));
 
   return (
     prevProps.statusType === nextProps.statusType &&
