@@ -85,6 +85,8 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
         canSubmit={canSubmit}
         backgroundColor={tokens.colors.primary}
         textColor={tokens.colors.textPrimary}
+        containerBackgroundColor={tokens.colors.backgroundPrimary}
+        borderColor="rgba(255, 255, 255, 0.1)"
         onPress={handleSubmit}
         bottomInset={insets.bottom}
       />

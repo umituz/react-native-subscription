@@ -89,8 +89,8 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
         </TouchableOpacity>
       )}
 
-      {/* Footer Links - Premium inline layout */}
-      <View style={[footerStyles.legalContainer, { marginTop: spacing / 2 }]}>
+      {/* Footer Links - Stacked layout (Restore on top, Legal on bottom) */}
+      <View style={{ marginTop: spacing, alignItems: 'center', gap: 12 }}>
         {onRestore && (
           <TouchableOpacity
             onPress={onRestore}
@@ -104,34 +104,32 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
           </TouchableOpacity>
         )}
 
-        {(onRestore && legalUrls.termsUrl) && (
-          <AtomicText style={footerStyles.legalSeparator}> • </AtomicText>
-        )}
-
-        {legalUrls.termsUrl && (
-          <TouchableOpacity
-            onPress={() => onLegalClick(legalUrls.termsUrl)}
-            activeOpacity={0.6}
-          >
-            <AtomicText style={[footerStyles.legalText, { color: tokens.colors.textTertiary }]}>
-              {translations.termsOfServiceText}
-            </AtomicText>
-          </TouchableOpacity>
-        )}
-
-        {legalUrls.privacyUrl && (
-          <>
-            <AtomicText style={footerStyles.legalSeparator}> • </AtomicText>
+        <View style={footerStyles.legalContainer}>
+          {legalUrls.termsUrl && (
             <TouchableOpacity
-              onPress={() => onLegalClick(legalUrls.privacyUrl)}
+              onPress={() => onLegalClick(legalUrls.termsUrl)}
               activeOpacity={0.6}
             >
               <AtomicText style={[footerStyles.legalText, { color: tokens.colors.textTertiary }]}>
-                {translations.privacyText}
+                {translations.termsOfServiceText}
               </AtomicText>
             </TouchableOpacity>
-          </>
-        )}
+          )}
+
+          {legalUrls.privacyUrl && (
+            <>
+              <AtomicText style={footerStyles.legalSeparator}> • </AtomicText>
+              <TouchableOpacity
+                onPress={() => onLegalClick(legalUrls.privacyUrl)}
+                activeOpacity={0.6}
+              >
+                <AtomicText style={[footerStyles.legalText, { color: tokens.colors.textTertiary }]}>
+                  {translations.privacyText}
+                </AtomicText>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
     </View>
   );

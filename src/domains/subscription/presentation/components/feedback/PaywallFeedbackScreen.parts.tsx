@@ -144,6 +144,8 @@ interface FeedbackSubmitButtonProps {
   canSubmit: boolean;
   backgroundColor: string;
   textColor: string;
+  containerBackgroundColor?: string;
+  borderColor?: string;
   onPress: () => void;
   bottomInset: number;
 }
@@ -153,6 +155,8 @@ export const FeedbackSubmitButton: React.FC<FeedbackSubmitButtonProps> = ({
   canSubmit,
   backgroundColor,
   textColor,
+  containerBackgroundColor = 'rgba(255,255,255,0.98)',
+  borderColor = 'rgba(0,0,0,0.1)',
   onPress,
   bottomInset,
 }) => (
@@ -165,8 +169,8 @@ export const FeedbackSubmitButton: React.FC<FeedbackSubmitButtonProps> = ({
     paddingTop: 18,
     paddingBottom: Math.max(bottomInset, 18),
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  }, { backgroundColor: 'rgba(255,255,255,0.98)' }]}>
+    borderTopColor: borderColor,
+  }, { backgroundColor: containerBackgroundColor }]}>
     <TouchableOpacity
       style={[{
         borderRadius: 16,
@@ -178,7 +182,7 @@ export const FeedbackSubmitButton: React.FC<FeedbackSubmitButtonProps> = ({
         shadowRadius: 4,
         elevation: 3,
       }, {
-        backgroundColor: canSubmit ? backgroundColor : 'rgba(0,0,0,0.1)',
+        backgroundColor: canSubmit ? backgroundColor : 'rgba(255,255,255,0.1)',
         opacity: canSubmit ? 1 : 0.6,
       }]}
       onPress={onPress}
@@ -191,7 +195,7 @@ export const FeedbackSubmitButton: React.FC<FeedbackSubmitButtonProps> = ({
           fontWeight: "700",
           fontSize: 17,
           letterSpacing: 0.3,
-        }, { color: canSubmit ? textColor : 'rgba(0,0,0,0.3)' }]}
+        }, { color: canSubmit ? textColor : 'rgba(255,255,255,0.4)' }]}
       >
         {title}
       </AtomicText>
