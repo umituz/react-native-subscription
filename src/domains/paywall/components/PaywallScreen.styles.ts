@@ -121,45 +121,30 @@ export const paywallScreenStyles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Footer Links
-  footer: {
+  // Footer container with modern design
+  footerContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 40,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255, 255, 255, 0.08)",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    borderTopWidth: 0.5,
+    borderTopColor: "rgba(255, 255, 255, 0.1)",
     ...Platform.select({
       ios: {
+        backgroundColor: "rgba(0, 0, 0, 0.8)",
+        backdropFilter: "blur(20px)",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: -8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
       },
       android: {
-        elevation: 8,
+        backgroundColor: "#000000",
+        elevation: 12,
       },
     }),
-  },
-  purchaseButton: {
-    borderRadius: 18,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    marginBottom: 16,
-  },
-  purchaseButtonText: {
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    fontSize: 16,
   },
   restoreButton: {
     paddingVertical: 4,
@@ -194,6 +179,7 @@ export const paywallScreenStyles = StyleSheet.create({
   // List
   listContent: {
     paddingBottom: 40,
+    paddingHorizontal: 20, // Add horizontal padding
   },
   loadingContainer: {
     flex: 1,

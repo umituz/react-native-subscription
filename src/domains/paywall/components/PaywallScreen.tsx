@@ -220,22 +220,24 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         contentContainerStyle={[
           styles.listContent,
           {
-            paddingTop: Math.max(insets.top, 20) + 40,
-            paddingBottom: 220
+            paddingTop: Math.max(insets.top, 20) + 50,
+            paddingBottom: 280 // Increased for footer
           }
         ]}
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Fixed Footer */}
-      <PaywallFooter
-        translations={translations}
-        legalUrls={legalUrls}
-        isProcessing={isProcessing}
-        onPurchase={handlePurchase}
-        onRestore={handleRestore}
-        onLegalClick={handleLegalUrl}
-      />
+      {/* Fixed Footer - Improved positioning */}
+      <View style={[styles.footerContainer, { paddingBottom: insets.bottom + 20 }]}>
+        <PaywallFooter
+          translations={translations}
+          legalUrls={legalUrls}
+          isProcessing={isProcessing}
+          onPurchase={handlePurchase}
+          onRestore={handleRestore}
+          onLegalClick={handleLegalUrl}
+        />
+      </View>
     </View>
   );
 });
