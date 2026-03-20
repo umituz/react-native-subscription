@@ -88,19 +88,23 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     onClose: handleClose
   });
 
+  // Cleanup on unmount only - resetState is stable from useCallback
   useEffect(() => {
     return () => {
       if (__DEV__) console.log('[PaywallScreen] 🧹 Cleanup: resetting state');
       resetState();
     };
-  }, [resetState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-select first package
   useEffect(() => {
     if (hasItems(packages) && !selectedPlanId) {
       setSelectedPlanId(packages[0].product.identifier);
     }
-  }, [packages, selectedPlanId, setSelectedPlanId]);
+    // setSelectedPlanId is stable from useState, packages.length is sufficient
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [packages?.length, selectedPlanId]);
 
   const handleLegalUrl = useCallback(async (url: string | undefined) => {
     if (!url) return;

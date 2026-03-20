@@ -5,7 +5,7 @@
  * Handlers extracted to separate modules for better maintainability.
  */
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePurchaseHandler } from "./usePaywallPurchase";
 import { useRestoreHandler } from "./usePaywallRestore";
@@ -59,14 +59,14 @@ export function usePaywallActions({
     callbacksRef,
   });
 
-  // Reset state
-  const resetState = () => {
+  // Reset state - memoized with useCallback to prevent infinite loops
+  const resetState = useCallback(() => {
     if (__DEV__) {
       console.log('[usePaywallActions] 🧹 Resetting state');
     }
     setSelectedPlanId(null);
     setIsProcessing(false);
-  };
+  }, []);
 
   // Return API
   return useMemo(() => ({
@@ -76,5 +76,5 @@ export function usePaywallActions({
     handlePurchase,
     handleRestore,
     resetState,
-  }), [selectedPlanId, isProcessing, handlePurchase, handleRestore]);
+  }), [selectedPlanId, isProcessing, handlePurchase, handleRestore, resetState]);
 }
