@@ -42,7 +42,7 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
           {isProcessing ? (
             <AtomicSpinner size="sm" />
           ) : (
-            <AtomicText type="body" style={[styles.purchaseButtonText, { color: tokens.colors.textPrimary }]}>
+            <AtomicText style={[styles.purchaseButtonText, { color: tokens.colors.textPrimary, fontWeight: '700', fontSize: 16 }]}>
               {purchaseButtonText || translations.purchaseButtonText}
             </AtomicText>
           )}
