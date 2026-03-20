@@ -58,6 +58,7 @@ export {
 export {
   formatRelative,
   formatShort,
+  formatMedium,
   formatLong,
 } from "./utils/dateUtils.format";
 
