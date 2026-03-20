@@ -61,6 +61,8 @@ export const paywallScreenStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
+    marginHorizontal: 24,
+    marginBottom: 16,
   },
   featureIcon: {
     width: 30,

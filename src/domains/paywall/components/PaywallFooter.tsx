@@ -2,6 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { AtomicText, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { useResponsive } from "@umituz/react-native-design-system/responsive";
 import type { PaywallTranslations, PaywallLegalUrls } from "../entities/types";
 
 interface PaywallFooterProps {
@@ -24,10 +25,43 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
   purchaseButtonText,
 }) => {
   const tokens = useAppDesignTokens();
+  const responsive = useResponsive();
+
+  // Base values that will be scaled by spacingMultiplier
+  const BASE_BUTTON_HEIGHT = 56;
+  const BASE_FONT_SIZE = 17;
+  const BASE_PADDING_VERTICAL = 16;
+  const BASE_SPACING = 12;
+
+  // Responsive values using spacingMultiplier
+  const buttonHeight = React.useMemo(
+    () => Math.round(BASE_BUTTON_HEIGHT * responsive.spacingMultiplier),
+    [responsive, BASE_BUTTON_HEIGHT]
+  );
+
+  const fontSize = React.useMemo(
+    () => responsive.getFontSize(BASE_FONT_SIZE),
+    [responsive, BASE_FONT_SIZE]
+  );
+
+  const paddingVertical = React.useMemo(
+    () => Math.round(BASE_PADDING_VERTICAL * responsive.spacingMultiplier),
+    [responsive, BASE_PADDING_VERTICAL]
+  );
+
+  const spacing = React.useMemo(
+    () => Math.round(BASE_SPACING * responsive.spacingMultiplier),
+    [responsive, BASE_SPACING]
+  );
+
+  const paddingHorizontal = React.useMemo(
+    () => responsive.horizontalPadding,
+    [responsive]
+  );
 
   return (
-    <View style={footerStyles.container}>
-      {/* Purchase Button - Large and prominent */}
+    <View style={[footerStyles.container, { paddingHorizontal, paddingVertical: spacing, gap: spacing }]}>
+      {/* Purchase Button - Responsive sizing */}
       {onPurchase && (
         <TouchableOpacity
           onPress={onPurchase}
@@ -35,7 +69,11 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
           activeOpacity={0.8}
           style={[
             footerStyles.purchaseButton,
-            { backgroundColor: tokens.colors.primary },
+            {
+              backgroundColor: tokens.colors.primary,
+              height: buttonHeight,
+              paddingVertical: paddingVertical,
+            },
             isProcessing && footerStyles.buttonDisabled,
           ]}
         >
@@ -44,29 +82,32 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
               <AtomicSpinner size="sm" />
             </View>
           ) : (
-            <AtomicText style={[footerStyles.purchaseButtonText, { color: tokens.colors.textPrimary }]}>
+            <AtomicText style={[footerStyles.purchaseButtonText, { color: tokens.colors.textPrimary, fontSize }]}>
               {purchaseButtonText || translations.purchaseButtonText}
             </AtomicText>
           )}
         </TouchableOpacity>
       )}
 
-      {/* Restore Link - Minimal */}
-      {onRestore && (
-        <TouchableOpacity
-          onPress={onRestore}
-          disabled={isProcessing}
-          activeOpacity={0.6}
-          style={footerStyles.restoreButton}
-        >
-          <AtomicText style={[footerStyles.restoreText, { color: tokens.colors.textSecondary }]}>
-            {translations.restoreButtonText}
-          </AtomicText>
-        </TouchableOpacity>
-      )}
+      {/* Footer Links - Premium inline layout */}
+      <View style={[footerStyles.legalContainer, { marginTop: spacing / 2 }]}>
+        {onRestore && (
+          <TouchableOpacity
+            onPress={onRestore}
+            disabled={isProcessing}
+            activeOpacity={0.6}
+            style={footerStyles.restoreButton}
+          >
+            <AtomicText style={[footerStyles.legalText, { color: tokens.colors.textSecondary, fontWeight: '600' }]}>
+              {translations.restoreButtonText}
+            </AtomicText>
+          </TouchableOpacity>
+        )}
 
-      {/* Legal Links - Minimal */}
-      <View style={footerStyles.legalContainer}>
+        {(onRestore && legalUrls.termsUrl) && (
+          <AtomicText style={footerStyles.legalSeparator}> • </AtomicText>
+        )}
+
         {legalUrls.termsUrl && (
           <TouchableOpacity
             onPress={() => onLegalClick(legalUrls.termsUrl)}
@@ -77,6 +118,7 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
             </AtomicText>
           </TouchableOpacity>
         )}
+
         {legalUrls.privacyUrl && (
           <>
             <AtomicText style={footerStyles.legalSeparator}> • </AtomicText>
@@ -99,13 +141,9 @@ export const PaywallFooter: React.FC<PaywallFooterProps> = React.memo(({
 const footerStyles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    gap: 12,
   },
   purchaseButton: {
     width: '100%',
-    height: 56,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
@@ -123,16 +161,13 @@ const footerStyles = StyleSheet.create({
     alignItems: 'center',
   },
   purchaseButtonText: {
-    fontSize: 17,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   restoreButton: {
     alignItems: 'center',
-    paddingVertical: 4,
   },
   restoreText: {
-    fontSize: 13,
     fontWeight: '500',
     textDecorationLine: 'underline',
   },
@@ -143,11 +178,9 @@ const footerStyles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   legalText: {
-    fontSize: 11,
     lineHeight: 16,
   },
   legalSeparator: {
-    fontSize: 11,
     color: 'rgba(255, 255, 255, 0.4)',
     marginHorizontal: 4,
   },

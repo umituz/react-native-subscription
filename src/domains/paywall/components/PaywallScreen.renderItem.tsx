@@ -7,15 +7,17 @@ import React from "react";
 import { View } from "react-native";
 import type { ImageSourcePropType } from "react-native";
 import { AtomicText, AtomicIcon } from "@umituz/react-native-design-system/atoms";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { useResponsive } from "@umituz/react-native-design-system/responsive";
 import { Image } from "expo-image";
 import { PlanCard } from "./PlanCard";
 import type { PaywallListItem } from "../utils/paywallLayoutUtils";
+import type { PaywallTranslations } from "../entities/types";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 
 interface PaywallRenderItemProps {
   item: PaywallListItem;
-  tokens: any;
-  translations: any;
+  translations: PaywallTranslations;
   heroImage?: ImageSourcePropType;
   selectedPlanId?: string;
   bestValueIdentifier?: string;
@@ -26,7 +28,6 @@ interface PaywallRenderItemProps {
 
 export const PaywallRenderItem: React.FC<PaywallRenderItemProps> = React.memo(({
   item,
-  tokens,
   translations,
   heroImage,
   selectedPlanId,
@@ -35,16 +36,42 @@ export const PaywallRenderItem: React.FC<PaywallRenderItemProps> = React.memo(({
   creditsLabel,
   onSelectPlan,
 }) => {
+  const tokens = useAppDesignTokens();
+  const responsive = useResponsive();
+
+  // Responsive spacing
+  const spacing = React.useMemo(
+    () => Math.round(16 * responsive.spacingMultiplier),
+    [responsive]
+  );
+
+  // Responsive feature icon size - use spacing multiplier directly to avoid max/min constraints from getIconSize
+  const featureIconSize = React.useMemo(
+    () => Math.round(30 * responsive.spacingMultiplier),
+    [responsive]
+  );
+
+  // Responsive hero image size
+  const heroImageSize = React.useMemo(
+    () => responsive.getIconSize(120),
+    [responsive]
+  );
+
   if (!translations) return null;
 
   switch (item.type) {
     case 'HEADER':
       return (
         <View key="header">
-          {/* Hero Image */}
+          {/* Hero Image - Responsive sizing */}
           {heroImage && (
             <View style={styles.heroContainer}>
-              <Image source={heroImage} style={styles.heroImage} contentFit="cover" transition={200} />
+              <Image
+                source={heroImage}
+                style={[styles.heroImage, { width: heroImageSize, height: heroImageSize, borderRadius: heroImageSize * 0.25 }]}
+                contentFit="cover"
+                transition={200}
+              />
             </View>
           )}
 
@@ -64,7 +91,7 @@ export const PaywallRenderItem: React.FC<PaywallRenderItemProps> = React.memo(({
 
     case 'FEATURE_HEADER':
       return (
-        <View key="feat-header" style={styles.sectionHeader}>
+        <View key="feat-header" style={[styles.sectionHeader, { marginTop: spacing * 1.5 }]}>
           <AtomicText type="labelLarge" style={[styles.sectionTitle, { color: tokens.colors.textSecondary }]}>
             {translations.featuresTitle || "WHAT'S INCLUDED"}
           </AtomicText>
@@ -73,9 +100,13 @@ export const PaywallRenderItem: React.FC<PaywallRenderItemProps> = React.memo(({
 
     case 'FEATURE':
       return (
-        <View key={`feat-${item.feature.text}`} style={[styles.featureRow, { marginHorizontal: 24, marginBottom: 16 }]}>
-          <View style={[styles.featureIcon, { backgroundColor: tokens.colors.primary }]}>
-            <AtomicIcon name={item.feature.icon} customSize={16} customColor={tokens.colors.onPrimary} />
+        <View key={`feat-${item.feature.text}`} style={[styles.featureRow, { marginBottom: spacing }]}>
+          <View style={[styles.featureIcon, { width: featureIconSize, height: featureIconSize, backgroundColor: tokens.colors.primary }]}>
+            <AtomicIcon
+              name={item.feature.icon}
+              customSize={responsive.getFontSize(16)}
+              customColor={tokens.colors.onPrimary}
+            />
           </View>
           <AtomicText type="bodyMedium" style={[styles.featureText, { color: tokens.colors.textPrimary }]}>
             {item.feature.text}
@@ -85,7 +116,7 @@ export const PaywallRenderItem: React.FC<PaywallRenderItemProps> = React.memo(({
 
     case 'PLAN_HEADER':
       return (
-        <View key="plan-header" style={styles.sectionHeader}>
+        <View key="plan-header" style={[styles.sectionHeader, { marginTop: spacing * 1.5 }]}>
           <AtomicText type="labelLarge" style={[styles.sectionTitle, { color: tokens.colors.textSecondary }]}>
             {translations.plansTitle || "CHOOSE YOUR PLAN"}
           </AtomicText>

@@ -18,6 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
+import { useResponsive } from "@umituz/react-native-design-system/responsive";
 import { paywallScreenStyles as styles } from "./PaywallScreen.styles";
 import { PaywallFooter } from "./PaywallFooter";
 import { usePaywallActions } from "../hooks/usePaywallActions";
@@ -28,6 +29,10 @@ import {
 } from "../utils/paywallLayoutUtils";
 import { hasItems } from "../../../shared/utils/arrayUtils";
 import { PaywallRenderItem } from "./PaywallScreen.renderItem";
+
+// Paywall layout constants
+const PAYWALL_HEADER_HEIGHT = 60; // Close button + spacing
+const PAYWALL_FOOTER_HEIGHT_BASE = 280; // Base footer height
 
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
   const navigation = useNavigation();
@@ -61,6 +66,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
 
   const tokens = useAppDesignTokens();
   const insets = useSafeAreaInsets();
+  const responsive = useResponsive();
 
   const handleClose = useCallback(() => {
     if (__DEV__) console.log('[PaywallScreen] 🔙 Closing paywall');
@@ -146,7 +152,6 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     return (
       <PaywallRenderItem
         item={item}
-        tokens={tokens}
         translations={translations}
         heroImage={heroImage}
         selectedPlanId={selectedPlanId ?? undefined}
@@ -156,7 +161,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         onSelectPlan={setSelectedPlanId}
       />
     );
-  }, [tokens, translations, heroImage, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
+  }, [translations, heroImage, selectedPlanId, bestValueIdentifier, creditAmounts, creditsLabel, setSelectedPlanId]);
 
   // Performance Optimization: getItemLayout for FlatList
   const getItemLayout = useCallback((_data: ArrayLike<PaywallListItem> | null | undefined, index: number) => {
@@ -190,11 +195,11 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     <View style={[styles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}>
       <StatusBar barStyle="light-content" />
 
-      {/* Absolute Close Button */}
+      {/* Absolute Close Button - Responsive positioning */}
       <View style={{
         position: 'absolute',
         top: Math.max(insets.top, 16),
-        right: 0,
+        right: 16,
         zIndex: 10,
       }}>
         <TouchableOpacity
@@ -206,7 +211,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         </TouchableOpacity>
       </View>
 
-      {/* Main Content */}
+      {/* Main Content - Responsive spacing */}
       <FlatList
         data={flatData}
         renderItem={renderItem}
@@ -220,15 +225,16 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
         contentContainerStyle={[
           styles.listContent,
           {
-            paddingTop: Math.max(insets.top, 20) + 50,
-            paddingBottom: 280 // Increased for footer
+            paddingTop: Math.max(insets.top, 20) + PAYWALL_HEADER_HEIGHT, // Responsive header spacing
+            paddingBottom: PAYWALL_FOOTER_HEIGHT_BASE + responsive.verticalPadding, // Dynamic footer spacing
+            paddingHorizontal: responsive.horizontalPadding, // Device-based horizontal padding
           }
         ]}
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Fixed Footer - Improved positioning */}
-      <View style={[styles.footerContainer, { paddingBottom: insets.bottom + 20 }]}>
+      {/* Fixed Footer - Responsive positioning */}
+      <View style={[styles.footerContainer, { paddingBottom: insets.bottom + responsive.verticalPadding }]}>
         <PaywallFooter
           translations={translations}
           legalUrls={legalUrls}
