@@ -8,6 +8,7 @@ export interface PremiumStatus {
   isPremium: boolean;
   credits: UserCredits | null;
   isSyncing: boolean;
+  isLoading: boolean;
 }
 
 /**
@@ -34,5 +35,6 @@ export function usePremiumStatus(): PremiumStatus {
     isPremium,
     credits,
     isSyncing,
-  }), [isPremium, credits, isSyncing]);
+    isLoading: statusLoading || creditsLoading,
+  }), [isPremium, credits, isSyncing, statusLoading, creditsLoading]);
 }
