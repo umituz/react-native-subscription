@@ -9,6 +9,7 @@
 import React, { useMemo } from "react";
 import { View, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "@umituz/react-native-design-system/safe-area";
+import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { usePaywallFeedback } from "../../../../../presentation/hooks/feedback/usePaywallFeedback";
 import type { PaywallFeedbackScreenProps, PaywallFeedbackTranslations } from "./PaywallFeedbackScreen.types";
 import {
@@ -27,6 +28,7 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
   onSubmit,
 }) => {
   const insets = useSafeAreaInsets();
+  const tokens = useAppDesignTokens();
 
   const {
     selectedReason,
@@ -41,13 +43,13 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
   const screenStyles = useMemo(() => createScreenStyles(), []);
 
   return (
-    <View style={[screenStyles.container, { backgroundColor: 'white', opacity: 1 }]}>
+    <View style={[screenStyles.container, { backgroundColor: tokens.colors.backgroundPrimary }]}>
       {/* Close button */}
       <FeedbackCloseButton
         onPress={handleSkip}
         topInset={insets.top}
-        backgroundColor="rgba(0,0,0,0.05)"
-        iconColor="#000"
+        backgroundColor={tokens.colors.surfaceSecondary}
+        iconColor={tokens.colors.textPrimary}
       />
 
       {/* Scrollable content */}
@@ -60,8 +62,8 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
         <FeedbackHeader
           title={translations.title}
           subtitle={translations.subtitle}
-          titleColor="#000"
-          subtitleColor="#666"
+          titleColor={tokens.colors.textPrimary}
+          subtitleColor={tokens.colors.textSecondary}
           style={screenStyles.header}
         />
 
@@ -81,8 +83,8 @@ export const PaywallFeedbackScreen: React.FC<PaywallFeedbackScreenProps> = React
       <FeedbackSubmitButton
         title={translations.submit}
         canSubmit={canSubmit}
-        backgroundColor="#007AFF"
-        textColor="#FFF"
+        backgroundColor={tokens.colors.primary}
+        textColor={tokens.colors.textPrimary}
         onPress={handleSubmit}
         bottomInset={insets.bottom}
       />
