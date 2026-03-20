@@ -123,9 +123,43 @@ export const paywallScreenStyles = StyleSheet.create({
 
   // Footer Links
   footer: {
-    marginTop: 16,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255, 255, 255, 0.08)",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  purchaseButton: {
+    borderRadius: 18,
+    height: 60,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginBottom: 16,
+  },
+  purchaseButtonText: {
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    fontSize: 16,
   },
   restoreButton: {
     paddingVertical: 4,
