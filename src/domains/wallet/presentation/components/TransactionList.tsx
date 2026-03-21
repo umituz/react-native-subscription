@@ -7,7 +7,7 @@ import { transactionListStyles } from "./TransactionList.styles";
 import { LoadingState, EmptyState } from "./TransactionListStates";
 import { DEFAULT_TRANSACTION_LIST_MAX_HEIGHT } from "./TransactionList.constants";
 import type { TransactionListTranslations, TransactionListProps } from "./TransactionList.types";
-import { isEmptyArray } from "../../../shared/utils/arrayUtils";
+import { isEmptyArray } from "../../../../shared/utils/arrayUtils";
 
 export type { TransactionListTranslations };
 

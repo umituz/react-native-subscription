@@ -5,8 +5,8 @@ import type {
   CreditLog,
   TransactionRepositoryConfig,
 } from "../../domain/types/transaction.types";
-import { requireFirestore } from "../../../shared/infrastructure/firestore/collectionUtils";
-import { useFirestoreCollectionRealTime } from "../../../shared/presentation/hooks/useFirestoreRealTime";
+import { requireFirestore } from "../../../../shared/infrastructure/firestore/collectionUtils";
+import { useFirestoreCollectionRealTime } from "../../../../shared/presentation/hooks/useFirestoreRealTime";
 
 export interface UseTransactionHistoryParams {
   config: TransactionRepositoryConfig;

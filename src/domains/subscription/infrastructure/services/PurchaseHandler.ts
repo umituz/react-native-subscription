@@ -1,11 +1,11 @@
 import type { PurchasesPackage } from "react-native-purchases";
-import type { PurchaseResult } from "../../../shared/application/ports/IRevenueCatService";
+import type { PurchaseResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import { isUserCancelledError, isAlreadyPurchasedError } from "../../../revenuecat/core/types/RevenueCatTypes";
 import { validatePurchaseReady, isConsumableProduct } from "./purchase/PurchaseValidator";
 import { executePurchase } from "./purchase/PurchaseExecutor";
 import { handleAlreadyPurchasedError, handlePurchaseError } from "./purchase/PurchaseErrorHandler";
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("PurchaseHandler");
 

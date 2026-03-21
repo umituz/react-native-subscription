@@ -3,9 +3,9 @@
  * Centralized logging for subscription sync operations
  */
 
-import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
+import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../../shared/infrastructure/SubscriptionEventBus";
 import type { PurchaseCompletedEvent, RenewalDetectedEvent, PremiumStatusChangedEvent } from "../../core/SubscriptionEvents";
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("SubscriptionSyncProcessor");
 

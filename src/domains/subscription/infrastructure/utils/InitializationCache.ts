@@ -4,7 +4,7 @@ interface CacheEntry {
     completed: boolean;
 }
 
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("InitializationCache");
 

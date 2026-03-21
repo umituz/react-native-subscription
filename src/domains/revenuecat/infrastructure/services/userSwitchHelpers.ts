@@ -5,10 +5,10 @@
  */
 
 import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-native-purchases";
-import type { InitializeResult } from "../../../shared/application/ports/IRevenueCatService";
+import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { ANONYMOUS_CACHE_KEY } from "../../../subscription/core/SubscriptionConstants";
-import { createLogger } from "../../../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("UserSwitchHelpers");
 

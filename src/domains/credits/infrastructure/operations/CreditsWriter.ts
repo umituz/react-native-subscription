@@ -4,7 +4,7 @@ import { getDoc, setDoc } from "firebase/firestore";
 import { SUBSCRIPTION_STATUS } from "../../../subscription/core/SubscriptionConstants";
 import { resolveSubscriptionStatus } from "../../../subscription/core/SubscriptionStatus";
 import type { SubscriptionMetadata } from "../../../subscription/core/types/SubscriptionMetadata";
-import { toTimestamp } from "../../../shared/utils/dateConverter";
+import { toTimestamp } from "../../../../shared/utils/dateConverter";
 import { isPast } from "../../../../utils/dateUtils";
 import { getAppVersion, validatePlatform } from "../../../../utils/appUtils";
 

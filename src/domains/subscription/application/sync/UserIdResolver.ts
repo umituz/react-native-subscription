@@ -3,7 +3,7 @@
  * Handles resolution of RevenueCat user ID to credits user ID
  */
 
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("UserIdResolver");
 

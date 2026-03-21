@@ -8,7 +8,7 @@ import type { PremiumStatusChangedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
 import { CreditDocumentOperations } from "./CreditDocumentOperations";
 import { PurchaseSyncHandler } from "./PurchaseSyncHandler";
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("StatusChangeSyncHandler");
 

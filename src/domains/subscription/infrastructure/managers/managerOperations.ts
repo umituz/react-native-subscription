@@ -1,5 +1,5 @@
 import type { PurchasesPackage } from "react-native-purchases";
-import type { IRevenueCatService } from "../../../shared/application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
 import type { PackageHandler } from "../handlers/PackageHandler";
 import type { RestoreResultInfo } from "./SubscriptionManager.types";
 import { ensureConfigured, getOrCreateService } from "./subscriptionManagerUtils";

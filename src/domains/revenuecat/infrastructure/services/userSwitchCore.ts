@@ -5,7 +5,7 @@
  */
 
 import Purchases, { type CustomerInfo } from "react-native-purchases";
-import type { InitializeResult } from "../../../shared/application/ports/IRevenueCatService";
+import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT } from "./initializerConstants";
 import { UserSwitchMutex } from "./UserSwitchMutex";
@@ -16,7 +16,7 @@ import {
   buildSuccessResult,
   fetchOfferingsSafe,
 } from "./userSwitchHelpers";
-import { createLogger } from "../../../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("UserSwitchCore");
 

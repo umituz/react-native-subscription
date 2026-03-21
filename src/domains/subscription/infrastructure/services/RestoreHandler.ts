@@ -1,5 +1,5 @@
 import Purchases from "react-native-purchases";
-import type { RestoreResult } from "../../../shared/application/ports/IRevenueCatService";
+import type { RestoreResult } from "../../../../shared/application/ports/IRevenueCatService";
 import {
   RevenueCatRestoreError,
   RevenueCatInitializationError,

@@ -5,7 +5,7 @@
 
 import { getCreditsRepository } from "../../../credits/infrastructure/CreditsRepositoryManager";
 import type { PremiumStatusChangedEvent } from "../../core/SubscriptionEvents";
-import { createLogger } from "../../../shared/utils/logger";
+import { createLogger } from "../../../../shared/utils/logger";
 
 const logger = createLogger("CreditDocumentOperations");
 
