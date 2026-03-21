@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 import { AtomicText, AtomicIcon, AtomicSpinner } from "@umituz/react-native-design-system/atoms";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
-import { ScreenLayout } from "../../../../shared/presentation/layouts/ScreenLayout";
+import { ScreenLayout } from "../../../shared/presentation/layouts/ScreenLayout";
 import { useAppNavigation } from "@umituz/react-native-design-system/molecules";
 import { useWallet } from "../hooks/useWallet";
 import { getWalletConfig } from "../../infrastructure/config/walletConfig";

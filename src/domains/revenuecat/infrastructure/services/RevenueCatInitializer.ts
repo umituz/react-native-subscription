@@ -1,4 +1,4 @@
-import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
+import type { InitializeResult } from "../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS, MAX_INIT_RETRIES } from "./initializerConstants";
 import { configState } from "./ConfigurationStateManager";

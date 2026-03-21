@@ -5,7 +5,7 @@ import { AtomicIcon, AtomicText } from "@umituz/react-native-design-system/atoms
 import { NavigationHeader } from "@umituz/react-native-design-system/molecules";
 import { useAppDesignTokens } from "@umituz/react-native-design-system/theme";
 import { useAuthStore, selectUserId } from "@umituz/react-native-auth";
-import { ScreenLayout } from "../../../../shared/presentation/layouts/ScreenLayout";
+import { ScreenLayout } from "../../../shared/presentation/layouts/ScreenLayout";
 import { getCreditsRepository } from "../../../credits/infrastructure/CreditsRepositoryManager";
 import { SubscriptionHeader } from "./components/SubscriptionHeader";
 import { CreditsList } from "./components/CreditsList";

@@ -1,7 +1,7 @@
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { getCurrentUserId, setupAuthStateListener } from "../SubscriptionAuthListener";
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("BackgroundInitializer");
 

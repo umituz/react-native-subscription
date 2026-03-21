@@ -9,7 +9,7 @@ import { useState, useRef, useMemo, useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePurchaseHandler } from "./usePaywallPurchase";
 import { useRestoreHandler } from "./usePaywallRestore";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("usePaywallActions");
 

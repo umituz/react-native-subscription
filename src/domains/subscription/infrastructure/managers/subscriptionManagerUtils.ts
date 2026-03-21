@@ -1,5 +1,5 @@
 import type { SubscriptionManagerConfig } from "./SubscriptionManager.types";
-import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../shared/application/ports/IRevenueCatService";
 import { getRevenueCatService } from "../services/revenueCatServiceInstance";
 import type { InitializationCache } from "../utils/InitializationCache";
 

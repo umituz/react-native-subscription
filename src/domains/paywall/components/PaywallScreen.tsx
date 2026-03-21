@@ -29,7 +29,7 @@ import {
 } from "../utils/paywallLayoutUtils";
 import { hasItems } from "../../../shared/utils/arrayUtils";
 import { PaywallRenderItem } from "./PaywallScreen.renderItem";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("PaywallScreen");
 

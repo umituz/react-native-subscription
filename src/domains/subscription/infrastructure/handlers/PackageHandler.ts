@@ -1,5 +1,5 @@
 import type { PurchasesPackage, CustomerInfo } from "react-native-purchases";
-import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../shared/application/ports/IRevenueCatService";
 import { PurchaseStatusResolver, type PremiumStatus } from "./PurchaseStatusResolver";
 import { fetchPackages } from "./package-operations/PackageFetcher";
 import { executePurchase } from "./package-operations/PackagePurchaser";

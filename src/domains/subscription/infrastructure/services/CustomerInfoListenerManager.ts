@@ -2,7 +2,7 @@ import Purchases, { type CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import { ListenerState } from "./listeners/ListenerState";
 import { processCustomerInfo } from "./listeners/CustomerInfoHandler";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("CustomerInfoListenerManager");
 

@@ -1,5 +1,5 @@
 import Purchases, { type PurchasesOffering } from "react-native-purchases";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("OfferingsFetcher");
 

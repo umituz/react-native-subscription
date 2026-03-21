@@ -9,7 +9,7 @@ import { extractRevenueCatData } from "../SubscriptionSyncUtils";
 import { generateRenewalId } from "../syncIdGenerators";
 import type { RenewalDetectedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("RenewalSyncHandler");
 

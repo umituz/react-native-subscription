@@ -7,7 +7,7 @@
 import { useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePremiumVerification } from "./usePaywallActions.utils";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("useRestoreHandler");
 

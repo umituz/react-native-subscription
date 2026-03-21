@@ -1,4 +1,4 @@
-import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../shared/application/ports/IRevenueCatService";
 import { PackageHandler } from "../handlers/PackageHandler";
 import { ensureServiceAvailable, ensureConfigured } from "./subscriptionManagerUtils";
 import type { SubscriptionManagerConfig } from "./SubscriptionManager.types";

@@ -3,7 +3,7 @@ import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCat
 import type { PurchaseSource } from "../../core/SubscriptionConstants";
 import type { PackageType } from "../../../revenuecat/core/types/RevenueCatTypes";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types/RevenueCatTypes";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("PremiumStatusSyncer");
 

@@ -7,7 +7,7 @@ import {
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("usePurchasePackage");
 

@@ -1,4 +1,4 @@
-import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
+import type { InitializeResult } from "../../../shared/application/ports/IRevenueCatService";
 
 export const FAILED_INITIALIZATION_RESULT: InitializeResult = {
   success: false,

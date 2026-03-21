@@ -5,7 +5,7 @@
 
 import { useSubscriptionStatus } from "../../subscription/presentation/useSubscriptionStatus";
 import { useCredits } from "../../credits/presentation/useCredits";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("PremiumVerification");
 

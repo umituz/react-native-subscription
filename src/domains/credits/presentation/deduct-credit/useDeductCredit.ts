@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryManager";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
 
 const logger = createLogger("useDeductCredit");

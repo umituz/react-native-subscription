@@ -9,7 +9,7 @@ import { extractRevenueCatData } from "../SubscriptionSyncUtils";
 import { generatePurchaseId } from "../syncIdGenerators";
 import type { PurchaseCompletedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("PurchaseSyncHandler");
 

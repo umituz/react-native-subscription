@@ -1,5 +1,5 @@
 import type { PurchasesPackage } from "react-native-purchases";
-import type { IRevenueCatService } from "../../../../shared/application/ports/IRevenueCatService";
+import type { IRevenueCatService } from "../../../shared/application/ports/IRevenueCatService";
 import type { PackageHandler } from "../handlers/PackageHandler";
 import { InitializationCache } from "../utils/InitializationCache";
 import { ensureServiceAvailable, getCurrentUserIdOrThrow } from "./subscriptionManagerUtils";
@@ -10,7 +10,7 @@ import { getPackagesOperation, purchasePackageOperation, restoreOperation } from
 import { performServiceInitialization } from "./initializationHandler";
 import { initializationState } from "../state/initializationState";
 import { ANONYMOUS_CACHE_KEY } from "../../core/SubscriptionConstants";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("SubscriptionManager");
 

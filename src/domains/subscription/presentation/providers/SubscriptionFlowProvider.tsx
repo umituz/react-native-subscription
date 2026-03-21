@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect } from "react";
 import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
 import { useSyncStatusListener } from "../useSyncStatusListener";
 import { initializationState } from "../../infrastructure/state/initializationState";
-import { createLogger } from "../../../../shared/utils/logger";
+import { createLogger } from "../../../shared/utils/logger";
 
 const logger = createLogger("SubscriptionFlowProvider");
 
