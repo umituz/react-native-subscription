@@ -1,6 +1,9 @@
 import { useCallback, useState } from "react";
 import { getCreditsRepository } from "../../infrastructure/CreditsRepositoryManager";
+import { createLogger } from "../../../../shared/utils/logger";
 import type { UseDeductCreditParams, UseDeductCreditResult } from "./types";
+
+const logger = createLogger("useDeductCredit");
 
 export const useDeductCredit = ({
   userId,
@@ -15,26 +18,22 @@ export const useDeductCredit = ({
     setIsDeducting(true);
     try {
       const res = await repository.deductCredit(userId, cost);
-      if (__DEV__) console.log('[useDeductCredit] deduction result:', JSON.stringify(res));
+      logger.debug("Deduction result", { result: res });
 
       if (!res.success) {
-        if (__DEV__) console.log('[useDeductCredit] deduction FAILED:', res.error?.code, res.error?.message);
+        logger.warn("Deduction failed", { code: res.error?.code, message: res.error?.message });
 
         if (res.error?.code === "CREDITS_EXHAUSTED" || res.error?.code === "DEDUCT_ERR" || res.error?.code === "NO_CREDITS") {
-          if (__DEV__) console.log('[useDeductCredit] Credits exhausted, calling onCreditsExhausted callback');
+          logger.info("Credits exhausted, calling onCreditsExhausted callback");
           onCreditsExhausted?.();
         }
         return false;
       }
 
-      if (__DEV__) console.log('[useDeductCredit] deduction SUCCESS, remaining:', res.remainingCredits);
+      logger.debug("Deduction success", { remainingCredits: res.remainingCredits });
       return true;
     } catch (error) {
-      if (__DEV__) console.error('[useDeductCredit] UNEXPECTED ERROR during credit deduction', {
-        cost,
-        userId,
-        error: error instanceof Error ? error.message : String(error)
-      });
+      logger.error("Unexpected error during credit deduction", error, { cost, userId });
       return false;
     } finally {
       setIsDeducting(false);
@@ -52,13 +51,7 @@ export const useDeductCredit = ({
       const result = await repository.refundCredit(userId, amount);
       return result.success;
     } catch (error) {
-      if (__DEV__) {
-        console.error('[useDeductCredit] Unexpected error during credit refund', {
-          amount,
-          userId,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
+      logger.error("Unexpected error during credit refund", error, { amount, userId });
       return false;
     }
   }, [userId, repository]);

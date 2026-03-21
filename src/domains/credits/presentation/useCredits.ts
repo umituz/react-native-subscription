@@ -28,7 +28,7 @@ export const useCredits = (): UseCreditsResult => {
   const hasUser = isAuthenticated(userId);
   const queryEnabled = hasUser && isConfigured;
 
-  const { credits, isLoading, error } = useCreditsRealTime(userId);
+  const { credits, isLoading, error, refetch } = useCreditsRealTime(userId);
 
   const derivedValues = useMemo(() => {
     const has = (credits?.credits ?? 0) > 0;
@@ -53,7 +53,7 @@ export const useCredits = (): UseCreditsResult => {
     error,
     hasCredits: derivedValues.hasCredits,
     creditsPercent: derivedValues.creditsPercent,
-    refetch: async () => {},
+    refetch,
     canAfford,
   };
 };
