@@ -15,8 +15,9 @@ import {
   buildSuccessResult,
   fetchOfferingsSafe,
 } from "./userSwitchHelpers";
+import { createLogger } from "../../../../../shared/utils/logger";
 
-declare const __DEV__: boolean;
+const logger = createLogger("UserSwitchInitializer");
 
 /**
  * Handle initial SDK configuration with API key and user ID.
@@ -29,14 +30,12 @@ export async function handleInitialConfiguration(
   try {
     const normalizedUserId = normalizeUserId(userId);
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchInitializer] handleInitialConfiguration:', {
-        providedUserId: userId,
-        normalizedUserId: normalizedUserId || '(null - anonymous)',
-        apiKeyPrefix: apiKey.substring(0, 5) + '...',
-        isTestKey: apiKey.startsWith('test_'),
-      });
-    }
+    logger.debug("handleInitialConfiguration", {
+      providedUserId: userId,
+      normalizedUserId: normalizedUserId || '(null - anonymous)',
+      apiKeyPrefix: apiKey.substring(0, 5) + '...',
+      isTestKey: apiKey.startsWith('test_'),
+    });
 
     Purchases.setLogLevel(
       (typeof __DEV__ !== 'undefined' && __DEV__)
@@ -48,32 +47,25 @@ export async function handleInitialConfiguration(
     deps.setInitialized(true);
     deps.setCurrentUserId(normalizedUserId || undefined);
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchInitializer] Purchases.configure() successful');
-    }
+    logger.debug("Purchases.configure() successful");
 
     const [customerInfo, offerings] = await Promise.all([
       Purchases.getCustomerInfo(),
       fetchOfferingsSafe(),
     ]);
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      const currentUserId = await Purchases.getAppUserID();
-      console.log('[UserSwitchInitializer] Initial configuration completed:', {
-        revenueCatUserId: currentUserId,
-        activeEntitlements: Object.keys(customerInfo.entitlements.active),
-        offeringsCount: offerings?.all ? Object.keys(offerings.all).length : 0,
-      });
-    }
+    const currentUserId = await Purchases.getAppUserID();
+    logger.debug("Initial configuration completed", {
+      revenueCatUserId: currentUserId,
+      activeEntitlements: Object.keys(customerInfo.entitlements.active),
+      offeringsCount: offerings?.all ? Object.keys(offerings.all).length : 0,
+    });
 
     await syncPremiumStatusIfConfigured(deps, normalizedUserId, customerInfo);
 
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
-    console.error('[UserSwitchInitializer] SDK configuration failed', {
-      userId,
-      error
-    });
+    logger.error("SDK configuration failed", error, { userId });
     return FAILED_INITIALIZATION_RESULT;
   }
 }
@@ -89,9 +81,7 @@ export async function fetchCurrentUserData(deps: InitializerDeps): Promise<Initi
     ]);
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
-    console.error('[UserSwitchInitializer] Failed to fetch customer info for initialized user', {
-      error
-    });
+    logger.error("Failed to fetch customer info for initialized user", error);
     return FAILED_INITIALIZATION_RESULT;
   }
 }
@@ -138,6 +128,6 @@ async function syncPremiumStatusIfConfigured(
       });
     }
   } catch (error) {
-    console.error('[UserSwitchInitializer] Premium status sync callback failed:', error);
+    logger.error("Premium status sync callback failed", error);
   }
 }

@@ -3,6 +3,10 @@
  * Handles resolution of RevenueCat user ID to credits user ID
  */
 
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("UserIdResolver");
+
 export class UserIdResolver {
   constructor(private getAnonymousUserId: () => Promise<string>) {}
 
@@ -14,7 +18,7 @@ export class UserIdResolver {
     }
 
     // Fallback to anonymous user ID
-    console.warn("[UserIdResolver] revenueCatUserId is empty/null, falling back to anonymousUserId");
+    logger.warn("revenueCatUserId is empty/null, falling back to anonymousUserId");
     const anonymousId = await this.getAnonymousUserId();
     const trimmedAnonymous = anonymousId?.trim();
 

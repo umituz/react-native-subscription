@@ -1,5 +1,8 @@
 import type { PurchasesPackage } from "react-native-purchases";
 import type { IRevenueCatService } from "../../../../../shared/application/ports/IRevenueCatService";
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("PackageFetcher");
 
 export async function fetchPackages(
   service: IRevenueCatService
@@ -20,12 +23,10 @@ export async function fetchPackages(
       return [];
     }
 
-    if (__DEV__) {
-      console.log('[PackageHandler] Returning packages:', {
-        count: packages.length,
-        packageIds: packages.map(p => p.product.identifier),
-      });
-    }
+    logger.debug("Returning packages", {
+      count: packages.length,
+      packageIds: packages.map(p => p.product.identifier),
+    });
 
     return packages;
   } catch (error) {

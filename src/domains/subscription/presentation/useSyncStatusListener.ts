@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { subscriptionEventBus, SUBSCRIPTION_EVENTS } from "../../../shared/infrastructure/SubscriptionEventBus";
 import { useSubscriptionFlowStore, SyncStatus } from "./useSubscriptionFlow";
+import { createLogger } from "../../../shared/utils/logger";
+
+const logger = createLogger("useSyncStatusListener");
 
 interface SyncStatusEvent {
   status: 'syncing' | 'success' | 'error';
@@ -30,15 +33,13 @@ export function useSyncStatusListener() {
 
         setSyncStatus(syncStatus, event.error);
 
-        if (__DEV__) {
-          console.log('[useSyncStatusListener] Sync status updated', {
-            status: event.status,
-            phase: event.phase,
-            userId: event.userId,
-            productId: event.productId,
-            error: event.error,
-          });
-        }
+        logger.debug("Sync status updated", {
+          status: event.status,
+          phase: event.phase,
+          userId: event.userId,
+          productId: event.productId,
+          error: event.error,
+        });
       }
     );
 

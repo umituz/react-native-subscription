@@ -8,6 +8,9 @@ import { handlePurchase } from "./PurchaseHandler";
 import { handleRestore } from "./RestoreHandler";
 import { CustomerInfoListenerManager } from "./CustomerInfoListenerManager";
 import { ServiceStateManager } from "./ServiceStateManager";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("RevenueCatService");
 
 export class RevenueCatService implements IRevenueCatService {
     private stateManager: ServiceStateManager;
@@ -83,9 +86,7 @@ export class RevenueCatService implements IRevenueCatService {
             try {
                 await Purchases.logOut();
             } catch (error) {
-                if (__DEV__) {
-                    console.warn('[RevenueCatService] logOut failed during reset', { error });
-                }
+                logger.warn("logOut failed during reset", error);
             }
         }
 

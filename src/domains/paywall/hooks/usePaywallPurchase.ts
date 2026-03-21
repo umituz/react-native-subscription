@@ -7,6 +7,9 @@
 import { useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePremiumVerification } from "./usePaywallActions.utils";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("usePurchaseHandler");
 
 interface UsePurchaseHandlerParams {
   selectedPlanId: string | null;
@@ -36,18 +39,14 @@ export function usePurchaseHandler({
       return;
     }
 
-    if (__DEV__) {
-      console.log('[usePurchaseHandler] 🛒 Starting purchase', {
-        productId: pkg.product.identifier,
-      });
-    }
+    logger.debug("Starting purchase", {
+      productId: pkg.product.identifier,
+    });
 
     try {
       const success = await callbacksRef.current.purchasePackage(pkg);
 
-      if (__DEV__) {
-        console.log('[usePurchaseHandler] ✅ Purchase completed', { success });
-      }
+      logger.debug("Purchase completed", { success });
 
       let isActuallySuccessful = success === true;
 
@@ -56,20 +55,14 @@ export function usePurchaseHandler({
       }
 
       if (isActuallySuccessful) {
-        if (__DEV__) {
-          console.log('[usePurchaseHandler] 🎉 Purchase successful, closing paywall');
-        }
+        logger.debug("Purchase successful, closing paywall");
         callbacksRef.current.onPurchaseSuccess?.();
         callbacksRef.current.onClose?.();
       } else {
-        if (__DEV__) {
-          console.warn('[usePurchaseHandler] ⚠️ Purchase did not indicate success');
-        }
+        logger.warn("Purchase did not indicate success");
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('[usePurchaseHandler] ❌ Purchase error:', error);
-      }
+      logger.error("Purchase error", error);
       callbacksRef.current.onPurchaseError?.(error instanceof Error ? error : new Error(String(error)));
     }
   }, [selectedPlanId, verifyPremiumStatus, callbacksRef, isProcessingRef]);

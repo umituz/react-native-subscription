@@ -5,6 +5,9 @@ import { isUserCancelledError, isAlreadyPurchasedError } from "../../../revenuec
 import { validatePurchaseReady, isConsumableProduct } from "./purchase/PurchaseValidator";
 import { executePurchase } from "./purchase/PurchaseExecutor";
 import { handleAlreadyPurchasedError, handlePurchaseError } from "./purchase/PurchaseErrorHandler";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("PurchaseHandler");
 
 export interface PurchaseHandlerDeps {
   config: RevenueCatConfig;
@@ -21,13 +24,11 @@ export async function handlePurchase(
   const consumableIds = deps.config.consumableProductIdentifiers || [];
   const isConsumable = isConsumableProduct(pkg, consumableIds);
 
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseHandler] handlePurchase:", {
-      productId: pkg.product.identifier,
-      userId,
-      isConsumable,
-    });
-  }
+  logger.debug("handlePurchase", {
+    productId: pkg.product.identifier,
+    userId,
+    isConsumable,
+  });
 
   try {
     const result = await executePurchase(deps.config, userId, pkg, isConsumable);

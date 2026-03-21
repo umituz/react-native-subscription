@@ -7,6 +7,9 @@ import {
 } from "@umituz/react-native-auth";
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { getErrorMessage } from "../../../revenuecat/core/errors/RevenueCatErrorHandler";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("usePurchasePackage");
 
 interface PurchaseMutationResult {
   success: boolean;
@@ -24,9 +27,7 @@ export const usePurchasePackage = () => {
       }
 
       const productId = pkg.product.identifier;
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log(`[Purchase] Initializing and purchasing. User: ${userId}`);
-      }
+      logger.debug("Initializing and purchasing", { userId, productId });
 
       const success = await SubscriptionManager.purchasePackage(pkg, userId);
 

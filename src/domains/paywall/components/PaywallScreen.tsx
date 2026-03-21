@@ -29,6 +29,9 @@ import {
 } from "../utils/paywallLayoutUtils";
 import { hasItems } from "../../../shared/utils/arrayUtils";
 import { PaywallRenderItem } from "./PaywallScreen.renderItem";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("PaywallScreen");
 
 // Paywall layout constants
 const PAYWALL_HEADER_HEIGHT = 60; // Close button + spacing
@@ -37,13 +40,11 @@ const PAYWALL_FOOTER_HEIGHT_BASE = 280; // Base footer height
 export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) => {
   const navigation = useNavigation();
 
-  if (__DEV__) {
-    console.log('[PaywallScreen] 📱 Rendering PaywallScreen', {
-      hasPackages: !!props.packages?.length,
-      packagesCount: props.packages?.length || 0,
-      isPremium: props.isPremium,
-    });
-  }
+  logger.debug("Rendering PaywallScreen", {
+    hasPackages: !!props.packages?.length,
+    packagesCount: props.packages?.length || 0,
+    isPremium: props.isPremium,
+  });
 
   const {
     translations,
@@ -69,7 +70,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   const responsive = useResponsive();
 
   const handleClose = useCallback(() => {
-    if (__DEV__) console.log('[PaywallScreen] 🔙 Closing paywall');
+    logger.debug("Closing paywall");
     if (onClose) {
       onClose();
     } else if (navigation.canGoBack()) {
@@ -98,7 +99,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
   // Cleanup on unmount only - resetState is stable from useCallback
   useEffect(() => {
     return () => {
-      if (__DEV__) console.log('[PaywallScreen] 🧹 Cleanup: resetting state');
+      logger.debug("Cleanup: resetting state");
       resetState();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,7 +119,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
     try {
       if (await Linking.canOpenURL(url)) await Linking.openURL(url);
     } catch (error) {
-      console.error('[PaywallScreen] Failed to open URL:', error);
+      logger.error("Failed to open URL", error);
     }
   }, []);
 
@@ -176,7 +177,7 @@ export const PaywallScreen: React.FC<PaywallScreenProps> = React.memo((props) =>
 
   // Defensive check for translations
   if (!translations) {
-    if (__DEV__) console.warn("[PaywallScreen] Translations prop is missing");
+    logger.warn("Translations prop is missing");
     return null;
   }
 

@@ -1,3 +1,7 @@
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("UserSwitchMutex");
+
 class UserSwitchMutexImpl {
   private activeSwitchPromise: Promise<unknown> | null = null;
   private activeUserId: string | null = null;
@@ -6,30 +10,24 @@ class UserSwitchMutexImpl {
 
   async acquire(userId: string): Promise<{ shouldProceed: boolean; existingPromise?: Promise<unknown> }> {
     if (this.activeSwitchPromise && this.activeUserId === userId) {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[UserSwitchMutex] Switch already in progress for this user, returning existing promise');
-      }
+      logger.debug("Switch already in progress for this user, returning existing promise");
       return { shouldProceed: false, existingPromise: this.activeSwitchPromise };
     }
 
     if (this.activeSwitchPromise) {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[UserSwitchMutex] Waiting for active switch to complete...');
-      }
+      logger.debug("Waiting for active switch to complete...");
       try {
         await this.activeSwitchPromise;
       } catch (error) {
         // Previous switch failed — this is non-fatal for the current switch,
         // but worth logging so the failure is visible in diagnostics.
-        console.warn('[UserSwitchMutex] Previous user switch failed:', error instanceof Error ? error.message : String(error));
+        logger.warn("Previous user switch failed", error);
       }
 
       const timeSinceLastSwitch = Date.now() - this.lastSwitchTime;
       if (timeSinceLastSwitch < this.MIN_SWITCH_INTERVAL_MS) {
         const delayNeeded = this.MIN_SWITCH_INTERVAL_MS - timeSinceLastSwitch;
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log(`[UserSwitchMutex] Rate limiting: waiting ${delayNeeded}ms`);
-        }
+        logger.debug(`Rate limiting: waiting ${delayNeeded}ms`);
         await new Promise<void>(resolve => setTimeout(() => resolve(), delayNeeded));
       }
 

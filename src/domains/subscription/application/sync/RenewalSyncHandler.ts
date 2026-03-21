@@ -9,6 +9,9 @@ import { extractRevenueCatData } from "../SubscriptionSyncUtils";
 import { generateRenewalId } from "../syncIdGenerators";
 import type { RenewalDetectedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("RenewalSyncHandler");
 
 export class RenewalSyncHandler {
   private renewalInProgress = false;
@@ -55,13 +58,11 @@ export class RenewalSyncHandler {
         throw new Error(`[RenewalSyncHandler] Credit initialization failed: ${result.error?.message ?? 'unknown'}`);
       }
 
-      if (__DEV__) {
-        console.log('[RenewalSyncHandler] 🟢 Renewal credits allocated successfully', {
-          creditsUserId,
-          purchaseId,
-          productId: event.productId,
-        });
-      }
+      logger.debug("Renewal credits allocated successfully", {
+        creditsUserId,
+        purchaseId,
+        productId: event.productId,
+      });
     } finally {
       this.renewalInProgress = false;
     }

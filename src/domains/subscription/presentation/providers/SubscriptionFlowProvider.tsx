@@ -2,6 +2,9 @@ import React, { createContext, useContext, useEffect } from "react";
 import { useSubscriptionFlowStore, SubscriptionFlowStatus } from "../useSubscriptionFlow";
 import { useSyncStatusListener } from "../useSyncStatusListener";
 import { initializationState } from "../../infrastructure/state/initializationState";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("SubscriptionFlowProvider");
 
 interface SubscriptionFlowContextType {
   status: SubscriptionFlowStatus;
@@ -24,9 +27,7 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
     // 1. Listen to background initialization state
     const unsubscribe = initializationState.subscribe(() => {
       const { initialized } = initializationState.getSnapshot();
-      if (__DEV__) {
-        console.log('[SubscriptionFlowProvider] 🔄 Initialization status updated:', { initialized });
-      }
+      logger.debug("Initialization status updated", { initialized });
       if (initialized && !isInitialized) {
         setInitialized(true);
       }
@@ -35,7 +36,7 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
     // Check initial state
     const { initialized: currentlyInitialized } = initializationState.getSnapshot();
     if (currentlyInitialized && !isInitialized) {
-      if (__DEV__) console.log('[SubscriptionFlowProvider] ✅ Already initialized on mount');
+      logger.debug("Already initialized on mount");
       setInitialized(true);
     }
 
@@ -44,13 +45,11 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
 
   useEffect(() => {
     // This effect manages the overall flow status transition
-    if (__DEV__) {
-       console.log('[SubscriptionFlowProvider] 🧠 Calculating Status Transition', {
-         isInitialized,
-         isOnboardingComplete,
-         currentStatus: status
-       });
-    }
+    logger.debug("Calculating Status Transition", {
+      isInitialized,
+      isOnboardingComplete,
+      currentStatus: status
+    });
 
     let nextStatus = SubscriptionFlowStatus.READY;
 
@@ -70,7 +69,7 @@ export const SubscriptionFlowProvider: React.FC<{ children: React.ReactNode }> =
     }
 
     if (nextStatus !== status) {
-       if (__DEV__) console.log('[SubscriptionFlowProvider] 🚀 Transitioning status to:', nextStatus);
+       logger.debug("Transitioning status to", nextStatus);
        setStatus(nextStatus);
     }
   }, [

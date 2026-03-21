@@ -1,6 +1,9 @@
 import { SubscriptionManager } from "../../infrastructure/managers/SubscriptionManager";
 import { getCurrentUserId, setupAuthStateListener } from "../SubscriptionAuthListener";
 import type { SubscriptionInitConfig } from "../SubscriptionInitializerTypes";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("BackgroundInitializer");
 
 const AUTH_STATE_DEBOUNCE_MS = 500;
 const MAX_RETRY_ATTEMPTS = 3;
@@ -16,18 +19,14 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   let lastUserId: string | undefined = undefined;
 
   const initializeInBackground = async (revenueCatUserId?: string): Promise<void> => {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[BackgroundInitializer] initializeInBackground called with userId:', revenueCatUserId || '(undefined - anonymous)');
-    }
+    logger.debug("initializeInBackground called with userId", revenueCatUserId || '(undefined - anonymous)');
     await SubscriptionManager.initialize(revenueCatUserId);
   };
 
   const attemptInitWithRetry = async (revenueCatUserId: string | undefined, attempt: number, sequenceId: number): Promise<void> => {
     // Abort if this is no longer the active sequence (e.g., user changed)
     if (sequenceId !== currentSequenceId) {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[BackgroundInitializer] Aborting retry - sequence changed');
-      }
+      logger.debug("Aborting retry - sequence changed");
       return;
     }
 
@@ -38,23 +37,20 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       }
     } catch (error) {
       if (sequenceId !== currentSequenceId) return;
-      
+
       lastInitSucceeded = false;
-      console.error('[BackgroundInitializer] Initialization failed:', {
+      logger.error("Initialization failed", error, {
         userId: revenueCatUserId,
         attempt: attempt + 1,
         maxAttempts: MAX_RETRY_ATTEMPTS,
-        error: error instanceof Error ? error.message : String(error)
       });
 
       if (attempt < MAX_RETRY_ATTEMPTS - 1) {
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[BackgroundInitializer] Scheduling retry', { attempt: attempt + 2 });
-        }
+        logger.debug("Scheduling retry", { attempt: attempt + 2 });
         retryTimer = setTimeout(() => {
           // Fire and forget promise, but safe because of sequenceId check
           attemptInitWithRetry(revenueCatUserId, attempt + 1, sequenceId).catch(err => {
-              console.error('[BackgroundInitializer] Retry failed unhandled:', err);
+              logger.error("Retry failed unhandled", err);
           });
         }, RETRY_DELAY_MS * (attempt + 1));
       }
@@ -71,9 +67,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
     }
 
     if (lastUserId === revenueCatUserId && lastInitSucceeded) {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[BackgroundInitializer] UserId unchanged and init succeeded, skipping');
-      }
+      logger.debug("UserId unchanged and init succeeded, skipping");
       return;
     }
 
@@ -83,15 +77,11 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
       const sequenceId = currentSequenceId;
 
       if (!revenueCatUserId && !lastUserId) {
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[BackgroundInitializer] No user and no previous user, waiting for auth');
-        }
+        logger.debug("No user and no previous user, waiting for auth");
         return;
       }
 
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[BackgroundInitializer] Auth state listener triggered, reinitializing with userId:', revenueCatUserId || '(undefined - anonymous)');
-      }
+      logger.debug("Auth state listener triggered, reinitializing with userId", revenueCatUserId || '(undefined - anonymous)');
 
       // Important: Always reset on user change, not just on logout.
       // This ensures previous user's cached state is cleared before init.
@@ -104,7 +94,7 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
 
       // Start the retry chain
       attemptInitWithRetry(revenueCatUserId, 0, sequenceId).catch(err => {
-        console.error('[BackgroundInitializer] Init sequence failed unhandled:', err);
+        logger.error("Init sequence failed unhandled", err);
       });
     }, AUTH_STATE_DEBOUNCE_MS);
   };
@@ -117,17 +107,15 @@ export async function startBackgroundInitialization(config: SubscriptionInitConf
   const initialRevenueCatUserId = getCurrentUserId(() => auth);
   lastUserId = initialRevenueCatUserId;
 
-  if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[BackgroundInitializer] Initial RevenueCat userId:', initialRevenueCatUserId || '(undefined - anonymous)');
-  }
+  logger.debug("Initial RevenueCat userId", initialRevenueCatUserId || '(undefined - anonymous)');
 
   if (initialRevenueCatUserId) {
     currentSequenceId++;
     attemptInitWithRetry(initialRevenueCatUserId, 0, currentSequenceId).catch(err => {
-        console.error('[BackgroundInitializer] Initial sequence failed unhandled:', err);
+        logger.error("Initial sequence failed unhandled", err);
     });
-  } else if (typeof __DEV__ !== 'undefined' && __DEV__) {
-    console.log('[BackgroundInitializer] No user available yet, waiting for auth state');
+  } else {
+    logger.debug("No user available yet, waiting for auth state");
   }
 
   const unsubscribe = setupAuthStateListener(() => auth, debouncedInitialize);

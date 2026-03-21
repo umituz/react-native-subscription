@@ -10,6 +10,9 @@ import { getPackagesOperation, purchasePackageOperation, restoreOperation } from
 import { performServiceInitialization } from "./initializationHandler";
 import { initializationState } from "../state/initializationState";
 import { ANONYMOUS_CACHE_KEY } from "../../core/SubscriptionConstants";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("SubscriptionManager");
 
 class SubscriptionManagerImpl {
   private managerConfig: SubscriptionManagerConfig | null = null;
@@ -23,14 +26,14 @@ class SubscriptionManagerImpl {
 
   private ensureConfigured(): void {
     if (!this.managerConfig) {
-      throw new Error('[SubscriptionManager] Not configured. Call configure() first.');
+      throw new Error('SubscriptionManager: Not configured. Call configure() first.');
     }
   }
 
   private ensurePackageHandlerInitialized(): void {
     if (this.packageHandler) return;
     if (!this.serviceInstance || !this.managerConfig) {
-      throw new Error('[SubscriptionManager] Cannot create package handler without service and config');
+      throw new Error('SubscriptionManager: Cannot create package handler without service and config');
     }
     this.packageHandler = createPackageHandler(this.serviceInstance, this.managerConfig);
   }
@@ -40,20 +43,16 @@ class SubscriptionManagerImpl {
 
     const actualUserId: string = (userId && userId.length > 0) ? userId : '';
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionManager] initialize called:', {
-        providedUserId: userId,
-        actualUserId: actualUserId || '(empty - RevenueCat will generate anonymous ID)',
-      });
-    }
+    logger.debug("initialize called", {
+      providedUserId: userId,
+      actualUserId: actualUserId || '(empty - RevenueCat will generate anonymous ID)',
+    });
 
     const cacheKey = actualUserId || ANONYMOUS_CACHE_KEY;
     const { shouldInit, existingPromise } = this.initCache.tryAcquireInitialization(cacheKey);
 
     if (!shouldInit && existingPromise) {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[SubscriptionManager] Using cached initialization for:', cacheKey);
-      }
+      logger.debug("Using cached initialization for", cacheKey);
       return existingPromise;
     }
 
@@ -67,11 +66,9 @@ class SubscriptionManagerImpl {
   }
 
   private async performInitialization(userId: string): Promise<boolean> {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionManager] performInitialization:', {
-        userId: userId || '(empty - anonymous)',
-      });
-    }
+    logger.debug("performInitialization", {
+      userId: userId || '(empty - anonymous)',
+    });
 
     const config = this.managerConfig!;
     const { service, success } = await performServiceInitialization(config.config, userId);
@@ -83,9 +80,7 @@ class SubscriptionManagerImpl {
       initializationState.markInitialized(notifyUserId);
     }
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionManager] Initialization completed:', { success });
-    }
+    logger.debug("Initialization completed", { success });
 
     return success;
   }
@@ -107,14 +102,12 @@ class SubscriptionManagerImpl {
     if (explicitUserId) {
         await this.initialize(explicitUserId);
     }
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[SubscriptionManager] purchasePackage: init complete, starting purchase', {
-        productId: pkg.product.identifier,
-        hasPackageHandler: !!this.packageHandler,
-        hasService: !!this.serviceInstance,
-        serviceInitialized: this.serviceInstance?.isInitialized() ?? false,
-      });
-    }
+    logger.debug("purchasePackage: init complete, starting purchase", {
+      productId: pkg.product.identifier,
+      hasPackageHandler: !!this.packageHandler,
+      hasService: !!this.serviceInstance,
+      serviceInitialized: this.serviceInstance?.isInitialized() ?? false,
+    });
     this.ensurePackageHandlerInitialized();
     const resolvedUserId = explicitUserId || getCurrentUserIdOrThrow(this.initCache);
     const handler = this.packageHandler!;

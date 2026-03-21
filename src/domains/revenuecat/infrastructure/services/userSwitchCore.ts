@@ -16,8 +16,9 @@ import {
   buildSuccessResult,
   fetchOfferingsSafe,
 } from "./userSwitchHelpers";
+import { createLogger } from "../../../../../shared/utils/logger";
 
-declare const __DEV__: boolean;
+const logger = createLogger("UserSwitchCore");
 
 /**
  * Handle user switch operation with mutex protection.
@@ -31,9 +32,7 @@ export async function handleUserSwitch(
   const { shouldProceed, existingPromise } = await UserSwitchMutex.acquire(mutexKey);
 
   if (!shouldProceed && existingPromise) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchCore] Using result from active switch operation');
-    }
+    logger.debug("Using result from active switch operation");
     return existingPromise as Promise<InitializeResult>;
   }
 
@@ -54,38 +53,28 @@ async function performUserSwitch(
     const normalizedUserId = normalizeUserId(userId);
     const normalizedCurrentUserId = isAnonymousId(currentAppUserId) ? null : currentAppUserId;
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchCore] performUserSwitch:', {
-        providedUserId: userId,
-        normalizedUserId: normalizedUserId || '(null - anonymous)',
-        currentAppUserId,
-        normalizedCurrentUserId: normalizedCurrentUserId || '(null - anonymous)',
-        needsSwitch: normalizedCurrentUserId !== normalizedUserId,
-      });
-    }
+    logger.debug("performUserSwitch", {
+      providedUserId: userId,
+      normalizedUserId: normalizedUserId || '(null - anonymous)',
+      currentAppUserId,
+      normalizedCurrentUserId: normalizedCurrentUserId || '(null - anonymous)',
+      needsSwitch: normalizedCurrentUserId !== normalizedUserId,
+    });
 
     let customerInfo: CustomerInfo;
 
     if (normalizedCurrentUserId !== normalizedUserId) {
       if (normalizedUserId) {
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[UserSwitchCore] Calling Purchases.logIn() to switch from anonymous to:', normalizedUserId);
-        }
+        logger.debug("Calling Purchases.logIn() to switch from anonymous to", normalizedUserId);
         const result = await Purchases.logIn(normalizedUserId!);
         customerInfo = result.customerInfo;
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[UserSwitchCore] Purchases.logIn() successful, created:', result.created);
-        }
+        logger.debug("Purchases.logIn() successful, created", result.created);
       } else {
-        if (typeof __DEV__ !== 'undefined' && __DEV__) {
-          console.log('[UserSwitchCore] User is anonymous, fetching customer info');
-        }
+        logger.debug("User is anonymous, fetching customer info");
         customerInfo = await Purchases.getCustomerInfo();
       }
     } else {
-      if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        console.log('[UserSwitchCore] No user switch needed, fetching current customer info');
-      }
+      logger.debug("No user switch needed, fetching current customer info");
       customerInfo = await Purchases.getCustomerInfo();
     }
 
@@ -93,9 +82,7 @@ async function performUserSwitch(
     deps.setCurrentUserId(normalizedUserId || undefined);
     const offerings = await fetchOfferingsSafe();
 
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.log('[UserSwitchCore] User switch completed successfully');
-    }
+    logger.debug("User switch completed successfully");
 
     return buildSuccessResult(deps, customerInfo, offerings);
   } catch (error) {
@@ -106,11 +93,7 @@ async function performUserSwitch(
       // Ignore error in error handler
     }
 
-    console.error('[UserSwitchCore] Failed during user switch or fetch', {
-      userId,
-      currentAppUserId,
-      error
-    });
+    logger.error("Failed during user switch or fetch", error, { userId, currentAppUserId });
     return FAILED_INITIALIZATION_RESULT;
   }
 }

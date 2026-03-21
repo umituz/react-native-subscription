@@ -1,6 +1,9 @@
 import type { InitModule } from '@umituz/react-native-design-system/init';
 import { initializeSubscription } from "../domains/subscription/application/initializer/SubscriptionInitializer";
 import type { SubscriptionInitConfig } from "../domains/subscription/application/SubscriptionInitializerTypes";
+import { createLogger } from "../shared/utils/logger";
+
+const logger = createLogger("SubscriptionInitModule");
 
 export interface SubscriptionInitModuleConfig extends Omit<SubscriptionInitConfig, 'apiKey'> {
   getApiKey: () => string | undefined;
@@ -34,7 +37,7 @@ export function createSubscriptionInitModule(config: SubscriptionInitModuleConfi
         subscriptionCleanup = await initializeSubscription({ apiKey, ...subscriptionConfig });
         return true;
       } catch (error) {
-        console.error('[SubscriptionInitModule] Initialization failed:', error instanceof Error ? error.message : String(error));
+        logger.error("Initialization failed", error);
         throw error;
       }
     },

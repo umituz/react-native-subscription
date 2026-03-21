@@ -5,6 +5,9 @@
 
 import { getCreditsRepository } from "../../../credits/infrastructure/CreditsRepositoryManager";
 import type { PremiumStatusChangedEvent } from "../../core/SubscriptionEvents";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("CreditDocumentOperations");
 
 export class CreditDocumentOperations {
   async expireSubscription(userId: string): Promise<void> {
@@ -14,14 +17,12 @@ export class CreditDocumentOperations {
   async syncPremiumStatus(userId: string, event: PremiumStatusChangedEvent): Promise<void> {
     const repo = getCreditsRepository();
 
-    if (__DEV__) {
-      console.log('[CreditDocumentOperations] 🔵 syncPremiumStatus: Starting', {
-        userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-        willRenew: event.willRenew,
-      });
-    }
+    logger.debug("syncPremiumStatus: Starting", {
+      userId,
+      isPremium: event.isPremium,
+      productId: event.productId,
+      willRenew: event.willRenew,
+    });
 
     // Ensure premium user has a credits document (recovery)
     if (event.isPremium) {
@@ -32,8 +33,8 @@ export class CreditDocumentOperations {
         event.expirationDate ?? null,
         event.periodType ?? null,
       );
-      if (__DEV__ && created) {
-        console.log('[CreditDocumentOperations] 🟢 Recovery: created missing credits document for premium user', {
+      if (created) {
+        logger.debug("Recovery: created missing credits document for premium user", {
           userId,
           productId: event.productId,
         });
@@ -53,12 +54,10 @@ export class CreditDocumentOperations {
       ownershipType: event.ownershipType ?? null,
     });
 
-    if (__DEV__) {
-      console.log('[CreditDocumentOperations] 🟢 syncPremiumStatus: Completed', {
-        userId,
-        isPremium: event.isPremium,
-        productId: event.productId,
-      });
-    }
+    logger.debug("syncPremiumStatus: Completed", {
+      userId,
+      isPremium: event.isPremium,
+      productId: event.productId,
+    });
   }
 }

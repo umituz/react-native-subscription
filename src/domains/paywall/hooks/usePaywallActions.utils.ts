@@ -5,32 +5,27 @@
 
 import { useSubscriptionStatus } from "../../subscription/presentation/useSubscriptionStatus";
 import { useCredits } from "../../credits/presentation/useCredits";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("PremiumVerification");
 
 export function usePremiumVerification() {
-  const { refetch: refetchStatus } = useSubscriptionStatus();
-  const { refetch: refetchCredits } = useCredits();
+  const { isPremium: isSubscriptionPremium } = useSubscriptionStatus();
+  const { credits } = useCredits();
 
   const verifyPremiumStatus = async (): Promise<boolean> => {
-    if (__DEV__) {
-      console.log('[PremiumVerification] 🔍 Checking premium status as fallback...');
-    }
+    logger.debug("Checking premium status as fallback...");
 
-    const [statusResult, creditsResult] = await Promise.all([
-      refetchStatus(),
-      refetchCredits()
-    ]);
-
-    const isSubscriptionPremium = statusResult.data?.isPremium ?? false;
-    const isCreditsPremium = creditsResult.data?.isPremium ?? false;
+    // With real-time sync, data is already up-to-date via onSnapshot
+    // No need to manually refetch - just check current state
+    const isCreditsPremium = credits?.isPremium ?? false;
     const isActuallySuccessful = isSubscriptionPremium || isCreditsPremium;
 
-    if (__DEV__) {
-      console.log('[PremiumVerification] 📊 Fallback check result:', {
-        isSubscriptionPremium,
-        isCreditsPremium,
-        isActuallySuccessful
-      });
-    }
+    logger.debug("Fallback check result", {
+      isSubscriptionPremium,
+      isCreditsPremium,
+      isActuallySuccessful
+    });
 
     return isActuallySuccessful;
   };

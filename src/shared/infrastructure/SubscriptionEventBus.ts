@@ -1,4 +1,7 @@
 type EventCallback<T = unknown> = (data: T) => void;
+import { createLogger } from "../utils/logger";
+
+const logger = createLogger("SubscriptionEventBus");
 
 class SubscriptionEventBus {
   private static instance: SubscriptionEventBus;
@@ -43,7 +46,7 @@ class SubscriptionEventBus {
         try {
           callback(data);
         } catch (error) {
-          console.error('[SubscriptionEventBus] Listener error for event:', event, { error });
+          logger.error("Listener error for event", error, { event });
         }
       });
     });

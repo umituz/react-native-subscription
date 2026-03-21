@@ -8,6 +8,9 @@ import type { PremiumStatusChangedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
 import { CreditDocumentOperations } from "./CreditDocumentOperations";
 import { PurchaseSyncHandler } from "./PurchaseSyncHandler";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("StatusChangeSyncHandler");
 
 export class StatusChangeSyncHandler {
   constructor(
@@ -19,9 +22,7 @@ export class StatusChangeSyncHandler {
   async processStatusChange(event: PremiumStatusChangedEvent): Promise<void> {
     // If purchase is in progress, only do recovery sync
     if (this.purchaseHandler.isProcessing()) {
-      if (__DEV__) {
-        console.log("[StatusChangeSyncHandler] Purchase in progress - running recovery only");
-      }
+      logger.debug("Purchase in progress - running recovery only");
       if (event.isPremium && event.productId) {
         const creditsUserId = await this.userIdResolver.resolveCreditsUserId(event.userId);
         await this.creditOps.syncPremiumStatus(creditsUserId, event);

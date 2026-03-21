@@ -4,6 +4,10 @@ interface CacheEntry {
     completed: boolean;
 }
 
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("InitializationCache");
+
 export class InitializationCache {
     private entries: Map<string, CacheEntry> = new Map();
 
@@ -38,7 +42,7 @@ export class InitializationCache {
                 if (this.entries.get(cacheKey) === entry) {
                     this.entries.delete(cacheKey);
                 }
-                console.error('[InitializationCache] Initialization failed', { cacheKey, error });
+                logger.error("Initialization failed", error, { cacheKey });
                 return false;
             });
 

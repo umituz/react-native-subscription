@@ -1,4 +1,7 @@
 import Purchases, { type PurchasesOffering } from "react-native-purchases";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("OfferingsFetcher");
 
 interface OfferingsFetcherDeps {
   isInitialized: () => boolean;
@@ -14,15 +17,13 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
     try {
       const offerings = await Purchases.getOfferings();
 
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log('[OfferingsFetcher] Offerings received:', {
-          attempt,
-          hasCurrent: !!offerings.current,
-          currentId: offerings.current?.identifier,
-          allOfferingsCount: Object.keys(offerings.all).length,
-          allOfferingIds: Object.keys(offerings.all),
-        });
-      }
+      logger.debug("Offerings received", {
+        attempt,
+        hasCurrent: !!offerings.current,
+        currentId: offerings.current?.identifier,
+        allOfferingsCount: Object.keys(offerings.all).length,
+        allOfferingIds: Object.keys(offerings.all),
+      });
 
       if (offerings.current) {
         return offerings.current;
@@ -35,28 +36,20 @@ export async function fetchOfferings(deps: OfferingsFetcherDeps): Promise<Purcha
 
       // No offerings found - retry after delay (RevenueCat may still be syncing)
       if (attempt < MAX_FETCH_RETRIES) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.log('[OfferingsFetcher] No offerings found, retrying...', { attempt: attempt + 1 });
-        }
+        logger.debug("No offerings found, retrying...", { attempt: attempt + 1 });
         await new Promise<void>(resolve => setTimeout(resolve, FETCH_RETRY_DELAY_MS));
         continue;
       }
 
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.warn('[OfferingsFetcher] No offerings found after all retries');
-      }
+      logger.warn("No offerings found after all retries");
       return null;
     } catch (error) {
       if (attempt < MAX_FETCH_RETRIES) {
-        if (typeof __DEV__ !== "undefined" && __DEV__) {
-          console.warn('[OfferingsFetcher] Fetch failed, retrying...', { attempt: attempt + 1, error });
-        }
+        logger.warn("Fetch failed, retrying...", error, { attempt: attempt + 1 });
         await new Promise<void>(resolve => setTimeout(resolve, FETCH_RETRY_DELAY_MS));
         continue;
       }
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.warn('[OfferingsFetcher] Failed to fetch offerings after all retries:', error);
-      }
+      logger.warn("Failed to fetch offerings after all retries", error);
       return null;
     }
   }

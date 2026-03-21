@@ -8,8 +8,9 @@ import Purchases, { type CustomerInfo, type PurchasesOfferings } from "react-nat
 import type { InitializeResult } from "../../../../shared/application/ports/IRevenueCatService";
 import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { ANONYMOUS_CACHE_KEY } from "../../../subscription/core/SubscriptionConstants";
+import { createLogger } from "../../../../../shared/utils/logger";
 
-declare const __DEV__: boolean;
+const logger = createLogger("UserSwitchHelpers");
 
 /**
  * Normalize user ID to null if empty or anonymous cache key.
@@ -47,9 +48,7 @@ export async function fetchOfferingsSafe(): Promise<PurchasesOfferings | null> {
   try {
     return await Purchases.getOfferings();
   } catch (error) {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-      console.warn('[UserSwitchHelpers] Offerings fetch failed (non-fatal):', error);
-    }
+    logger.warn("Offerings fetch failed (non-fatal)", error);
     return null;
   }
 }

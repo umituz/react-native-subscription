@@ -15,6 +15,9 @@ import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useA
 import { notifyPurchaseCompleted } from "../../utils/PremiumStatusSyncer";
 import { handleRestore } from "../RestoreHandler";
 import type { PurchaseHandlerDeps } from "../PurchaseHandler";
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("PurchaseErrorHandler");
 
 export async function handleAlreadyPurchasedError(
   deps: PurchaseHandlerDeps,
@@ -85,11 +88,10 @@ export function handlePurchaseError(
     ? `${errorMessage} (Code: ${errorCode})`
     : errorMessage;
 
-  console.error('[PurchaseHandler] Purchase failed', {
+  logger.error("Purchase failed", error, {
     productId: pkg.product.identifier,
     userId,
     errorCode,
-    error,
   });
 
   throw new RevenueCatPurchaseError(

@@ -9,6 +9,9 @@ import { useState, useRef, useMemo, useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePurchaseHandler } from "./usePaywallPurchase";
 import { useRestoreHandler } from "./usePaywallRestore";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("usePaywallActions");
 
 export function usePaywallActions({
   packages = [],
@@ -61,9 +64,7 @@ export function usePaywallActions({
 
   // Reset state - memoized with useCallback to prevent infinite loops
   const resetState = useCallback(() => {
-    if (__DEV__) {
-      console.log('[usePaywallActions] 🧹 Resetting state');
-    }
+    logger.debug("Resetting state");
     setSelectedPlanId(null);
     setIsProcessing(false);
   }, []);

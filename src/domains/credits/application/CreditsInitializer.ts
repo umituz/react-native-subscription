@@ -9,6 +9,9 @@ import { calculateNewCredits, buildCreditsData } from "./creditOperationUtils";
 import { CreditLimitService } from "../domain/services/CreditLimitService";
 import { generatePurchaseMetadata } from "./PurchaseMetadataGenerator";
 import { PURCHASE_ID_PREFIXES } from "../core/CreditsConstants";
+import { createLogger } from "../../../shared/utils/logger";
+
+const logger = createLogger("CreditsInitializer");
 
 export async function initializeCreditsTransaction(
     _db: Firestore,
@@ -19,19 +22,17 @@ export async function initializeCreditsTransaction(
     userId: string
 ): Promise<InitializationResult> {
 
-    if (__DEV__) {
-        console.log('[CreditsInitializer] 🔵 initializeCreditsTransaction: START', {
-            userId,
-            purchaseId,
-            productId: metadata.productId,
-            source: metadata.source,
-            type: metadata.type,
-            isPremium: metadata.isPremium,
-            willRenew: metadata.willRenew,
-            storeTransactionId: metadata.storeTransactionId,
-            timestamp: new Date().toISOString(),
-        });
-    }
+    logger.debug("initializeCreditsTransaction: START", {
+        userId,
+        purchaseId,
+        productId: metadata.productId,
+        source: metadata.source,
+        type: metadata.type,
+        isPremium: metadata.isPremium,
+        willRenew: metadata.willRenew,
+        storeTransactionId: metadata.storeTransactionId,
+        timestamp: new Date().toISOString(),
+    });
 
     if (!purchaseId.startsWith(PURCHASE_ID_PREFIXES.PURCHASE) && !purchaseId.startsWith(PURCHASE_ID_PREFIXES.RENEWAL)) {
         throw new Error(`[CreditsInitializer] Only purchase and renewal operations can allocate credits. Received: ${purchaseId}`);
@@ -46,14 +47,12 @@ export async function initializeCreditsTransaction(
         const existingData = getCreditDocumentOrDefault(creditsDoc, platform);
 
         if (existingData.processedPurchases.includes(purchaseId)) {
-            if (__DEV__) {
-                console.log('[CreditsInitializer] 🟡 Transaction already processed, skipping', {
-                    userId,
-                    purchaseId,
-                    existingCredits: existingData.credits,
-                    processedPurchasesCount: existingData.processedPurchases.length,
-                });
-            }
+            logger.debug("Transaction already processed, skipping", {
+                userId,
+                purchaseId,
+                existingCredits: existingData.credits,
+                processedPurchasesCount: existingData.processedPurchases.length,
+            });
             return {
                 credits: existingData.credits,
                 alreadyProcessed: true,
@@ -61,14 +60,12 @@ export async function initializeCreditsTransaction(
             };
         }
 
-        if (__DEV__) {
-            console.log('[CreditsInitializer] 🔵 Processing credit allocation', {
-                userId,
-                purchaseId,
-                existingCredits: existingData.credits,
-                productId: metadata.productId,
-            });
-        }
+        logger.debug("Processing credit allocation", {
+            userId,
+            purchaseId,
+            existingCredits: existingData.credits,
+            productId: metadata.productId,
+        });
 
         const creditLimitService = new CreditLimitService(config);
         const creditLimit = creditLimitService.calculate(metadata.productId);
@@ -100,16 +97,14 @@ export async function initializeCreditsTransaction(
 
         transaction.set(creditsRef, creditsData, { merge: true });
 
-        if (__DEV__) {
-            console.log('[CreditsInitializer] 🟢 Credit allocation successful', {
-                userId,
-                purchaseId,
-                previousCredits: existingData.credits,
-                newCredits,
-                creditLimit,
-                productId: metadata.productId,
-            });
-        }
+        logger.debug("Credit allocation successful", {
+            userId,
+            purchaseId,
+            previousCredits: existingData.credits,
+            newCredits,
+            creditLimit,
+            productId: metadata.productId,
+        });
 
         return {
             credits: newCredits,

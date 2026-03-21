@@ -9,6 +9,9 @@ import { extractRevenueCatData } from "../SubscriptionSyncUtils";
 import { generatePurchaseId } from "../syncIdGenerators";
 import type { PurchaseCompletedEvent } from "../../core/SubscriptionEvents";
 import { UserIdResolver } from "./UserIdResolver";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("PurchaseSyncHandler");
 
 export class PurchaseSyncHandler {
   private purchaseInProgress = false;
@@ -25,14 +28,12 @@ export class PurchaseSyncHandler {
   async processPurchase(event: PurchaseCompletedEvent): Promise<void> {
     this.purchaseInProgress = true;
 
-    if (__DEV__) {
-      console.log('[PurchaseSyncHandler] 🔵 Starting credit initialization', {
-        productId: event.productId,
-        source: event.source,
-        packageType: event.packageType,
-        activeEntitlements: Object.keys(event.customerInfo.entitlements.active),
-      });
-    }
+    logger.debug("Starting credit initialization", {
+      productId: event.productId,
+      source: event.source,
+      packageType: event.packageType,
+      activeEntitlements: Object.keys(event.customerInfo.entitlements.active),
+    });
 
     try {
       // Extract revenue cat data
@@ -46,14 +47,12 @@ export class PurchaseSyncHandler {
       // Resolve user ID
       const creditsUserId = await this.userIdResolver.resolveCreditsUserId(event.userId);
 
-      if (__DEV__) {
-        console.log('[PurchaseSyncHandler] 🔵 Calling initializeCredits', {
-          creditsUserId,
-          purchaseId,
-          productId: event.productId,
-          revenueCatUserId: revenueCatData.revenueCatUserId,
-        });
-      }
+      logger.debug("Calling initializeCredits", {
+        creditsUserId,
+        purchaseId,
+        productId: event.productId,
+        revenueCatUserId: revenueCatData.revenueCatUserId,
+      });
 
       // Initialize credits
       const result = await getCreditsRepository().initializeCredits(
@@ -69,13 +68,11 @@ export class PurchaseSyncHandler {
         throw new Error(`[PurchaseSyncHandler] Credit initialization failed: ${result.error?.message ?? 'unknown'}`);
       }
 
-      if (__DEV__) {
-        console.log('[PurchaseSyncHandler] 🟢 Credits initialized successfully', {
-          creditsUserId,
-          purchaseId,
-          credits: result.data?.credits,
-        });
-      }
+      logger.debug("Credits initialized successfully", {
+        creditsUserId,
+        purchaseId,
+        credits: result.data?.credits,
+      });
     } finally {
       this.purchaseInProgress = false;
     }

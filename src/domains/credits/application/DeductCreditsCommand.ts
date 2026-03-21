@@ -2,6 +2,9 @@ import { runTransaction, serverTimestamp, type DocumentReference } from "firebas
 import type { Firestore } from "@umituz/react-native-firebase";
 import type { DeductCreditsResult } from "../core/Credits";
 import { CREDIT_ERROR_CODES, MAX_SINGLE_DEDUCTION } from "../core/CreditsConstants";
+import { createLogger } from "../../../shared/utils/logger";
+
+const logger = createLogger("DeductCreditsCommand");
 
 export async function deductCreditsOperation(
   _db: Firestore,
@@ -32,12 +35,12 @@ export async function deductCreditsOperation(
   }
 
   try {
-    if (__DEV__) console.log('[DeductCreditsCommand] >>> starting transaction', { userId, cost, creditsRefPath: creditsRef.path });
+    logger.debug(">>> starting transaction", { userId, cost, creditsRefPath: creditsRef.path });
 
     const remaining = await runTransaction(_db, async (tx) => {
       const docSnap = await tx.get(creditsRef);
 
-      if (__DEV__) console.log('[DeductCreditsCommand] doc exists:', docSnap.exists());
+      logger.debug("doc exists", { exists: docSnap.exists() });
 
       if (!docSnap.exists()) {
         throw new Error(CREDIT_ERROR_CODES.NO_CREDITS);
@@ -46,7 +49,7 @@ export async function deductCreditsOperation(
       const rawCredits = docSnap.data().credits;
       const current = typeof rawCredits === "number" && Number.isFinite(rawCredits) ? rawCredits : 0;
 
-      if (__DEV__) console.log('[DeductCreditsCommand] current credits:', current, 'cost:', cost);
+      logger.debug("current credits", { current, cost });
 
       if (current < cost) {
         throw new Error(CREDIT_ERROR_CODES.CREDITS_EXHAUSTED);
@@ -58,12 +61,12 @@ export async function deductCreditsOperation(
         lastUpdatedAt: serverTimestamp()
       });
 
-      if (__DEV__) console.log('[DeductCreditsCommand] updated credits to:', updated);
+      logger.debug("updated credits to", { updated });
 
       return updated;
     });
 
-    if (__DEV__) console.log('[DeductCreditsCommand] transaction SUCCESS, remaining:', remaining);
+    logger.debug("transaction SUCCESS", { remaining });
 
     return {
       success: true,
@@ -76,13 +79,11 @@ export async function deductCreditsOperation(
       ? message
       : CREDIT_ERROR_CODES.DEDUCT_ERR;
 
-    // Use console.warn instead of console.error for "no credits" - this is expected behavior, not a system error
-    if (__DEV__) {
-      if (code === CREDIT_ERROR_CODES.NO_CREDITS || code === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED) {
-        console.warn('[DeductCreditsCommand] ⚠️ User has no credits - paywall should open', { code, message });
-      } else {
-        console.error('[DeductCreditsCommand] ❌ Unexpected transaction error:', { code, message });
-      }
+    // Use logger.warn instead of logger.error for "no credits" - this is expected behavior, not a system error
+    if (code === CREDIT_ERROR_CODES.NO_CREDITS || code === CREDIT_ERROR_CODES.CREDITS_EXHAUSTED) {
+      logger.warn("User has no credits - paywall should open", { code, message });
+    } else {
+      logger.error("Unexpected transaction error", e, { code, message });
     }
 
     return {

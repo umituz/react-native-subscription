@@ -4,13 +4,16 @@ import type { RevenueCatConfig } from "../../../../revenuecat/core/types/Revenue
 import type { PackageType } from "../../../../revenuecat/core/types/RevenueCatTypes";
 import { notifyPurchaseCompleted, syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
 import { getSavedPurchase, clearSavedPurchase } from "../../../presentation/useAuthAwarePurchase";
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("PurchaseExecutor");
 
 async function attemptRecovery(config: RevenueCatConfig, userId: string, customerInfo: CustomerInfo): Promise<void> {
   try {
-    console.warn('[PurchaseExecutor] Attempting recovery via syncPremiumStatus...');
+    logger.warn("Attempting recovery via syncPremiumStatus...");
     await syncPremiumStatus(config, userId, customerInfo);
   } catch (recoveryError) {
-    console.error('[PurchaseExecutor] Recovery also failed:', recoveryError);
+    logger.error("Recovery also failed", recoveryError);
   }
 }
 
@@ -27,7 +30,7 @@ async function executeConsumablePurchase(
   try {
     await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
   } catch (syncError) {
-    console.error('[PurchaseExecutor] Post-purchase sync failed, attempting recovery:', syncError);
+    logger.error("Post-purchase sync failed, attempting recovery", syncError);
     await attemptRecovery(config, userId, customerInfo);
   } finally {
     if (savedPurchase) {
@@ -56,34 +59,29 @@ async function executeSubscriptionPurchase(
   const savedPurchase = getSavedPurchase();
   const source = savedPurchase?.source;
 
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] 🔵 executeSubscriptionPurchase: START", {
-      userId,
-      productId,
-      isPremium,
-      entitlementIdentifier,
-      activeEntitlements: Object.keys(customerInfo.entitlements.active),
-      source,
-      packageType,
-      timestamp: new Date().toISOString(),
-    });
-  }
+  logger.debug("executeSubscriptionPurchase: START", {
+    userId,
+    productId,
+    isPremium,
+    entitlementIdentifier,
+    activeEntitlements: Object.keys(customerInfo.entitlements.active),
+    source,
+    packageType,
+    timestamp: new Date().toISOString(),
+  });
 
   try {
     await notifyPurchaseCompleted(config, userId, productId, customerInfo, source, packageType);
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[PurchaseExecutor] 🟢 executeSubscriptionPurchase: SUCCESS", {
-        userId,
-        productId,
-        isPremium,
-        timestamp: new Date().toISOString(),
-      });
-    }
-  } catch (syncError) {
-    console.error('[PurchaseExecutor] 🔴 Post-purchase sync failed, attempting recovery:', {
+    logger.debug("executeSubscriptionPurchase: SUCCESS", {
       userId,
       productId,
-      error: syncError instanceof Error ? syncError.message : String(syncError),
+      isPremium,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (syncError) {
+    logger.error("Post-purchase sync failed, attempting recovery", syncError, {
+      userId,
+      productId,
       timestamp: new Date().toISOString(),
     });
     await attemptRecovery(config, userId, customerInfo);
@@ -122,13 +120,11 @@ export async function executePurchase(
   pkg: PurchasesPackage,
   isConsumable: boolean
 ): Promise<PurchaseResult> {
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] Starting Purchases.purchasePackage:", {
-      productId: pkg.product.identifier,
-      userId,
-      isConsumable,
-    });
-  }
+  logger.debug("Starting Purchases.purchasePackage", {
+    productId: pkg.product.identifier,
+    userId,
+    isConsumable,
+  });
 
   const { customerInfo } = await withTimeout(
     Purchases.purchasePackage(pkg),
@@ -136,9 +132,7 @@ export async function executePurchase(
     `Purchases.purchasePackage(${pkg.product.identifier})`
   );
 
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[PurchaseExecutor] Purchases.purchasePackage completed successfully");
-  }
+  logger.debug("Purchases.purchasePackage completed successfully");
 
   const productId = pkg.product.identifier;
   const packageType = pkg.packageType ?? null;

@@ -10,6 +10,6 @@ export interface UseCreditsResult {
   error: Error | null;
   hasCredits: boolean;
   creditsPercent: number;
-  refetch: () => Promise<any>;
+  refetch: () => void;
   canAfford: (cost: number) => boolean;
 }

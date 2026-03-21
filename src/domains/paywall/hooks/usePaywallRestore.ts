@@ -7,6 +7,9 @@
 import { useCallback } from "react";
 import type { UsePaywallActionsParams } from "./usePaywallActions.types";
 import { usePremiumVerification } from "./usePaywallActions.utils";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("useRestoreHandler");
 
 interface UseRestoreHandlerParams {
   isProcessingRef: React.MutableRefObject<boolean>;
@@ -26,16 +29,12 @@ export function useRestoreHandler({
   const handleRestore = useCallback(async () => {
     if (isProcessingRef.current) return;
 
-    if (__DEV__) {
-      console.log('[useRestoreHandler] 🔄 Starting restore');
-    }
+    logger.debug("Starting restore");
 
     try {
       const success = await callbacksRef.current.restorePurchase();
 
-      if (__DEV__) {
-        console.log('[useRestoreHandler] ✅ Restore completed', { success });
-      }
+      logger.debug("Restore completed", { success });
 
       let isActuallySuccessful = success === true;
 
@@ -44,20 +43,14 @@ export function useRestoreHandler({
       }
 
       if (isActuallySuccessful) {
-        if (__DEV__) {
-          console.log('[useRestoreHandler] 🎉 Restore successful, closing paywall');
-        }
+        logger.debug("Restore successful, closing paywall");
         callbacksRef.current.onPurchaseSuccess?.();
         callbacksRef.current.onClose?.();
       } else {
-        if (__DEV__) {
-          console.warn('[useRestoreHandler] ⚠️ Restore did not indicate success');
-        }
+        logger.warn("Restore did not indicate success");
       }
     } catch (error) {
-      if (__DEV__) {
-        console.error('[useRestoreHandler] ❌ Restore error:', error);
-      }
+      logger.error("Restore error", error);
       callbacksRef.current.onPurchaseError?.(error instanceof Error ? error : new Error(String(error)));
     }
   }, [verifyPremiumStatus, callbacksRef, isProcessingRef]);

@@ -3,6 +3,9 @@ import type { InitializerDeps } from "./RevenueCatInitializer.types";
 import { FAILED_INITIALIZATION_RESULT, CONFIGURATION_RETRY_DELAY_MS, MAX_INIT_RETRIES } from "./initializerConstants";
 import { configState } from "./ConfigurationStateManager";
 import { handleUserSwitch, handleInitialConfiguration, fetchCurrentUserData } from "./userSwitchHandler";
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("RevenueCatInitializer");
 
 const MAX_CONFIG_START_RETRIES = 3;
 
@@ -32,7 +35,7 @@ export async function initializeSDK(
     }
 
     if (configState.isConfiguring) {
-      console.error('[RevenueCatInitializer] Max retry attempts reached', { userId });
+      logger.error("Max retry attempts reached", undefined, { userId });
       return FAILED_INITIALIZATION_RESULT;
     }
 
@@ -49,18 +52,16 @@ export async function initializeSDK(
     resolveConfig = configState.startConfiguration();
   } catch (error) {
     if (configStartRetryCount >= MAX_CONFIG_START_RETRIES) {
-      console.error('[RevenueCatInitializer] Max configuration start retries reached', {
+      logger.error("Max configuration start retries reached", error, {
         userId,
         retryCount: configStartRetryCount,
-        error
       });
       return FAILED_INITIALIZATION_RESULT;
     }
 
-    console.error('[RevenueCatInitializer] Failed to start configuration, retrying', {
+    logger.error("Failed to start configuration, retrying", error, {
       userId,
       retryCount: configStartRetryCount,
-      error
     });
     await new Promise<void>(resolve => setTimeout(() => resolve(), CONFIGURATION_RETRY_DELAY_MS));
     return initializeSDK(deps, userId, apiKey, configStartRetryCount + 1);

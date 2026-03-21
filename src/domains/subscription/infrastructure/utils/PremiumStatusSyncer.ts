@@ -3,20 +3,21 @@ import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCat
 import type { PurchaseSource } from "../../core/SubscriptionConstants";
 import type { PackageType } from "../../../revenuecat/core/types/RevenueCatTypes";
 import { getPremiumEntitlement } from "../../../revenuecat/core/types/RevenueCatTypes";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("PremiumStatusSyncer");
 
 export async function syncPremiumStatus(
     config: RevenueCatConfig,
     userId: string,
     customerInfo: CustomerInfo
 ): Promise<{ success: boolean; error?: Error }> {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[PremiumStatusSyncer] syncPremiumStatus called:", {
-            userId,
-            hasCallback: !!config.onPremiumStatusChanged,
-            entitlementId: config.entitlementIdentifier,
-            activeEntitlements: Object.keys(customerInfo.entitlements.active),
-        });
-    }
+    logger.debug("syncPremiumStatus called", {
+        userId,
+        hasCallback: !!config.onPremiumStatusChanged,
+        entitlementId: config.entitlementIdentifier,
+        activeEntitlements: Object.keys(customerInfo.entitlements.active),
+    });
 
     if (!config.onPremiumStatusChanged) {
         return { success: true };
@@ -49,12 +50,7 @@ export async function syncPremiumStatus(
         }
         return { success: true };
     } catch (error) {
-        if (__DEV__) {
-            console.error('[PremiumStatusSyncer] Premium status callback failed:', {
-                userId,
-                error: error instanceof Error ? error.message : String(error)
-            });
-        }
+        logger.error("Premium status callback failed", error, { userId });
 
         return {
             success: false,
@@ -87,8 +83,6 @@ export async function notifyRestoreCompleted(
     try {
         await config.onRestoreCompleted({ userId, isPremium, customerInfo });
     } catch (error) {
-        if (__DEV__) {
-            console.error('[PremiumStatusSyncer] Restore callback failed:', error instanceof Error ? error.message : String(error));
-        }
+        logger.error("Restore callback failed", error);
     }
 }

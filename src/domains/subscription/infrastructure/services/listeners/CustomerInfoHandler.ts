@@ -4,6 +4,9 @@ import { syncPremiumStatus } from "../../utils/PremiumStatusSyncer";
 import { detectRenewal } from "../../utils/renewal/RenewalDetector";
 import { updateRenewalState } from "../../utils/renewal/RenewalStateUpdater";
 import type { RenewalState } from "../../utils/renewal/types";
+import { createLogger } from "../../../../../shared/utils/logger";
+
+const logger = createLogger("CustomerInfoHandler");
 
 async function handleRenewal(
   userId: string,
@@ -17,11 +20,7 @@ async function handleRenewal(
   try {
     await onRenewalDetected({ userId, productId, newExpirationDate: expirationDate, customerInfo });
   } catch (error) {
-    console.error('[CustomerInfoHandler] Renewal callback failed:', {
-      userId,
-      productId,
-      error: error instanceof Error ? error.message : String(error)
-    });
+    logger.error("Renewal callback failed", error, { userId, productId });
   }
 }
 
@@ -38,13 +37,7 @@ async function handlePlanChange(
   try {
     await onPlanChanged({ userId, newProductId, previousProductId, isUpgrade, customerInfo });
   } catch (error) {
-    console.error('[CustomerInfoHandler] Plan change callback failed:', {
-      userId,
-      newProductId,
-      previousProductId,
-      isUpgrade,
-      error: error instanceof Error ? error.message : String(error)
-    });
+    logger.error("Plan change callback failed", error, { userId, newProductId, previousProductId, isUpgrade });
   }
 }
 
@@ -56,10 +49,7 @@ async function handlePremiumStatusSync(
   try {
     await syncPremiumStatus(config, userId, customerInfo);
   } catch (error) {
-    console.error('[CustomerInfoHandler] Premium status sync failed:', {
-      userId,
-      error: error instanceof Error ? error.message : String(error)
-    });
+    logger.error("Premium status sync failed", error, { userId });
   }
 }
 
@@ -69,14 +59,12 @@ export async function processCustomerInfo(
   renewalState: RenewalState,
   config: RevenueCatConfig
 ): Promise<RenewalState> {
-  if (typeof __DEV__ !== "undefined" && __DEV__) {
-    console.log("[CustomerInfoHandler] processCustomerInfo called:", {
-      userId,
-      renewalState,
-      entitlementId: config.entitlementIdentifier,
-      activeEntitlements: Object.keys(customerInfo.entitlements.active),
-    });
-  }
+  logger.debug("processCustomerInfo called", {
+    userId,
+    renewalState,
+    entitlementId: config.entitlementIdentifier,
+    activeEntitlements: Object.keys(customerInfo.entitlements.active),
+  });
 
   const renewalResult = detectRenewal(
     renewalState,
@@ -86,7 +74,7 @@ export async function processCustomerInfo(
 
   if (renewalResult.isRenewal) {
     if (!renewalResult.productId || !renewalResult.newExpirationDate) {
-      console.error('[CustomerInfoHandler] Invalid renewal state: missing productId or expirationDate');
+      logger.error("Invalid renewal state: missing productId or expirationDate");
       return renewalState;
     }
     await handleRenewal(
@@ -100,7 +88,7 @@ export async function processCustomerInfo(
 
   if (renewalResult.isPlanChange) {
     if (!renewalResult.productId || !renewalResult.previousProductId) {
-      console.error('[CustomerInfoHandler] Invalid plan change state: missing productId(s)');
+      logger.error("Invalid plan change state: missing productId(s)");
       return renewalState;
     }
     await handlePlanChange(
@@ -114,9 +102,7 @@ export async function processCustomerInfo(
   }
 
   if (!renewalResult.isRenewal && !renewalResult.isPlanChange) {
-    if (typeof __DEV__ !== "undefined" && __DEV__) {
-      console.log("[CustomerInfoHandler] Handling premium status sync (new purchase or status update)");
-    }
+    logger.debug("Handling premium status sync (new purchase or status update)");
     await handlePremiumStatusSync(config, userId, customerInfo);
   }
 

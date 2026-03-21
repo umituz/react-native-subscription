@@ -2,6 +2,9 @@ import Purchases, { type CustomerInfo } from "react-native-purchases";
 import type { RevenueCatConfig } from "../../../revenuecat/core/types/RevenueCatConfig";
 import { ListenerState } from "./listeners/ListenerState";
 import { processCustomerInfo } from "./listeners/CustomerInfoHandler";
+import { createLogger } from "../../../../shared/utils/logger";
+
+const logger = createLogger("CustomerInfoListenerManager");
 
 export class CustomerInfoListenerManager {
   private state = new ListenerState();
@@ -33,7 +36,7 @@ export class CustomerInfoListenerManager {
       this._createAndAttachListener(config);
       return true;
     } catch (error) {
-      console.error("[CustomerInfoListenerManager] Failed to setup listener:", error);
+      logger.error("Failed to setup listener", error);
       this.state.currentUserId = null;
       return false;
     }
@@ -41,13 +44,11 @@ export class CustomerInfoListenerManager {
 
   private _createAndAttachListener(config: RevenueCatConfig): void {
     this.state.listener = async (customerInfo: CustomerInfo) => {
-      if (typeof __DEV__ !== "undefined" && __DEV__) {
-        console.log("[CustomerInfoListener] 🔔 LISTENER TRIGGERED!", {
-          userId: this.state.currentUserId,
-          activeEntitlements: Object.keys(customerInfo.entitlements.active),
-          entitlementsCount: Object.keys(customerInfo.entitlements.all).length,
-        });
-      }
+      logger.debug("LISTENER TRIGGERED", {
+        userId: this.state.currentUserId,
+        activeEntitlements: Object.keys(customerInfo.entitlements.active),
+        entitlementsCount: Object.keys(customerInfo.entitlements.all).length,
+      });
 
       const capturedUserId = this.state.currentUserId;
       if (!capturedUserId) {
@@ -67,7 +68,7 @@ export class CustomerInfoListenerManager {
         }
         // else: User switched during async operation, discard stale renewal state
       } catch (error) {
-        console.error("[CustomerInfoListener] processCustomerInfo failed:", error);
+        logger.error("processCustomerInfo failed", error);
       }
     };
 
